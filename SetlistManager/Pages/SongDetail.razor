@@ -1,0 +1,55 @@
+﻿@page "/songdetail/{songId:int}"
+@inject IJSRuntime JSRuntime
+
+@code {
+    [Parameter]
+    public int songId { get; set; }
+
+    private Song? song;
+
+    protected override async void OnInitialized()
+    {
+        var allSongs = Song.GetExampleSongCollection();
+        song = allSongs.FirstOrDefault(s => s.SongId == songId);
+        if (song != null)
+        {
+            await SearchLyrics();
+        }
+
+    }
+    private async Task GoBack()
+    {
+        await JSRuntime.InvokeVoidAsync("history.back");
+    }
+    private SongLyrics songLyrics;    
+
+    private async Task SearchLyrics()
+    {
+        songLyrics = await LyricsService.SearchLyricsAsync(song);
+    }    
+    private MarkupString GetFormattedLyrics()
+    {
+        if (songLyrics?.Lyrics != null)
+        {
+            var formattedLyrics = songLyrics.Lyrics.Replace("\n", "<br/>");
+            return (MarkupString)formattedLyrics;
+        }
+        return new MarkupString(string.Empty);
+    }
+}
+
+@if (song != null)
+{
+    <h1>@song.Name</h1>
+    <p>Artist: @song.Artist</p>
+    <p>Language: @song.Language</p>
+    <p>Tabs: <a href ="@song.Tabs" target="_blank">@song.Tabs</a></p>
+    <p>Lyrics: </p>
+    <p>@GetFormattedLyrics()</p>
+}
+else
+{
+    <p>Song not found!</p>
+}
+
+<button class="btn btn-primary" @onclick="GoBack">Return</button>

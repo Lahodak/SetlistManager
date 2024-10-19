@@ -1,0 +1,63 @@
+﻿@page "/"
+
+<PageTitle>Home</PageTitle>
+<h1>Welcome to Setlist Manager!</h1>
+<br />
+
+<div>
+    How many songs? <input type="number" @bind="setlistLength" min="1" max="8"/>
+</div>
+
+<br />
+
+<button class="btn btn-primary" @onclick="GenerateSetlist">Generate Setlist</button>
+
+<br />
+<br />
+
+@if (exampleSongCollection != null && exampleSongCollection.Any())
+{
+    <ol>
+        @foreach (var song in shuffeledSongCollection)
+        {
+            <li class="py-1">
+                <button class="btn btn-secondary btn-sm" @onclick="() => RegenerateSong(song.SongId)">↺</button>
+                <a href="@($"songdetail/{song.SongId}")" target="_blank" style="color: black; text-decoration: none; font-size: medium;">@song.ToString()</a>
+            </li>
+        }
+    </ol>
+}
+
+@code {
+    private int setlistLength = 1;
+    private List<Song>? exampleSongCollection;   
+    private List<Song> shuffeledSongCollection;
+
+    private void GenerateSetlist()
+    {
+        exampleSongCollection = Song.GetExampleSongCollection();
+        ShuffleService.ShuffleList(exampleSongCollection);
+        shuffeledSongCollection = exampleSongCollection.Take(setlistLength).ToList();
+    }
+    private void RegenerateSong(int songId)
+    {
+        if (shuffeledSongCollection.Count == exampleSongCollection.Count)
+            return;
+        int index = shuffeledSongCollection.FindIndex(song => song.SongId == songId);
+        Song newSong;
+        do
+        {
+            ShuffleService.ShuffleList(exampleSongCollection);
+            newSong = exampleSongCollection[0];
+        } while (songId == newSong.SongId || shuffeledSongCollection.Contains(newSong));
+        ReplaceSong(index, newSong);
+        StateHasChanged();
+    }
+    private void ReplaceSong(int index, Song newSong)
+    {
+        if (index >= 0 && index < shuffeledSongCollection.Count)
+        {
+            shuffeledSongCollection[index] = newSong;
+        }
+    }
+}
