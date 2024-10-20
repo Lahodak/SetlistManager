@@ -8,7 +8,7 @@ public class Song
     [Index(1)]
     public required string Artist { get; set; }
     [Index(2)]
-    public required int SongId { get; set; }
+    public required int SongID { get; set; }
     [Index(3)]
     public required Language Language { get; set; }
     [Index(4)]
@@ -27,7 +27,7 @@ public class Song
             Name = "Siuu",
             Artist = "Ronaldo Kristioano",
             Language = Language.EN,
-            SongId = 1,
+            SongID = 1,
             Tabs = "https://www.google.com"
         };
         Song song2 = new()
@@ -35,7 +35,7 @@ public class Song
             Name = "Skibiďácký toilet",
             Artist = "Netuším jak se blud jmenuje",
             Language = Language.CZ,
-            SongId = 2,
+            SongID = 2,
             Tabs = "https://www.google.com"
         };
         Song song3 = new()
@@ -43,7 +43,7 @@ public class Song
             Name = "Slovenská hitovka",
             Artist = "Unknown Artist",
             Language = Language.SK,
-            SongId = 3,
+            SongID = 3,
             Tabs = "https://www.google.com"
         };
         Song song4 = new()
@@ -51,7 +51,7 @@ public class Song
             Name = "Bohemian Rhapsody",
             Artist = "Queen",
             Language = Language.EN,
-            SongId = 4,
+            SongID = 4,
             Tabs = "https://www.google.com"
         };
         Song song5 = new()
@@ -59,7 +59,7 @@ public class Song
             Name = "Holubí dům",
             Artist = "Jiří Schelinger",
             Language = Language.CZ,
-            SongId = 5,
+            SongID = 5,
             Tabs = "https://www.google.com"
         };
         Song song6 = new()
@@ -67,7 +67,7 @@ public class Song
             Name = "Tears in Heaven",
             Artist = "Eric Clapton",
             Language = Language.EN,
-            SongId = 6,
+            SongID = 6,
             Tabs = "https://www.google.com"
         };
         Song song7 = new()
@@ -75,7 +75,7 @@ public class Song
             Name = "Prší, prší",
             Artist = "Lidová písnička",
             Language = Language.SK,
-            SongId = 7,
+            SongID = 7,
             Tabs = "https://www.google.com"
         };
         Song song8 = new()
@@ -83,7 +83,7 @@ public class Song
             Name = "Rolling In The Deep",
             Artist = "Adele",
             Language = Language.EN,
-            SongId = 8,
+            SongID = 8,
             Tabs = "https://www.google.com"
         };
         list.Add(song1);

@@ -10,7 +10,7 @@
     protected override async void OnInitialized()
     {
         var allSongs = Song.GetExampleSongCollection();
-        song = allSongs.FirstOrDefault(s => s.SongId == songId);
+        song = allSongs.FirstOrDefault(s => s.SongID == songId);
         if (song != null)
         {
             await SearchLyrics();
