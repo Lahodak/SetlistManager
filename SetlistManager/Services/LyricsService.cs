@@ -3,25 +3,34 @@ using SetlistManager.Models;
 
 namespace SetlistManager.Services;
 
-public static class LyricsService
+public class LyricsService(IHttpClientFactory httpClientFactory)
 {
-    private static readonly HttpClient _httpClient = new();
-    public static async Task<SongLyrics> SearchLyricsAsync(Song song)
+    private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
+
+    private const string _lyricsApiUrl = "https://api.lyrics.ovh/v1/{0}/{1}";
+
+    public async Task<SongLyrics?> SearchLyricsAsync(Song song)
     {
         if (song.Language != Language.EN)
-            return null;
-        string url = $"https://api.lyrics.ovh/v1/{song.Artist}/{song.Name}";
-
-        var response = await _httpClient.GetAsync(url);
-
-        if (response.IsSuccessStatusCode)
         {
-            var songLyrics = await response.Content.ReadFromJsonAsync<SongLyrics>();
-            return songLyrics;
+            return null;
         }
-        return null;
+
+        string url = string.Format(_lyricsApiUrl, song.Artist, song.Name);
+
+        using var client = _httpClientFactory.CreateClient();
+        var response = await client.GetAsync(url);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            return null;
+        }
+
+        var songLyrics = await response.Content.ReadFromJsonAsync<SongLyrics>();
+        return songLyrics;
     }
 }
+
 public class SongLyrics
 {
     public string Title { get; set; }

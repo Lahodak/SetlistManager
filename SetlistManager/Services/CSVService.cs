@@ -2,7 +2,8 @@
 using CsvHelper;
 using System.Globalization;
 using SetlistManager.Models;
-using System.Collections;
+using CsvHelper.Configuration;
+using System.Text;
 
 namespace SetlistManager.Services;
 
@@ -13,7 +14,12 @@ public static class CsvService
         try
         {
             var reader = new StreamReader(fileStream);
-            var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
+			var config = new CsvConfiguration(CultureInfo.CurrentCulture)
+			{
+				Delimiter = ";",
+				Encoding = Encoding.UTF8
+			};
+			var csv = new CsvReader(reader, config);
             var records = new List<Song>();
             await foreach (var record in csv.GetRecordsAsync<Song>())
             {
