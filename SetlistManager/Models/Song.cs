@@ -1,13 +1,18 @@
-﻿namespace SetlistManager.Models;
+﻿using CsvHelper.Configuration.Attributes;
+
+namespace SetlistManager.Models;
 public class Song
 {
+    [Index(0)]
     public required string Name { get; set; }
+    [Index(1)]
     public required string Artist { get; set; }
+    [Index(2)]
     public required int SongId { get; set; }
+    [Index(3)]
     public required Language Language { get; set; }
+    [Index(4)]
     public required string Tabs { get; set; }
-    public string YouTubeUrl { get; set; }
-
 
 	public override string ToString()
 	{

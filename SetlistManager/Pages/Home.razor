@@ -5,7 +5,7 @@
 <br />
 
 <div>
-    How many songs? <input type="number" @bind="setlistLength" min="1" max="8"/>
+    How many songs? <input type="number" @bind="_setlistLength" min="1" max="8"/>
 </div>
 
 <br />
@@ -15,10 +15,13 @@
 <br />
 <br />
 
-@if (exampleSongCollection != null && exampleSongCollection.Any())
+<h3>Upload CSV File</h3>
+<InputFile OnChange="HandleFileUpload" />
+
+@if (_songCollection != null && _songCollection.Any())
 {
     <ol>
-        @foreach (var song in shuffeledSongCollection)
+        @foreach (var song in _shuffeledSongCollection)
         {
             <li class="py-1">
                 <button class="btn btn-secondary btn-sm" @onclick="() => RegenerateSong(song.SongId)">↺</button>
@@ -29,35 +32,59 @@
 }
 
 @code {
-    private int setlistLength = 1;
-    private List<Song>? exampleSongCollection;   
-    private List<Song> shuffeledSongCollection;
+    private int _setlistLength = 1;
+    private List<Song>? _songCollection;   
+    private List<Song>? _shuffeledSongCollection;
+    private List<Song> _uploadedSongs = new();
 
     private void GenerateSetlist()
     {
-        exampleSongCollection = Song.GetExampleSongCollection();
-        ShuffleService.ShuffleList(exampleSongCollection);
-        shuffeledSongCollection = exampleSongCollection.Take(setlistLength).ToList();
+        if (_songCollection == null)
+            return;
+        _shuffeledSongCollection = _songCollection;
+        ShuffleService.ShuffleList(_shuffeledSongCollection);
+        _shuffeledSongCollection = _shuffeledSongCollection.Take(_setlistLength).ToList();
     }
+    
+    private async Task HandleFileUpload(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+
+        if (file != null)
+        {
+            var fileStream = file.OpenReadStream();
+            try
+            {
+                _uploadedSongs = await CsvService.ReadCsvFile(fileStream);
+                _songCollection = _uploadedSongs;
+            }
+            catch (ApplicationException ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+    }
+
     private void RegenerateSong(int songId)
     {
-        if (shuffeledSongCollection.Count == exampleSongCollection.Count)
+        if (_shuffeledSongCollection.Count == _songCollection.Count)
             return;
-        int index = shuffeledSongCollection.FindIndex(song => song.SongId == songId);
+        int index = _shuffeledSongCollection.FindIndex(song => song.SongId == songId);
         Song newSong;
         do
         {
-            ShuffleService.ShuffleList(exampleSongCollection);
-            newSong = exampleSongCollection[0];
-        } while (songId == newSong.SongId || shuffeledSongCollection.Contains(newSong));
+            ShuffleService.ShuffleList(_songCollection);
+            newSong = _songCollection[0];
+        } while (songId == newSong.SongId || _shuffeledSongCollection.Contains(newSong));
         ReplaceSong(index, newSong);
         StateHasChanged();
     }
     private void ReplaceSong(int index, Song newSong)
     {
-        if (index >= 0 && index < shuffeledSongCollection.Count)
+        if (index >= 0 && index < _shuffeledSongCollection.Count)
         {
-            shuffeledSongCollection[index] = newSong;
+            _shuffeledSongCollection[index] = newSong;
         }
     }
+
 }
