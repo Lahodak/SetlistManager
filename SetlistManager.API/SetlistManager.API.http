@@ -1,0 +1,6 @@
+@SetlistManager.API_HostAddress = http://localhost:5103
+
+GET {{SetlistManager.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -6,7 +6,7 @@ namespace SetlistManager.Pages;
 
 public partial class AllSongs
 {
-    private List<Song>_songCollection = [];
+    private readonly List<Song>_songCollection = [];
     [Inject]
     public SongsDB SongsDatabase { get; set; }
     protected override void OnInitialized()
