@@ -18,8 +18,8 @@ namespace SetlistManager.API.Controllers
             _logger = logger;
         }
 
-        [HttpGet(Name = "GetWeatherForecast")]
-        public IEnumerable<WeatherForecast> Get()
+        [HttpGet("{id}")]
+        public IEnumerable<WeatherForecast> GetSong(int id)
         {
             return Enumerable.Range(1, 5).Select(index => new WeatherForecast
             {
@@ -28,6 +28,11 @@ namespace SetlistManager.API.Controllers
                 Summary = Summaries[Random.Shared.Next(Summaries.Length)]
             })
             .ToArray();
+        }
+        [HttpPost("")]
+        public IActionResult CreateToilet()
+        {
+            return Ok();
         }
     }
 }
