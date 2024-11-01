@@ -1,4 +1,4 @@
-namespace SetlistManager.API
+namespace SetlistManager.API.Models
 {
     public class WeatherForecast
     {
