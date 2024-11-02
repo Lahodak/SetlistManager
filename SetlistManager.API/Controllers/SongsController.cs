@@ -1,12 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
 using SetlistManager.API.Data;
+using SetlistManager.API.Entities;
 using SetlistManager.API.Models;
 
 namespace SetlistManager.API.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class SongsController : ControllerBase
+public partial class SongsController : ControllerBase
 {
     private readonly ISongsDB _songsDB;
 
@@ -19,6 +20,22 @@ public class SongsController : ControllerBase
     public async Task<IEnumerable<Song>> GetSongCollection()
     {
         return await _songsDB.GetSongsAsync();        
+    }
+
+    [HttpPost]
+    public async Task AddSongs(AddSongsModel addSongs)
+    {
+        foreach(var song in addSongs.Songs)
+        {
+            await _songsDB.UploadSongs(new()
+            {
+                Name = song.Name,
+                Artist = song.Artist,
+                YouTubeURL = song.YouTubeURL,
+                TabsURL = song.TabsURL,
+                Language = song.Language
+            });
+        }
     }
 
     [HttpGet("{SongId}")]

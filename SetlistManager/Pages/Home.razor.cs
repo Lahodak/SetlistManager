@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Newtonsoft.Json;
-using SetlistManager.Models;
 using SetlistManager.Services;
 using System;
+using SetlistManager.Common.Models;
 using System.Net.Http.Json;
 
 namespace SetlistManager.Pages;
@@ -12,9 +12,9 @@ public partial class Home
 {	
 	private int _maxNumber = 0;
 	private int _setlistLength = 1;
-	private List<Song> _shuffeledSongCollection = [];
-	private List<Song> _uploadedSongs = [];
-	private List<Song> _songCollection = [];
+	private List<SongModel> _shuffeledSongCollection = [];
+	private List<SongModel> _uploadedSongs = [];
+	private List<SongModel> _songCollection = [];
 
     [Inject]
     public required SongsDB SongsDatabase { get; set; }
@@ -35,11 +35,11 @@ public partial class Home
 	{
         if (_shuffeledSongCollection.Count >= SongsDatabase.GetCount())
             return;
-        int index = _shuffeledSongCollection.FindIndex(song => song.SongID == songId);
+        int index = _shuffeledSongCollection.FindIndex(song => song.Id == songId);
         var availableSongs = _songCollection
-                             .Where(song => !_shuffeledSongCollection.Contains(song) && song.SongID != songId)
+                             .Where(song => !_shuffeledSongCollection.Contains(song) && song.Id != songId)
                              .ToList();
-        Song newSong;
+        SongModel newSong;
         if (availableSongs.Count <= 0)
             return;
         var random = new Random();
@@ -48,7 +48,7 @@ public partial class Home
         StateHasChanged();        
 	}
 
-	private void ReplaceSong(int index, Song newSong)
+	private void ReplaceSong(int index, SongModel newSong)
 	{
 		if (index >= 0 && index < _shuffeledSongCollection.Count)
 		{

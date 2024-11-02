@@ -1,12 +1,12 @@
 using Microsoft.AspNetCore.Components;
-using SetlistManager.Models;
+using SetlistManager.Common.Models;
 using SetlistManager.Services;
 
 namespace SetlistManager.Pages;
 
 public partial class AllSongs
 {
-    private readonly List<Song>_songCollection = [];
+    private readonly List<SongModel> _songCollection = [];
     [Inject]
     public SongsDB SongsDatabase { get; set; }
     protected override async Task OnInitializedAsync()

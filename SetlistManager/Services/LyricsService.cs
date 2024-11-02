@@ -1,5 +1,5 @@
 ﻿using System.Net.Http.Json;
-using SetlistManager.Models;
+using SetlistManager.Common.Models;
 
 namespace SetlistManager.Services;
 
@@ -9,7 +9,7 @@ public class LyricsService(IHttpClientFactory httpClientFactory)
 
     private const string _lyricsApiUrl = "https://api.lyrics.ovh/v1/{0}/{1}";
 
-    public async Task<SongLyrics?> SearchLyricsAsync(Song song)
+    public async Task<SongLyrics?> SearchLyricsAsync(SongModel song)
     {
         if (song.Language != Language.EN)
         {

@@ -5,7 +5,9 @@ VisualStudioVersion = 17.8.34511.84
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SetlistManager", "SetlistManager\SetlistManager.csproj", "{23B04941-0333-4283-99A0-412B9CCC7FD2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SetlistManager.API", "SetlistManager.API\SetlistManager.API.csproj", "{1BF07F8B-A07E-4AB9-9C5A-CFFD4F8DAF53}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SetlistManager.API", "SetlistManager.API\SetlistManager.API.csproj", "{1BF07F8B-A07E-4AB9-9C5A-CFFD4F8DAF53}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SetlistManager.Common", "SetlistManager.Common\SetlistManager.Common.csproj", "{06945914-8AA1-4020-83F0-3DD61C8447CB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{1BF07F8B-A07E-4AB9-9C5A-CFFD4F8DAF53}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1BF07F8B-A07E-4AB9-9C5A-CFFD4F8DAF53}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1BF07F8B-A07E-4AB9-9C5A-CFFD4F8DAF53}.Release|Any CPU.Build.0 = Release|Any CPU
+		{06945914-8AA1-4020-83F0-3DD61C8447CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{06945914-8AA1-4020-83F0-3DD61C8447CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{06945914-8AA1-4020-83F0-3DD61C8447CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{06945914-8AA1-4020-83F0-3DD61C8447CB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

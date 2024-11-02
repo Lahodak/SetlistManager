@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Components;
-using SetlistManager.Models;
+using SetlistManager.Common.Models;
 using SetlistManager.Services;
 
 namespace SetlistManager.Pages;
@@ -8,7 +8,7 @@ public partial class SongDetail
 {
 	[Parameter]
 	public int SongId { get; set; }
-	Song song = new();
+    SongModel song = new();
 	[Inject]
 	public SongsDB SongsDatabase { get; set; }
     protected override async Task OnInitializedAsync()
