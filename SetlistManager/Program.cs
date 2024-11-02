@@ -7,7 +7,7 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 builder.Services.AddHttpClient();
-builder.Services.AddSingleton(songsDatabase => new SongsDB());
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
-
+builder.Services.AddSingleton<SongService>();
+builder.Services.AddSingleton<SongsDB>();
+builder.Services.AddScoped<LyricsService>();
 await builder.Build().RunAsync();

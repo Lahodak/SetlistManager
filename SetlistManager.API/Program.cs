@@ -15,13 +15,20 @@ builder.Services.AddSingleton(serviceProvider =>
     var configuration = serviceProvider.GetRequiredService<IConfiguration>();
     var connectionString = configuration.GetConnectionString("SongDB")
         ?? throw new ApplicationException("The connection string is null");
-    Console.WriteLine($"Connection String Retrieved: {connectionString}");
-
     return new SqlConnectionFactory(connectionString);
 });
 
 builder.Services.AddScoped<ISongsDB, UseSongsDB>();
 builder.Services.AddControllers();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAllPolicy", builder =>
+    {
+        builder.AllowAnyOrigin()
+               .AllowAnyMethod()
+               .AllowAnyHeader();
+    });
+});
 
 var app = builder.Build();
 
@@ -31,6 +38,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseCors("AllowAllPolicy");
+
 
 app.UseHttpsRedirection();
 

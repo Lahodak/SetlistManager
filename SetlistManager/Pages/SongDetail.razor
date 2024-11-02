@@ -10,11 +10,11 @@
     <p>Tabs: <a href ="@song.Tabs" target="_blank">@song.Tabs</a></p>
     <p>Youtube</p>
     <iframe width="420" height="315"
-            src="@song.YouTubeURL">
+            src="@GetEmbedUrl(song.YouTubeURL)">
     </iframe>
     <p>Link: <a href="@song.YouTubeURL" target="_blank">@song.Name by @song.Artist on Youtube</a></p>
-    //<p>Lyrics: </p>
-    //<p>@GetFormattedLyrics()</p>
+    <p>Lyrics: </p>
+    <p>@GetFormattedLyrics()</p>
 }
 else
 {

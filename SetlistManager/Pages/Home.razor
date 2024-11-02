@@ -3,23 +3,20 @@
 <PageTitle>Home</PageTitle>
 <h1>Welcome to Setlist Manager!</h1>
 
-<h3>Upload CSV File</h3>
-<InputFile OnChange="HandleFileUpload" />
-
 <br />
 
 <div>
-    How many songs? <input type="number" @bind="_setlistLength" min="0" max="@_maxNumber"/>
+    How many songs? <input type="number" @bind="_setlistLength" min="1" max="@_maxNumber"/>
 </div>
 
 <br />
 
-<button class="btn btn-primary" @onclick="GenerateSetlist">Generate Setlist</button>
+<button class="btn btn-primary" @onclick="() => GenerateSetlist()">Generate Setlist</button>
 
 <br />
 <br />
 
-@if (_songCollection != null && _songCollection.Any())
+@if (_shuffeledSongCollection.Count != 0)
 {
     <ol>
         @foreach (var song in _shuffeledSongCollection)

@@ -9,8 +9,8 @@ public partial class AllSongs
     private readonly List<Song>_songCollection = [];
     [Inject]
     public SongsDB SongsDatabase { get; set; }
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        _songCollection.AddRange(SongsDatabase.GetSongCollection());            
+        _songCollection.AddRange(await SongsDatabase.GetSongCollection());            
     }
 }

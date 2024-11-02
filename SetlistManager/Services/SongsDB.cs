@@ -1,11 +1,35 @@
-﻿using SetlistManager.Models;
+﻿using Microsoft.AspNetCore.Components;
+using SetlistManager.Models;
 namespace SetlistManager.Services;
 public class SongsDB
 {
+    private readonly SongService _songService;
     private readonly List<Song> _songsDB = [];
-    public void AddSongsToSongsDB(List<Song> LoadedSongs) => _songsDB.AddRange(LoadedSongs);
-    public void RemoveSongsFromDB(Song SongToRemove) => _songsDB.Remove(SongToRemove);
-    public List<Song> GetSongCollection() => _songsDB;
-    public Song GetSong(int id) => _songsDB.Where(song => song.SongID == id).FirstOrDefault();
-    public int GetCount() => _songsDB.Count;
+
+    public SongsDB(SongService songService)
+    {
+        _songService = songService;
+    }
+
+    public void RemoveSongsFromDB(Song songToRemove) 
+        => _songsDB.Remove(songToRemove);
+
+    public async Task<List<Song>> GetSongCollection()
+    {
+        await CheckForData();
+        return _songsDB;
+    }
+
+    public Song? GetSong(int id) 
+        => _songsDB.FirstOrDefault(song => song.SongID == id);
+    
+    public int GetCount() 
+        => _songsDB.Count;
+    
+    private async Task CheckForData()
+    {
+        if (_songsDB.Count != 0)
+            return;
+        _songsDB.AddRange(await _songService.FetchSongsFromAPI() ?? []);
+    }
 }

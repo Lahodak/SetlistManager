@@ -25,7 +25,7 @@ public class SongsController : ControllerBase
     public async Task<ActionResult<Song>> GetSongById(int SongId)
     {
         var song = await _songsDB.GetSongByIdAsync(SongId);
-        if (song == null)
+        if (song is null)
         {
             return NotFound();
         }
