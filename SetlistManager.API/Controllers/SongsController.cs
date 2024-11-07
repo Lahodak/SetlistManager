@@ -2,11 +2,12 @@ using Microsoft.AspNetCore.Mvc;
 using SetlistManager.API.Data;
 using SetlistManager.API.Entities;
 using SetlistManager.API.Models;
+using SetlistManager.Common.Models;
 
 namespace SetlistManager.API.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("api/[controller]")]
 public partial class SongsController : ControllerBase
 {
     private readonly ISongsDB _songsDB;

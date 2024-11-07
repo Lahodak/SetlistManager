@@ -18,7 +18,8 @@ builder.Services.AddSingleton(serviceProvider =>
     return new SqlConnectionFactory(connectionString);
 });
 
-builder.Services.AddScoped<ISongsDB, UseSongsDB>();
+builder.Services.AddScoped<ISongsDB, SongsDB>();
+builder.Services.AddScoped<ISetlistsDB, SetlistsDB>();
 builder.Services.AddControllers();
 builder.Services.AddCors(options =>
 {

@@ -3,7 +3,7 @@ using Dapper;
 using SetlistManager.API.Entities;
 namespace SetlistManager.API.Data;
 
-public class UseSongsDB(SqlConnectionFactory sqlConnectionFactory) : ISongsDB
+public class SongsDB(SqlConnectionFactory sqlConnectionFactory) : ISongsDB
 {
     public async Task<IEnumerable<Song>>GetSongsAsync()
     {
@@ -31,7 +31,7 @@ public class UseSongsDB(SqlConnectionFactory sqlConnectionFactory) : ISongsDB
                 VALUES
                 (@Name, @Artist, @Language, @TabsURL, @YouTubeURL)
             """;
-        await connection.QuerySingleOrDefaultAsync<Song>(sql, new 
+        await connection.ExecuteAsync(sql, new 
         {
             song.Name,
             song.Artist,
