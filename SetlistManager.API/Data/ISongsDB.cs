@@ -1,5 +1,4 @@
 ﻿using SetlistManager.API.Entities;
-using SetlistManager.API.Models;
 
 namespace SetlistManager.API.Data;
 public interface ISongsDB

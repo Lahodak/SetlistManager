@@ -1,5 +1,4 @@
-﻿using SetlistManager.API.Models;
-using Dapper;
+﻿using Dapper;
 using SetlistManager.API.Entities;
 namespace SetlistManager.API.Data;
 

@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Components;
-using SetlistManager.Common.Models;
+﻿using SetlistManager.Common.Models;
 namespace SetlistManager.Services;
 public class SongsDB
 {
@@ -19,6 +18,8 @@ public class SongsDB
         await CheckForData();
         return _songsDB;
     }
+
+
 
     public SongModel? GetSong(int id) 
         => _songsDB.FirstOrDefault(song => song.Id == id);

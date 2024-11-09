@@ -1,10 +1,6 @@
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Forms;
-using Newtonsoft.Json;
 using SetlistManager.Services;
-using System;
 using SetlistManager.Common.Models;
-using System.Net.Http.Json;
 
 namespace SetlistManager.Pages;
 

@@ -1,11 +1,9 @@
 ﻿using Dapper;
-using Microsoft.OpenApi.Validations;
-using SetlistManager.API.Entities;
 using SetlistManager.Common.Models;
 namespace SetlistManager.API.Data;
 public class SetlistsDB(SqlConnectionFactory sqlConnectionFactory) : ISetlistsDB
 {
-    public async Task<SetlistModel?> GetSetlistById(string id)
+    public async Task<SetlistModel?> GetSetlistById(int id)
     {
         using var connection = sqlConnectionFactory.CreateConnection();
         
