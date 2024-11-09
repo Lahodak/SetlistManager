@@ -5,7 +5,7 @@ namespace SetlistManager.Services;
 
 public class SongService
 {
-    private const string path = "https://localhost:7143/api/Songs";
+    private const string path = "https://localhost:7143/api/Songs";    
     private IHttpClientFactory _httpClientFactory;
     public SongService(IHttpClientFactory factory)
     {
@@ -23,9 +23,5 @@ public class SongService
         }
         string json = await message.Content.ReadAsStringAsync();
         return JsonConvert.DeserializeObject<List<SongModel>>(json);
-    }    
-    public async Task PushSetlistToApi()
-    {
-
-    }
+    }        
 }

@@ -16,10 +16,15 @@ namespace SetlistManager.API.Controllers
             _setlistsDB = setlistsDB;
         }
         [HttpPost]
-        public async Task UploadSetlistToDb(SetlistModel setlistModel)
+        public async Task<int> UploadSetlistToDb(SetlistModel setlistModel)
         {
-            await _setlistsDB.SaveSetlist(setlistModel);
+            return await _setlistsDB.SaveSetlist(setlistModel);
         }
-        
+        [HttpGet]
+        public async Task<SetlistModel> GetSetlistById(int id)
+        {
+
+            return new SetlistModel();
+        }
     }
 }

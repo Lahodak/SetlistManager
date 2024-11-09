@@ -9,14 +9,16 @@ public class SetlistsDB(SqlConnectionFactory sqlConnectionFactory) : ISetlistsDB
     {
         using var connection = sqlConnectionFactory.CreateConnection();
         
-        const string sql = """
-                SELECT Top(1)* FROM Setlists s
+        string sql = """
+                SELECT Top(1) * FROM Setlists s
                 JOIN SongsSetlists sl ON sl.SetlistId = s.Id
                 WHERE s.Id = @Id;
             """;
 
         //setlist
-        //relace mezi set a songy
+        
+        //relace mezi set a songy        
+
         //detaily songu
 
         //pospojovani
@@ -24,31 +26,27 @@ public class SetlistsDB(SqlConnectionFactory sqlConnectionFactory) : ISetlistsDB
         var x = await connection.QueryAsync<SetlistModel, SongModel, SetlistModel>(sql, (x, y) => { return x; }, new { Id = id }, splitOn: "SongId");
         return x.FirstOrDefault();
     }
-    public async Task SaveSetlist(SetlistModel setlistModel)
+
+    public async Task<int> SaveSetlist(SetlistModel setlistModel)
     {
         using var connection = sqlConnectionFactory.CreateConnection();
 
         string sql = """
                 INSERT INTO Setlists (Name)
-                VALUES
-                (@Name)
+                OUTPUT INSERTED.Id
+                VALUES (@Name);
             """;
 
-        await connection.ExecuteAsync(sql, new
+        int id = await connection.QuerySingleAsync<int>(sql, new
         {
-            setlistModel.Name
-        });
-
-        sql = """
-                SELECT Top(1) * FROM Setlists ORDER BY Id DESC;
-            """;
-        var addedSetlist = await connection.QuerySingleOrDefaultAsync<SetlistModel>(sql);        
+                setlistModel.Name   
+        });               
 
         List<object> songs = [];
 
         foreach (var songsInSetlist in setlistModel.Songs)
         {
-            songs.Add(new { SongId = songsInSetlist.Id, SetlistId = addedSetlist.Id });
+            songs.Add(new { SongId = songsInSetlist.Id, SetlistId = id });
         }
 
         sql = """
@@ -58,5 +56,6 @@ public class SetlistsDB(SqlConnectionFactory sqlConnectionFactory) : ISetlistsDB
             """;
 
         await connection.ExecuteAsync(sql, songs);
+        return id;
     }
 }
