@@ -9,5 +9,6 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<SongService>();
 builder.Services.AddSingleton<SongsDB>();
+builder.Services.AddSingleton<SetlistService>();
 builder.Services.AddScoped<LyricsService>();
 await builder.Build().RunAsync();

@@ -11,15 +11,24 @@ public partial class Home
 	private List<SongModel> _shuffeledSongCollection = [];
 	private List<SongModel> _uploadedSongs = [];
 	private List<SongModel> _songCollection = [];
+    private SetlistModel _setlist;
 
     [Inject]
     public required SongsDB SongsDatabase { get; set; }
+    [Inject]
+    public required SetlistService SetlistService { get; set; }
     private async Task GenerateSetlist()
 	{		
 		_shuffeledSongCollection.AddRange(_songCollection);
         ShuffleService.ShuffleList(_shuffeledSongCollection);
 		_shuffeledSongCollection = _shuffeledSongCollection.Take(_setlistLength).ToList();
 	}
+
+    private async Task SaveSetlist()
+    {
+        _setlist.Songs.AddRange(_shuffeledSongCollection);
+        await SetlistService.PushSetlistToApi(_setlist);
+    }
 
     protected override async Task OnInitializedAsync()
     {

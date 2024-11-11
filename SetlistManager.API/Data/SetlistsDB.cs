@@ -6,22 +6,38 @@ public class SetlistsDB(SqlConnectionFactory sqlConnectionFactory) : ISetlistsDB
     public async Task<SetlistModel?> GetSetlistById(int id)
     {
         using var connection = sqlConnectionFactory.CreateConnection();
-        
-        string sql = """
+
+        SetlistModel setlistResult = new();
+
+        /*string sql = """
                 SELECT Top(1) * FROM Setlists s
                 JOIN SongsSetlists sl ON sl.SetlistId = s.Id
                 WHERE s.Id = @Id;
+            """;*/
+
+        string sql = """
+                SELECT s.Id, s.Name,
+                   song.Id AS SongId, song.Name, song.Artist, song.Language, song.TabsURL, song.YouTubeURL
+            FROM Setlists s
+            JOIN SongsSetlists sl ON sl.SetlistId = s.Id
+            JOIN Songs song ON song.ID = sl.SongId
+            WHERE s.Id = @Id;
             """;
 
-        //setlist
-        
+        var x = await connection.QueryAsync<SetlistModel, SongModel, SetlistModel>(sql, 
+            (x, y) => 
+            { 
+                x.Songs = [];
+                setlistResult.Songs.Add(y);
+                return setlistResult; 
+            }, 
+            new { Id = id }, 
+            splitOn: "SongId");        
+               
         //relace mezi set a songy        
-
         //detaily songu
-
         //pospojovani
 
-        var x = await connection.QueryAsync<SetlistModel, SongModel, SetlistModel>(sql, (x, y) => { return x; }, new { Id = id }, splitOn: "SongId");
         return x.FirstOrDefault();
     }
 

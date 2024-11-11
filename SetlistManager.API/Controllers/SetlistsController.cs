@@ -9,17 +9,17 @@ namespace SetlistManager.API.Controllers;
 public class SetlistsController : ControllerBase
 {
     private readonly ISetlistsDB _setlistsDB;
-    
+
     public SetlistsController(ISetlistsDB setlistsDB)
     {
         _setlistsDB = setlistsDB;
     }
-    
+
     [HttpPost]
-    public async Task<int> UploadSetlistToDb(SetlistModel setlistModel) 
+    public async Task<int> UploadSetlistToDb(SetlistModel setlistModel)
         => await _setlistsDB.SaveSetlist(setlistModel);
-    
-    [HttpGet]
+
+    [HttpGet("{id}")]
     public async Task<SetlistModel> GetSetlistById(int id) 
         => await _setlistsDB.GetSetlistById(id) ?? new SetlistModel();
 }
