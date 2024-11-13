@@ -5,11 +5,13 @@
 
 <br />
 
-<button class="btn btn-primary" @onclick="() => _showGenerateSetlistUI = true">Create Setlist</button>
-<button class="btn btn-primary" @onclick="() => _showLoadSetlistUI = true">Load Setlist</button>
+<button class="btn btn-primary me-2" @onclick="() => ShowGenerateSetlistUI()">Create Setlist</button>
+
+<button class="btn btn-primary" @onclick="() => ShowLoadSetlistUI()">Load Setlist</button>
 
 @if(_showGenerateSetlistUI)
 {
+    HideLoadSetlistUI();
     <div>
         <br/>
         How many songs? <input type="number" @bind="_setlistLength" min="1" max="@_maxNumber" />
@@ -19,6 +21,7 @@
 
 @if(_showLoadSetlistUI)
 {
+    HideGenerateSetlistUI();
     <div>
         <br/>
         Setlist id: <input type="number" @bind="_setlistToBeLoadedId" min="1"/>
@@ -37,7 +40,7 @@
 
 <br />
 
-@if (_shuffeledSongCollection.Count != 0)
+@if (_shuffeledSongCollection.Count != 0 && _showSetlistContentUI)
 {
     <ol>
         @foreach (var song in _shuffeledSongCollection)

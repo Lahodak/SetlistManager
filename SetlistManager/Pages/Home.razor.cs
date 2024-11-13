@@ -17,6 +17,7 @@ public partial class Home
     private string? _toBeSavedSetlistName;
     private bool _showLoadSetlistUI;
     private int _setlistToBeLoadedId;
+    private bool _showSetlistContentUI = true;
     private bool _error;
     
     [Inject]
@@ -24,9 +25,29 @@ public partial class Home
     [Inject]
     public required SetlistService SetlistService { get; set; }
 
+    private void ShowGenerateSetlistUI()
+    {
+        _showGenerateSetlistUI = true;
+        _showLoadSetlistUI = false;
+    }        
+    private void HideGenerateSetlistUI()
+        => _showGenerateSetlistUI = false;
+    private void ShowLoadSetlistUI()
+    {
+        _showLoadSetlistUI = true;
+        _showGenerateSetlistUI = false;
+        _showSaveSetlistUI = false;
+        HideSetlistContentUI();
+    }
+    private void HideLoadSetlistUI()
+        => _showLoadSetlistUI = false;
+    private void ShowSetlistContentUI()
+        => _showSetlistContentUI = true;
+    private void HideSetlistContentUI()
+        => _showSetlistContentUI = false;
     private async Task GenerateSetlist()
 	{		
-        _showSaveSetlistUI = true;
+        ShowSetlistContentUI();
 		_shuffeledSongCollection.AddRange(_songCollection);
         ShuffleService.ShuffleList(_shuffeledSongCollection);
 		_shuffeledSongCollection = _shuffeledSongCollection.Take(_setlistLength).ToList();
