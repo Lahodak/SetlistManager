@@ -38,7 +38,7 @@ public class SetlistsDB(SqlConnectionFactory sqlConnectionFactory) : ISetlistsDB
         //detaily songu
         //pospojovani
 
-        return x.FirstOrDefault();
+        return setlistResult;
     }
 
     public async Task<int> SaveSetlist(SetlistModel setlistModel)

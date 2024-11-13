@@ -11,15 +11,16 @@
 @if(_showGenerateSetlistUI)
 {
     <div>
+        <br/>
         How many songs? <input type="number" @bind="_setlistLength" min="1" max="@_maxNumber" />
         <button class="btn btn-primary" @onclick="() => GenerateSetlist()">Generate Setlist</button>
-
     </div>    
 }
 
 @if(_showLoadSetlistUI)
 {
     <div>
+        <br/>
         Setlist id: <input type="number" @bind="_setlistToBeLoadedId" min="1"/>
         <button class="btn btn-primary" @onclick="() => GetSetlist()">Submit</button>
     </div>
@@ -28,12 +29,12 @@
 @if(_showSaveSetlistUI)
 {
     <div>
+        <br/>
         Setlist name: <input type="text" @bind="_toBeSavedSetlistName"/>
         <button class="btn btn-primary" @onclick="() => SaveSetlist()">Save Setlist</button>
     </div>
 }
 
-<br />
 <br />
 
 @if (_shuffeledSongCollection.Count != 0)

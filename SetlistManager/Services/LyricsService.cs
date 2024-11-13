@@ -1,4 +1,5 @@
 ﻿using System.Net.Http.Json;
+using Newtonsoft.Json;
 using SetlistManager.Common.Models;
 
 namespace SetlistManager.Services;
@@ -26,8 +27,17 @@ public class LyricsService(IHttpClientFactory httpClientFactory)
             return null;
         }
 
-        var songLyrics = await response.Content.ReadFromJsonAsync<SongLyrics>();
-        return songLyrics;
+        var songLyricsJson = await response.Content.ReadAsStringAsync();
+        
+        try
+        {
+            var songLyrics = JsonConvert.DeserializeObject<SongLyrics>(songLyricsJson);
+            return songLyrics;
+        }
+        catch (Exception ex)
+        {
+            return null;
+        }
     }
 }
 
