@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using SetlistManager.Common.Models;
 using System.IO;
+using System.Net.Http;
 using System.Text;
 
 namespace SetlistManager.Services;
@@ -13,7 +14,7 @@ public class SetlistService
     {
         _httpClientFactory = httpClientFactory;
     }
-    public async Task PushSetlistToApi(SetlistModel setlistModel)
+    public async Task PushSetlist(SetlistModel setlistModel)
     {
         using var httpClient = _httpClientFactory.CreateClient();
         var s  = JsonConvert.SerializeObject(setlistModel);
@@ -23,6 +24,25 @@ public class SetlistService
         {
             Console.WriteLine(message.ToString());
         }
+    }
+    public async Task<SetlistModel>? GetSetlistById(int id)
+    {
+        using var httpClient = _httpClientFactory.CreateClient();
+        HttpResponseMessage message = await httpClient.GetAsync(_pathSetlists);
+        if (!message.IsSuccessStatusCode)
+        {
+            Console.WriteLine(message.ToString());
+            return null;
+        }
         string json = await message.Content.ReadAsStringAsync();
+        try
+        {
+            return JsonConvert.DeserializeObject<SetlistModel>(json);
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
     }
 }

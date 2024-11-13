@@ -5,16 +5,23 @@
 
 <br />
 
-<div>
-    How many songs? <input type="number" @bind="_setlistLength" min="1" max="@_maxNumber"/>
-</div>
-
-<br />
-
 <button class="btn btn-primary" @onclick="() => GenerateSetlist()">Generate Setlist</button>
 
-<button class="btn btn-primary" @onclick="() => SaveSetlist()">Save Setlist</button>
+@if(_showGenerateSetlistUI)
+{
+    <br />
 
+    <div>
+        How many songs? <input type="number" @bind="_setlistLength" min="1" max="@_maxNumber" />
+    </div>    
+}
+
+@if(_showSaveSetlistComponents)
+{
+    <br />    
+    <input type="text" @bind="_toBeSavedSetlistName"/>
+    <button class="btn btn-primary" @onclick="() => SaveSetlist()">Save Setlist</button>    
+}
 
 <br />
 <br />
