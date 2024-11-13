@@ -11,22 +11,35 @@ public partial class Home
 	private List<SongModel> _shuffeledSongCollection = [];
 	private List<SongModel> _uploadedSongs = [];
 	private List<SongModel> _songCollection = [];
-    private SetlistModel _setlist;
+    private SetlistModel _setlist = new();
     private bool _showGenerateSetlistUI;
-    private bool _showSaveSetlistComponents;
+    private bool _showSaveSetlistUI;
     private string? _toBeSavedSetlistName;
+    private bool _showLoadSetlistUI;
+    private int _setlistToBeLoadedId;
+    private bool _error;
     
     [Inject]
     public required SongsDB SongsDatabase { get; set; }
     [Inject]
     public required SetlistService SetlistService { get; set; }
+
     private async Task GenerateSetlist()
 	{		
-        _showGenerateSetlistUI = true;
+        _showSaveSetlistUI = true;
 		_shuffeledSongCollection.AddRange(_songCollection);
         ShuffleService.ShuffleList(_shuffeledSongCollection);
 		_shuffeledSongCollection = _shuffeledSongCollection.Take(_setlistLength).ToList();
 	}
+
+    private async Task GetSetlist()
+    {
+        if (_setlistToBeLoadedId <= 0)
+            return;        
+        _setlist = await SetlistService.GetSetlistById(_setlistToBeLoadedId);
+        _shuffeledSongCollection.Clear();
+        _shuffeledSongCollection.AddRange(_setlist.Songs);
+    }
 
     private async Task SaveSetlist()
     {

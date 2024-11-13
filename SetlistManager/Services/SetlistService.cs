@@ -43,6 +43,7 @@ public class SetlistService
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
+            return null;
         }
     }
 }
