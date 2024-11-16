@@ -1,5 +1,5 @@
 # SetlistManager
-App for managing and creating new setlist based on a collection of songs. 
+App for managing and creating setlists based on a collection of songs. 
 
 # Features:
 - Creation of setlists
