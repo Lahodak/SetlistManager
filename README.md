@@ -9,7 +9,7 @@ App for managing and creating setlists based on a collection of songs.
 - Retrieving saved setlists
 
 # Technologies used:
-- ASP.NET Core Web Api
+- ASP.NET Core Web API
 - .NET Blazor
 - External Lyrics API
 - .NET 8.0 based
