@@ -7,13 +7,7 @@ public class SetlistsDB(SqlConnectionFactory sqlConnectionFactory) : ISetlistsDB
     {
         using var connection = sqlConnectionFactory.CreateConnection();
 
-        SetlistModel setlistResult = null;
-
-        /*string sql = """
-                SELECT Top(1) * FROM Setlists s
-                JOIN SongsSetlists sl ON sl.SetlistId = s.Id
-                WHERE s.Id = @Id;
-            """;*/
+        SetlistModel? setlistResult = null;
 
         string sql = """
                 SELECT s.Id, s.Name,

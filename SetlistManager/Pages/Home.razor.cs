@@ -9,8 +9,7 @@ public partial class Home
 	private int _maxNumber = 0;
 	private int _setlistLength = 1;
 	private List<SongModel> _shuffeledSongCollection = [];
-	private List<SongModel> _uploadedSongs = [];
-	private List<SongModel> _songCollection = [];
+	private readonly List<SongModel> _songCollection = [];
     private SetlistModel _setlist = new();
     private bool _showGenerateSetlistUI;
     private bool _showSaveSetlistUI;
@@ -18,7 +17,6 @@ public partial class Home
     private bool _showLoadSetlistUI;
     private int _setlistToBeLoadedId;
     private bool _showSetlistContentUI = true;
-    private bool _error;
     
     [Inject]
     public required SongsDB SongsDatabase { get; set; }
@@ -45,7 +43,7 @@ public partial class Home
         => _showSetlistContentUI = true;
     private void HideSetlistContentUI()
         => _showSetlistContentUI = false;
-    private async Task GenerateSetlist()
+    private void GenerateSetlist()
 	{
         ShowSetlistContentUI();
         _showSaveSetlistUI = true;
@@ -57,8 +55,8 @@ public partial class Home
     private async Task GetSetlist()
     {
         if (_setlistToBeLoadedId <= 0)
-            return;        
-        _setlist = await SetlistService.GetSetlistById(_setlistToBeLoadedId);
+            return;               
+        _setlist = await SetlistService.GetSetlistById(_setlistToBeLoadedId)!;
         _shuffeledSongCollection.Clear();
         _shuffeledSongCollection.AddRange(_setlist.Songs);
         ShowSetlistContentUI();

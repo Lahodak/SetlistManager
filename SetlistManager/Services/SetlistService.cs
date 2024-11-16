@@ -10,7 +10,7 @@ public class SetlistService
 {
     private const string _pathSetlists = "https://localhost:7143/api/Setlists";
     private const string _pathSetlistById = "https://localhost:7143/api/Setlists/";    
-    private IHttpClientFactory _httpClientFactory;
+    private readonly IHttpClientFactory _httpClientFactory;
     public SetlistService(IHttpClientFactory httpClientFactory)
     {
         _httpClientFactory = httpClientFactory;
@@ -36,18 +36,18 @@ public class SetlistService
         if (!message.IsSuccessStatusCode)
         {
             Console.WriteLine(message.ToString());
-            return null;
+            return null!;
         }
         string json = await message.Content.ReadAsStringAsync();
         try
         {
-            return JsonConvert.DeserializeObject<SetlistModel>(json);
+            return JsonConvert.DeserializeObject<SetlistModel>(json)!;
 
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
-            return null;
+            return null!;
         }
     }
 }

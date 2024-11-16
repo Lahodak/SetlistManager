@@ -19,10 +19,6 @@
   <ItemGroup>
     <ProjectReference Include="..\SetlistManager.Common\SetlistManager.Common.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Models\" />
-  </ItemGroup>
 	
 
 </Project>

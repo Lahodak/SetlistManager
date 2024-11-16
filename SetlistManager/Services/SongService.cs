@@ -6,7 +6,7 @@ namespace SetlistManager.Services;
 public class SongService
 {
     private const string path = "https://localhost:7143/api/Songs";    
-    private IHttpClientFactory _httpClientFactory;
+    private readonly IHttpClientFactory _httpClientFactory;
     public SongService(IHttpClientFactory factory)
     {
         _httpClientFactory = factory;

@@ -1,6 +1,6 @@
-﻿using System.Net.Http.Json;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using SetlistManager.Common.Models;
+using SetlistManager.Models;
 
 namespace SetlistManager.Services;
 
@@ -36,14 +36,8 @@ public class LyricsService(IHttpClientFactory httpClientFactory)
         }
         catch (Exception ex)
         {
+            Console.WriteLine(ex.Message);  
             return null;
         }
     }
-}
-
-public class SongLyrics
-{
-    public string Title { get; set; }
-    public string Artist { get; set; }
-    public string Lyrics { get; set; }
 }

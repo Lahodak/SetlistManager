@@ -1,4 +1,5 @@
 using SetlistManager.API.Data;
+using SetlistManager.API;
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 

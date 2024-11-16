@@ -1,8 +1,8 @@
 ﻿using SetlistManager.Common.Models;
 
-namespace SetlistManager.API.Controllers;
+namespace SetlistManager.API.Models;
 
 public class AddSongsModel
 {
-    public List<SongUpdateModel> Songs { get; set; }
+    public List<SongUpdateModel> Songs { get; set; } = [];
 }
