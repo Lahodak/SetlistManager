@@ -7,7 +7,7 @@ public class SetlistsDB(SqlConnectionFactory sqlConnectionFactory) : ISetlistsDB
     {
         using var connection = sqlConnectionFactory.CreateConnection();
 
-        SetlistModel setlistResult = new();
+        SetlistModel setlistResult = null;
 
         /*string sql = """
                 SELECT Top(1) * FROM Setlists s
@@ -25,18 +25,20 @@ public class SetlistsDB(SqlConnectionFactory sqlConnectionFactory) : ISetlistsDB
             """;
 
         var x = await connection.QueryAsync<SetlistModel, SongModel, SetlistModel>(sql, 
-            (x, y) => 
-            { 
-                x.Songs = [];
-                setlistResult.Songs.Add(y);
+            (setlist, song) => 
+            {
+                if (setlistResult == null)
+                {
+                    setlistResult = setlist;
+                    setlistResult.Songs = [];
+                }
+
+                setlistResult.Songs.Add(song);
+                
                 return setlistResult; 
             }, 
             new { Id = id }, 
             splitOn: "SongId");        
-               
-        //relace mezi set a songy        
-        //detaily songu
-        //pospojovani
 
         return setlistResult;
     }

@@ -46,8 +46,9 @@ public partial class Home
     private void HideSetlistContentUI()
         => _showSetlistContentUI = false;
     private async Task GenerateSetlist()
-	{		
+	{
         ShowSetlistContentUI();
+        _showSaveSetlistUI = true;
 		_shuffeledSongCollection.AddRange(_songCollection);
         ShuffleService.ShuffleList(_shuffeledSongCollection);
 		_shuffeledSongCollection = _shuffeledSongCollection.Take(_setlistLength).ToList();
@@ -60,6 +61,7 @@ public partial class Home
         _setlist = await SetlistService.GetSetlistById(_setlistToBeLoadedId);
         _shuffeledSongCollection.Clear();
         _shuffeledSongCollection.AddRange(_setlist.Songs);
+        ShowSetlistContentUI();
     }
 
     private async Task SaveSetlist()
