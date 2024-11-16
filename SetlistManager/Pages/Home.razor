@@ -38,6 +38,14 @@
     </div>
 }
 
+@if(_showSetlistId)
+{
+    <div>
+        <br/>
+        Saved setlist id is: <b>@_setlist.Id.ToString()</b>
+    </div>
+}
+
 <br />
 
 @if (_shuffeledSongCollection.Count != 0 && _showSetlistContentUI)

@@ -16,7 +16,7 @@ public class SetlistService
         _httpClientFactory = httpClientFactory;
     }
 
-    public async Task PushSetlist(SetlistModel setlistModel)
+    public async Task<int> PushSetlist(SetlistModel setlistModel)
     {
         using var httpClient = _httpClientFactory.CreateClient();
         var s  = JsonConvert.SerializeObject(setlistModel);
@@ -25,7 +25,17 @@ public class SetlistService
         if (!message.IsSuccessStatusCode)
         {
             Console.WriteLine(message.ToString());
+            return -1;
         }
+
+        string responseContent = await message.Content.ReadAsStringAsync();
+        if (int.TryParse(responseContent, out int result))
+        {
+            return result;
+        }
+
+        Console.WriteLine("Failed to parse response content.");
+        return -1;
     }
 
     public async Task<SetlistModel>? GetSetlistById(int id)

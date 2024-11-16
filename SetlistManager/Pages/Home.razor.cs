@@ -17,6 +17,7 @@ public partial class Home
     private bool _showLoadSetlistUI;
     private int _setlistToBeLoadedId;
     private bool _showSetlistContentUI = true;
+    private bool _showSetlistId = false;
     
     [Inject]
     public required SongsDB SongsDatabase { get; set; }
@@ -66,9 +67,11 @@ public partial class Home
     {
         if (_toBeSavedSetlistName is null || _toBeSavedSetlistName.Length < 4)
             return;
+        _setlist.Songs.Clear();
         _setlist.Name = _toBeSavedSetlistName;
         _setlist.Songs.AddRange(_shuffeledSongCollection);
-        await SetlistService.PushSetlist(_setlist);
+        _setlist.Id = await SetlistService.PushSetlist(_setlist);
+        _showSetlistId = true;
     }
 
     protected override async Task OnInitializedAsync()
