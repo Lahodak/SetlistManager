@@ -1,3 +1,4 @@
+using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using SetlistManager;
@@ -11,4 +12,5 @@ builder.Services.AddSingleton<SongService>();
 builder.Services.AddSingleton<SongsDB>();
 builder.Services.AddSingleton<SetlistService>();
 builder.Services.AddScoped<LyricsService>();
+builder.Services.AddBlazoredLocalStorageAsSingleton(); 
 await builder.Build().RunAsync();

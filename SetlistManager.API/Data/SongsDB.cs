@@ -4,7 +4,7 @@ namespace SetlistManager.API.Data;
 
 public class SongsDB(SqlConnectionFactory sqlConnectionFactory) : ISongsDB
 {
-    public async Task<IEnumerable<Song>>GetSongsAsync()
+    public async Task<IEnumerable<Song>> GetSongsAsync()
     {
         using var connection = sqlConnectionFactory.CreateConnection();
         const string sql = "SELECT * FROM Songs;";

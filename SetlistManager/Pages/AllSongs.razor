@@ -6,9 +6,17 @@
 
 @if (_songCollection != null && _songCollection.Any())
 {
+    <br/>
+    <p>
+        Search songs: <input type="search" @bind="input" @bind:event="oninput" />
+    </p>
+
+    <br/>
     <ol>
-        @foreach (var song in _songCollection)
-        {
+        @foreach (var song in _songCollection.Where(s => string.IsNullOrEmpty(input)
+        || s.Name.Contains(input, StringComparison.OrdinalIgnoreCase)
+        || s.Artist.Contains(input, StringComparison.OrdinalIgnoreCase)))
+        {   
             <li class="py-1">
                 <a href="@($"songdetail/{song.Id}")" style="color: black; text-decoration: none; font-size: medium;">@song.Name | @song.Artist</a>
             </li>

@@ -10,6 +10,7 @@ public partial class AllSongs
     public required SongsDB SongsDatabase { get; set; }
 
     private readonly List<SongModel> _songCollection = [];
+    private string input = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {

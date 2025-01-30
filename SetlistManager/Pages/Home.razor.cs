@@ -18,19 +18,24 @@ public partial class Home
     private int _setlistToBeLoadedId;
     private bool _showSetlistContentUI = true;
     private bool _showSetlistId = false;
+    private const string _localStorageKey = "LastLoadedSetlistId";
     
     [Inject]
     public required SongsDB SongsDatabase { get; set; }
     [Inject]
     public required SetlistService SetlistService { get; set; }
+    [Inject]
+    public required Blazored.LocalStorage.ILocalStorageService LocalStorage { get; set; }
 
     private void ShowGenerateSetlistUI()
     {
         _showGenerateSetlistUI = true;
         _showLoadSetlistUI = false;
     }        
+
     private void HideGenerateSetlistUI()
         => _showGenerateSetlistUI = false;
+
     private void ShowLoadSetlistUI()
     {
         _showLoadSetlistUI = true;
@@ -38,12 +43,14 @@ public partial class Home
         _showSaveSetlistUI = false;
         HideSetlistContentUI();
     }
+
     private void HideLoadSetlistUI()
         => _showLoadSetlistUI = false;
     private void ShowSetlistContentUI()
         => _showSetlistContentUI = true;
     private void HideSetlistContentUI()
         => _showSetlistContentUI = false;
+
     private void GenerateSetlist()
 	{
         ShowSetlistContentUI();
@@ -51,46 +58,69 @@ public partial class Home
 		_shuffeledSongCollection.AddRange(_songCollection);
         ShuffleService.ShuffleList(_shuffeledSongCollection);
 		_shuffeledSongCollection = _shuffeledSongCollection.Take(_setlistLength).ToList();
-	}
+    }
 
     private async Task GetSetlist()
     {
         if (_setlistToBeLoadedId <= 0)
-            return;               
+            return;           
+        
         _setlist = await SetlistService.GetSetlistById(_setlistToBeLoadedId)!;
         _shuffeledSongCollection.Clear();
         _shuffeledSongCollection.AddRange(_setlist.Songs);
         ShowSetlistContentUI();
     }
 
+    protected override async Task OnInitializedAsync()
+    {
+        _songCollection.AddRange(await SongsDatabase.GetSongCollection());
+        _maxNumber = SongsDatabase.GetCount();
+        var localData = await LocalStorage.GetItemAsync<string>(_localStorageKey);
+
+        if(!int.TryParse(localData, out int lastLoadedSetlistId))        
+            return;    
+        
+        if(lastLoadedSetlistId <= 0)
+        {
+            return;
+        }
+        else
+        {
+            _setlistToBeLoadedId = lastLoadedSetlistId;
+            await GetSetlist();
+            ShowLoadSetlistUI();
+        }
+
+    }
+
     private async Task SaveSetlist()
     {
         if (_toBeSavedSetlistName is null || _toBeSavedSetlistName.Length < 4)
             return;
+
         _setlist.Songs.Clear();
         _setlist.Name = _toBeSavedSetlistName;
         _setlist.Songs.AddRange(_shuffeledSongCollection);
         _setlist.Id = await SetlistService.PushSetlist(_setlist);
         _showSetlistId = true;
-    }
-
-    protected override async Task OnInitializedAsync()
-    {
-        _songCollection.AddRange(await SongsDatabase.GetSongCollection());
-        _maxNumber = SongsDatabase.GetCount();
+        await LocalStorage.SetItemAsync(_localStorageKey, _setlist.Id);
     }
 
     private void RegenerateSong(int songId)
 	{
         if (_shuffeledSongCollection.Count >= SongsDatabase.GetCount())
             return;
+
         int index = _shuffeledSongCollection.FindIndex(song => song.Id == songId);
+
         var availableSongs = _songCollection
                              .Where(song => !_shuffeledSongCollection.Contains(song) && song.Id != songId)
                              .ToList();
-        SongModel newSong;
+        SongModel newSong = new();
+
         if (availableSongs.Count <= 0)
             return;
+
         var random = new Random();
         newSong = availableSongs[random.Next(availableSongs.Count)];
         ReplaceSong(index, newSong);
