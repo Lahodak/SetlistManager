@@ -18,6 +18,7 @@ public partial class Home
     private int _setlistToBeLoadedId;
     private bool _showSetlistContentUI = true;
     private bool _showSetlistId = false;
+    private bool _showSearchAndReplaceUI = false;
     private const string _localStorageKey = "LastLoadedSetlistId";
     
     [Inject]
@@ -114,13 +115,8 @@ public partial class Home
         int index = _shuffeledSongCollection.FindIndex(song => song.Id == songId);
 
         var availableSongs = new List<SongModel>();
-        foreach (var song in _songCollection)
-        {
-            if (!_shuffeledSongCollection.Any(shuffledSong => shuffledSong.Id == song.Id) && song.Id != songId)
-            {
-                availableSongs.Add(song);
-            }
-        }
+        
+        availableSongs.AddRange(GetAvailableSongs());
 
         SongModel newSong = new();
 
@@ -132,6 +128,28 @@ public partial class Home
         ReplaceSong(index, newSong);
         StateHasChanged();        
 	}
+
+    private List<SongModel> GetAvailableSongs()
+    {
+        List<SongModel> availableSongs = [];
+
+        foreach (var song in _songCollection)
+        {
+            if (!_shuffeledSongCollection.Any(shuffledSong => shuffledSong.Id == song.Id))  
+            {
+                availableSongs.Add(song);
+            }
+        }
+
+        return availableSongs;
+    }
+
+    private void SearchAndReplaceSong(int id)
+    {
+        _showSearchAndReplaceUI = true;
+        var availableSongs = GetAvailableSongs();
+    }
+
 
 	private void ReplaceSong(int index, SongModel newSong)
 	{
