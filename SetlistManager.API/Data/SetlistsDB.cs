@@ -11,10 +11,10 @@ public class SetlistsDB(SqlConnectionFactory sqlConnectionFactory) : ISetlistsDB
 
         string sql = """
                 SELECT s.Id, s.Name,
-                   song.Id AS SongId, song.Name, song.Artist, song.Language, song.TabsURL, song.YouTubeURL
+                   song.Id, song.Name, song.Artist, song.Language, song.TabsURL, song.YouTubeURL
             FROM Setlists s
             JOIN SongsSetlists sl ON sl.SetlistId = s.Id
-            JOIN Songs song ON song.ID = sl.SongId
+            JOIN Songs song ON song.Id = sl.SongId
             WHERE s.Id = @Id;
             """;
 
@@ -32,8 +32,8 @@ public class SetlistsDB(SqlConnectionFactory sqlConnectionFactory) : ISetlistsDB
                 return setlistResult; 
             }, 
             new { Id = id }, 
-            splitOn: "SongId");        
-
+            splitOn: "Id");        
+            
         return setlistResult;
     }
 
