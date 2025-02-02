@@ -55,6 +55,7 @@ public partial class Home
 	{
         ShowSetlistContentUI();
         _showSaveSetlistUI = true;
+        _shuffeledSongCollection.Clear();
 		_shuffeledSongCollection.AddRange(_songCollection);
         ShuffleService.ShuffleList(_shuffeledSongCollection);
 		_shuffeledSongCollection = _shuffeledSongCollection.Take(_setlistLength).ToList();
@@ -90,7 +91,6 @@ public partial class Home
             await GetSetlist();
             ShowLoadSetlistUI();
         }
-
     }
 
     private async Task SaveSetlist()
@@ -113,9 +113,15 @@ public partial class Home
 
         int index = _shuffeledSongCollection.FindIndex(song => song.Id == songId);
 
-        var availableSongs = _songCollection
-                             .Where(song => !_shuffeledSongCollection.Contains(song) && song.Id != songId)
-                             .ToList();
+        var availableSongs = new List<SongModel>();
+        foreach (var song in _songCollection)
+        {
+            if (!_shuffeledSongCollection.Any(shuffledSong => shuffledSong.Id == song.Id) && song.Id != songId)
+            {
+                availableSongs.Add(song);
+            }
+        }
+
         SongModel newSong = new();
 
         if (availableSongs.Count <= 0)
