@@ -31,12 +31,10 @@
             <MudText Typo="Typo.body1">How many songs?</MudText>
             <MudGrid>
                 <MudItem>
-                    <MudNumericField @bind-Value="_setlistLength" Min="1" Max="@_maxNumber" Dense="true"
-                                  Style="width: 150px; height: 50px;" />
+                    <MudNumericField @bind-Value="_setlistLength" Min="1" Max="@_maxNumber" Dense="true" Style="width: 150px; height: 50px;" />
                 </MudItem>
                 <MudItem>
-                    <MudButton Class="pa-2 ml-2" Variant="Variant.Outlined" Style="height: 50px;"
-                               OnClick="() => GenerateSetlist()">
+                    <MudButton Class="pa-2 ml-2" Variant="Variant.Outlined" Style="height: 50px;" OnClick="() => GenerateSetlist()">
                         Generate Setlist
                     </MudButton>
                 </MudItem>
