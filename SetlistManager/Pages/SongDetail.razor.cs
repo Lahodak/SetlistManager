@@ -9,10 +9,8 @@ public partial class SongDetail
 {
 	[Parameter]
 	public int SongId { get; set; }
-	
     [Inject]
 	public required SongsDB SongsDatabase { get; set; }   	
-    
     [Inject]
     public required LyricsService LyricsService { get; set; }
 

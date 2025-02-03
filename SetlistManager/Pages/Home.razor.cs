@@ -75,6 +75,7 @@ public partial class Home
         _shuffeledSongCollection.Clear();
         _shuffeledSongCollection.AddRange(_setlist.Songs);
         ShowSetlistContentUI();
+        await LocalStorage.SetItemAsync(_localStorageKey, _setlistToBeLoadedId);
     }
 
     protected override async Task OnInitializedAsync()

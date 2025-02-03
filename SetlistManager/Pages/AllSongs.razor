@@ -4,12 +4,11 @@
 
 <MudContainer Class="mt-5">
     <MudPaper Class="pa-4 mt-3" Elevation="2">
-        <MudText Typo="Typo.h3" Class="ml-5">All Songs</MudText>
+        <MudText Typo="Typo.h3" Class="ml-2">All Songs</MudText>
 
         @if (_songCollection != null && _songCollection.Any())
         {
-            <MudTextField T="string" Label="Search songs" @bind-Value="input" Immediate="true"
-                          Class="mt-3" />
+            <MudTextField T="string" Label="Search songs" @bind-Value="input" Immediate="true" Class="mt-3" />
 
             <MudPaper Class="pa-4 mt-3" Elevation="2">
                 <MudList T="string">

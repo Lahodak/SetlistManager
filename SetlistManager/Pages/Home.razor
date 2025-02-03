@@ -4,7 +4,7 @@
 
 <MudContainer Class="mt-5">
     <MudPaper Class="pa-4 mt-3" Elevation="2">
-        <MudText Typo="Typo.h3" Class="ml-5">Welcome to Setlist Manager!</MudText>
+        <MudText Typo="Typo.h3" Class="ml-2">Welcome to Setlist Manager!</MudText>
 
         <MudGrid Class="mt-4">
             <MudItem>
@@ -103,7 +103,7 @@
                         <MudButton Variant="Variant.Outlined" Class="pa-2 ml-2" OnClick="() => SearchAndReplaceSong(song.Id)">
                             🔍
                         </MudButton>
-                        <MudLink Href="@($"songdetail/{song.Id}")" Target="_blank"
+                        <MudLink Href="@($"songdetail/{song.Id}")"
                                  Style="color: black; text-decoration: none; font-size: medium;">
                             @song.Name | @song.Artist
                         </MudLink>
