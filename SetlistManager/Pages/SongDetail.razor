@@ -4,16 +4,19 @@
 
 @if (song != null)
 {
-    <h1>@song.Name</h1>
-    <p>Artist: @song.Artist</p>
-    <p>Language: @song.Language</p>
-    <p>Tabs: <a href ="@song.TabsURL" target="_blank">@song.TabsURL</a></p>
-    <p>Youtube</p>
-    <p>Link: <a href="@song.YouTubeURL" target="_blank">@song.Name by @song.Artist on Youtube</a></p>
-    <p>Lyrics: </p>
-    <p>@GetFormattedLyrics()</p>
+    <MudText Typo="Typo.h3">@song.Name</MudText>
+    <MudText>Artist: @song.Artist</MudText>
+    <MudText>Language: @song.Language</MudText>
+    <MudText>
+        Tabs: <MudLink Href="@song.TabsURL" Target="_blank">View Tabs</MudLink>
+    </MudText>
+    <MudText>
+        Youtube: <MudLink Href="@song.YouTubeURL" Target="_blank">@song.Name by @song.Artist on YouTube</MudLink>
+    </MudText>
+    <MudText>Lyrics:</MudText>
+    <MudText>@GetFormattedLyrics()</MudText>
 }
 else
 {
-    <p>Song not found!</p>
+    <MudText>No song found!</MudText>
 }

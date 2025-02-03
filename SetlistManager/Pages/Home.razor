@@ -1,64 +1,115 @@
 ﻿@page "/"
 
 <PageTitle>Home</PageTitle>
-<h1>Welcome to Setlist Manager!</h1>
 
-<br />
+<MudContainer Class="mt-5">
+    <MudPaper Class="pa-4 mt-3" Elevation="2">
+        <MudText Typo="Typo.h3" Class="ml-5">Welcome to Setlist Manager!</MudText>
 
-<button class="btn btn-primary me-2" @onclick="() => ShowGenerateSetlistUI()">Create Setlist</button>
+        <MudGrid Class="mt-4">
+            <MudItem>
+                <MudButton Class="pa-2"
+                           Variant="Variant.Outlined"
+                           Color="@(_showGenerateSetlistUI ? Color.Primary : Color.Default)"
+                           OnClick="() => ShowGenerateSetlistUI()">
+                    Create Setlist
+                </MudButton>
 
-<button class="btn btn-primary" @onclick="() => ShowLoadSetlistUI()">Load Setlist</button>
+                <MudButton Class="pa-2 ml-5"
+                           Variant="Variant.Outlined"
+                           Color="@(_showLoadSetlistUI ? Color.Primary : Color.Default)"
+                           OnClick="() => ShowLoadSetlistUI()">
+                    Load Setlist
+                </MudButton>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
 
-@if(_showGenerateSetlistUI)
-{
-    HideLoadSetlistUI();
-    <div>
-        <br/>
-        How many songs? <input type="number" @bind="_setlistLength" min="1" max="@_maxNumber" />
-        <button class="btn btn-primary" @onclick="() => GenerateSetlist()">Generate Setlist</button>
-    </div>    
-}
+    @if (_showGenerateSetlistUI)
+    {
+        <MudPaper Class="pa-4 mt-3" Elevation="2">
+            <MudText Typo="Typo.body1">How many songs?</MudText>
+            <MudGrid>
+                <MudItem>
+                    <MudNumericField @bind-Value="_setlistLength" Min="1" Max="@_maxNumber" Dense="true"
+                                  Style="width: 150px; height: 50px;" />
+                </MudItem>
+                <MudItem>
+                    <MudButton Class="pa-2 ml-2" Variant="Variant.Outlined" Style="height: 50px;"
+                               OnClick="() => GenerateSetlist()">
+                        Generate Setlist
+                    </MudButton>
+                </MudItem>
+            </MudGrid>
+        </MudPaper>
+    }
 
-@if(_showLoadSetlistUI)
-{
-    HideGenerateSetlistUI();
-    <div>
-        <br/>
-        Setlist id: <input type="number" @bind="_setlistToBeLoadedId" min="1"/>
-        <button class="btn btn-primary" @onclick="() => GetSetlist()">Submit</button>
-    </div>
-}
+    @if (_showLoadSetlistUI)
+    {
+        <MudPaper Class="pa-4 mt-3" Elevation="2">
+            <MudText Typo="Typo.body1">Setlist ID:</MudText>
+            <MudGrid>
+                <MudItem>
+                    <MudNumericField @bind-Value="_setlistToBeLoadedId" Min="1" Dense="true"
+                                  Style="width: 150px; height: 50px;" />
+                </MudItem>
+                <MudItem>
+                    <MudButton Class="pa-2 ml-2" Variant="Variant.Outlined" Style="height: 50px;"
+                               OnClick="() => GetSetlist()">
+                        Submit
+                    </MudButton>
+                </MudItem>
+            </MudGrid>
+        </MudPaper>
+    }
 
-@if(_showSaveSetlistUI)
-{
-    <div>
-        <br/>
-        Setlist name: <input type="text" @bind="_toBeSavedSetlistName"/>
-        <button class="btn btn-primary" @onclick="() => SaveSetlist()">Save Setlist</button>
-    </div>
-}
+    @if (_showSaveSetlistUI)
+    {
+        <MudPaper Class="pa-4 mt-3" Elevation="2">
+            <MudText Typo="Typo.body1">Setlist Name:</MudText>
+            <MudGrid>
+                <MudItem>
+                    <MudTextField @bind-Value="_toBeSavedSetlistName" Dense="true" Style="width: 200px; height: 50px;" />
+                </MudItem>
+                <MudItem>
+                    <MudButton Class="pa-2 ml-2" Variant="Variant.Outlined" Style="height: 50px;"
+                               OnClick="() => SaveSetlist()">
+                        Save Setlist
+                    </MudButton>
+                </MudItem>
+            </MudGrid>
+        </MudPaper>
+    }
 
-@if(_showSetlistId)
-{
-    <div>
-        <br/>
-        Saved setlist id is: <b>@_setlist.Id.ToString()</b>
-    </div>
-}
+    @if (_showSetlistId)
+    {
+        <MudPaper Class="pa-4 mt-3" Elevation="2">
+            <MudText Typo="Typo.body1">
+                Saved setlist ID: <b>@_setlist.Id.ToString()</b>
+            </MudText>
+        </MudPaper>
+    }
 
-<br />
-
-@if (_shuffeledSongCollection.Count != 0 && _showSetlistContentUI)
-{
-    <ol>
-        @foreach (var song in _shuffeledSongCollection)
-        {
-            <li class="py-1">
-                <button class="btn btn-secondary btn-sm" @onclick="() => RegenerateSong(song.Id)">↺</button>
-				<button class="btn btn-secondary btn-sm" @onclick="() => SearchAndReplaceSong(song.Id)">🔍</button>
-				<a href="@($"songdetail/{song.Id}")" style="color: black; text-decoration: none; font-size: medium;">@song.Name | @song.Artist</a>
-            </li>
-        }
-    </ol>
-}
-
+    @if (_shuffeledSongCollection.Count != 0 && _showSetlistContentUI)
+    {
+        <MudPaper Class="pa-4 mt-4" Elevation="2">
+            <MudList T="string">
+                @foreach (var song in _shuffeledSongCollection)
+                {
+                    <MudListItem>
+                        <MudButton Variant="Variant.Outlined" Class="pa-2 ml-2" OnClick="() => RegenerateSong(song.Id)">
+                            ↺
+                        </MudButton>
+                        <MudButton Variant="Variant.Outlined" Class="pa-2 ml-2" OnClick="() => SearchAndReplaceSong(song.Id)">
+                            🔍
+                        </MudButton>
+                        <MudLink Href="@($"songdetail/{song.Id}")" Target="_blank"
+                                 Style="color: black; text-decoration: none; font-size: medium;">
+                            @song.Name | @song.Artist
+                        </MudLink>
+                    </MudListItem>
+                }
+            </MudList>
+        </MudPaper>
+    }
+</MudContainer>

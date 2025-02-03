@@ -25,7 +25,7 @@ public class SongsDB
     public int GetCount() 
         => _songsDB.Count;
     
-    private async Task CheckForData()
+    public async Task CheckForData()
     {
         if (_songsDB.Count != 0)
             return;

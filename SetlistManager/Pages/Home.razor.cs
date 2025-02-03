@@ -32,6 +32,7 @@ public partial class Home
     {
         _showGenerateSetlistUI = true;
         _showLoadSetlistUI = false;
+        _shuffeledSongCollection.Clear();
     }        
 
     private void HideGenerateSetlistUI()
@@ -50,7 +51,10 @@ public partial class Home
     private void ShowSetlistContentUI()
         => _showSetlistContentUI = true;
     private void HideSetlistContentUI()
-        => _showSetlistContentUI = false;
+    {
+        _showSetlistContentUI = false;
+        _showSetlistId = false;
+    }
 
     private void GenerateSetlist()
 	{

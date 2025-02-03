@@ -16,13 +16,14 @@ public partial class SongDetail
     [Inject]
     public required LyricsService LyricsService { get; set; }
 
-	private SongLyrics songLyrics = new();
+	private SongLyrics? songLyrics = new();
     SongModel song = new();
 
     protected override async Task OnInitializedAsync()
 	{
+        if(SongsDatabase.GetCount() == 0)
+            await SongsDatabase.CheckForData();
 		song = SongsDatabase.GetSong(SongId)!;
-
 		if (song.Language == Language.EN)
 		{
 			await SearchLyrics();
