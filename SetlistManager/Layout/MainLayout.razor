@@ -7,7 +7,7 @@
 
 <MudLayout>
     <MudAppBar Position="MudAppBarPosition.Top">
-        <MudIconButton Icon="@Icons.Material.Filled.Home" Color="Color.Inherit"/>
+        <MudIconButton Icon="@Icons.Material.Filled.Home" Color="Color.Inherit" OnClick="NavigateHome"/>
         <MudSpacer />
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
     </MudAppBar>
@@ -27,6 +27,9 @@
 </MudLayout>
 
 @code {
+    [Inject]
+    private NavigationManager Navigation { get; set; }
+    
     private bool _drawerOpen = true;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -37,8 +40,14 @@
             await InvokeAsync(StateHasChanged);
         }
     }
+
     void DrawerToggle()
     {
         _drawerOpen = !_drawerOpen;
+    }
+
+    void NavigateHome()
+    {
+        Navigation.NavigateTo("/");  // This will navigate to the homepage
     }
 }
