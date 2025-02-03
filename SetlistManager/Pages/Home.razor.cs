@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using SetlistManager.Services;
 using SetlistManager.Common.Models;
+using MudBlazor;
 
 namespace SetlistManager.Pages;
 
@@ -19,6 +20,7 @@ public partial class Home
     private bool _showSetlistContentUI = true;
     private bool _showSetlistId = false;
     private bool _showSearchAndReplaceUI = false;
+    private bool _setlistExists = true;
     private const string _localStorageKey = "LastLoadedSetlistId";
     
     [Inject]
@@ -27,6 +29,8 @@ public partial class Home
     public required SetlistService SetlistService { get; set; }
     [Inject]
     public required Blazored.LocalStorage.ILocalStorageService LocalStorage { get; set; }
+    [Inject]
+    public required ISnackbar Snackbar { get; set; }
 
     private void ShowGenerateSetlistUI()
     {
@@ -68,10 +72,23 @@ public partial class Home
 
     private async Task GetSetlist()
     {
+        _shuffeledSongCollection.Clear();
         if (_setlistToBeLoadedId <= 0)
             return;           
         
         _setlist = await SetlistService.GetSetlistById(_setlistToBeLoadedId)!;
+
+        if (_setlist.Songs.Count == 0)
+        {
+            _setlistExists = false;
+            Snackbar.Add($"Setlist with ID: {_setlistToBeLoadedId} doesn't exist!");
+            return;
+        }           
+        else
+        {
+            _setlistExists = true;
+        }
+
         _shuffeledSongCollection.Clear();
         _shuffeledSongCollection.AddRange(_setlist.Songs);
         ShowSetlistContentUI();
