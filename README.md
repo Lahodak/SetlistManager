@@ -13,3 +13,4 @@ App for managing and creating setlists based on a collection of songs.
 - .NET Blazor
 - External Lyrics API
 - .NET 8.0 based
+- MudBlazor powered UI
