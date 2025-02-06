@@ -1,7 +1,5 @@
 ﻿using Newtonsoft.Json;
 using SetlistManager.Common.Models;
-using System.IO;
-using System.Net.Http;
 using System.Text;
 
 namespace SetlistManager.Services;

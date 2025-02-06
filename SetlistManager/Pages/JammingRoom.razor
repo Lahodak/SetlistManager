@@ -1,0 +1,79 @@
+﻿@page "/JammingRoom"
+
+<PageTitle>Jamming Room</PageTitle>
+
+<style>
+    .BackgroundBlur{
+        backdrop-filter: blur(10px);
+    }
+</style>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-5">
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OpenDialogAsync">
+        Join or Create a Room
+    </MudButton>
+    <MudGrid>
+        <MudItem xs="12" md="3">
+            <MudPaper Class="pa-4" Elevation="2">
+                <MudText Typo="Typo.h3">RoomName | RoomId</MudText>
+                <MudText Typo="Typo.body1">Hosted by: username</MudText>
+
+                <MudText Typo="Typo.body1" Class="mt-2">Users attending:</MudText>
+                <MudList T="string">
+                    <MudListItem>user1</MudListItem>
+                    <MudListItem>user2</MudListItem>
+                    <MudListItem>user3</MudListItem>
+                    <MudListItem>user4</MudListItem>
+                </MudList>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" md="9">
+            <MudGrid>
+                <MudItem xs="12" md="6">
+                    <MudPaper Class="pa-4" Elevation="2">
+                        <MudText Typo="Typo.h4">Previous song</MudText>
+                        <MudText Typo="Typo.h5">Previous Song Name</MudText>
+                        <MudGrid>
+                            <MudItem xs="12" class="d-flex justify-space-between">
+                                <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" Color="Color.Primary" IconColor="Color.Secondary"/>                                    
+                            </MudItem>
+                        </MudGrid>
+                    </MudPaper>
+                </MudItem>
+
+                <MudItem xs="12" md="6">
+                    <MudPaper Class="pa-4" Elevation="2">
+                        <MudText Typo="Typo.h4">Next song</MudText>
+                        <MudText Typo="Typo.h5">Next Song Name</MudText>
+                        <MudGrid>
+                            <MudItem xs="12" class="d-flex justify-end">
+                                <MudIconButton Icon="@Icons.Material.Filled.ArrowForward" Color="Color.Primary" IconColor="Color.Secondary" />
+                            </MudItem>
+                        </MudGrid>
+                    </MudPaper>
+                </MudItem>
+            </MudGrid>
+
+            <MudPaper Class="pa-4 mt-4" Elevation="2">
+                <MudText Typo="Typo.h4">Current song</MudText>
+                <MudText Typo="Typo.h5">Song Name</MudText>
+                <MudText Typo="Typo.body1">song information</MudText>
+                <MudText Typo="Typo.body2">songLyrics</MudText>
+
+                <MudGrid>
+                    <MudItem xs="12" md="6">
+                        <MudButton Class="mt-2" Variant="Variant.Outlined" Color="Color.Primary">
+                            AutoScroll Button
+                        </MudButton>
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudButton Class="mt-2" Variant="Variant.Outlined" Color="Color.Primary">
+                            BPM Playback
+                        </MudButton>
+                    </MudItem>
+                </MudGrid>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>    
+</MudContainer>
