@@ -8,10 +8,7 @@
     }
 </style>
 
-<MudContainer MaxWidth="MaxWidth.Large" Class="mt-5">
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OpenDialogAsync">
-        Join or Create a Room
-    </MudButton>
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-5">   
     <MudGrid>
         <MudItem xs="12" md="3">
             <MudPaper Class="pa-4" Elevation="2">
@@ -24,11 +21,30 @@
                     <MudListItem>user2</MudListItem>
                     <MudListItem>user3</MudListItem>
                     <MudListItem>user4</MudListItem>
+                    <MudListItem>user1</MudListItem>
+                    <MudListItem>user2</MudListItem>
+                    <MudListItem>user3</MudListItem>
+                    <MudListItem>user4</MudListItem>
                 </MudList>
             </MudPaper>
         </MudItem>
 
         <MudItem xs="12" md="9">
+            <MudGrid Class="mb-4">
+                <MudItem xs="12" md="6">
+                    <MudPaper Class="pa-4" Elevation="2">
+                        <MudButton Color="Color.Primary">Join room</MudButton>
+                    </MudPaper>
+                </MudItem>
+
+                <MudItem xs="12" md="6">
+                    <MudPaper Class="pa-4" Elevation="2">
+                        <MudButton Color="Color.Primary">Create room</MudButton>
+                    </MudPaper>
+                </MudItem>
+            </MudGrid>
+
+
             <MudGrid>
                 <MudItem xs="12" md="6">
                     <MudPaper Class="pa-4" Elevation="2">

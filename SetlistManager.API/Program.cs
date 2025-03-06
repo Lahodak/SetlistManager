@@ -20,6 +20,7 @@ builder.Services.AddSingleton(serviceProvider =>
 
 builder.Services.AddScoped<ISongsDB, SongsDB>();
 builder.Services.AddScoped<ISetlistsDB, SetlistsDB>();
+builder.Services.AddScoped<IRoomsDB, RoomsDB>();
 builder.Services.AddControllers();
 builder.Services.AddCors(options =>
 {
