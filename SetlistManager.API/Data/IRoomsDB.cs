@@ -4,6 +4,7 @@ namespace SetlistManager.API.Data;
 
 public interface IRoomsDB
 {
-    Task<int> CreateRoomAsync (JammingRoomModel room);
-    Task<JammingRoomModel> JoinRoomAsync (int id);
+    Task<int> CreateRoomAsync(RoomModel room);
+    Task<RoomModel> JoinRoomAsync(int id, UserModel user);
+    Task<int> ChangeCurrentSongAsync(int roomId);
 }

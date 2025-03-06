@@ -4,5 +4,4 @@ public interface ISetlistsDB
 {
     Task<SetlistModel?> GetSetlistById (int id);
     Task<int> SaveSetlist (SetlistModel setlistModel);
-    Task<int> ChangeCurrentSong();
 }

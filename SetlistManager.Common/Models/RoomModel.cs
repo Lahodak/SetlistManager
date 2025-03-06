@@ -1,6 +1,6 @@
 ﻿namespace SetlistManager.Common.Models;
 
-public class JammingRoomModel
+public class RoomModel
 {
     public int Id { get; set; }
     public string Name { get; set; } = default!;
