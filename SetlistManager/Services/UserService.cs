@@ -33,14 +33,14 @@ public class UserService
         UserModel user2 = new()
         {
             Username = "vyznamenanai31",
-            Id = 1,
+            Id = 2,
             Instrument = InstrumentModel.Accordionist
         };
 
         UserModel user3 = new()
         {
             Username = "namestimiru.com",
-            Id = 1,
+            Id = 3,
             Instrument = InstrumentModel.Drummer
         };
         

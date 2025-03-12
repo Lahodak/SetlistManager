@@ -53,11 +53,14 @@
                             @if(Room.CurrentSong != 0)
                             {
                                 <MudText Typo="Typo.h5">@Room.Setlist.Songs[Room.CurrentSong - 1].Name</MudText>
-
+                            }
+                            else
+                            {
+                                <MudText Typo="Typo.h5">No song</MudText>
                             }
                             <MudGrid>
                                 <MudItem xs="12" class="d-flex justify-space-between">
-                                    <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" Color="Color.Primary" IconColor="Color.Secondary"/>                                    
+                                    <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" Color="Color.Primary" IconColor="Color.Secondary" OnClick="() => PreviousSong()"/>                                    
                                 </MudItem>
                             </MudGrid>
                         </MudPaper>
@@ -72,7 +75,7 @@
                             }
                             <MudGrid>
                                 <MudItem xs="12" class="d-flex justify-end">
-                                    <MudIconButton Icon="@Icons.Material.Filled.ArrowForward" Color="Color.Primary" IconColor="Color.Secondary" />
+                                    <MudIconButton Icon="@Icons.Material.Filled.ArrowForward" Color="Color.Primary" IconColor="Color.Secondary" OnClick="() => NextSong()" />
                                 </MudItem>
                             </MudGrid>
                         </MudPaper>
@@ -97,7 +100,7 @@
                         </MudLink>
                     </MudText>
                     <MudText Typo="Typo.body2">Lyrics:</MudText>
-
+                    <MudText Typo="Typo.body1">@LyricsMarkupService.GetFormattedLyrics(SongLyrics)</MudText>
                     <MudGrid>
                         <MudItem xs="12" md="6">
                             <MudButton Class="mt-2" Variant="Variant.Outlined" Color="Color.Primary">

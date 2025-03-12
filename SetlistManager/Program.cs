@@ -15,5 +15,6 @@ builder.Services.AddSingleton<SongsDB>();
 builder.Services.AddSingleton<SetlistService>();
 builder.Services.AddScoped<LyricsService>();
 builder.Services.AddScoped<UserService>();
+builder.Services.AddTransient<LyricsMarkupService>();
 builder.Services.AddBlazoredLocalStorageAsSingleton(); 
 await builder.Build().RunAsync();
