@@ -1,17 +1,19 @@
 ﻿using Dapper;
 using SetlistManager.API.Entities;
+using SetlistManager.Common.Models;
+
 namespace SetlistManager.API.Data;
 
 public class SongsDB(SqlConnectionFactory sqlConnectionFactory) : ISongsDB
 {
-    public async Task<IEnumerable<Song>> GetSongsAsync()
+    public async Task<IEnumerable<SongModel>> GetSongsAsync()
     {
         using var connection = sqlConnectionFactory.CreateConnection();
         const string sql = "SELECT * FROM Songs;";
-        return await connection.QueryAsync<Song>(sql);
+        return await connection.QueryAsync<SongModel>(sql);
     }
 
-    public async Task<Song?> GetSongByIdAsync(int id)
+    public async Task<SongModel?> GetSongByIdAsync(int id)
     {
         using var connection = sqlConnectionFactory.CreateConnection();
 
@@ -20,10 +22,10 @@ public class SongsDB(SqlConnectionFactory sqlConnectionFactory) : ISongsDB
                 WHERE Id = @Id;
             """;
 
-        return await connection.QuerySingleOrDefaultAsync<Song>(sql, new { Id = id });
+        return await connection.QuerySingleOrDefaultAsync<SongModel>(sql, new { Id = id });
     }
 
-    public async Task UploadSongs(Song song)
+    public async Task UploadSongs(SongModel song)
     {
         using var connection = sqlConnectionFactory.CreateConnection();
 

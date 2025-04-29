@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using SetlistManager.API.Data;
 using SetlistManager.API.Entities;
 using SetlistManager.API.Models;
+using SetlistManager.Common.Models;
 
 namespace SetlistManager.API.Controllers;
 
@@ -17,7 +18,7 @@ public partial class SongsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IEnumerable<Song>> GetSongCollection()
+    public async Task<IEnumerable<SongModel>> GetSongCollection()
     {
         return await _songsDB.GetSongsAsync();        
     }
@@ -39,7 +40,7 @@ public partial class SongsController : ControllerBase
     }
 
     [HttpGet("{SongId}")]
-    public async Task<ActionResult<Song>> GetSongById(int SongId)
+    public async Task<ActionResult<SongModel>> GetSongById(int SongId)
     {
         var song = await _songsDB.GetSongByIdAsync(SongId);
         if (song is null)
