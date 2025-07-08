@@ -10,5 +10,5 @@ public class Room : Base
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public int UpdatedBy { get; set; }
-    public List<Setlist> Setlists { get; set; }
+    public List<RoomsSetlists> RoomsSetlists { get; set; }
 }

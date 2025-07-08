@@ -23,7 +23,7 @@ public class APIDbContext(DbContextOptions<APIDbContext> options) : DbContext(op
         new SetlistConfig().Configure(modelBuilder.Entity<Setlist>());
         new SongConfig().Configure(modelBuilder.Entity<Song>());
         new UserConfig().Configure(modelBuilder.Entity<User>());
-        new RoomsSetlistsConfig().Configure(modelBuilder.Entity<RoomsSetlists>().HasNoKey());
-        new SongsSetlistsConfig().Configure(modelBuilder.Entity<SongsSetlists>().HasNoKey());
+        new RoomsSetlistsConfig().Configure(modelBuilder.Entity<RoomsSetlists>());
+        new SongsSetlistsConfig().Configure(modelBuilder.Entity<SongsSetlists>());
     }
 }

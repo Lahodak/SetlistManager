@@ -8,7 +8,6 @@ public class SetlistConfig : IEntityTypeConfiguration<Setlist>
 {
     public void Configure(EntityTypeBuilder<Setlist> builder)
     {
-        
-    }
 
+    }
 }

@@ -12,4 +12,5 @@ public class Setlist : Base
     public List<Room> Rooms { get; set; }
     public List<Song> Songs { get; set; }
     public List<SongsSetlists> SongsSetlists { get; set; }
+    public List<RoomsSetlists> RoomsSetlists { get; set; }
 }

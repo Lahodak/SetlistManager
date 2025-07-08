@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SetlistManager.API.Data;
 
@@ -11,9 +12,11 @@ using SetlistManager.API.Data;
 namespace SetlistManager.API.Migrations
 {
     [DbContext(typeof(APIDbContext))]
-    partial class APIDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250708183652_test1")]
+    partial class test1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -297,13 +300,13 @@ namespace SetlistManager.API.Migrations
                     b.HasOne("SetlistManager.API.Data.Entities.Room", "Room")
                         .WithMany("RoomsSetlists")
                         .HasForeignKey("RoomId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("SetlistManager.API.Data.Entities.Setlist", "Setlist")
                         .WithMany("RoomsSetlists")
                         .HasForeignKey("SetlistId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Room");
@@ -342,13 +345,13 @@ namespace SetlistManager.API.Migrations
                     b.HasOne("SetlistManager.API.Data.Entities.Setlist", "Setlist")
                         .WithMany("SongsSetlists")
                         .HasForeignKey("SetlistId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("SetlistManager.API.Data.Entities.Song", "Song")
                         .WithMany("SongsSetlists")
                         .HasForeignKey("SongId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Setlist");
