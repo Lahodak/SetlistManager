@@ -1,12 +1,11 @@
 ﻿using Microsoft.Data.SqlClient;
 
-namespace SetlistManager.API
+namespace SetlistManager.API;
+
+public class SqlConnectionFactory(string connectionString)
 {
-    public class SqlConnectionFactory(string connectionString)
+    public SqlConnection CreateConnection()
     {
-        public SqlConnection CreateConnection()
-        {
-            return new SqlConnection(connectionString);
-        }
+        return new SqlConnection(connectionString);
     }
 }

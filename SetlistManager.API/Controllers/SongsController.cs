@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using SetlistManager.API.Data;
-using SetlistManager.API.Entities;
+using SetlistManager.API;
 using SetlistManager.API.Models;
 using SetlistManager.Common.Models;
 

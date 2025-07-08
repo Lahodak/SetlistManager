@@ -1,4 +1,4 @@
-﻿namespace SetlistManager.Models;
+﻿                            namespace SetlistManager.Models;
 
 public class SongLyrics
 {
