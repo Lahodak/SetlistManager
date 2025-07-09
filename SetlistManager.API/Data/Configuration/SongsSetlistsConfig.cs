@@ -8,15 +8,14 @@ public class SongsSetlistsConfig : IEntityTypeConfiguration<SongsSetlists>
 {
     public void Configure(EntityTypeBuilder<SongsSetlists> builder)
     {
-        builder
-               .HasKey(ss => new { ss.SetlistId, ss.SongId});
-
         builder.HasOne(ss => ss.Song)
                .WithMany(s => s.SongsSetlists)
-               .HasForeignKey(ss => ss.SongId);
+               .HasForeignKey(ss => ss.SongId)
+               .OnDelete(DeleteBehavior.NoAction);
 
         builder.HasOne(ss => ss.Setlist)
                .WithMany(sl => sl.SongsSetlists)
-               .HasForeignKey(ss => ss.SetlistId);
+               .HasForeignKey(ss => ss.SetlistId)
+               .OnDelete(DeleteBehavior.NoAction);
     }
 }

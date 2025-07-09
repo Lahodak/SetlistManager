@@ -12,8 +12,8 @@ using SetlistManager.API.Data;
 namespace SetlistManager.API.Migrations
 {
     [DbContext(typeof(APIDbContext))]
-    [Migration("20250708183652_test1")]
-    partial class test1
+    [Migration("20250709211654_initialMigrationAB")]
+    partial class initialMigrationAB
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -124,15 +124,23 @@ namespace SetlistManager.API.Migrations
 
             modelBuilder.Entity("SetlistManager.API.Data.Entities.RoomsSetlists", b =>
                 {
-                    b.Property<int>("SetlistId")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("RoomId")
                         .HasColumnType("int");
 
-                    b.HasKey("SetlistId", "RoomId");
+                    b.Property<int>("SetlistId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
 
                     b.HasIndex("RoomId");
+
+                    b.HasIndex("SetlistId");
 
                     b.ToTable("RoomsSetlists");
                 });
@@ -229,13 +237,21 @@ namespace SetlistManager.API.Migrations
 
             modelBuilder.Entity("SetlistManager.API.Data.Entities.SongsSetlists", b =>
                 {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
                     b.Property<int>("SetlistId")
                         .HasColumnType("int");
 
                     b.Property<int>("SongId")
                         .HasColumnType("int");
 
-                    b.HasKey("SetlistId", "SongId");
+                    b.HasKey("Id");
+
+                    b.HasIndex("SetlistId");
 
                     b.HasIndex("SongId");
 
@@ -345,13 +361,13 @@ namespace SetlistManager.API.Migrations
                     b.HasOne("SetlistManager.API.Data.Entities.Setlist", "Setlist")
                         .WithMany("SongsSetlists")
                         .HasForeignKey("SetlistId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("SetlistManager.API.Data.Entities.Song", "Song")
                         .WithMany("SongsSetlists")
                         .HasForeignKey("SongId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Setlist");

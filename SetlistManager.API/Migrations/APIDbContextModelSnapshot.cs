@@ -121,15 +121,23 @@ namespace SetlistManager.API.Migrations
 
             modelBuilder.Entity("SetlistManager.API.Data.Entities.RoomsSetlists", b =>
                 {
-                    b.Property<int>("SetlistId")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("RoomId")
                         .HasColumnType("int");
 
-                    b.HasKey("SetlistId", "RoomId");
+                    b.Property<int>("SetlistId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
 
                     b.HasIndex("RoomId");
+
+                    b.HasIndex("SetlistId");
 
                     b.ToTable("RoomsSetlists");
                 });
@@ -226,13 +234,21 @@ namespace SetlistManager.API.Migrations
 
             modelBuilder.Entity("SetlistManager.API.Data.Entities.SongsSetlists", b =>
                 {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
                     b.Property<int>("SetlistId")
                         .HasColumnType("int");
 
                     b.Property<int>("SongId")
                         .HasColumnType("int");
 
-                    b.HasKey("SetlistId", "SongId");
+                    b.HasKey("Id");
+
+                    b.HasIndex("SetlistId");
 
                     b.HasIndex("SongId");
 
@@ -297,13 +313,13 @@ namespace SetlistManager.API.Migrations
                     b.HasOne("SetlistManager.API.Data.Entities.Room", "Room")
                         .WithMany("RoomsSetlists")
                         .HasForeignKey("RoomId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("SetlistManager.API.Data.Entities.Setlist", "Setlist")
                         .WithMany("RoomsSetlists")
                         .HasForeignKey("SetlistId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Room");
@@ -342,13 +358,13 @@ namespace SetlistManager.API.Migrations
                     b.HasOne("SetlistManager.API.Data.Entities.Setlist", "Setlist")
                         .WithMany("SongsSetlists")
                         .HasForeignKey("SetlistId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("SetlistManager.API.Data.Entities.Song", "Song")
                         .WithMany("SongsSetlists")
                         .HasForeignKey("SongId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Setlist");

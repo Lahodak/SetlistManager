@@ -6,14 +6,14 @@ namespace SetlistManager.API.Data;
 
 public class APIDbContext(DbContextOptions<APIDbContext> options) : DbContext(options)
 {
-    public required DbSet<Instrument> Instruments { get; set; }
-    public required DbSet<Language> Languages { get; set; }
-    public required DbSet<Room> Rooms { get; set; }
-    public required DbSet<Setlist> Setlists { get; set; }
-    public required DbSet<Song> Songs { get; set; }
-    public required DbSet<User> Users { get; set; }
-    public required DbSet<RoomsSetlists> RoomsSetlists { get; set; }
-    public required DbSet<SongsSetlists> SongsSetlists { get; set; }
+    public DbSet<Instrument> Instruments { get; set; }
+    public DbSet<Language> Languages { get; set; }
+    public DbSet<Room> Rooms { get; set; }
+    public DbSet<Setlist> Setlists { get; set; }
+    public DbSet<Song> Songs { get; set; }
+    public DbSet<User> Users { get; set; }
+    public DbSet<RoomsSetlists> RoomsSetlists { get; set; }
+    public DbSet<SongsSetlists> SongsSetlists { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
