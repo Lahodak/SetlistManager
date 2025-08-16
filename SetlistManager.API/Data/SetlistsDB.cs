@@ -1,71 +1,70 @@
 ﻿using Dapper;
+using Microsoft.EntityFrameworkCore;
 using SetlistManager.Common.Models;
+using SetlistManager.API.Data.Entities;
+using System.Runtime.Serialization;
+using Microsoft.AspNetCore.Mvc;
+
 namespace SetlistManager.API.Data;
-public class SetlistsDB(SqlConnectionFactory sqlConnectionFactory) : ISetlistsDB
+public class SetlistsDB: ISetlistsDB
 {
-    public async Task<SetlistModel?> GetSetlistById(int id)
+    private readonly APIDbContext _dbContext;
+    public SetlistsDB(APIDbContext dbContext)
     {
-        using var connection = sqlConnectionFactory.CreateConnection();
-
-        SetlistModel? setlistResult = null;
-
-        string sql = """
-                SELECT s.Id, s.Name,
-                   song.Id, song.Name, song.Artist, song.Language, song.TabsURL, song.YouTubeURL
-            FROM Setlists s
-            JOIN SongsSetlists sl ON sl.SetlistId = s.Id
-            JOIN Songs song ON song.Id = sl.SongId
-            WHERE s.Id = @Id;
-            """;
-
-        var x = await connection.QueryAsync<SetlistModel, SongModel, SetlistModel>(sql, 
-            (setlist, song) => 
-            {
-                if (setlistResult == null)
-                {
-                    setlistResult = setlist;
-                    setlistResult.Songs = [];
-                }
-
-                setlistResult.Songs.Add(song);
-                
-                return setlistResult; 
-            }, 
-            new { Id = id }, 
-            splitOn: "Id");        
-            
-        return setlistResult;
+        _dbContext = dbContext;
     }
 
-    public async Task<int> SaveSetlist(SetlistModel setlistModel)
+    public async Task<SetlistModel?> GetSetlistByIdAsync(int id)
     {
-        using var connection = sqlConnectionFactory.CreateConnection();
+        var setlist = await _dbContext.Setlists    
+            .Include(s => s.SongsSetlists)
+            .ThenInclude(s => s.Song)
+            .FirstOrDefaultAsync(x => x.Id == id);
 
-        string sql = """
-                INSERT INTO Setlists (Name)
-                OUTPUT INSERTED.Id
-                VALUES (@Name);
-            """;
+        if (setlist is null)
+            return null;
 
-        int id = await connection.QuerySingleAsync<int>(sql, new
+        return setlist.ToModel();
+    }
+
+    public async Task<SetlistModel?> GetSetlistByNameAsync(string name)
+    {
+        var setlist = await _dbContext.Setlists
+            .Include(s => s.SongsSetlists)
+            .ThenInclude(s => s.Song)
+            .FirstOrDefaultAsync(x => x.Name.Contains(name));
+
+        if (setlist is null)
+            return null;
+
+        return setlist.ToModel();
+    }
+
+    public async Task<int> SaveSetlistAsync(SetlistModel setlistModel)
+    {
+
+        var songs = new List<Song>();
+        foreach (var x in setlistModel.Songs)
         {
-                setlistModel.Name   
-        });               
-
-        List<object> songs = [];
-
-        foreach (var songsInSetlist in setlistModel.Songs)
-        {
-            songs.Add(new { SongId = songsInSetlist.Id, SetlistId = id });
+            var song = await _dbContext.Songs.FirstOrDefaultAsync(y => y.Id == x.Id);
+            if (song != null)
+                songs.Add(song);
         }
 
-        sql = """
-                INSERT INTO SongsSetlists (SongId, SetlistId)
-                VALUES
-                (@SongId, @SetlistId)
-            """;
+        var setlistToCreate = new Setlist
+        {
+            Name = setlistModel.Name,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
+            Creator = await _dbContext.Users.FirstAsync(x => x.Id == setlistModel.CreatorId),
+            CreatorId = setlistModel.CreatorId,
+            UpdatedBy = setlistModel.CreatorId,
+            SongsSetlists = songs.Select(s => new SongsSetlists { Song = s }).ToList()
+        };
 
-        await connection.ExecuteAsync(sql, songs);
-        return id;
+        await _dbContext.Setlists.AddAsync(setlistToCreate);
+        await _dbContext.SaveChangesAsync();
+
+        return setlistToCreate.Id;
     }
 }

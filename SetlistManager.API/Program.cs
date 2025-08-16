@@ -1,5 +1,6 @@
 using SetlistManager.API.Data;
 using SetlistManager.API;
+using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
@@ -31,6 +32,14 @@ builder.Services.AddCors(options =>
                .AllowAnyHeader();
     });
 });
+
+builder.Services.AddDbContext<APIDbContext>(options =>
+{
+    var connectionString = builder.Configuration.GetConnectionString("SetlistManagerDB")
+        ?? throw new InvalidOperationException("Connection string 'SetlistManagerDB' not found.");
+    options.UseSqlServer(connectionString);
+});
+
 
 var app = builder.Build();
 

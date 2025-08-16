@@ -1,45 +1,42 @@
 ﻿using Dapper;
-using SetlistManager.API.Entities;
+using Microsoft.EntityFrameworkCore;
+using SetlistManager.API;
+using SetlistManager.API.Data.Entities;
+using SetlistManager.Common.Models;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+
 namespace SetlistManager.API.Data;
 
-public class SongsDB(SqlConnectionFactory sqlConnectionFactory) : ISongsDB
+public class SongsDB : ISongsDB
 {
-    public async Task<IEnumerable<Song>> GetSongsAsync()
+    private readonly APIDbContext _dbContext;
+
+    public SongsDB(APIDbContext dbContext)
     {
-        using var connection = sqlConnectionFactory.CreateConnection();
-        const string sql = "SELECT * FROM Songs;";
-        return await connection.QueryAsync<Song>(sql);
+        _dbContext = dbContext;
+    }
+
+    public async Task<IEnumerable<Song>> GetSongsAsync()
+    {       
+        return await _dbContext.Songs.ToListAsync();
     }
 
     public async Task<Song?> GetSongByIdAsync(int id)
     {
-        using var connection = sqlConnectionFactory.CreateConnection();
-
-        const string sql = """
-                SELECT * FROM Songs
-                WHERE Id = @Id;
-            """;
-
-        return await connection.QuerySingleOrDefaultAsync<Song>(sql, new { Id = id });
+        return await _dbContext.Songs.FirstOrDefaultAsync(x => x.Id == id) ?? throw new Exception("Song wasn't found");
     }
 
-    public async Task UploadSongs(Song song)
+    public async Task<IEnumerable<Song?>> GetSongByNameAsync(string name)
     {
-        using var connection = sqlConnectionFactory.CreateConnection();
+        return await _dbContext.Songs
+            .Where(x => x.Name.Contains(name) || x.Artist.Contains(name))
+            .Take(10)
+            .ToListAsync();
+    }
 
-        const string sql = """
-                INSERT INTO Songs (Name, Artist, Language, TabsURL, YouTubeURL)
-                VALUES
-                (@Name, @Artist, @Language, @TabsURL, @YouTubeURL)
-            """;
-
-        await connection.ExecuteAsync(sql, new 
-        {
-            song.Name,
-            song.Artist,
-            song.Language,
-            song.TabsURL,
-            song.YouTubeURL
-        });
+    public async Task UploadSong(Song song)
+    {
+        await _dbContext.Songs.AddAsync(song);
+        await _dbContext.SaveChangesAsync();
     }
 }

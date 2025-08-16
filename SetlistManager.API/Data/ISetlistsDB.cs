@@ -2,6 +2,8 @@
 namespace SetlistManager.API.Data;
 public interface ISetlistsDB
 {
-    Task<SetlistModel?> GetSetlistById (int id);
-    Task<int> SaveSetlist (SetlistModel setlistModel);
+    Task<SetlistModel?> GetSetlistByIdAsync (int id);
+    Task<SetlistModel?> GetSetlistByNameAsync(string name);
+
+    Task<int> SaveSetlistAsync (SetlistModel setlistModel);
 }
