@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SetlistManager.API.Migrations
 {
     /// <inheritdoc />
-    public partial class initialMigration : Migration
+    public partial class ínit : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -39,19 +39,30 @@ namespace SetlistManager.API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "InstrumentUser",
+                name: "Songs",
                 columns: table => new
                 {
-                    InstrumentsId = table.Column<int>(type: "int", nullable: false),
-                    UsersId = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Artist = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    TabsURL = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AudioURL = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Tuning = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Key = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    BPM = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedBy = table.Column<int>(type: "int", nullable: false),
+                    LanguageId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_InstrumentUser", x => new { x.InstrumentsId, x.UsersId });
+                    table.PrimaryKey("PK_Songs", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_InstrumentUser_Instruments_InstrumentsId",
-                        column: x => x.InstrumentsId,
-                        principalTable: "Instruments",
+                        name: "FK_Songs_Languages_LanguageId",
+                        column: x => x.LanguageId,
+                        principalTable: "Languages",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -70,6 +81,7 @@ namespace SetlistManager.API.Migrations
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedBy = table.Column<int>(type: "int", nullable: false),
+                    CurrentSongId = table.Column<int>(type: "int", nullable: false),
                     SetlistId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
@@ -87,17 +99,23 @@ namespace SetlistManager.API.Migrations
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    RoomId = table.Column<int>(type: "int", nullable: false)
+                    RoomId = table.Column<int>(type: "int", nullable: true),
+                    InstrumentId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.Id);
                     table.ForeignKey(
+                        name: "FK_Users_Instruments_InstrumentId",
+                        column: x => x.InstrumentId,
+                        principalTable: "Instruments",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
                         name: "FK_Users_Rooms_RoomId",
                         column: x => x.RoomId,
                         principalTable: "Rooms",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -121,65 +139,6 @@ namespace SetlistManager.API.Migrations
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "RoomsSetlists",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    RoomId = table.Column<int>(type: "int", nullable: false),
-                    SetlistId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_RoomsSetlists", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_RoomsSetlists_Rooms_RoomId",
-                        column: x => x.RoomId,
-                        principalTable: "Rooms",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_RoomsSetlists_Setlists_SetlistId",
-                        column: x => x.SetlistId,
-                        principalTable: "Setlists",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Songs",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Artist = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    TabsURL = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    AudioURL = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Tuning = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Key = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    BPM = table.Column<int>(type: "int", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedBy = table.Column<int>(type: "int", nullable: false),
-                    LanguageId = table.Column<int>(type: "int", nullable: false),
-                    SetlistId = table.Column<int>(type: "int", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Songs", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Songs_Languages_LanguageId",
-                        column: x => x.LanguageId,
-                        principalTable: "Languages",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Songs_Setlists_SetlistId",
-                        column: x => x.SetlistId,
-                        principalTable: "Setlists",
-                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -207,23 +166,8 @@ namespace SetlistManager.API.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_InstrumentUser_UsersId",
-                table: "InstrumentUser",
-                column: "UsersId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Rooms_SetlistId",
                 table: "Rooms",
-                column: "SetlistId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_RoomsSetlists_RoomId",
-                table: "RoomsSetlists",
-                column: "RoomId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_RoomsSetlists_SetlistId",
-                table: "RoomsSetlists",
                 column: "SetlistId");
 
             migrationBuilder.CreateIndex(
@@ -237,11 +181,6 @@ namespace SetlistManager.API.Migrations
                 column: "LanguageId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Songs_SetlistId",
-                table: "Songs",
-                column: "SetlistId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_SongsSetlists_SetlistId",
                 table: "SongsSetlists",
                 column: "SetlistId");
@@ -252,44 +191,33 @@ namespace SetlistManager.API.Migrations
                 column: "SongId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Users_InstrumentId",
+                table: "Users",
+                column: "InstrumentId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Users_RoomId",
                 table: "Users",
                 column: "RoomId");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_InstrumentUser_Users_UsersId",
-                table: "InstrumentUser",
-                column: "UsersId",
-                principalTable: "Users",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Rooms_Setlists_SetlistId",
                 table: "Rooms",
                 column: "SetlistId",
                 principalTable: "Setlists",
-                principalColumn: "Id");
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Restrict);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_Setlists_Users_CreatorId",
-                table: "Setlists");
-
-            migrationBuilder.DropTable(
-                name: "InstrumentUser");
-
-            migrationBuilder.DropTable(
-                name: "RoomsSetlists");
+                name: "FK_Rooms_Setlists_SetlistId",
+                table: "Rooms");
 
             migrationBuilder.DropTable(
                 name: "SongsSetlists");
-
-            migrationBuilder.DropTable(
-                name: "Instruments");
 
             migrationBuilder.DropTable(
                 name: "Songs");
@@ -298,13 +226,16 @@ namespace SetlistManager.API.Migrations
                 name: "Languages");
 
             migrationBuilder.DropTable(
+                name: "Setlists");
+
+            migrationBuilder.DropTable(
                 name: "Users");
 
             migrationBuilder.DropTable(
-                name: "Rooms");
+                name: "Instruments");
 
             migrationBuilder.DropTable(
-                name: "Setlists");
+                name: "Rooms");
         }
     }
 }

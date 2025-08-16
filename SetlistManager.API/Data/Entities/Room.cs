@@ -13,7 +13,8 @@ public class Room : Base
     public DateTime UpdatedAt { get; set; }
     public int UpdatedBy { get; set; }
     public int CurrentSongId { get; set; }
-    public List<RoomsSetlists> RoomsSetlists { get; set; }
+    public int? SetlistId { get; set; }
+    public Setlist? Setlist { get; set; }
     public List<User> Users { get; set; }
 
     public RoomModel ToModel()
@@ -26,6 +27,7 @@ public class Room : Base
         }
 
         List<SetlistModel> setlistModels = [];
+
 
         RoomModel roomModel = new()
         {

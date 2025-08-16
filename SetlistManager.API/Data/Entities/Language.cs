@@ -4,4 +4,5 @@ public class Language : Base
 {
     public string Name { get; set; } = default!;
     public string Code { get; set; } = default!;
+    public List<Song>? Songs { get; set; }
 }

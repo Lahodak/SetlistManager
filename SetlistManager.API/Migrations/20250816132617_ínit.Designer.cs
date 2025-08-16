@@ -12,8 +12,8 @@ using SetlistManager.API.Data;
 namespace SetlistManager.API.Migrations
 {
     [DbContext(typeof(APIDbContext))]
-    [Migration("20250710171413_AddedNullableForUserRoomId")]
-    partial class AddedNullableForUserRoomId
+    [Migration("20250816132617_ínit")]
+    partial class ínit
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,21 +24,6 @@ namespace SetlistManager.API.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("InstrumentUser", b =>
-                {
-                    b.Property<int>("InstrumentsId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UsersId")
-                        .HasColumnType("int");
-
-                    b.HasKey("InstrumentsId", "UsersId");
-
-                    b.HasIndex("UsersId");
-
-                    b.ToTable("InstrumentUser");
-                });
 
             modelBuilder.Entity("SetlistManager.API.Data.Entities.Instrument", b =>
                 {
@@ -93,6 +78,9 @@ namespace SetlistManager.API.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("CurrentSongId")
+                        .HasColumnType("int");
+
                     b.Property<int>("HostId")
                         .HasColumnType("int");
 
@@ -120,29 +108,6 @@ namespace SetlistManager.API.Migrations
                     b.HasIndex("SetlistId");
 
                     b.ToTable("Rooms");
-                });
-
-            modelBuilder.Entity("SetlistManager.API.Data.Entities.RoomsSetlists", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("RoomId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SetlistId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RoomId");
-
-                    b.HasIndex("SetlistId");
-
-                    b.ToTable("RoomsSetlists");
                 });
 
             modelBuilder.Entity("SetlistManager.API.Data.Entities.Setlist", b =>
@@ -209,9 +174,6 @@ namespace SetlistManager.API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("SetlistId")
-                        .HasColumnType("int");
-
                     b.Property<string>("TabsURL")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -229,8 +191,6 @@ namespace SetlistManager.API.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("LanguageId");
-
-                    b.HasIndex("SetlistId");
 
                     b.ToTable("Songs");
                 });
@@ -269,6 +229,9 @@ namespace SetlistManager.API.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("InstrumentId")
+                        .HasColumnType("int");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
@@ -284,48 +247,19 @@ namespace SetlistManager.API.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("InstrumentId");
+
                     b.HasIndex("RoomId");
 
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("InstrumentUser", b =>
-                {
-                    b.HasOne("SetlistManager.API.Data.Entities.Instrument", null)
-                        .WithMany()
-                        .HasForeignKey("InstrumentsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SetlistManager.API.Data.Entities.User", null)
-                        .WithMany()
-                        .HasForeignKey("UsersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("SetlistManager.API.Data.Entities.Room", b =>
                 {
-                    b.HasOne("SetlistManager.API.Data.Entities.Setlist", null)
-                        .WithMany("Rooms")
-                        .HasForeignKey("SetlistId");
-                });
-
-            modelBuilder.Entity("SetlistManager.API.Data.Entities.RoomsSetlists", b =>
-                {
-                    b.HasOne("SetlistManager.API.Data.Entities.Room", "Room")
-                        .WithMany("RoomsSetlists")
-                        .HasForeignKey("RoomId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("SetlistManager.API.Data.Entities.Setlist", "Setlist")
-                        .WithMany("RoomsSetlists")
+                        .WithMany("Rooms")
                         .HasForeignKey("SetlistId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Room");
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Setlist");
                 });
@@ -344,14 +278,10 @@ namespace SetlistManager.API.Migrations
             modelBuilder.Entity("SetlistManager.API.Data.Entities.Song", b =>
                 {
                     b.HasOne("SetlistManager.API.Data.Entities.Language", "Language")
-                        .WithMany()
+                        .WithMany("Songs")
                         .HasForeignKey("LanguageId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("SetlistManager.API.Data.Entities.Setlist", null)
-                        .WithMany("Songs")
-                        .HasForeignKey("SetlistId");
 
                     b.Navigation("Language");
                 });
@@ -377,25 +307,39 @@ namespace SetlistManager.API.Migrations
 
             modelBuilder.Entity("SetlistManager.API.Data.Entities.User", b =>
                 {
+                    b.HasOne("SetlistManager.API.Data.Entities.Instrument", "Instruments")
+                        .WithMany("Users")
+                        .HasForeignKey("InstrumentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("SetlistManager.API.Data.Entities.Room", "Room")
-                        .WithMany()
+                        .WithMany("Users")
                         .HasForeignKey("RoomId");
+
+                    b.Navigation("Instruments");
 
                     b.Navigation("Room");
                 });
 
+            modelBuilder.Entity("SetlistManager.API.Data.Entities.Instrument", b =>
+                {
+                    b.Navigation("Users");
+                });
+
+            modelBuilder.Entity("SetlistManager.API.Data.Entities.Language", b =>
+                {
+                    b.Navigation("Songs");
+                });
+
             modelBuilder.Entity("SetlistManager.API.Data.Entities.Room", b =>
                 {
-                    b.Navigation("RoomsSetlists");
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("SetlistManager.API.Data.Entities.Setlist", b =>
                 {
                     b.Navigation("Rooms");
-
-                    b.Navigation("RoomsSetlists");
-
-                    b.Navigation("Songs");
 
                     b.Navigation("SongsSetlists");
                 });

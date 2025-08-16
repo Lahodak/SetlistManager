@@ -12,7 +12,6 @@ public class APIDbContext(DbContextOptions<APIDbContext> options) : DbContext(op
     public DbSet<Setlist> Setlists { get; set; }
     public DbSet<Song> Songs { get; set; }
     public DbSet<User> Users { get; set; }
-    public DbSet<RoomsSetlists> RoomsSetlists { get; set; }
     public DbSet<SongsSetlists> SongsSetlists { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -23,7 +22,6 @@ public class APIDbContext(DbContextOptions<APIDbContext> options) : DbContext(op
         new SetlistConfig().Configure(modelBuilder.Entity<Setlist>());
         new SongConfig().Configure(modelBuilder.Entity<Song>());
         new UserConfig().Configure(modelBuilder.Entity<User>());
-        new RoomsSetlistsConfig().Configure(modelBuilder.Entity<RoomsSetlists>());
         new SongsSetlistsConfig().Configure(modelBuilder.Entity<SongsSetlists>());
     }
 }
