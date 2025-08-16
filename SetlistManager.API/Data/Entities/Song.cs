@@ -23,6 +23,7 @@ public class Song : Base
     {
         SongModel model = new()
         {
+            Id = Id,
             Name = Name,
             Artist = Artist,
             TabsURL = TabsURL,

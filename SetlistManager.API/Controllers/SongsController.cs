@@ -22,16 +22,15 @@ public partial class SongsController : ControllerBase
     [HttpGet]
     public async Task<IEnumerable<SongModel>> GetSongCollection()
     {
-        SongModel model;
-        var x = await _songsDB.GetSongsAsync();
-        List<SongModel> modelList = [];
+        var songs = await _songsDB.GetSongsAsync();
+        List<SongModel> songModels = [];
 
-        foreach (var y in x)
+        foreach (var song in songs)
         {
-            model = y.ToModel();
-            modelList.Add(model);
+            songModels.Add(song.ToModel());
+
         }
-        return modelList;        
+        return songModels;        
     }
 
     [HttpPost]
@@ -56,14 +55,32 @@ public partial class SongsController : ControllerBase
         }
     }
 
-    [HttpGet("{SongId}")]
-    public async Task<ActionResult<SongModel>> GetSongById(int SongId)
+    [HttpGet("{songId:int}")]
+    public async Task<ActionResult<SongModel>> GetSongById(int songId)
     {
-        var song = await _songsDB.GetSongByIdAsync(SongId);
+        var song = await _songsDB.GetSongByIdAsync(songId);
         if (song is null)
         {
             return NotFound();
         }
         return song.ToModel();
+    }
+
+    [HttpGet("{songName}")]
+    public async Task<ActionResult<IEnumerable<SongModel>>> GetSongByName(string songName)
+    {
+        var songs = await _songsDB.GetSongByNameAsync(songName);
+        if(songs is null)
+        {
+            return NotFound();
+        }
+        List<SongModel> songModels = [];
+
+        foreach (var song in songs)
+        {
+            songModels.Add(song!.ToModel());
+        }
+
+        return songModels;
     }
 }

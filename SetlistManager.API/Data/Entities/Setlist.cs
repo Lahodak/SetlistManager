@@ -17,8 +17,15 @@ public class Setlist : Base
 
     public SetlistModel ToModel()
     {
-        
-
-        return new();
+        return new SetlistModel
+        {
+            Id = Id,
+            Name = Name,
+            CreatorId = CreatorId,
+            Songs = SongsSetlists?
+                        .Select(ss => ss.Song.ToModel())
+                        .ToList()
+                        ?? new List<SongModel>()
+        };
     }
 }

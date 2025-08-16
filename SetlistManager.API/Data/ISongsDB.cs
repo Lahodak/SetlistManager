@@ -8,4 +8,5 @@ public interface ISongsDB
     Task<Song?> GetSongByIdAsync(int SongId);
     Task<IEnumerable<Song>> GetSongsAsync();
     Task UploadSong(Song Song);
+    Task<IEnumerable<Song?>> GetSongByNameAsync(string Name);
 }

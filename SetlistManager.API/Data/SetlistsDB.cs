@@ -1,6 +1,10 @@
 ﻿using Dapper;
 using Microsoft.EntityFrameworkCore;
 using SetlistManager.Common.Models;
+using SetlistManager.API.Data.Entities;
+using System.Runtime.Serialization;
+using Microsoft.AspNetCore.Mvc;
+
 namespace SetlistManager.API.Data;
 public class SetlistsDB: ISetlistsDB
 {
@@ -10,19 +14,57 @@ public class SetlistsDB: ISetlistsDB
         _dbContext = dbContext;
     }
 
-    public async Task<SetlistModel?> GetSetlistById(int id)
+    public async Task<SetlistModel?> GetSetlistByIdAsync(int id)
     {
-        var setlist = _dbContext.Setlists    
+        var setlist = await _dbContext.Setlists    
             .Include(s => s.SongsSetlists)
             .ThenInclude(s => s.Song)
             .FirstOrDefaultAsync(x => x.Id == id);
 
-        return new();
+        if (setlist is null)
+            return null;
+
+        return setlist.ToModel();
     }
 
-    public async Task<int> SaveSetlist(SetlistModel setlistModel)
+    public async Task<SetlistModel?> GetSetlistByNameAsync(string name)
     {
-        
-        return 0;
+        var setlist = await _dbContext.Setlists
+            .Include(s => s.SongsSetlists)
+            .ThenInclude(s => s.Song)
+            .FirstOrDefaultAsync(x => x.Name.Contains(name));
+
+        if (setlist is null)
+            return null;
+
+        return setlist.ToModel();
+    }
+
+    public async Task<int> SaveSetlistAsync(SetlistModel setlistModel)
+    {
+
+        var songs = new List<Song>();
+        foreach (var x in setlistModel.Songs)
+        {
+            var song = await _dbContext.Songs.FirstOrDefaultAsync(y => y.Id == x.Id);
+            if (song != null)
+                songs.Add(song);
+        }
+
+        var setlistToCreate = new Setlist
+        {
+            Name = setlistModel.Name,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
+            Creator = await _dbContext.Users.FirstAsync(x => x.Id == setlistModel.CreatorId),
+            CreatorId = setlistModel.CreatorId,
+            UpdatedBy = setlistModel.CreatorId,
+            SongsSetlists = songs.Select(s => new SongsSetlists { Song = s }).ToList()
+        };
+
+        await _dbContext.Setlists.AddAsync(setlistToCreate);
+        await _dbContext.SaveChangesAsync();
+
+        return setlistToCreate.Id;
     }
 }

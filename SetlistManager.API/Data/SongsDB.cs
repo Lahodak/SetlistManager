@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using SetlistManager.API;
 using SetlistManager.API.Data.Entities;
 using SetlistManager.Common.Models;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace SetlistManager.API.Data;
 
@@ -23,6 +24,14 @@ public class SongsDB : ISongsDB
     public async Task<Song?> GetSongByIdAsync(int id)
     {
         return await _dbContext.Songs.FirstOrDefaultAsync(x => x.Id == id) ?? throw new Exception("Song wasn't found");
+    }
+
+    public async Task<IEnumerable<Song?>> GetSongByNameAsync(string name)
+    {
+        return await _dbContext.Songs
+            .Where(x => x.Name.Contains(name) || x.Artist.Contains(name))
+            .Take(10)
+            .ToListAsync();
     }
 
     public async Task UploadSong(Song song)

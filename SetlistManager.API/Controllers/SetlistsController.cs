@@ -17,9 +17,30 @@ public class SetlistsController : ControllerBase
 
     [HttpPost]
     public async Task<int> UploadSetlistToDb(SetlistModel setlistModel)
-        => await _setlistsDB.SaveSetlist(setlistModel);
+        => await _setlistsDB.SaveSetlistAsync(setlistModel);
 
-    [HttpGet("{id}")]
-    public async Task<SetlistModel> GetSetlistById(int id) 
-        => await _setlistsDB.GetSetlistById(id) ?? new SetlistModel();
+    [HttpGet("{id:int}")]
+    public async Task<ActionResult<SetlistModel>> GetSetlistById(int id)
+    {
+        var result = await _setlistsDB.GetSetlistByIdAsync(id) ?? new SetlistModel();
+
+
+        if (result == null)
+            return NotFound();
+
+        return result;
+    }
+
+    [HttpGet("{setlistName}")]
+    public async Task<ActionResult<SetlistModel>> GetSetlistByName(string setlistName)
+    {
+        var result = await _setlistsDB.GetSetlistByNameAsync(setlistName) ?? new SetlistModel();
+
+
+        if (result == null)
+            return NotFound();
+
+        return result;
+
+    }
 }

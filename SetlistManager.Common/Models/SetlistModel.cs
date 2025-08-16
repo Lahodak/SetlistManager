@@ -3,5 +3,6 @@ public class SetlistModel
 {
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
+    public int CreatorId { get; set; }  
     public List<SongModel> Songs { get; set; } = [];
 }
