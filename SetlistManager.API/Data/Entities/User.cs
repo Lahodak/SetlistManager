@@ -1,4 +1,6 @@
 ﻿
+using SetlistManager.Common.Models;
+
 namespace SetlistManager.API.Data.Entities;
 
 public class User : Base
@@ -10,4 +12,18 @@ public class User : Base
     public int? RoomId { get; set; }
     public Room? Room { get; set; }
     public List<Instrument> Instruments { get; set; }
+
+    public UserModel ToModel()
+    {
+        return new();
+    }
+    public User ToEntity(UserModel model)
+    {
+        Username = model.Username;
+        IsActive = true;
+        RoomId = null;
+        Room = null;
+        
+        return new();
+    }
 }

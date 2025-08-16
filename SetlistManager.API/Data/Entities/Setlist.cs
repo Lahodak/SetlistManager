@@ -1,4 +1,6 @@
-﻿namespace SetlistManager.API.Data.Entities;
+﻿using SetlistManager.Common.Models;
+
+namespace SetlistManager.API.Data.Entities;
 
 public class Setlist : Base
 {
@@ -10,7 +12,13 @@ public class Setlist : Base
     public required User Creator { get; set; }
     public int UpdatedBy { get; set; }
     public List<Room> Rooms { get; set; }
-    public List<Song> Songs { get; set; }
     public List<SongsSetlists> SongsSetlists { get; set; }
     public List<RoomsSetlists> RoomsSetlists { get; set; }
+
+    public SetlistModel ToModel()
+    {
+        
+
+        return new();
+    }
 }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SetlistManager.API.Data;
 
@@ -11,9 +12,11 @@ using SetlistManager.API.Data;
 namespace SetlistManager.API.Migrations
 {
     [DbContext(typeof(APIDbContext))]
-    partial class APIDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250710181954_NamingChange")]
+    partial class NamingChange
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -209,6 +212,9 @@ namespace SetlistManager.API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("SetlistId")
+                        .HasColumnType("int");
+
                     b.Property<string>("TabsURL")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -226,6 +232,8 @@ namespace SetlistManager.API.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("LanguageId");
+
+                    b.HasIndex("SetlistId");
 
                     b.ToTable("Songs");
                 });
@@ -344,6 +352,10 @@ namespace SetlistManager.API.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("SetlistManager.API.Data.Entities.Setlist", null)
+                        .WithMany("Songs")
+                        .HasForeignKey("SetlistId");
+
                     b.Navigation("Language");
                 });
 
@@ -369,7 +381,7 @@ namespace SetlistManager.API.Migrations
             modelBuilder.Entity("SetlistManager.API.Data.Entities.User", b =>
                 {
                     b.HasOne("SetlistManager.API.Data.Entities.Room", "Room")
-                        .WithMany("Users")
+                        .WithMany()
                         .HasForeignKey("RoomId");
 
                     b.Navigation("Room");
@@ -378,8 +390,6 @@ namespace SetlistManager.API.Migrations
             modelBuilder.Entity("SetlistManager.API.Data.Entities.Room", b =>
                 {
                     b.Navigation("RoomsSetlists");
-
-                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("SetlistManager.API.Data.Entities.Setlist", b =>
@@ -387,6 +397,8 @@ namespace SetlistManager.API.Migrations
                     b.Navigation("Rooms");
 
                     b.Navigation("RoomsSetlists");
+
+                    b.Navigation("Songs");
 
                     b.Navigation("SongsSetlists");
                 });

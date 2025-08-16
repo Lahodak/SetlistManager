@@ -1,10 +1,11 @@
 ﻿using SetlistManager.API;
+using SetlistManager.API.Data.Entities;
 using SetlistManager.Common.Models;
 
 namespace SetlistManager.API.Data;
 public interface ISongsDB
 {
-    Task<SongModel?> GetSongByIdAsync(int SongId);
-    Task<IEnumerable<SongModel>> GetSongsAsync();
-    Task UploadSongs(SongModel Song);
+    Task<Song?> GetSongByIdAsync(int SongId);
+    Task<IEnumerable<Song>> GetSongsAsync();
+    Task UploadSong(Song Song);
 }

@@ -1,4 +1,6 @@
-﻿namespace SetlistManager.API.Data.Entities;
+﻿using SetlistManager.Common.Models;
+
+namespace SetlistManager.API.Data.Entities;
 
 public class Song : Base
 {
@@ -16,4 +18,24 @@ public class Song : Base
     public int LanguageId { get; set; }
     public Language Language { get; set; }
     public List<SongsSetlists> SongsSetlists { get; set; } 
+   
+    public SongModel ToModel()
+    {
+        SongModel model = new()
+        {
+            Name = Name,
+            Artist = Artist,
+            TabsURL = TabsURL,
+            AudioURL = AudioURL,
+            LanguageId = LanguageId,
+            Key = Key,
+            Tuning = Tuning,
+            BPM = BPM,
+            CreatedAt = CreatedAt,
+            UpdatedAt = UpdatedAt,
+            UpdatedBy = UpdatedBy
+        };
+
+        return model;
+    }
 }
