@@ -1,6 +1,6 @@
 ﻿@inherits LayoutComponentBase
 
-<MudThemeProvider />
+<MudThemeProvider @bind-IsDarkMode="@_isDarkMode" Theme="_theme" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
@@ -10,6 +10,10 @@
         <MudIconButton Icon="@Icons.Material.Filled.Home" Color="Color.Inherit" OnClick="NavigateHome"/>
         <MudSpacer />
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+        <MudIconButton Icon="@(_isDarkMode? Icons.Material.Filled.DarkMode : Icons.Material.Filled.WbSunny)"
+                       OnClick="ToggleTheme"
+                       Color="Color.Inherit"
+                       Class="ma-4" />
     </MudAppBar>
 
     <MudDrawer @bind-Open="_drawerOpen" Elevation="2">
@@ -29,7 +33,7 @@
 @code {
     [Inject]
     private NavigationManager Navigation { get; set; }
-    
+
     private bool _drawerOpen = true;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -50,4 +54,13 @@
     {
         Navigation.NavigateTo("/");  // This will navigate to the homepage
     }
+
+    private void ToggleTheme()
+    {
+        _isDarkMode = !_isDarkMode;
+    }
+
+    private MudTheme _theme = new();
+    private bool _isDarkMode;
+    
 }
