@@ -33,16 +33,28 @@
 @code {
     [Inject]
     private NavigationManager Navigation { get; set; }
+    [Inject]
+    public required Blazored.LocalStorage.ILocalStorageService LocalStorage { get; set; }
 
     private bool _drawerOpen = true;
+    private const string _localStorageKey = "ToggleDarkMode";
+    private MudTheme _theme = new();
+    private bool _isDarkMode;
+
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            // Ensure MudDrawer gets the correct bounding client rect after render
             await InvokeAsync(StateHasChanged);
         }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var localData = await LocalStorage.GetItemAsync<bool>(_localStorageKey);
+            
+        _isDarkMode = localData;
     }
 
     void DrawerToggle()
@@ -52,15 +64,14 @@
 
     void NavigateHome()
     {
-        Navigation.NavigateTo("/");  // This will navigate to the homepage
+        Navigation.NavigateTo("/");
     }
 
-    private void ToggleTheme()
+    private async Task ToggleTheme()
     {
         _isDarkMode = !_isDarkMode;
+        await LocalStorage.SetItemAsync(_localStorageKey, _isDarkMode);
     }
 
-    private MudTheme _theme = new();
-    private bool _isDarkMode;
     
 }

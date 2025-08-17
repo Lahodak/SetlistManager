@@ -27,6 +27,10 @@
   <ItemGroup>
     <ProjectReference Include="..\SetlistManager.Common\SetlistManager.Common.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\css\" />
+  </ItemGroup>
 	
 
 </Project>

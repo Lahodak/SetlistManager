@@ -1,33 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>SetlistManager</title>
+        <base href="/" />
+        <link rel="icon" type="image/png" href="favicon.png" />
+        <link href="SetlistManager.styles.css" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
+        <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
 
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SetlistManager</title>
-    <base href="/" />
-    <link rel="icon" type="image/png" href="favicon.png" />
-    <link href="SetlistManager.styles.css" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
-    <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
-</head>
+        <style>
+            .loader {
+                border: 8px solid #f3f3f3;
+                border-top: 8px solid #3f51b5;
+                border-radius: 50%;
+                width: 60px;
+                height: 60px;
+                animation: spin 1s linear infinite;
+                margin: 20% auto 12px;
+            }
 
-<body>
-    <div id="app">
-        <svg class="loading-progress">
-            <circle r="40%" cx="50%" cy="50%" />
-            <circle r="40%" cx="50%" cy="50%" />
-        </svg>
-        <div class="loading-progress-text"></div>
-    </div>
+            @keyframes spin {
+                to {
+                    transform: rotate(360deg);
+                }
+            }
 
-    <div id="blazor-error-ui">
-        An unhandled error has occurred.
-        <a href="" class="reload">Reload</a>
-        <a class="dismiss">🗙</a>
-    </div>
-    <script src="_framework/blazor.webassembly.js"></script>
-    <script src="_content/MudBlazor/MudBlazor.min.js"></script>
-</body>
+            .welcome {
+                font-family: 'Roboto', sans-serif;
+                font-weight: 500;
+                font-size: 2rem;
+                color: #3f51b5;
+                text-align: center;
+                opacity: 0;
+                animation: fadeIn 600ms ease-out forwards;
+            }
 
+            @keyframes fadeIn {
+                to {
+                    opacity: 1;
+                }
+            }
+        </style>
+    </head>
+
+    <body>
+        <div id="app">
+            <div class="loader"></div>
+            <h1 class="welcome">Welcome to Setlist Manager</h1>
+        </div>
+
+        <div id="blazor-error-ui">
+            An unhandled error has occurred.
+            <a href="" class="reload">Reload</a>
+            <a class="dismiss">🗙</a>
+        </div>
+        <script src="_framework/blazor.webassembly.js"></script>
+        <script src="_content/MudBlazor/MudBlazor.min.js"></script>
+    </body>
 </html>
