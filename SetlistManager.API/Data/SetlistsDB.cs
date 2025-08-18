@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace SetlistManager.API.Data;
-public class SetlistsDB: ISetlistsDB
+public class SetlistsDB : ISetlistsDB
 {
     private readonly APIDbContext _dbContext;
     public SetlistsDB(APIDbContext dbContext)
@@ -16,7 +16,7 @@ public class SetlistsDB: ISetlistsDB
 
     public async Task<SetlistModel?> GetSetlistByIdAsync(int id)
     {
-        var setlist = await _dbContext.Setlists    
+        var setlist = await _dbContext.Setlists
             .Include(s => s.SongsSetlists)
             .ThenInclude(s => s.Song)
             .FirstOrDefaultAsync(x => x.Id == id);
@@ -66,5 +66,22 @@ public class SetlistsDB: ISetlistsDB
         await _dbContext.SaveChangesAsync();
 
         return setlistToCreate.Id;
+    }
+
+    public async Task<IEnumerable<SetlistModel>> GetAllSetlistsOfUserAsync(int userId)
+    {
+        var userSetlists = await _dbContext.Setlists
+            .Include(s => s.SongsSetlists)
+            .ThenInclude(s => s.Song)
+            .Where(x => x.Id == userId)
+            .ToListAsync();
+
+        List<SetlistModel> result = [];
+        foreach(var s in userSetlists)
+        {
+            result.Add(s.ToModel());
+        }
+
+        return result;
     }
 }

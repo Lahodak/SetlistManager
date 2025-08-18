@@ -31,6 +31,18 @@ public class SetlistsController : ControllerBase
         return result;
     }
 
+    [HttpGet("/usersetlists/{UserId:int}")]
+    public async Task<ActionResult<List<SetlistModel>>> GetUserSetlistsByUserId(int id)
+    {
+        var result = await _setlistsDB.GetAllSetlistsOfUserAsync(id);
+
+
+        if (result == null)
+            return NotFound();
+
+        return null;
+    }
+
     [HttpGet("{setlistName}")]
     public async Task<ActionResult<SetlistModel>> GetSetlistByName(string setlistName)
     {

@@ -1,0 +1,89 @@
+﻿@page "/SongsPortal"
+
+<PageTitle>Songs Portal</PageTitle>
+
+<MudContainer Class="mt-5">
+    <MudPaper Class="pa-4 mt-3" Elevation="2">
+        <MudText Typo="Typo.h3" Class="ml-2">All Songs</MudText>
+
+        <MudTable ServerData="ServerReload" Hover="true" @ref="table">
+            <ToolBarContent>
+                <MudText Typo="Typo.h6">Song Library</MudText>
+                <MudSpacer />
+                <MudTextField T="string" ValueChanged="@(s => OnSearch(s))" Placeholder="Search songs"
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.Search"
+                              IconSize="Size.Medium" Class="mt-0">
+                </MudTextField>
+            </ToolBarContent>
+
+            <HeaderContent>
+                <MudTh><MudTableSortLabel SortLabel="title_field" T="SongModel">Title</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortLabel="artist_field" T="SongModel">Artist</MudTableSortLabel></MudTh>
+            </HeaderContent>
+
+            <RowTemplate>
+                <MudTd DataLabel="Title">
+                    <MudLink Href="@($"songdetail/{context.Id}")"
+                             Style="color: black; text-decoration: none; font-size: medium;">
+                        @context.Name
+                    </MudLink>
+                </MudTd>
+                <MudTd DataLabel="Artist">@context.Artist</MudTd>
+            </RowTemplate>
+
+            <NoRecordsContent>
+                <MudText>No matching records found</MudText>
+            </NoRecordsContent>
+
+            <LoadingContent>
+                <MudText>Loading...</MudText>
+            </LoadingContent>
+
+            <PagerContent>
+                <MudTablePager />
+            </PagerContent>
+        </MudTable>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    private MudTable<SongModel> table;
+    private string? searchString;
+
+    [Inject]
+    public required SongsDB SongsDatabase { get; set; }    
+
+    private async Task<TableData<SongModel>> ServerReload(TableState state, CancellationToken token)
+    {
+        var allSongs = await SongsDatabase.GetSongCollection();
+        await Task.Delay(300, token);
+
+        var filtered = allSongs.Where(song =>
+            string.IsNullOrWhiteSpace(searchString)
+            || song.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase)
+            || song.Artist.Contains(searchString, StringComparison.OrdinalIgnoreCase)
+        );
+
+        filtered = state.SortLabel switch
+        {
+            "title_field" => filtered.OrderByDirection(state.SortDirection, s => s.Name),
+            "artist_field" => filtered.OrderByDirection(state.SortDirection, s => s.Artist),
+            _ => filtered
+        };
+
+        var items = filtered.Skip(state.Page * state.PageSize).Take(state.PageSize).ToArray();
+
+        return new TableData<SongModel>
+        {
+            TotalItems = filtered.Count(),
+            Items = items
+        };
+    }
+
+    private void OnSearch(string text)
+    {
+        searchString = text;
+        table.ReloadServerData();
+    }
+}
