@@ -43,16 +43,26 @@ public class SetlistsController : ControllerBase
         return null;
     }
 
-    [HttpGet("{setlistName}")]
-    public async Task<ActionResult<SetlistModel>> GetSetlistByName(string setlistName)
+    [HttpGet]
+    public async Task<ActionResult<List<SetlistModel>>> GetAllSetlists()
     {
-        var result = await _setlistsDB.GetSetlistByNameAsync(setlistName) ?? new SetlistModel();
+        var result = await _setlistsDB.GetAllSetlistsAsync();
 
 
         if (result == null)
             return NotFound();
 
-        return result;
+        return result.ToList();
+    }
 
+    [HttpGet("{setlistName}")]
+    public async Task<ActionResult<SetlistModel>> GetSetlistByName(string setlistName)
+    {
+        var result = await _setlistsDB.GetSetlistByNameAsync(setlistName) ?? new SetlistModel();
+
+        if (result == null)
+            return NotFound();
+
+        return result;
     }
 }

@@ -36,6 +36,15 @@
                 opacity: 0;
                 animation: fadeIn 600ms ease-out forwards;
             }
+            .ready {
+                font-family: 'Roboto', sans-serif;
+                font-weight: 500;
+                font-size: 1rem;
+                color: #3f51b5;
+                text-align: center;
+                opacity: 0;
+                animation: fadeIn 1600ms ease-out forwards;
+            }
 
             @keyframes fadeIn {
                 to {
@@ -49,6 +58,7 @@
         <div id="app">
             <div class="loader"></div>
             <h1 class="welcome">Welcome to Setlist Manager</h1>
+            <h3 class="ready">Ready to rock?</h3>
         </div>
 
         <div id="blazor-error-ui">

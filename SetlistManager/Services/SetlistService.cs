@@ -58,4 +58,30 @@ public class SetlistService
             return null!;
         }
     }
+
+    public async Task<List<SetlistModel>> GetAllSetlists()
+    {
+        using var httpClient = _httpClientFactory.CreateClient();
+        string str = _pathSetlists;
+        HttpResponseMessage message = await httpClient.GetAsync(str);
+
+        if (!message.IsSuccessStatusCode)
+        {
+            Console.WriteLine(message.ToString());
+            return null!;
+        }
+
+        string json = await message.Content.ReadAsStringAsync();
+
+        try
+        {
+            return JsonConvert.DeserializeObject<List<SetlistModel>>(json)!;
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            return null!;
+        }
+    }
 }

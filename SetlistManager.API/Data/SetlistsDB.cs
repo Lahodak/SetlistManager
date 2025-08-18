@@ -84,4 +84,20 @@ public class SetlistsDB : ISetlistsDB
 
         return result;
     }
+
+    public async Task<IEnumerable<SetlistModel>> GetAllSetlistsAsync()
+    {
+        var setlists = await _dbContext.Setlists
+            .Include(s => s.SongsSetlists)
+            .ThenInclude(s => s.Song)
+            .ToListAsync();
+
+        List<SetlistModel> result = [];
+        foreach (var s in setlists)
+        {
+            result.Add(s.ToModel());
+        }
+
+        return result;
+    }
 }

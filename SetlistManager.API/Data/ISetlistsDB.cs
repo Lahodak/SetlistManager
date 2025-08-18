@@ -7,4 +7,6 @@ public interface ISetlistsDB
     Task<SetlistModel?> GetSetlistByNameAsync(string name);
     Task<IEnumerable<SetlistModel>> GetAllSetlistsOfUserAsync(int userId);
     Task<int> SaveSetlistAsync (SetlistModel setlistModel);
+    Task<IEnumerable<SetlistModel>> GetAllSetlistsAsync();
+
 }

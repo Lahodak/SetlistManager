@@ -1,15 +1,205 @@
 ﻿@page "/SetlistsPortal"
 
-<PageTitle> Setlist Portal </PageTitle>
+<PageTitle>Setlist Portal</PageTitle>
 
 <MudContainer Class="mt-5">
     <MudPaper Class="pa-4 mt-3" Elevation="2">
-        <MudText Typo="Typo.h3" Class="ml-2"></MudText>
+        <MudText Typo="Typo.h3" Class="ml-2">Your Setlists</MudText>
 
-        
+        <MudTable ServerData="ServerReload" Hover="true" @ref="table">
+            <ToolBarContent>
+                <MudText Typo="Typo.h6">Setlist Library</MudText>
+                <MudSpacer />
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => CreateNewSetlist()">
+                    + New Setlist
+                </MudButton>
+                <MudTextField T="string" ValueChanged="@(s => OnSearch(s))" Placeholder="Search setlists"
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.Search"
+                              IconSize="Size.Medium" Class="mt-0 ml-3">
+                </MudTextField>
+            </ToolBarContent>
+
+            <HeaderContent>
+                <MudTh><MudTableSortLabel SortLabel="name_field" T="SetlistModel">Name</MudTableSortLabel></MudTh>
+                <MudTh>Songs</MudTh>
+                <MudTh>Actions</MudTh>
+            </HeaderContent>
+
+            <RowTemplate>
+                <MudTd DataLabel="Name">
+                    <MudLink Href="@($"setlistdetail/{context.Id}")"
+                             Style="color: black; text-decoration: none; font-size: medium;">
+                        @context.Name
+                    </MudLink>
+                </MudTd>
+                <MudTd DataLabel="Songs">@context.Songs.Count</MudTd>
+                <MudTd>
+                    <MudButton Variant="Variant.Outlined" Size="Size.Small" Color="Color.Primary"
+                               OnClick="() => EditSetlist(context.Id)">
+                        ✏️ Edit
+                    </MudButton>
+                    <MudButton Variant="Variant.Outlined" Size="Size.Small" Color="Color.Error" Class="ml-2"
+                               OnClick="() => DeleteSetlist(context.Id)">
+                        🗑️ Delete
+                    </MudButton>
+                </MudTd>
+            </RowTemplate>
+
+            <NoRecordsContent>
+                <MudText>No setlists found</MudText>
+            </NoRecordsContent>
+
+            <LoadingContent>
+                <MudText>Loading...</MudText>
+            </LoadingContent>
+
+            <PagerContent>
+                <MudTablePager />
+            </PagerContent>
+        </MudTable>
     </MudPaper>
+
+    @if (_showSetlistEditor)
+    {
+        <MudPaper Class="pa-4 mt-4" Elevation="2">
+            <MudText Typo="Typo.h5">@(_editingSetlist?.Id == 0 ? "Create New Setlist" : $"Edit: {_editingSetlist?.Name}")</MudText>
+            <MudTextField @bind-Value="_editingSetlist.Name" Label="Setlist Name" Class="mt-3" />
+
+            <MudList T="SongModel">
+                @foreach (var song in _editingSetlist.Songs)
+                {
+                    <MudListItem>
+                        <MudText>@song.Name (@song.Artist)</MudText>
+                        <MudSpacer />
+                        <MudIconButton Icon="@Icons.Material.Filled.ArrowUpward" OnClick="() => MoveSongUp(song)" />
+                        <MudIconButton Icon="@Icons.Material.Filled.ArrowDownward" OnClick="() => MoveSongDown(song)" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => RemoveSong(song)" />
+                    </MudListItem>
+                }
+            </MudList>
+
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="AddSong">
+                + Add Song
+            </MudButton>
+
+            <MudDivider Class="my-3" />
+
+            <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="SaveSetlist">
+                💾 Save Setlist
+            </MudButton>
+            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="CancelEdit" Class="ml-2">
+                Cancel
+            </MudButton>
+        </MudPaper>
+    }
 </MudContainer>
-@code
-{
-    
+
+@code {
+    private MudTable<SetlistModel> table;
+    private string? searchString;
+
+    private bool _showSetlistEditor = false;
+    private SetlistModel _editingSetlist = new();
+
+    [Inject]
+    public required SetlistService SetlistService { get; set; }
+
+    private async Task<TableData<SetlistModel>> ServerReload(TableState state, CancellationToken token)
+    {
+        var allSetlists = await SetlistService.GetAllSetlists();
+        await Task.Delay(300, token);
+
+        var filtered = allSetlists.Where(setlist =>
+            string.IsNullOrWhiteSpace(searchString)
+            || setlist.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase)
+        );
+
+        filtered = state.SortLabel switch
+        {
+            "name_field" => filtered.OrderByDirection(state.SortDirection, s => s.Name),
+            _ => filtered
+        };
+
+        var items = filtered.Skip(state.Page * state.PageSize).Take(state.PageSize).ToArray();
+
+        return new TableData<SetlistModel>
+        {
+            TotalItems = filtered.Count(),
+            Items = items
+        };
+    }
+
+    private void OnSearch(string text)
+    {
+        searchString = text;
+        table.ReloadServerData();
+    }
+
+    private void CreateNewSetlist()
+    {
+        _editingSetlist = new SetlistModel { Id = 0, Name = "", Songs = new List<SongModel>() };
+        _showSetlistEditor = true;
+    }
+
+    private async Task EditSetlist(int id)
+    {
+        _editingSetlist = await SetlistService.GetSetlistById(id);
+        _showSetlistEditor = true;
+    }
+
+    private void CancelEdit()
+    {
+        _showSetlistEditor = false;
+        _editingSetlist = new();
+    }
+
+    private async Task SaveSetlist()
+    {
+        if (_editingSetlist.Id == 0)
+        {
+            _editingSetlist.Id = await SetlistService.PushSetlist(_editingSetlist);
+        }
+        else
+        {
+            //await SetlistService.UpdateSetlist(_editingSetlist);
+        }
+
+        _showSetlistEditor = false;
+        table.ReloadServerData();
+    }
+
+    private async Task DeleteSetlist(int id)
+    {
+        //await SetlistService.DeleteSetlist(id);
+        table.ReloadServerData();
+    }
+
+    private void AddSong()
+    {
+        // TODO: open dialog to pick song(s) from library
+    }
+
+    private void RemoveSong(SongModel song)
+    {
+        _editingSetlist.Songs.Remove(song);
+    }
+
+    private void MoveSongUp(SongModel song)
+    {
+        int index = _editingSetlist.Songs.IndexOf(song);
+        if (index > 0)
+        {
+            (_editingSetlist.Songs[index - 1], _editingSetlist.Songs[index]) = (_editingSetlist.Songs[index], _editingSetlist.Songs[index - 1]);
+        }
+    }
+
+    private void MoveSongDown(SongModel song)
+    {
+        int index = _editingSetlist.Songs.IndexOf(song);
+        if (index < _editingSetlist.Songs.Count - 1)
+        {
+            (_editingSetlist.Songs[index + 1], _editingSetlist.Songs[index]) = (_editingSetlist.Songs[index], _editingSetlist.Songs[index + 1]);
+        }
+    }
 }
