@@ -31,7 +31,7 @@ public class SetlistsController : ControllerBase
         return result;
     }
 
-    [HttpGet("/usersetlists/{UserId:int}")]
+    [HttpGet("usersetlists/{UserId:int}")]
     public async Task<ActionResult<List<SetlistModel>>> GetUserSetlistsByUserId(int id)
     {
         var result = await _setlistsDB.GetAllSetlistsOfUserAsync(id);
@@ -43,7 +43,7 @@ public class SetlistsController : ControllerBase
         return null;
     }
 
-    [HttpGet("/GetAllSetlists")]
+    [HttpGet("getallsetlists")]
     public async Task<ActionResult<List<SetlistModel>>> GetAllSetlists()
     {
         var result = await _setlistsDB.GetAllSetlistsAsync();

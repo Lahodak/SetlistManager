@@ -19,7 +19,7 @@ public partial class SongsController : ControllerBase
         _songsDB = songsDB;
     }
 
-    [HttpGet]
+    [HttpGet("getallsongs")]
     public async Task<IEnumerable<SongModel>> GetSongCollection()
     {
         var songs = await _songsDB.GetSongsAsync();
@@ -33,7 +33,7 @@ public partial class SongsController : ControllerBase
         return songModels;        
     }
 
-    [HttpPost]
+    [HttpPost("addsongs")]
     public async Task AddSongs(AddSongsModel addSongs)
     {
         foreach(var song in addSongs.Songs)
@@ -55,7 +55,7 @@ public partial class SongsController : ControllerBase
         }
     }
 
-    [HttpGet("{songId:int}")]
+    [HttpGet("songbyid/{songId:int}")]
     public async Task<ActionResult<SongModel>> GetSongById(int songId)
     {
         var song = await _songsDB.GetSongByIdAsync(songId);
@@ -66,7 +66,7 @@ public partial class SongsController : ControllerBase
         return song.ToModel();
     }
 
-    [HttpGet("{songName}")]
+    [HttpGet("songbyname/{songName}")]
     public async Task<ActionResult<IEnumerable<SongModel>>> GetSongByName(string songName)
     {
         var songs = await _songsDB.GetSongByNameAsync(songName);

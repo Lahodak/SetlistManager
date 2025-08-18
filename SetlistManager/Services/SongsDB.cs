@@ -29,6 +29,6 @@ public class SongsDB
     {
         if (_songsDB.Count != 0)
             return;
-        _songsDB.AddRange(await _songService.FetchSongsFromAPI() ?? []);
+        _songsDB.AddRange(await _songService.GetAllSongsAsync() ?? []);
     }
 }

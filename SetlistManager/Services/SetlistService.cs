@@ -6,10 +6,10 @@ namespace SetlistManager.Services;
 
 public class SetlistService
 {
-    private const string _pathSetlists = "https://localhost:7143/api/Setlists";
-    private const string _pathGetAllSetlists = "https://localhost:7143/GetAllSetlists";
+    private const string _setlistsEndpointPath = "https://localhost:7143/api/Setlists";
+    private const string _getAllSetlistsSuffix = "/getallsetlists";
+    private const string _setlistByIdSuffix = "/";
 
-    private const string _pathSetlistById = "https://localhost:7143/api/Setlists/";    
     private readonly IHttpClientFactory _httpClientFactory;
     public SetlistService(IHttpClientFactory httpClientFactory)
     {
@@ -21,7 +21,7 @@ public class SetlistService
         using var httpClient = _httpClientFactory.CreateClient();
         var s  = JsonConvert.SerializeObject(setlistModel);
         var content = new StringContent(s, Encoding.UTF8, "application/json");
-        HttpResponseMessage message = await httpClient.PostAsync(_pathSetlists, content);
+        HttpResponseMessage message = await httpClient.PostAsync(_setlistsEndpointPath, content);
         if (!message.IsSuccessStatusCode)
         {
             Console.WriteLine(message.ToString());
@@ -41,7 +41,7 @@ public class SetlistService
     public async Task<SetlistModel>? GetSetlistById(int id)
     {
         using var httpClient = _httpClientFactory.CreateClient();
-        string str = _pathSetlistById + id.ToString();
+        string str = _setlistsEndpointPath + _setlistByIdSuffix + id.ToString();
         HttpResponseMessage message = await httpClient.GetAsync(str);
         if (!message.IsSuccessStatusCode)
         {
@@ -64,7 +64,7 @@ public class SetlistService
     public async Task<List<SetlistModel>> GetAllSetlists()
     {
         using var httpClient = _httpClientFactory.CreateClient();
-        string str = _pathGetAllSetlists;
+        string str = _setlistsEndpointPath + _getAllSetlistsSuffix;
         HttpResponseMessage message = await httpClient.GetAsync(str);
 
         if (!message.IsSuccessStatusCode)
