@@ -43,7 +43,7 @@ public class SetlistsController : ControllerBase
         return null;
     }
 
-    [HttpGet]
+    [HttpGet("/GetAllSetlists")]
     public async Task<ActionResult<List<SetlistModel>>> GetAllSetlists()
     {
         var result = await _setlistsDB.GetAllSetlistsAsync();

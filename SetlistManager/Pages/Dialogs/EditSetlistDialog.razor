@@ -1,0 +1,84 @@
+﻿@using MudBlazor
+@namespace SetlistManager.Pages.Dialogs
+@inject IDialogService DialogService
+
+<MudDialog>
+    <DialogContent>
+        <MudTextField @bind-Value="_setlist.Name" Label="Setlist Name" Class="mt-3" />
+
+        <MudList T="SongModel">
+            @foreach (var song in _setlist.Songs)
+            {
+                <MudListItem>
+                    <MudText>@song.Name (@song.Artist)</MudText>
+                    <MudSpacer />
+                    <MudIconButton Icon="@Icons.Material.Filled.ArrowUpward" OnClick="() => MoveSongUp(song)" />
+                    <MudIconButton Icon="@Icons.Material.Filled.ArrowDownward" OnClick="() => MoveSongDown(song)" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => RemoveSong(song)" />
+                </MudListItem>
+            }
+        </MudList>
+
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="AddSong" Class="mt-2">
+            + Add Song
+        </MudButton>
+    </DialogContent>
+
+    <DialogActions>
+        <MudIconButton Icon="@Icons.Material.Filled.SaveAs" Variant="Variant.Filled" Color="Color.Success" OnClick="Save">Save</MudIconButton>
+        <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="Cancel" Class="ml-2">
+            Cancel
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter]
+    public SetlistModel Setlist { get; set; } = new();
+
+    private SetlistModel _setlist = new();
+
+    protected override void OnInitialized()
+    {
+        _setlist = new SetlistModel
+        {
+            Id = Setlist.Id,
+            Name = Setlist.Name,
+            Songs = new List<SongModel>(Setlist.Songs)
+        };
+    }
+
+    private void Save()
+    {
+        MudDialog.Close(DialogResult.Ok(_setlist));
+    }
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+
+    private void AddSong()
+    {
+        
+    }
+
+    private void RemoveSong(SongModel song) => _setlist.Songs.Remove(song);
+
+    private void MoveSongUp(SongModel song)
+    {
+        int index = _setlist.Songs.IndexOf(song);
+        if (index > 0)
+            (_setlist.Songs[index - 1], _setlist.Songs[index]) = (_setlist.Songs[index], _setlist.Songs[index - 1]);
+    }
+
+    private void MoveSongDown(SongModel song)
+    {
+        int index = _setlist.Songs.IndexOf(song);
+        if (index < _setlist.Songs.Count - 1)
+            (_setlist.Songs[index + 1], _setlist.Songs[index]) = (_setlist.Songs[index], _setlist.Songs[index + 1]);
+    }
+}

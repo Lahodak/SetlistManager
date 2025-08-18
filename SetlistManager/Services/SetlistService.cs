@@ -7,6 +7,8 @@ namespace SetlistManager.Services;
 public class SetlistService
 {
     private const string _pathSetlists = "https://localhost:7143/api/Setlists";
+    private const string _pathGetAllSetlists = "https://localhost:7143/GetAllSetlists";
+
     private const string _pathSetlistById = "https://localhost:7143/api/Setlists/";    
     private readonly IHttpClientFactory _httpClientFactory;
     public SetlistService(IHttpClientFactory httpClientFactory)
@@ -62,7 +64,7 @@ public class SetlistService
     public async Task<List<SetlistModel>> GetAllSetlists()
     {
         using var httpClient = _httpClientFactory.CreateClient();
-        string str = _pathSetlists;
+        string str = _pathGetAllSetlists;
         HttpResponseMessage message = await httpClient.GetAsync(str);
 
         if (!message.IsSuccessStatusCode)
