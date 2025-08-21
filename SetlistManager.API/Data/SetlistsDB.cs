@@ -100,4 +100,16 @@ public class SetlistsDB : ISetlistsDB
 
         return result;
     }
+
+    public async Task<bool> EditSetlistAsync(SetlistModel setlistModel)
+    {
+        var setlistToBeEdited = await _dbContext.Setlists.FirstAsync(x => x.Id == setlistModel.Id);
+        setlistToBeEdited.Name = setlistModel.Name;
+        setlistToBeEdited.UpdatedAt = DateTime.Now;
+        setlistToBeEdited.UpdatedBy = setlistModel.CreatorId;
+        
+        await _dbContext.SaveChangesAsync();
+
+        return true;
+    }
 }

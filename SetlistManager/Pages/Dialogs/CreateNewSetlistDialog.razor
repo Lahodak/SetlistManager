@@ -6,12 +6,23 @@
 <MudDialog>
     <DialogContent>
         <MudText Typo="Typo.h5">Generate New Setlist</MudText>
+        <MudPaper Class="pa-4 mt-3" Elevation="2">
+            <MudGrid>
+                <MudItem>
+                    <MudNumericField @bind-Value="_length"
+                                     Min="1" Max="@_maxNumber"
+                                     Label="Number of Songs"
+                                     Variant="Variant.Outlined"
+                                     /> 
+                </MudItem>
+                <MudItem>
+                    <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Generate" >
+                        Generate
+                    </MudButton>
 
-        <MudNumericField @bind-Value="_length"
-                         Min="1" Max="@_maxNumber"
-                         Label="Number of Songs"
-                         Variant="Variant.Outlined"
-                         Style="width:200px; margin-top:16px;" />
+                </MudItem>
+            </MudGrid>
+        </MudPaper>
 
         @if (_showSaveSetlistUI)
         {
@@ -20,12 +31,6 @@
                 <MudGrid>
                     <MudItem>
                         <MudTextField @bind-Value="_toBeSavedSetlistName" Dense="true" Style="width: 200px; height: 50px;" />
-                    </MudItem>
-                    <MudItem>
-                        <MudButton Class="pa-2 ml-2" Variant="Variant.Outlined" Style="height: 50px;"
-                                   OnClick="() => Save()">
-                            Save Setlist
-                        </MudButton>
                     </MudItem>
                 </MudGrid>
             </MudPaper>
@@ -54,11 +59,15 @@
     </DialogContent>
 
     <DialogActions>
-        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Generate">
-            Generate
-        </MudButton>
 
-        
+        @if (_showSaveSetlistUI)
+        {
+            <MudButton Class="pa-2 ml-2" Variant="Variant.Outlined" Style="height: 50px;"
+                       OnClick="() => Save()">
+                Save Setlist
+            </MudButton>
+        }
+
         <MudButton Variant="Variant.Text" OnClick="Cancel">Cancel</MudButton>
     </DialogActions>
 </MudDialog>

@@ -1,6 +1,8 @@
-using SetlistManager.API.Data;
-using SetlistManager.API;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using SetlistManager.API;
+using SetlistManager.API.Data;
+using SetlistManager.API.Data.Entities;
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
@@ -33,6 +35,8 @@ builder.Services.AddCors(options =>
     });
 });
 
+
+
 builder.Services.AddDbContext<APIDbContext>(options =>
 {
     var connectionString = builder.Configuration.GetConnectionString("SetlistManagerDB")
@@ -40,10 +44,13 @@ builder.Services.AddDbContext<APIDbContext>(options =>
     options.UseSqlServer(connectionString);
 });
 
+builder.Services.AddIdentity<User, Role>(options =>
+                                       options.SignIn.RequireConfirmedAccount = true)
+    .AddEntityFrameworkStores<APIDbContext>();
+
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

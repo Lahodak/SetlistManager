@@ -9,6 +9,7 @@ public class SetlistService
     private const string _setlistsEndpointPath = "https://localhost:7143/api/Setlists";
     private const string _getAllSetlistsSuffix = "/getallsetlists";
     private const string _setlistByIdSuffix = "/";
+    private const string _editSetlistSuffix = "/editsetlist";
 
     private readonly IHttpClientFactory _httpClientFactory;
     public SetlistService(IHttpClientFactory httpClientFactory)
@@ -84,6 +85,19 @@ public class SetlistService
         {
             Console.WriteLine(ex.Message);
             return null!;
+        }
+    }
+
+    public async Task EditSetlist(SetlistModel setlistModel)
+    {
+        using var httpClient = _httpClientFactory.CreateClient();
+        var s = JsonConvert.SerializeObject(setlistModel);
+        var content = new StringContent(s, Encoding.UTF8, "application/json");
+        HttpResponseMessage message = await httpClient.PostAsync(_setlistsEndpointPath + _editSetlistSuffix, content);
+
+        if (!message.IsSuccessStatusCode)
+        {
+            Console.WriteLine(message.ToString());
         }
     }
 }

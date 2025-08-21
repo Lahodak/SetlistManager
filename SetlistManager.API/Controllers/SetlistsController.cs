@@ -65,4 +65,16 @@ public class SetlistsController : ControllerBase
 
         return result;
     }
+
+    [HttpPost("editsetlist")]
+    public async Task<ActionResult> EditSetlist(SetlistModel setlist)
+    {
+        if(setlist == null)
+            return BadRequest();
+
+        if (!await _setlistsDB.EditSetlistAsync(setlist)) 
+            return BadRequest();
+
+        return Ok();    
+    }
 }

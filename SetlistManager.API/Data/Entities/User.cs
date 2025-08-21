@@ -1,11 +1,11 @@
 ﻿
+using Microsoft.AspNetCore.Identity;
 using SetlistManager.Common.Models;
 
 namespace SetlistManager.API.Data.Entities;
 
-public class User : Base
+public class User : IdentityUser<int> 
 {
-    public string Username { get; set; }
     public bool IsActive { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
@@ -13,6 +13,7 @@ public class User : Base
     public Room? Room { get; set; }
     public int InstrumentId { get; set; }
     public Instrument Instruments { get; set; }
+    
 
     public UserModel ToModel()
     {
@@ -20,7 +21,7 @@ public class User : Base
     }
     public User ToEntity(UserModel model)
     {
-        Username = model.Username;
+        UserName = model.Username;
         IsActive = true;
         RoomId = null;
         Room = null;

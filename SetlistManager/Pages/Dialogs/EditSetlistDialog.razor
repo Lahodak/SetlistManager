@@ -39,6 +39,9 @@
     [Parameter]
     public SetlistModel Setlist { get; set; } = new();
 
+    [Inject]
+    public SetlistService SetlistService { get; set; }
+
     private SetlistModel _setlist = new();
 
     protected override void OnInitialized()
@@ -51,8 +54,12 @@
         };
     }
 
-    private void Save()
+    private async Task Save()
     {
+        if (Setlist is null)
+            return;
+
+        await SetlistService.EditSetlist(_setlist);
         MudDialog.Close(DialogResult.Ok(_setlist));
     }
 
