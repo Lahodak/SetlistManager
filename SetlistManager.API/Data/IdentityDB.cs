@@ -1,7 +1,6 @@
-﻿namespace SetlistManager.API.Data
-{
-    public class IdentityDB
-    {
+﻿namespace SetlistManager.API.Data;
 
-    }
+public class IdentityDB
+{
+
 }

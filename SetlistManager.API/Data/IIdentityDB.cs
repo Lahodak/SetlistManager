@@ -1,9 +1,8 @@
-﻿namespace SetlistManager.API.Data
+﻿namespace SetlistManager.API.Data;
+
+public interface IIdentityDB
 {
-    public interface IIdentityDB
-    {
-        Task TryLogInAsync();
-        Task TryLogOutAsync();
-        Task TryRegisterUserAsync();
-    }
+    Task TryLogInAsync();
+    Task TryLogOutAsync();
+    Task TryRegisterUserAsync();
 }
