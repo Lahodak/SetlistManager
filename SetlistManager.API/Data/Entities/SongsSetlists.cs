@@ -7,4 +7,6 @@ public class SongsSetlists : Base
 
     public int SetlistId { get; set; }
     public Setlist Setlist { get; set; } = default!;
+
+    public int Order { get; set; }
 }
