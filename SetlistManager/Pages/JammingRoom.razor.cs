@@ -32,7 +32,6 @@ public partial class JammingRoom
         Room = new()
         {
             Setlist = await SetlistService.GetSetlistById(5),
-            Users = UserService.GetUsers(),
             Id = 1,
             Name = "JammingrRoom",
             CurrentSong = 0

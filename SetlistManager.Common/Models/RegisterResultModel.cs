@@ -1,4 +1,4 @@
-﻿namespace SetlistManager.API.Models;
+﻿namespace SetlistManager.Common.Models;
 
 public class RegisterResultModel
 {

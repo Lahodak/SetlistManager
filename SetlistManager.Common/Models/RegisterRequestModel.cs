@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace SetlistManager.API.Models;
+namespace SetlistManager.Common.Models;
 
 public class RegisterRequestModel
 {

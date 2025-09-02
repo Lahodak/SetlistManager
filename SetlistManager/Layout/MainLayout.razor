@@ -54,7 +54,14 @@
     }
 
     protected override async Task OnInitializedAsync()
-    {
+    {        
+        var token = await LocalStorage.GetItemAsStringAsync("authToken");
+        if (string.IsNullOrWhiteSpace(token) && !Navigation.Uri.Contains("/login"))
+        {
+
+            Navigation.NavigateTo("/login", true);
+            return;
+        }
         var localData = await LocalStorage.GetItemAsync<bool>(_localStorageKey);
             
         _isDarkMode = localData;
@@ -74,8 +81,5 @@
     {
         _isDarkMode = !_isDarkMode;
         await LocalStorage.SetItemAsync(_localStorageKey, _isDarkMode);
-    }
-
-    
-    
+    }    
 }

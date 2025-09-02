@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
 using SetlistManager.API.Data.Entities;
-using SetlistManager.API.Models;
 using SetlistManager.API.Services;
+using SetlistManager.Common.Models;
 
 namespace SetlistManager.API.Controllers;
 
