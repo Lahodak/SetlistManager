@@ -1,5 +1,41 @@
-﻿<h3>RegisterDIalog</h3>
+﻿@page "/register"
+@using MudBlazor;
+@using SetlistManager.Common.Models;
+
+<MudForm>
+    <MudPaper Class="mx-auto mt-12 p-6" Style="max-width:400px;" Elevation="8">
+        <MudText Typo="Typo.h5" Class="mb-4">Register</MudText>
+
+        <MudTextField @bind-Value="registerRequestModel.Email" Label="Email" Variant="Variant.Outlined" FullWidth="true" />
+        <MudTextField @bind-Value="registerRequestModel.UserName" Label="UserName" Variant="Variant.Outlined" FullWidth="true" />
+        <MudTextField @bind-Value="registerRequestModel.Password" Label="Password" Variant="Variant.Outlined" InputType="InputType.Password" FullWidth="true" Class="mt-3" />
+        <MudTextField @bind-Value="confirmPassword" Label="Confirm Password" Variant="Variant.Outlined" InputType="InputType.Password" FullWidth="true" Class="mt-3" />
+
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="LoginUser" FullWidth="true" Class="mt-4">
+            Register
+        </MudButton>
+    </MudPaper>
+</MudForm>
 
 @code {
+    [Inject]
+    private UserService UserService { get; set; }
+    [Inject]
+	private NavigationManager Navigation { get; set; }
 
+
+    private RegisterRequestModel registerRequestModel = new();
+    private string confirmPassword = string.Empty;
+
+    private async Task LoginUser()
+    {
+        if (registerRequestModel.Password == string.Empty 
+            || registerRequestModel.Email == string.Empty 
+            || registerRequestModel.UserName == string.Empty
+            || confirmPassword != registerRequestModel.Password)
+            return;
+
+        await UserService.RegisterAsync(registerRequestModel);
+		Navigation.NavigateTo("/login");
+    }
 }
