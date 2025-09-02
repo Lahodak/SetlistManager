@@ -11,8 +11,8 @@ public class User : IdentityUser<int>
     public DateTime UpdatedAt { get; set; }
     public int? RoomId { get; set; }
     public Room? Room { get; set; }
-    public int InstrumentId { get; set; }
-    public Instrument Instruments { get; set; }
+    public int? InstrumentId { get; set; }
+    public Instrument? Instruments { get; set; }
     
 
     public UserModel ToModel()

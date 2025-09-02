@@ -14,6 +14,9 @@
                        OnClick="ToggleTheme"
                        Color="Color.Inherit"
                        Class="ma-4" />
+        <MudButton Color="Color.Inherit" Variant="Variant.Outlined">
+            Log In
+        </MudButton>
     </MudAppBar>
 
     <MudDrawer @bind-Open="_drawerOpen" Elevation="2">
@@ -73,5 +76,6 @@
         await LocalStorage.SetItemAsync(_localStorageKey, _isDarkMode);
     }
 
+    
     
 }

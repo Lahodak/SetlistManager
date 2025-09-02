@@ -21,7 +21,7 @@ IConfiguration configuration = builder.Configuration;
 builder.Services.AddSingleton(serviceProvider =>
 {
     var configuration = serviceProvider.GetRequiredService<IConfiguration>();
-    var connectionString = configuration.GetConnectionString("SongDB")
+    var connectionString = configuration.GetConnectionString("SetlistManagerDB")
         ?? throw new ApplicationException("The connection string is null");
     return new SqlConnectionFactory(connectionString);
 });
