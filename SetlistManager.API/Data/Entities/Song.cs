@@ -14,7 +14,6 @@ public class Song : Base
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public int UpdatedBy { get; set; }
-
     public int LanguageId { get; set; }
     public Language Language { get; set; }
     public List<SongsSetlists> SongsSetlists { get; set; } 
@@ -34,7 +33,7 @@ public class Song : Base
             BPM = BPM,
             CreatedAt = CreatedAt,
             UpdatedAt = UpdatedAt,
-            UpdatedBy = UpdatedBy
+            UpdatedBy = UpdatedBy,
         };
 
         return model;

@@ -9,5 +9,4 @@ public interface ISetlistsDB
     Task<int> SaveSetlistAsync (SetlistModel setlistModel);
     Task<IEnumerable<SetlistModel>> GetAllSetlistsAsync();
     Task<bool> EditSetlistAsync(SetlistModel setlistModel);
-
 }

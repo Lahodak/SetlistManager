@@ -14,4 +14,5 @@ public class SongModel
     public DateTime UpdatedAt { get; set; }
     public int UpdatedBy { get; set; }
     public int LanguageId { get; set; }
+    public int Order { get; set; }
 }

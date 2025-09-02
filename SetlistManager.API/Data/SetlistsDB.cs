@@ -95,6 +95,7 @@ public class SetlistsDB : ISetlistsDB
         List<SetlistModel> result = [];
         foreach (var s in setlists)
         {
+            
             result.Add(s.ToModel());
         }
 
@@ -103,11 +104,20 @@ public class SetlistsDB : ISetlistsDB
 
     public async Task<bool> EditSetlistAsync(SetlistModel setlistModel)
     {
-        var setlistToBeEdited = await _dbContext.Setlists.FirstAsync(x => x.Id == setlistModel.Id);
+        var setlistToBeEdited = await _dbContext.Setlists
+            .Include(x => x.SongsSetlists)
+            .ThenInclude(x => x.Song)
+            .FirstAsync(x => x.Id == setlistModel.Id);
+
         setlistToBeEdited.Name = setlistModel.Name;
         setlistToBeEdited.UpdatedAt = DateTime.Now;
         setlistToBeEdited.UpdatedBy = setlistModel.CreatorId;
         
+        foreach(var song in setlistToBeEdited.SongsSetlists)
+        {
+            song.Order = setlistModel.Songs.First(x => x.Id == song.SongId).Order;
+        }
+
         await _dbContext.SaveChangesAsync();
 
         return true;

@@ -23,7 +23,9 @@ public class Setlist : Base
             Songs = SongsSetlists?
                         .Select(ss => ss.Song.ToModel())
                         .ToList()
-                        ?? new List<SongModel>()
+                        ?? []            
         };
+
+        
     }
 }

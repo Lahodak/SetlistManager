@@ -1,9 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using SetlistManager.API.Data;
-using SetlistManager.API;
 using SetlistManager.API.Models;
-using SetlistManager.API.Data.Entities;
-
 using SetlistManager.Common.Models;
 
 namespace SetlistManager.API.Controllers;
@@ -33,7 +30,7 @@ public partial class SongsController : ControllerBase
         return songModels;        
     }
 
-    [HttpPost("addsongs")]
+    [HttpPost("addsongcollection")]
     public async Task AddSongs(AddSongsModel addSongs)
     {
         foreach(var song in addSongs.Songs)
@@ -55,14 +52,35 @@ public partial class SongsController : ControllerBase
         }
     }
 
+    [HttpPost("addsong")]
+    public async Task AddSong(SongModel addSong)
+    {
+        await _songsDB.UploadSong(new()
+        {
+            Name = addSong.Name,
+            Artist = addSong.Artist,
+            TabsURL = addSong.TabsURL,
+            AudioURL = addSong.AudioURL,
+            LanguageId = addSong.LanguageId,
+            Key = addSong.Key,
+            Tuning = addSong.Tuning,
+            BPM = addSong.BPM,
+            CreatedAt = addSong.CreatedAt,
+            UpdatedAt = addSong.UpdatedAt,
+            UpdatedBy = addSong.UpdatedBy
+        });
+    }
+
     [HttpGet("songbyid/{songId:int}")]
     public async Task<ActionResult<SongModel>> GetSongById(int songId)
     {
         var song = await _songsDB.GetSongByIdAsync(songId);
+
         if (song is null)
         {
             return NotFound();
         }
+
         return song.ToModel();
     }
 
@@ -70,10 +88,12 @@ public partial class SongsController : ControllerBase
     public async Task<ActionResult<IEnumerable<SongModel>>> GetSongByName(string songName)
     {
         var songs = await _songsDB.GetSongByNameAsync(songName);
+
         if(songs is null)
         {
             return NotFound();
         }
+
         List<SongModel> songModels = [];
 
         foreach (var song in songs)

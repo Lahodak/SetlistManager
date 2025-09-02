@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using SetlistManager.Common.Models;
+using System.Text;
 
 namespace SetlistManager.Services;
 
@@ -9,10 +10,11 @@ public class SongService
     private const string _getAllSongsSuffix = "/getallsongs";
     private const string _getSongbyIdSuffix = "/songbyid/";
     private const string _getSongbyNameSuffix = "/songbyname/";
-    private const string _uploadSongsSuffix = "/addsongs";
-
+    private const string _uploadSongCollectionSuffix = "/addsongcollection";
+    private const string _uploadSongSuffix = "/addsong";
 
     private readonly IHttpClientFactory _httpClientFactory;
+
     public SongService(IHttpClientFactory factory)
     {
         _httpClientFactory = factory;
@@ -63,9 +65,51 @@ public class SongService
         return JsonConvert.DeserializeObject<SongModel>(json);
     }
 
-    public async Task UploadSongsAsync(List<SongModel> songs)
+    public async Task UploadSongsAsync(List<SongModel> songsToUpload)
     {
         using var httpClient = _httpClientFactory.CreateClient();
+        string songs;
+        
+        try
+        {
+            songs = JsonConvert.SerializeObject(songsToUpload);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            return;
+        }
 
+        var content = new StringContent(songs, Encoding.UTF8, "application/json");
+        HttpResponseMessage message = await httpClient.PostAsync(_songsEndpointPath + _uploadSongCollectionSuffix, content);
+
+        if (!message.IsSuccessStatusCode)
+        {
+            Console.WriteLine(message.ToString());
+        }
+    }
+
+    public async Task UploadSongAsync(SongModel songToUpload)
+    {
+        using var httpClient = _httpClientFactory.CreateClient();
+        string song;
+        
+        try
+        {
+            song = JsonConvert.SerializeObject(songToUpload);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            return;
+        }
+        
+        var content = new StringContent(song, Encoding.UTF8, "application/json");
+        HttpResponseMessage message = await httpClient.PostAsync(_songsEndpointPath + _uploadSongSuffix, content);
+        
+        if (!message.IsSuccessStatusCode)
+        {
+            Console.WriteLine(message.ToString());
+        }
     }
 }

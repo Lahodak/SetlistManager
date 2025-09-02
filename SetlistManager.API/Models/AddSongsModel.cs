@@ -4,5 +4,5 @@ namespace SetlistManager.API.Models;
 
 public class AddSongsModel
 {
-    public List<SongUpdateModel> Songs { get; set; } = [];
+    public List<SongModel> Songs { get; set; } = [];
 }

@@ -20,8 +20,19 @@ public class SetlistService
     public async Task<int> PushSetlist(SetlistModel setlistModel)
     {
         using var httpClient = _httpClientFactory.CreateClient();
-        var s  = JsonConvert.SerializeObject(setlistModel);
-        var content = new StringContent(s, Encoding.UTF8, "application/json");
+        string setlist;
+
+        try
+        {
+            setlist = JsonConvert.SerializeObject(setlistModel);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            return -1;
+        }
+        
+        var content = new StringContent(setlist, Encoding.UTF8, "application/json");
         HttpResponseMessage message = await httpClient.PostAsync(_setlistsEndpointPath, content);
         if (!message.IsSuccessStatusCode)
         {
@@ -91,8 +102,20 @@ public class SetlistService
     public async Task EditSetlist(SetlistModel setlistModel)
     {
         using var httpClient = _httpClientFactory.CreateClient();
-        var s = JsonConvert.SerializeObject(setlistModel);
-        var content = new StringContent(s, Encoding.UTF8, "application/json");
+
+        string setlist;
+
+        try
+        {
+            setlist = JsonConvert.SerializeObject(setlistModel);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            return;
+        }
+                
+        var content = new StringContent(setlist, Encoding.UTF8, "application/json");
         HttpResponseMessage message = await httpClient.PostAsync(_setlistsEndpointPath + _editSetlistSuffix, content);
 
         if (!message.IsSuccessStatusCode)
