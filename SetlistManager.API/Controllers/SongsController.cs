@@ -5,9 +5,7 @@ using SetlistManager.Common.Models;
 
 namespace SetlistManager.API.Controllers;
 
-[ApiController]
-[Route("api/[controller]")]
-public partial class SongsController : ControllerBase
+public partial class SongsController : BaseController
 {
     private readonly ISongsDB _songsDB;
 

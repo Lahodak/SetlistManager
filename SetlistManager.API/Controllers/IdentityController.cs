@@ -1,14 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using SetlistManager.API.Data.Entities;
 using SetlistManager.API.Services;
 using SetlistManager.Common.Models;
 
 namespace SetlistManager.API.Controllers;
 
-[Route("api/[controller]")]
-[ApiController]
-public class IdentityController : ControllerBase
+public class IdentityController : BaseController
 {
     private readonly SignInManager<User> _signInManager;
     private readonly UserManager<User> _userManager;
@@ -21,6 +20,7 @@ public class IdentityController : ControllerBase
         _jwtService = jwtService;
     }
 
+    [AllowAnonymous]
     [HttpPost("register")]
     public async Task<ActionResult> Register(RegisterRequestModel model)
     {
@@ -65,6 +65,7 @@ public class IdentityController : ControllerBase
         return NoContent();
     }
 
+    [AllowAnonymous]
     [HttpPost("login")]
     public async Task<ActionResult<LoginResultModel>> Login(LoginRequestModel model)
     {

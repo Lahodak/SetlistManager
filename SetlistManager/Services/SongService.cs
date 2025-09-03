@@ -1,6 +1,8 @@
 ﻿using Newtonsoft.Json;
 using SetlistManager.Common.Models;
+using System.Net.Http.Headers;
 using System.Text;
+using Blazored.LocalStorage;
 
 namespace SetlistManager.Services;
 
@@ -12,19 +14,31 @@ public class SongService
     private const string _getSongbyNameSuffix = "/songbyname/";
     private const string _uploadSongCollectionSuffix = "/addsongcollection";
     private const string _uploadSongSuffix = "/addsong";
+    private const string _tokenKey = "authToken";
 
     private readonly IHttpClientFactory _httpClientFactory;
+    private readonly ILocalStorageService _localStorage;
 
-    public SongService(IHttpClientFactory factory)
+    public SongService(IHttpClientFactory factory, ILocalStorageService localStorageService)
     {
         _httpClientFactory = factory;
+        _localStorage = localStorageService;
     }
 
     public async Task<List<SongModel>?> GetAllSongsAsync()
     {
         using var httpClient = _httpClientFactory.CreateClient();
-        HttpResponseMessage message = await httpClient.GetAsync(_songsEndpointPath + _getAllSongsSuffix);
-        
+
+        var token = await _localStorage.GetItemAsync<string>("authToken");
+
+        if (!string.IsNullOrWhiteSpace(token))
+        {
+            httpClient.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("Bearer", token);
+        }
+
+        HttpResponseMessage message = await httpClient.GetAsync(_songsEndpointPath + _getAllSongsSuffix);        
+
         if (!message.IsSuccessStatusCode)
         {
             Console.WriteLine(message.ToString());

@@ -4,9 +4,7 @@ using SetlistManager.Common.Models;
 
 namespace SetlistManager.API.Controllers;
 
-[Route("api/[controller]")]
-[ApiController]
-public class SetlistsController : ControllerBase
+public class SetlistsController : BaseController
 {
     private readonly ISetlistsDB _setlistsDB;
 
