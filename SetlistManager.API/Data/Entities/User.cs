@@ -12,20 +12,28 @@ public class User : IdentityUser<int>
     public int? RoomId { get; set; }
     public Room? Room { get; set; }
     public int? InstrumentId { get; set; }
-    public Instrument? Instruments { get; set; }
-    
+    public Instrument? Instrument { get; set; }    
 
     public UserModel ToModel()
     {
-        return new();
+        UserModel model = new()
+        {
+            Id = Id,
+            Username = UserName!,
+            Email = Email!,
+            Instrument = Instrument?.Name ?? "No Instrument"
+        };
+
+        return model;
     }
+
     public User ToEntity(UserModel model)
     {
         UserName = model.Username;
         IsActive = true;
         RoomId = null;
         Room = null;
-        
+
         return new();
     }
 }

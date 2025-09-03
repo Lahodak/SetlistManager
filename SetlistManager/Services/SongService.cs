@@ -29,7 +29,7 @@ public class SongService
     {
         using var httpClient = _httpClientFactory.CreateClient();
 
-        var token = await _localStorage.GetItemAsync<string>("authToken");
+        var token = await _localStorage.GetItemAsync<string>(_tokenKey);
 
         if (!string.IsNullOrWhiteSpace(token))
         {

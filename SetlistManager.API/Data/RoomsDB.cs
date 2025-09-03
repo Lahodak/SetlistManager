@@ -24,7 +24,7 @@ public class RoomsDB : IRoomsDB
     {
         var room = await _dbContext.Rooms
             .Include(x => x.Users)
-            .ThenInclude(x => x.Instruments)
+            .ThenInclude(x => x.Instrument)
             .Include(x => x.Setlist)            
             .FirstOrDefaultAsync(x => x.Code == code)
             ?? throw new Exception($"Room with code {code} does not exist");

@@ -1,0 +1,23 @@
+﻿@layout EmptyLayout
+@page "/"
+
+<MudContainer Class="d-flex justify-center align-center" Style="height:100vh;">
+    <MudText Typo="Typo.h1">Setlist Manager</MudText>
+</MudContainer>
+
+@code {
+	[Inject]
+	private NavigationManager Navigation { get; set; }
+	[Inject]
+	private UserService UserService { get; set; }
+
+	protected override async Task OnInitializedAsync()
+	{
+		if(await UserService.IsUserLoggedInAsync())
+		{
+			Navigation.NavigateTo("/home");
+			return;
+		}			
+		Navigation.NavigateTo("/login");
+	}
+}

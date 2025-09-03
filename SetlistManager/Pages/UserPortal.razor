@@ -1,5 +1,17 @@
-﻿<h3>UserPortal</h3>
+﻿@page "/UserPortal"
 
-@code {
+<MudText>
+	@userModel.Username - @userModel.Email - @userModel.Instrument - @userModel.Id
+</MudText>
 
+@code 
+{
+	[Inject]
+	private UserService _userService { get; set; }
+	private UserModel userModel = new();
+
+	protected override async Task OnInitializedAsync()
+	{
+		userModel = await _userService.GetUserAsync() ?? new UserModel();
+	}
 }

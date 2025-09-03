@@ -1,5 +1,6 @@
 ﻿@page "/login"
 @using MudBlazor;
+@layout EmptyLayout;
 @using SetlistManager.Common.Models;
 
 <MudForm>
@@ -20,15 +21,21 @@
 @code {
     [Inject]
     private UserService UserService { get; set; }
+    [Inject]
+	private NavigationManager Navigation { get; set; }
 
     private LoginRequestModel loginRequestModel = new();
-
 
     private async Task LoginUser()
     {
         if (loginRequestModel.Password == string.Empty || loginRequestModel.Email == string.Empty)
             return;
 
-        await UserService.LogInAsync(loginRequestModel);        
+        await UserService.LogInAsync(loginRequestModel);      
+
+        if(await UserService.GetUserToken() is not null)
+        {
+			Navigation.NavigateTo("/");
+        }
     }
 }

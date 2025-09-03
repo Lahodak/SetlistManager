@@ -3,12 +3,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using SetlistManager.API.Data.Entities;
-using SetlistManager.API.Services;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace IdentityDemo.Api.Services;
+namespace SetlistManager.API.Services;
 
 public class JwtService : IJwtService
 {

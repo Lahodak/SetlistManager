@@ -1,4 +1,3 @@
-using IdentityDemo.Api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -29,6 +28,8 @@ builder.Services.AddSingleton(serviceProvider =>
 builder.Services.AddScoped<ISongsDB, SongsDB>();
 builder.Services.AddScoped<ISetlistsDB, SetlistsDB>();
 builder.Services.AddScoped<IRoomsDB, RoomsDB>();
+builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<UserService>();
 builder.Services.AddControllers();
 builder.Services.AddCors(options =>
 {
@@ -84,9 +85,6 @@ builder.Services.AddAuthentication(options =>
         ClockSkew = TimeSpan.Zero
     };
 });
-
-builder.Services.AddScoped<IJwtService, JwtService>();
-
 
 var app = builder.Build();
 
