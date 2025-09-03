@@ -1,5 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿using Blazored.LocalStorage;
+using Newtonsoft.Json;
 using SetlistManager.Common.Models;
+using System.Net.Http.Headers;
 using System.Text;
 
 namespace SetlistManager.Services;
@@ -10,16 +12,33 @@ public class SetlistService
     private const string _getAllSetlistsSuffix = "/getallsetlists";
     private const string _setlistByIdSuffix = "/";
     private const string _editSetlistSuffix = "/editsetlist";
+    private const string _tokenKey = "authToken";
+    private readonly ILocalStorageService _localStorage;
 
     private readonly IHttpClientFactory _httpClientFactory;
-    public SetlistService(IHttpClientFactory httpClientFactory)
+    public SetlistService(IHttpClientFactory httpClientFactory, ILocalStorageService localStorage)
     {
         _httpClientFactory = httpClientFactory;
+        _localStorage = localStorage;
+    }
+
+    private async Task ConfigureHttpClientAsync(HttpClient httpClient)
+    {
+        var token = await _localStorage.GetItemAsync<string>(_tokenKey);
+
+        if (!string.IsNullOrWhiteSpace(token))
+        {
+            httpClient.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("Bearer", token);
+        }
     }
 
     public async Task<int> PushSetlist(SetlistModel setlistModel)
     {
         using var httpClient = _httpClientFactory.CreateClient();
+
+        await ConfigureHttpClientAsync(httpClient);
+
         string setlist;
 
         try
@@ -53,8 +72,12 @@ public class SetlistService
     public async Task<SetlistModel>? GetSetlistById(int id)
     {
         using var httpClient = _httpClientFactory.CreateClient();
+
+        await ConfigureHttpClientAsync(httpClient);
+
         string str = _setlistsEndpointPath + _setlistByIdSuffix + id.ToString();
         HttpResponseMessage message = await httpClient.GetAsync(str);
+
         if (!message.IsSuccessStatusCode)
         {
             Console.WriteLine(message.ToString());
@@ -76,6 +99,9 @@ public class SetlistService
     public async Task<List<SetlistModel>> GetAllSetlists()
     {
         using var httpClient = _httpClientFactory.CreateClient();
+
+        await ConfigureHttpClientAsync(httpClient);
+
         string str = _setlistsEndpointPath + _getAllSetlistsSuffix;
         HttpResponseMessage message = await httpClient.GetAsync(str);
 
@@ -102,6 +128,8 @@ public class SetlistService
     public async Task EditSetlist(SetlistModel setlistModel)
     {
         using var httpClient = _httpClientFactory.CreateClient();
+
+        await ConfigureHttpClientAsync(httpClient);
 
         string setlist;
 

@@ -29,15 +29,16 @@ public class UserService
 
     public async Task<UserModel?> GetUserAsync()
     {
-        var client = _httpClientFactory.CreateClient();
+        var httpClient = _httpClientFactory.CreateClient();
         string? token = await _localStorage.GetItemAsync<string>(_tokenKey);
 
         if (string.IsNullOrWhiteSpace(token))
             return null;
 
-        client.DefaultRequestHeaders.Authorization =
+        httpClient.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue("Bearer", token);
-        HttpResponseMessage message = await client.GetAsync(_userEndpointPath + _getUserSuffix);
+
+        HttpResponseMessage message = await httpClient.GetAsync(_userEndpointPath + _getUserSuffix);
 
         if (!message.IsSuccessStatusCode)
             return null;
@@ -96,6 +97,7 @@ public class UserService
             return false;
         return true;
     }
+
     public async Task LogInAsync(LoginRequestModel model)
     {
         var client = _httpClientFactory.CreateClient();

@@ -25,10 +25,8 @@ public class SongService
         _localStorage = localStorageService;
     }
 
-    public async Task<List<SongModel>?> GetAllSongsAsync()
+    private async Task ConfigureHttpClientAsync(HttpClient httpClient)
     {
-        using var httpClient = _httpClientFactory.CreateClient();
-
         var token = await _localStorage.GetItemAsync<string>(_tokenKey);
 
         if (!string.IsNullOrWhiteSpace(token))
@@ -36,6 +34,13 @@ public class SongService
             httpClient.DefaultRequestHeaders.Authorization =
                 new AuthenticationHeaderValue("Bearer", token);
         }
+    }
+
+    public async Task<List<SongModel>?> GetAllSongsAsync()
+    {
+        using var httpClient = _httpClientFactory.CreateClient();
+
+        await ConfigureHttpClientAsync(httpClient);
 
         HttpResponseMessage message = await httpClient.GetAsync(_songsEndpointPath + _getAllSongsSuffix);        
 
@@ -52,6 +57,9 @@ public class SongService
     public async Task<SongModel?> GetSongByIdAsync(int id)
     {
         using var httpClient = _httpClientFactory.CreateClient();
+
+        await ConfigureHttpClientAsync(httpClient);
+
         HttpResponseMessage message = await httpClient.GetAsync(_songsEndpointPath + _getSongbyIdSuffix + id.ToString());
 
         if (!message.IsSuccessStatusCode)
@@ -67,6 +75,9 @@ public class SongService
     public async Task<SongModel?> GetSongByNameAsync(string name)
     {
         using var httpClient = _httpClientFactory.CreateClient();
+
+        await ConfigureHttpClientAsync(httpClient);
+
         HttpResponseMessage message = await httpClient.GetAsync(_songsEndpointPath + _getSongbyNameSuffix + name);
 
         if (!message.IsSuccessStatusCode)
@@ -82,6 +93,9 @@ public class SongService
     public async Task UploadSongsAsync(List<SongModel> songsToUpload)
     {
         using var httpClient = _httpClientFactory.CreateClient();
+
+        await ConfigureHttpClientAsync(httpClient);
+
         string songs;
         
         try
@@ -106,6 +120,9 @@ public class SongService
     public async Task UploadSongAsync(SongModel songToUpload)
     {
         using var httpClient = _httpClientFactory.CreateClient();
+
+        await ConfigureHttpClientAsync(httpClient);
+
         string song;
         
         try
