@@ -1,0 +1,102 @@
+﻿@using SetlistManager.Common.Models
+@inject ISnackbar Snackbar
+@inject SongService SongService
+
+<MudDialog>
+    <DialogContent>
+        <MudText Typo="Typo.h5">Add New Song</MudText>
+
+        <MudPaper Class="pa-4 mt-3" Elevation="2">
+            <MudGrid Spacing="2">
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="_song.Name"
+                                  Label="Song Name"
+                                  Required="true"
+                                  Variant="Variant.Outlined" />
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="_song.Artist"
+                                  Label="Artist"
+                                  Required="true"
+                                  Variant="Variant.Outlined" />
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="_song.TabsURL"
+                                  Label="Tabs URL"
+                                  Variant="Variant.Outlined" />
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="_song.AudioURL"
+                                  Label="Audio URL"
+                                  Variant="Variant.Outlined" />
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="_song.Tuning"
+                                  Label="Tuning"
+                                  Variant="Variant.Outlined" />
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="_song.Key"
+                                  Label="Key"
+                                  Variant="Variant.Outlined" />
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudNumericField @bind-Value="_song.BPM"
+                                     Label="BPM"
+                                     Min="40" Max="300"
+                                     Variant="Variant.Outlined" />
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudSelect @bind-Value="_song.LanguageId" Label="Language" Variant="Variant.Outlined">
+                        <MudSelectItem Value="1">English</MudSelectItem>
+                        <MudSelectItem Value="2">Spanish</MudSelectItem>
+                        <MudSelectItem Value="3">German</MudSelectItem>
+                        <!-- You can bind real language values here -->
+                    </MudSelect>
+                </MudItem>
+            </MudGrid>
+        </MudPaper>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="SaveSong">Save</MudButton>
+        <MudButton Variant="Variant.Text" OnClick="Cancel">Cancel</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    IMudDialogInstance MudDialog { get; set; } = default!;
+
+    private SongModel _song = new()
+    {
+        CreatedAt = DateTime.UtcNow,
+        UpdatedAt = DateTime.UtcNow,
+        UpdatedBy = 1
+    };
+
+    private async Task SaveSong()
+    {
+        if (string.IsNullOrWhiteSpace(_song.Name) || string.IsNullOrWhiteSpace(_song.Artist))
+        {
+            Snackbar.Add("Please provide at least Song Name and Artist.", Severity.Error);
+            return;
+        }
+
+        try
+        {
+            await SongService.UploadSongAsync(_song);
+            Snackbar.Add("Song added successfully!", Severity.Success);
+            MudDialog.Close(DialogResult.Ok(_song));
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error adding song: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}
