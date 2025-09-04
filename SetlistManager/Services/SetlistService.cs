@@ -12,6 +12,7 @@ public class SetlistService
     private const string _getAllSetlistsSuffix = "/getallsetlists";
     private const string _setlistByIdSuffix = "/";
     private const string _editSetlistSuffix = "/editsetlist";
+    private const string _uploadSetlistSuffix = "/uploadsetlist";
     private const string _tokenKey = "authToken";
     private readonly ILocalStorageService _localStorage;
 
@@ -52,7 +53,7 @@ public class SetlistService
         }
         
         var content = new StringContent(setlist, Encoding.UTF8, "application/json");
-        HttpResponseMessage message = await httpClient.PostAsync(_setlistsEndpointPath, content);
+        HttpResponseMessage message = await httpClient.PostAsync(_setlistsEndpointPath + _uploadSetlistSuffix, content);
         if (!message.IsSuccessStatusCode)
         {
             Console.WriteLine(message.ToString());

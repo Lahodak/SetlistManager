@@ -13,9 +13,9 @@
         <MudIconButton Icon="@(_isDarkMode? Icons.Material.Filled.DarkMode : Icons.Material.Filled.WbSunny)"
                        OnClick="ToggleTheme"
                        Color="Color.Inherit"
-                       Class="ma-4" />
-        
-        <MudIconButton Icon="@Icons.Material.Filled.ManageAccounts" Color="Color.Inherit" OnClick="OpenUserDetail"> @userModel.Username </MudIconButton>
+                       Class="ma-4" />        
+        <MudIconButton Icon="@Icons.Material.Filled.ManageAccounts" Color="Color.Inherit" OnClick="OpenUserDetail"/>
+		<MudText Typo="Typo.subtitle1" Class="ml-2 mr-4">@userModel?.Username</MudText>
     </MudAppBar>
 
     <MudDrawer @bind-Open="_drawerOpen" Elevation="2">
@@ -37,25 +37,29 @@
     private NavigationManager Navigation { get; set; }
     [Inject]
     public required Blazored.LocalStorage.ILocalStorageService LocalStorage { get; set; }
-	[Inject]
-	private UserService UserService { get; set; }
+    [Inject]
+    private UserService UserService { get; set; }
 
     private bool _drawerOpen = true;
     private const string _localStorageKey = "ToggleDarkMode";
     private MudTheme _theme = new();
     private bool _isDarkMode;
-	private UserModel userModel = new();
+    private UserModel userModel = new();
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            await InvokeAsync(StateHasChanged);
+            //await InvokeAsync(StateHasChanged);
         }
     }
 
     protected override async Task OnInitializedAsync()
     {        
+        var localData = await LocalStorage.GetItemAsync<bool>(_localStorageKey);
+        _isDarkMode = localData;
+        StateHasChanged();
+
         var token = await LocalStorage.GetItemAsStringAsync("authToken");
 
         if (string.IsNullOrWhiteSpace(token) && !Navigation.Uri.Contains("/login"))
@@ -64,9 +68,8 @@
             return;
         }
 
-        var localData = await LocalStorage.GetItemAsync<bool>(_localStorageKey);
-		userModel = await UserService.GetUserAsync();
-        _isDarkMode = localData;
+        userModel = await UserService.GetUserAsync();
+        StateHasChanged();
     }
 
     void DrawerToggle()
@@ -88,5 +91,6 @@
     {
         _isDarkMode = !_isDarkMode;
         await LocalStorage.SetItemAsync(_localStorageKey, _isDarkMode);
+        StateHasChanged();
     }
 }

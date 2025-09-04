@@ -13,7 +13,7 @@ public class SetlistsController : BaseController
         _setlistsDB = setlistsDB;
     }
 
-    [HttpPost]
+    [HttpPost("uploadsetlist")]
     public async Task<int> UploadSetlistToDb(SetlistModel setlistModel)
         => await _setlistsDB.SaveSetlistAsync(setlistModel);
 

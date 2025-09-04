@@ -110,8 +110,6 @@
         var result = await dialog.Result;
         if (!result.Canceled)
         {
-            var setlist = (SetlistModel)result.Data;
-            setlist.Id = await SetlistService.PushSetlist(setlist);
             await table.ReloadServerData();
         }
     }

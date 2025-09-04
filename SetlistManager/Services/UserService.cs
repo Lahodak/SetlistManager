@@ -62,6 +62,8 @@ public class UserService
         }
     }
 
+
+
     public async Task RegisterAsync(RegisterRequestModel model)
     {
         var client = _httpClientFactory.CreateClient();

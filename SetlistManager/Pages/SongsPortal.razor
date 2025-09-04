@@ -14,12 +14,10 @@
                 <MudText Typo="Typo.h6">Song Library</MudText>
                 <MudSpacer />
 
-                <!-- Add Song Button -->
                 <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OpenAddSongDialog" StartIcon="@Icons.Material.Filled.Add">
                     Add Song
                 </MudButton>
 
-                <!-- Search Box -->
                 <MudTextField T="string" ValueChanged="@(s => OnSearch(s))" Placeholder="Search songs"
                               Adornment="Adornment.Start"
                               AdornmentIcon="@Icons.Material.Filled.Search"
