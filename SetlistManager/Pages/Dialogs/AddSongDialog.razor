@@ -1,6 +1,4 @@
 ﻿@using SetlistManager.Common.Models
-@inject ISnackbar Snackbar
-@inject SongService SongService
 
 <MudDialog>
     <DialogContent>
@@ -54,7 +52,6 @@
                         <MudSelectItem Value="1">English</MudSelectItem>
                         <MudSelectItem Value="2">Spanish</MudSelectItem>
                         <MudSelectItem Value="3">German</MudSelectItem>
-                        <!-- You can bind real language values here -->
                     </MudSelect>
                 </MudItem>
             </MudGrid>
@@ -69,7 +66,11 @@
 
 @code {
     [CascadingParameter]
-    IMudDialogInstance MudDialog { get; set; } = default!;
+    public required IMudDialogInstance MudDialog { get; set; }
+    [Inject]
+	public required ISnackbar Snackbar { get; set; }
+    [Inject]
+	public required SongService SongService { get; set; }
 
     private SongModel _song = new()
     {

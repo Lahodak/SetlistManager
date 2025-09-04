@@ -1,8 +1,6 @@
 ﻿@page "/SongsPortal"
-
-@inject IDialogService DialogService
-@inject ISnackbar Snackbar
 @using SetlistManager.Pages.Dialogs;
+
 <PageTitle>Songs Portal</PageTitle>
 
 <MudContainer Class="mt-5">
@@ -56,14 +54,21 @@
 </MudContainer>
 
 @code {
-    private MudTable<SongModel> table;
+    [Inject]
+    public required IDialogService DialogService { get; set; }
+    [Inject]
+    public required ISnackbar Snackbar { get; set; }
+    [Inject] 
+    public required SongsDB SongsDatabase { get; set; }
+    [Inject]
+    public required SongService SongService { get; set; } 
+    
+    private MudTable<SongModel> table = new ();
     private string? searchString;
-
-    [Inject] public required SongsDB SongsDatabase { get; set; }
 
     private async Task<TableData<SongModel>> ServerReload(TableState state, CancellationToken token)
     {
-        var allSongs = await SongsDatabase.GetSongCollection();
+        var allSongs = await SongService.GetAllSongsAsync();
         await Task.Delay(300, token);
 
         var filtered = allSongs.Where(song =>
@@ -99,7 +104,7 @@
         var parameters = new DialogParameters();
         var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
 
-        var dialog = DialogService.Show<AddSongDialog>("Add New Song", parameters, options);
+        var dialog = await DialogService.ShowAsync<AddSongDialog>("Add New Song", parameters, options);
         var result = await dialog.Result;
 
         if (!result.Canceled)

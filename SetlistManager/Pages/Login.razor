@@ -20,9 +20,9 @@
 
 @code {
     [Inject]
-    private UserService UserService { get; set; }
+    public required UserService UserService { get; set; }
     [Inject]
-	private NavigationManager Navigation { get; set; }
+    public required NavigationManager Navigation { get; set; }
 
     private LoginRequestModel loginRequestModel = new();
 

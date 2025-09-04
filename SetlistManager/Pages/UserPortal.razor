@@ -7,7 +7,7 @@
 @code 
 {
 	[Inject]
-	private UserService _userService { get; set; }
+	public required UserService _userService { get; set; }
 	private UserModel userModel = new();
 
 	protected override async Task OnInitializedAsync()

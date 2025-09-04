@@ -7,6 +7,15 @@ namespace SetlistManager.Pages;
 
 public partial class Home
 {	
+    [Inject]
+    public required SongsDB SongsDatabase { get; set; }
+    [Inject]
+    public required SetlistService SetlistService { get; set; }
+    [Inject]
+    public required Blazored.LocalStorage.ILocalStorageService LocalStorage { get; set; }
+    [Inject]
+    public required ISnackbar Snackbar { get; set; }
+
 	private int _maxNumber = 0;
 	private int _setlistLength = 1;
 	private List<SongModel> _shuffeledSongCollection = [];
@@ -23,15 +32,6 @@ public partial class Home
     private bool _setlistExists = true;
     private const string _localStorageKey = "LastLoadedSetlistId";
     
-    [Inject]
-    public required SongsDB SongsDatabase { get; set; }
-    [Inject]
-    public required SetlistService SetlistService { get; set; }
-    [Inject]
-    public required Blazored.LocalStorage.ILocalStorageService LocalStorage { get; set; }
-    [Inject]
-    public required ISnackbar Snackbar { get; set; }
-
     private void ShowGenerateSetlistUI()
     {
         _showGenerateSetlistUI = true;

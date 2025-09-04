@@ -69,9 +69,9 @@
     public int setlistId { get; set; }
 
     [Inject]
-    public SetlistService SetlistService { get; set; }
+    public required SetlistService SetlistService { get; set; }
 
-    private SetlistModel _setlist;
+    private SetlistModel _setlist = new();
 
     protected override async Task OnInitializedAsync()
     {
