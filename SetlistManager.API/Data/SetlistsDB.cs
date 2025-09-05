@@ -4,14 +4,17 @@ using SetlistManager.Common.Models;
 using SetlistManager.API.Data.Entities;
 using System.Runtime.Serialization;
 using Microsoft.AspNetCore.Mvc;
+using SetlistManager.API.Services;
 
 namespace SetlistManager.API.Data;
 public class SetlistsDB : ISetlistsDB
 {
     private readonly APIDbContext _dbContext;
-    public SetlistsDB(APIDbContext dbContext)
+    private readonly OrderMappingService _orderMappingService;
+    public SetlistsDB(APIDbContext dbContext, OrderMappingService orderMappingService)
     {
         _dbContext = dbContext;
+        _orderMappingService = orderMappingService;
     }
 
     public async Task<SetlistModel?> GetSetlistByIdAsync(int id)
@@ -24,7 +27,7 @@ public class SetlistsDB : ISetlistsDB
         if (setlist is null)
             return null;
 
-        return setlist.ToModel();
+        return _orderMappingService.MapSongEntityToModelOrder(setlist);
     }
 
     public async Task<SetlistModel?> GetSetlistByNameAsync(string name)
@@ -37,7 +40,7 @@ public class SetlistsDB : ISetlistsDB
         if (setlist is null)
             return null;
 
-        return setlist.ToModel();
+        return _orderMappingService.MapSongEntityToModelOrder(setlist);
     }
 
     public async Task<int> SaveSetlistAsync(SetlistModel setlistModel)
@@ -59,10 +62,10 @@ public class SetlistsDB : ISetlistsDB
             Creator = await _dbContext.Users.FirstAsync(x => x.Id == setlistModel.CreatorId),
             CreatorId = setlistModel.CreatorId,
             UpdatedBy = setlistModel.CreatorId,
-            SongsSetlists = songs.Select(s => new SongsSetlists { Song = s }).ToList()
+            SongsSetlists = new()
         };
 
-        await _dbContext.Setlists.AddAsync(setlistToCreate);
+        await _dbContext.Setlists.AddAsync(_orderMappingService.MapSongModelToEntity(setlistModel, setlistToCreate));
         await _dbContext.SaveChangesAsync();
 
         return setlistToCreate.Id;
@@ -79,7 +82,7 @@ public class SetlistsDB : ISetlistsDB
         List<SetlistModel> result = [];
         foreach(var s in userSetlists)
         {
-            result.Add(s.ToModel());
+            result.Add(_orderMappingService.MapSongEntityToModelOrder(s));
         }
 
         return result;
@@ -94,9 +97,8 @@ public class SetlistsDB : ISetlistsDB
 
         List<SetlistModel> result = [];
         foreach (var s in setlists)
-        {
-            
-            result.Add(s.ToModel());
+        {            
+            result.Add(_orderMappingService.MapSongEntityToModelOrder(s));
         }
 
         return result;
