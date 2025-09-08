@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 namespace SetlistManager.API.Controllers;
 
-public class RoomController : BaseController
+[Route("api/rooms")]
+
+public class RoomsController : BaseController
 {
     
 }

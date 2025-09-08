@@ -4,7 +4,7 @@ using SetlistManager.API.Models;
 using SetlistManager.Common.Models;
 
 namespace SetlistManager.API.Controllers;
-
+[Route("api/songs")]
 public partial class SongsController : BaseController
 {
     private readonly ISongsDB _songsDB;
@@ -14,21 +14,27 @@ public partial class SongsController : BaseController
         _songsDB = songsDB;
     }
 
-    [HttpGet("getallsongs")]
-    public async Task<IEnumerable<SongModel>> GetSongCollection()
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<SongModel>>> GetSongs([FromQuery] string? name)
     {
-        var songs = await _songsDB.GetSongsAsync();
-        List<SongModel> songModels = [];
-
-        foreach (var song in songs)
+        if (!string.IsNullOrWhiteSpace(name))
         {
-            songModels.Add(song.ToModel());
+            var songs = await _songsDB.GetSongByNameAsync(name);
 
+            if (songs is null || !songs.Any())
+            {
+                return NotFound();
+            }
+
+            return songs.Select(s => s!.ToModel()).ToList();
         }
-        return songModels;        
+
+        var allSongs = await _songsDB.GetSongsAsync();
+        return allSongs.Select(s => s.ToModel()).ToList();
     }
 
-    [HttpPost("addsongcollection")]
+
+    [HttpPost("bulk")]
     public async Task AddSongs(AddSongsModel addSongs)
     {
         foreach(var song in addSongs.Songs)
@@ -50,7 +56,7 @@ public partial class SongsController : BaseController
         }
     }
 
-    [HttpPost("addsong")]
+    [HttpPost]
     public async Task AddSong(SongModel addSong)
     {
         await _songsDB.UploadSong(new()
@@ -69,10 +75,10 @@ public partial class SongsController : BaseController
         });
     }
 
-    [HttpGet("songbyid/{songId:int}")]
-    public async Task<ActionResult<SongModel>> GetSongById(int songId)
+    [HttpGet("{id:int}")]
+    public async Task<ActionResult<SongModel>> GetSongById(int id)
     {
-        var song = await _songsDB.GetSongByIdAsync(songId);
+        var song = await _songsDB.GetSongByIdAsync(id);
 
         if (song is null)
         {
@@ -80,25 +86,5 @@ public partial class SongsController : BaseController
         }
 
         return song.ToModel();
-    }
-
-    [HttpGet("songbyname/{songName}")]
-    public async Task<ActionResult<IEnumerable<SongModel>>> GetSongByName(string songName)
-    {
-        var songs = await _songsDB.GetSongByNameAsync(songName);
-
-        if(songs is null)
-        {
-            return NotFound();
-        }
-
-        List<SongModel> songModels = [];
-
-        foreach (var song in songs)
-        {
-            songModels.Add(song!.ToModel());
-        }
-
-        return songModels;
     }
 }

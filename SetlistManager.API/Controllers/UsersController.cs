@@ -1,27 +1,31 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using SetlistManager.API.Data;
 using SetlistManager.API.Data.Entities;
 using SetlistManager.API.Services;
 using SetlistManager.Common.Models;
+using System.Security.Claims;
 
 namespace SetlistManager.API.Controllers;
-
-public class IdentityController : BaseController
+[Route("api/users")]
+public class UsersController : BaseController
 {
     private readonly SignInManager<User> _signInManager;
     private readonly UserManager<User> _userManager;
+    private readonly UserService _userService;
     private readonly IJwtService _jwtService;
 
-    public IdentityController(SignInManager<User> signInManager, UserManager<User> userManager, IJwtService jwtService)
+    public UsersController(SignInManager<User> signInManager, UserManager<User> userManager, UserService userService, IJwtService jwtService)
     {
         _signInManager = signInManager;
         _userManager = userManager;
+        _userService = userService;
         _jwtService = jwtService;
     }
 
     [AllowAnonymous]
-    [HttpPost("register")]
+    [HttpPost]
     public async Task<ActionResult> Register(RegisterRequestModel model)
     {
         var existingUser = await _userManager.FindByEmailAsync(model.Email);
@@ -66,7 +70,7 @@ public class IdentityController : BaseController
     }
 
     [AllowAnonymous]
-    [HttpPost("login")]
+    [HttpPost("auth")]
     public async Task<ActionResult<LoginResultModel>> Login(LoginRequestModel model)
     {
         var user = await _userManager.FindByEmailAsync(model.Email);
@@ -94,5 +98,28 @@ public class IdentityController : BaseController
         var token = await _jwtService.GenerateTokenAsync(user);
 
         return Ok(new LoginResultModel { Token = token });
+    }
+
+    [HttpPut]
+    public async Task<ActionResult> UpdateUser(UserModel model)
+    {
+        await _userService.UpdateUser(model);
+        return Ok();
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<UserModel>> GetUser()
+    {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+        if (userIdClaim == null)
+            return Unauthorized("Invalid token: User ID not found");
+
+        var userId = userIdClaim.Value;
+        var user = await _userManager.FindByIdAsync(userId);
+
+        if (user == null)
+            return NotFound();
+
+        return Ok(user.ToModel());
     }
 }

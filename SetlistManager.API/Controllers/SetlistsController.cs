@@ -3,6 +3,7 @@ using SetlistManager.API.Data;
 using SetlistManager.Common.Models;
 
 namespace SetlistManager.API.Controllers;
+[Route("api/setlists")]
 
 public class SetlistsController : BaseController
 {
@@ -13,7 +14,33 @@ public class SetlistsController : BaseController
         _setlistsDB = setlistsDB;
     }
 
-    [HttpPost("uploadsetlist")]
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<SetlistModel>>> GetSetlists([FromQuery] int? userId, [FromQuery] string? name)
+    {
+        if (userId.HasValue)
+        {
+            var userSetlists = await _setlistsDB.GetAllSetlistsOfUserAsync(userId.Value);
+            return userSetlists?.ToList() ?? [];
+        }
+
+        if (!string.IsNullOrWhiteSpace(name))
+        {
+            var setlist = await _setlistsDB.GetSetlistByNameAsync(name);
+            
+            if (setlist == null) 
+                return NotFound();
+            
+            return new List<SetlistModel> 
+            { 
+                setlist 
+            };
+        }
+
+        var allSetlists = await _setlistsDB.GetAllSetlistsAsync();
+        return allSetlists?.ToList() ?? [];
+    }
+
+    [HttpPost]
     public async Task<int> UploadSetlistToDb(SetlistModel setlistModel)
         => await _setlistsDB.SaveSetlistAsync(setlistModel);
 
@@ -29,42 +56,7 @@ public class SetlistsController : BaseController
         return result;
     }
 
-    [HttpGet("usersetlists/{UserId:int}")]
-    public async Task<ActionResult<List<SetlistModel>>> GetUserSetlistsByUserId(int id)
-    {
-        var result = await _setlistsDB.GetAllSetlistsOfUserAsync(id);
-
-
-        if (result == null)
-            return NotFound();
-
-        return null;
-    }
-
-    [HttpGet("getallsetlists")]
-    public async Task<ActionResult<List<SetlistModel>>> GetAllSetlists()
-    {
-        var result = await _setlistsDB.GetAllSetlistsAsync();
-
-
-        if (result == null)
-            return NotFound();
-
-        return result.ToList();
-    }
-
-    [HttpGet("{setlistName}")]
-    public async Task<ActionResult<SetlistModel>> GetSetlistByName(string setlistName)
-    {
-        var result = await _setlistsDB.GetSetlistByNameAsync(setlistName) ?? new SetlistModel();
-
-        if (result == null)
-            return NotFound();
-
-        return result;
-    }
-
-    [HttpPost("editsetlist")]
+    [HttpPut]
     public async Task<ActionResult> EditSetlist(SetlistModel setlist)
     {
         if(setlist == null)

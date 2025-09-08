@@ -10,12 +10,8 @@ using System.Net.Http.Headers;
 namespace SetlistManager.Services;
 public class UserService
 {
-    private const string _identityEndpointPath = "https://localhost:7143/api/Identity";
-    private const string _registerUserSuffix = "/register";
-    private const string _loginUserSuffix = "/login";
-    private const string _userEndpointPath = "https://localhost:7143/api/User";
-    private const string _updateUserSuffix = "/updateuser";
-    private const string _getUserSuffix = "/getuserdetail";
+    private const string _userEndpointPath = "https://localhost:7143/api/users";  
+    private const string _loginUserSuffix = "/auth";
     private const string _tokenKey = "authToken";
 
     private readonly IHttpClientFactory _httpClientFactory; 
@@ -30,10 +26,10 @@ public class UserService
     }
 
     public async Task<UserModel?> GetUserAsync() 
-        => await _apiService.GetAsync<UserModel>(_userEndpointPath + _getUserSuffix);
+        => await _apiService.GetAsync<UserModel>(_userEndpointPath);
 
     public async Task RegisterAsync(RegisterRequestModel model) 
-        => await _apiService.PostAsync(_userEndpointPath + _registerUserSuffix, model);
+        => await _apiService.PostAsync(_userEndpointPath, model);
 
     public async Task LogOutAsync()
     {
@@ -69,7 +65,7 @@ public class UserService
         }
 
         var content = new StringContent(user, Encoding.UTF8, "application/json");
-        HttpResponseMessage message = await client.PostAsync(_identityEndpointPath + _loginUserSuffix, content);
+        HttpResponseMessage message = await client.PostAsync(_userEndpointPath + _loginUserSuffix, content);
 
         if (!message.IsSuccessStatusCode)
             return;

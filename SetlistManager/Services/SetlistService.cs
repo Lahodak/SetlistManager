@@ -8,11 +8,10 @@ namespace SetlistManager.Services;
 
 public class SetlistService
 {
-    private const string _setlistsEndpointPath = "https://localhost:7143/api/Setlists";
-    private const string _getAllSetlistsSuffix = "/getallsetlists";
+    private const string _setlistsEndpointPath = "https://localhost:7143/api/setlists";
     private const string _setlistByIdSuffix = "/";
-    private const string _editSetlistSuffix = "/editsetlist";
-    private const string _uploadSetlistSuffix = "/uploadsetlist";
+    private const string _getSetlistByNameSuffix = "?name=";
+    private const string _getSetlistByUserIdSuffix = "?userId=";
 
     private readonly ApiService _apiService;
 
@@ -22,14 +21,20 @@ public class SetlistService
     }
 
     public async Task PushSetlist(SetlistModel setlistModel) 
-        => await _apiService.PostAsync(_setlistsEndpointPath + _uploadSetlistSuffix, setlistModel);
+        => await _apiService.PostAsync(_setlistsEndpointPath, setlistModel);
 
     public async Task<SetlistModel>? GetSetlistById(int id) 
         => await _apiService.GetAsync<SetlistModel>(_setlistsEndpointPath + _setlistByIdSuffix + id.ToString());
 
     public async Task<List<SetlistModel>> GetAllSetlists() 
-        => await _apiService.GetAsync<List<SetlistModel>>(_setlistsEndpointPath + _getAllSetlistsSuffix);
+        => await _apiService.GetAsync<List<SetlistModel>>(_setlistsEndpointPath);
+
+    public async Task<SetlistModel?> GetSetlistByNameAsync(string name)
+        => await _apiService.GetAsync<SetlistModel?>(_setlistsEndpointPath + _getSetlistByNameSuffix + name);
+
+    public async Task<List<SetlistModel>?> GetAllUserSetlists(int userId)
+       => await _apiService.GetAsync<List<SetlistModel>?>(_setlistsEndpointPath + _getSetlistByUserIdSuffix + userId.ToString());
 
     public async Task EditSetlist(SetlistModel setlistModel) 
-        => await _apiService.PostAsync(_setlistsEndpointPath + _editSetlistSuffix, setlistModel);
+        => await _apiService.PutAsync(_setlistsEndpointPath, setlistModel);
 }
