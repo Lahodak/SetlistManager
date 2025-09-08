@@ -14,133 +14,26 @@ public class SongService
     private const string _getSongbyNameSuffix = "/songbyname/";
     private const string _uploadSongCollectionSuffix = "/addsongcollection";
     private const string _uploadSongSuffix = "/addsong";
-    private const string _tokenKey = "authToken";
 
-    private readonly IHttpClientFactory _httpClientFactory;
-    private readonly ILocalStorageService _localStorage;
+    private readonly ApiService _apiService;
 
-    public SongService(IHttpClientFactory factory, ILocalStorageService localStorageService)
+    public SongService(ApiService apiService)
     {
-        _httpClientFactory = factory;
-        _localStorage = localStorageService;
+        _apiService = apiService;
     }
 
-    private async Task ConfigureHttpClientAsync(HttpClient httpClient)
-    {
-        var token = await _localStorage.GetItemAsync<string>(_tokenKey);
+    public async Task<List<SongModel>?> GetAllSongsAsync() 
+        => await _apiService.GetAsync<List<SongModel>>(_songsEndpointPath + _getAllSongsSuffix);
 
-        if (!string.IsNullOrWhiteSpace(token))
-        {
-            httpClient.DefaultRequestHeaders.Authorization =
-                new AuthenticationHeaderValue("Bearer", token);
-        }
-    }
+    public async Task<SongModel?> GetSongByIdAsync(int id) 
+        => await _apiService.GetAsync<SongModel>(_songsEndpointPath + _getSongbyIdSuffix + id.ToString());
 
-    public async Task<List<SongModel>?> GetAllSongsAsync()
-    {
-        using var httpClient = _httpClientFactory.CreateClient();
+    public async Task<SongModel?> GetSongByNameAsync(string name) 
+        => await _apiService.GetAsync<SongModel>(_songsEndpointPath + _getSongbyNameSuffix + name);
 
-        await ConfigureHttpClientAsync(httpClient);
+    public async Task UploadSongsAsync(List<SongModel> songsToUpload) 
+        => await _apiService.PostAsync(_songsEndpointPath + _uploadSongCollectionSuffix, songsToUpload);
 
-        HttpResponseMessage message = await httpClient.GetAsync(_songsEndpointPath + _getAllSongsSuffix);        
-
-        if (!message.IsSuccessStatusCode)
-        {
-            Console.WriteLine(message.ToString());
-            return null;
-        }
-
-        string json = await message.Content.ReadAsStringAsync();
-        return JsonConvert.DeserializeObject<List<SongModel>>(json);
-    }      
-
-    public async Task<SongModel?> GetSongByIdAsync(int id)
-    {
-        using var httpClient = _httpClientFactory.CreateClient();
-
-        await ConfigureHttpClientAsync(httpClient);
-
-        HttpResponseMessage message = await httpClient.GetAsync(_songsEndpointPath + _getSongbyIdSuffix + id.ToString());
-
-        if (!message.IsSuccessStatusCode)
-        {
-            Console.WriteLine(message.ToString());
-            return null;
-        }
-
-        string json = await message.Content.ReadAsStringAsync();
-        return JsonConvert.DeserializeObject<SongModel>(json);
-    }
-
-    public async Task<SongModel?> GetSongByNameAsync(string name)
-    {
-        using var httpClient = _httpClientFactory.CreateClient();
-
-        await ConfigureHttpClientAsync(httpClient);
-
-        HttpResponseMessage message = await httpClient.GetAsync(_songsEndpointPath + _getSongbyNameSuffix + name);
-
-        if (!message.IsSuccessStatusCode)
-        {
-            Console.WriteLine(message.ToString());
-            return null;
-        }
-
-        string json = await message.Content.ReadAsStringAsync();
-        return JsonConvert.DeserializeObject<SongModel>(json);
-    }
-
-    public async Task UploadSongsAsync(List<SongModel> songsToUpload)
-    {
-        using var httpClient = _httpClientFactory.CreateClient();
-
-        await ConfigureHttpClientAsync(httpClient);
-
-        string songs;
-        
-        try
-        {
-            songs = JsonConvert.SerializeObject(songsToUpload);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return;
-        }
-
-        var content = new StringContent(songs, Encoding.UTF8, "application/json");
-        HttpResponseMessage message = await httpClient.PostAsync(_songsEndpointPath + _uploadSongCollectionSuffix, content);
-
-        if (!message.IsSuccessStatusCode)
-        {
-            Console.WriteLine(message.ToString());
-        }
-    }
-
-    public async Task UploadSongAsync(SongModel songToUpload)
-    {
-        using var httpClient = _httpClientFactory.CreateClient();
-
-        await ConfigureHttpClientAsync(httpClient);
-
-        string song;
-        
-        try
-        {
-            song = JsonConvert.SerializeObject(songToUpload);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return;
-        }
-        
-        var content = new StringContent(song, Encoding.UTF8, "application/json");
-        HttpResponseMessage message = await httpClient.PostAsync(_songsEndpointPath + _uploadSongSuffix, content);
-        
-        if (!message.IsSuccessStatusCode)
-        {
-            Console.WriteLine(message.ToString());
-        }
-    }
+    public async Task UploadSongAsync(SongModel songToUpload) 
+        => await _apiService.PostAsync(_songsEndpointPath + _uploadSongSuffix, songToUpload);
 }

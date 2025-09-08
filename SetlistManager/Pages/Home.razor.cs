@@ -124,7 +124,7 @@ public partial class Home
         _setlist.Songs.Clear();
         _setlist.Name = _toBeSavedSetlistName;
         _setlist.Songs.AddRange(_shuffeledSongCollection);
-        _setlist.Id = await SetlistService.PushSetlist(_setlist);
+        await SetlistService.PushSetlist(_setlist);
         _showSetlistId = true;
         await LocalStorage.SetItemAsync(_localStorageKey, _setlist.Id);
     }

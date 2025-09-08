@@ -20,68 +20,21 @@ public class UserService
 
     private readonly IHttpClientFactory _httpClientFactory; 
     private readonly ILocalStorageService _localStorage;
+    private readonly ApiService _apiService;
 
-    public UserService(IHttpClientFactory httpClientFactory, ILocalStorageService localStorageService)
+    public UserService(IHttpClientFactory httpClientFactory, ILocalStorageService localStorageService, ApiService apiService)
     {
         _httpClientFactory = httpClientFactory;
         _localStorage = localStorageService;
+        _apiService = apiService;
     }
 
-    public async Task<UserModel?> GetUserAsync()
-    {
-        var httpClient = _httpClientFactory.CreateClient();
-        string? token = await _localStorage.GetItemAsync<string>(_tokenKey);
+    public async Task<UserModel?> GetUserAsync() 
+        => await _apiService.GetAsync<UserModel>(_userEndpointPath + _getUserSuffix);
 
-        if (string.IsNullOrWhiteSpace(token))
-            return null;
+    public async Task RegisterAsync(RegisterRequestModel model) 
+        => await _apiService.PostAsync(_userEndpointPath + _registerUserSuffix, model);
 
-        httpClient.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", token);
-
-        HttpResponseMessage message = await httpClient.GetAsync(_userEndpointPath + _getUserSuffix);
-
-        if (!message.IsSuccessStatusCode)
-            return null;
-
-        string json = await message.Content.ReadAsStringAsync();
-
-        if (json is null)
-            return null;
-
-        UserModel? user;
-
-        try
-        {
-            user = JsonConvert.DeserializeObject<UserModel>(json);
-            return user;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
-            return null;
-        }
-    }
-
-
-
-    public async Task RegisterAsync(RegisterRequestModel model)
-    {
-        var client = _httpClientFactory.CreateClient();
-        string user;
-
-        try
-        {
-            user = JsonConvert.SerializeObject(model);
-        }
-        catch(Exception ex)
-        {
-            Console.WriteLine(ex.Message);
-            return;
-        }
-
-        var content = new StringContent(user, Encoding.UTF8, "application/json");
-        HttpResponseMessage message = await client.PostAsync(_identityEndpointPath + _registerUserSuffix, content);
-    }
     public async Task LogOutAsync()
     {
         await _localStorage.RemoveItemAsync(_tokenKey);
