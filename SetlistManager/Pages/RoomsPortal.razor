@@ -1,0 +1,127 @@
+﻿@page "/RoomsPortal"
+@using SetlistManager.Common.Models
+@using MudBlazor
+
+<PageTitle>Rooms Portal</PageTitle>
+
+<MudContainer>
+    <MudPaper>
+
+        <MudGrid Justify="Justify.SpaceEvenly" Class="mt-6">
+            <MudItem>
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           Size="Size.Large"                           
+                           OnClick="CreateRoomClicked">
+                    Create Room
+                </MudButton>
+            </MudItem>
+            <MudItem>
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Secondary"
+                           Size="Size.Large"
+                           OnClick="JoinRoomClicked">
+                    Join Room
+                </MudButton>
+            </MudItem>
+        </MudGrid>
+
+        <MudTable ServerData="ServerReload" Hover="true" @ref="table">
+            <ToolBarContent>
+                <MudText Typo="Typo.h6">Browse Public Rooms</MudText>
+                <MudSpacer />
+                <MudTextField T="string" ValueChanged="@(s => OnSearch(s))" Placeholder="Search rooms"
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.Search"
+                              IconSize="Size.Medium" Class="mt-0 ml-3">
+                </MudTextField>
+            </ToolBarContent>
+
+            <HeaderContent>
+                <MudTh><MudTableSortLabel SortLabel="name_field" T="CreateRoomModel">Name</MudTableSortLabel></MudTh>
+                <MudTh>Public</MudTh>
+                <MudTh>Actions</MudTh>
+            </HeaderContent>
+
+            <RowTemplate>
+                <MudTd DataLabel="Name">@context.Name</MudTd>
+                <MudTd DataLabel="Public">@context.IsPublic</MudTd>
+                <MudTd>
+                    <MudButton Variant="Variant.Outlined" Color="Color.Primary" Size="Size.Small"
+                               OnClick="() => JoinSelectedRoom(context)">
+                        Join
+                    </MudButton>
+                </MudTd>
+            </RowTemplate>
+
+            <NoRecordsContent>
+                <MudText>No public rooms found</MudText>
+            </NoRecordsContent>
+
+            <LoadingContent>
+                <MudText>Loading rooms...</MudText>
+            </LoadingContent>
+
+            <PagerContent>
+                <MudTablePager />
+            </PagerContent>
+        </MudTable>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    private MudTable<CreateRoomModel> table = new();
+    private string? searchString;
+
+    private async Task<TableData<CreateRoomModel>> ServerReload(TableState state, CancellationToken token)
+    {
+        var allRooms = new List<CreateRoomModel>
+        {
+            new() { Name = "Rock Night", IsPublic = true },
+            new() { Name = "Jazz Vibes", IsPublic = true },
+            new() { Name = "Private Jam", IsPublic = true }
+        };
+
+        await Task.Delay(300, token);
+
+        var filtered = allRooms.Where(room =>
+            string.IsNullOrWhiteSpace(searchString)
+            || room.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase)
+        );
+
+        filtered = state.SortLabel switch
+        {
+            "name_field" => filtered.OrderByDirection(state.SortDirection, r => r.Name),
+            _ => filtered
+        };
+
+        var items = filtered.Skip(state.Page * state.PageSize).Take(state.PageSize).ToArray();
+
+        return new TableData<CreateRoomModel>
+        {
+            TotalItems = filtered.Count(),
+            Items = items
+        };
+    }
+
+    private void OnSearch(string text)
+    {
+        searchString = text;
+        table.ReloadServerData();
+    }
+
+    private void CreateRoomClicked()
+    {
+        // TODO: Open Create Room dialog
+    }
+
+    private void JoinRoomClicked()
+    {
+        // TODO: Open Join Room dialog
+    }
+
+    private void JoinSelectedRoom(CreateRoomModel room)
+    {
+        // TODO: Handle joining a specific room
+    }
+}

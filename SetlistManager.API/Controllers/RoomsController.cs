@@ -14,9 +14,10 @@ public class RoomsController : BaseController
     private readonly UserManager<User> _userManager;
     private readonly IRoomsDB _roomsDB;
 
-    public RoomsController(UserManager<User> userManager)
+    public RoomsController(UserManager<User> userManager, IRoomsDB roomsDB)
     {
         _userManager = userManager;
+        _roomsDB = roomsDB;
     }
 
     [HttpGet]
@@ -73,10 +74,10 @@ public class RoomsController : BaseController
         }
     }
 
-    public async Task<ActionResult<RoomModel>> CreateRoomAsync()
-    {
-        //To-Do
+    //public async Task<ActionResult<RoomModel>> CreateRoomAsync()
+    //{
+    //    //To-Do
 
-        return BadRequest("ok");
-    }
+    //    return BadRequest("ok");
+    //}
 }
