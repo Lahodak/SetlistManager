@@ -15,13 +15,16 @@ public class UsersController : BaseController
     private readonly UserManager<User> _userManager;
     private readonly UserService _userService;
     private readonly IJwtService _jwtService;
+    private ISetlistsDB _setlistsDB;
 
-    public UsersController(SignInManager<User> signInManager, UserManager<User> userManager, UserService userService, IJwtService jwtService)
+    public UsersController(SignInManager<User> signInManager, UserManager<User> userManager, UserService userService, IJwtService jwtService, 
+        ISetlistsDB setlistsDB)
     {
         _signInManager = signInManager;
         _userManager = userManager;
         _userService = userService;
         _jwtService = jwtService;
+        _setlistsDB = setlistsDB;
     }
 
     [AllowAnonymous]
@@ -121,5 +124,11 @@ public class UsersController : BaseController
             return NotFound();
 
         return Ok(user.ToModel());
+    }
+
+    [HttpGet("{id:int}/setlists")]
+    public async Task<ActionResult<List<SetlistModel>>> GetUserSetlists(int id)
+    {
+        return (await _setlistsDB.GetAllSetlistsOfUserAsync(id)).ToList();
     }
 }

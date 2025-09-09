@@ -10,9 +10,10 @@ using System.Net.Http.Headers;
 namespace SetlistManager.Services;
 public class UserService
 {
-    private const string _userEndpointPath = "https://localhost:7143/api/users";  
+    private const string _usersEndpointPath = "https://localhost:7143/api/users";  
     private const string _loginUserSuffix = "/auth";
     private const string _tokenKey = "authToken";
+    private const string _getUserSetlistsSuffix = "/Setlists";
 
     private readonly IHttpClientFactory _httpClientFactory; 
     private readonly ILocalStorageService _localStorage;
@@ -26,10 +27,16 @@ public class UserService
     }
 
     public async Task<UserModel?> GetUserAsync() 
-        => await _apiService.GetAsync<UserModel>(_userEndpointPath);
+        => await _apiService.GetAsync<UserModel>(_usersEndpointPath);
+
+    public async Task<List<SetlistModel>?> GetAllUserSetlists()
+    {
+        UserModel user = await GetUserAsync();
+        return await _apiService.GetAsync<List<SetlistModel>?>(_usersEndpointPath + "/" + user.Id.ToString() + _getUserSetlistsSuffix);
+    }
 
     public async Task RegisterAsync(RegisterRequestModel model) 
-        => await _apiService.PostAsync(_userEndpointPath, model);
+        => await _apiService.PostAsync(_usersEndpointPath, model);
 
     public async Task LogOutAsync()
     {
@@ -65,7 +72,7 @@ public class UserService
         }
 
         var content = new StringContent(user, Encoding.UTF8, "application/json");
-        HttpResponseMessage message = await client.PostAsync(_userEndpointPath + _loginUserSuffix, content);
+        HttpResponseMessage message = await client.PostAsync(_usersEndpointPath + _loginUserSuffix, content);
 
         if (!message.IsSuccessStatusCode)
             return;

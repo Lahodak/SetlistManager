@@ -15,29 +15,9 @@ public class SetlistsController : BaseController
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<SetlistModel>>> GetSetlists([FromQuery] int? userId, [FromQuery] string? name)
+    public async Task<ActionResult<IEnumerable<SetlistModel>>> GetSetlists()
     {
-        if (userId.HasValue)
-        {
-            var userSetlists = await _setlistsDB.GetAllSetlistsOfUserAsync(userId.Value);
-            return userSetlists?.ToList() ?? [];
-        }
-
-        if (!string.IsNullOrWhiteSpace(name))
-        {
-            var setlist = await _setlistsDB.GetSetlistByNameAsync(name);
-            
-            if (setlist == null) 
-                return NotFound();
-            
-            return new List<SetlistModel> 
-            { 
-                setlist 
-            };
-        }
-
-        var allSetlists = await _setlistsDB.GetAllSetlistsAsync();
-        return allSetlists?.ToList() ?? [];
+        return (await _setlistsDB.GetAllSetlistsAsync()).ToList();
     }
 
     [HttpPost]
@@ -55,6 +35,16 @@ public class SetlistsController : BaseController
 
         return result;
     }
+
+    //[HttpGet("{name:text}")]
+    //public async Task<ActionResult<SetlistModel>> GetSetlistByName(string name)
+    //{
+    //    var setlist = await _setlistsDB.GetSetlistByNameAsync(name);
+
+    //    if (setlist == null)
+    //        return NotFound();
+    //    return setlist;
+    //}
 
     [HttpPut]
     public async Task<ActionResult> EditSetlist(SetlistModel setlist)
