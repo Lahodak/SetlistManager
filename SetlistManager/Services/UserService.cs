@@ -2,16 +2,18 @@
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using SetlistManager.Common.Models;
+using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http;
-using System.Text;
 using System.Net.Http.Headers;
-
+using System.Text;
 
 namespace SetlistManager.Services;
 public class UserService
 {
-    private const string _usersEndpointPath = "https://localhost:7143/api/users";  
-    private const string _loginUserSuffix = "/auth";
+    private const string _usersEndpointPath = "https://localhost:7143/api/users";
+    private const string _authEndpointPath = "https://localhost:7143/api/auth";
+
+    private const string _loginUserSuffix = "/login";
     private const string _tokenKey = "authToken";
     private const string _getUserSetlistsSuffix = "/Setlists";
 
@@ -36,7 +38,7 @@ public class UserService
     }
 
     public async Task RegisterAsync(RegisterRequestModel model) 
-        => await _apiService.PostAsync(_usersEndpointPath, model);
+        => await _apiService.PostAsync(_authEndpointPath, model);
 
     public async Task LogOutAsync()
     {
@@ -51,8 +53,21 @@ public class UserService
     public async Task<bool> IsUserLoggedInAsync()
     {
         var token = await _localStorage.GetItemAsync<string>(_tokenKey);
+
         if (string.IsNullOrWhiteSpace(token))
             return false;
+
+        var handler = new JwtSecurityTokenHandler();
+        if (!handler.CanReadToken(token))
+            return false;
+
+        var jwt = handler.ReadJwtToken(token);
+
+        var exp = jwt.ValidTo;
+
+        if (exp < DateTime.UtcNow)
+            return false;
+
         return true;
     }
 
@@ -72,7 +87,7 @@ public class UserService
         }
 
         var content = new StringContent(user, Encoding.UTF8, "application/json");
-        HttpResponseMessage message = await client.PostAsync(_usersEndpointPath + _loginUserSuffix, content);
+        HttpResponseMessage message = await client.PostAsync(_authEndpointPath + _loginUserSuffix, content);
 
         if (!message.IsSuccessStatusCode)
             return;

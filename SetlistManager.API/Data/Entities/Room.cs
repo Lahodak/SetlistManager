@@ -4,8 +4,8 @@ namespace SetlistManager.API.Data.Entities;
 
 public class Room : Base
 {
-    public string Name { get; set; }
-    public string Code { get; set; }
+    public string Name { get; set; } = default!;
+    public string Code { get; set; } = default!;
     public bool IsActive { get; set; }
     public bool IsPublic { get; set; }    
     public int HostId { get; set; }
@@ -15,7 +15,7 @@ public class Room : Base
     public int CurrentSongId { get; set; }
     public int? SetlistId { get; set; }
     public Setlist? Setlist { get; set; }
-    public List<User> Users { get; set; }
+    public List<User>? Users { get; set; }
 
     public RoomModel ToModel()
     {
@@ -26,8 +26,10 @@ public class Room : Base
             userModels.Add(x);
         }
 
-        List<SetlistModel> setlistModels = [];
+        SetlistModel? setlist = new ();
 
+        if (Setlist is not null)
+            setlist = Setlist.ToModel() ?? new();
 
         RoomModel roomModel = new()
         {
@@ -41,8 +43,8 @@ public class Room : Base
             UpdatedBy = UpdatedBy,
             CurrentSong = CurrentSongId,
             Id = Id,
-            Users = userModels
-            
+            Users = userModels,
+            Setlist = setlist
         };
         return roomModel;
     }

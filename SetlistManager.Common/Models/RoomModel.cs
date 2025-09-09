@@ -12,6 +12,6 @@ public class RoomModel
     public DateTime UpdatedAt { get; set; }
     public int UpdatedBy { get; set; }
     public List<UserModel> Users { get; set; } = [];
-    public SetlistModel Setlist { get; set; }
+    public SetlistModel? Setlist { get; set; }
     public int CurrentSong { get; set; }    
 }

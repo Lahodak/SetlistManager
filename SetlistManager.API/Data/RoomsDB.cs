@@ -12,6 +12,18 @@ public class RoomsDB : IRoomsDB
     {
         _dbContext = dbContext;
     }
+
+    public async Task<RoomModel> GetRoomById(int roomId)
+    {
+        Room room = await _dbContext.Rooms.Include(x => x.Setlist)
+            .ThenInclude(x => x.SongsSetlists)
+            .ThenInclude(x => x.Song)
+            .FirstAsync(x => x.Id == roomId) 
+            ?? throw new Exception();
+        return room.ToModel();
+    }
+
+
     public async Task<int> CreateRoomAsync(RoomModel room)
     {
         await _dbContext.AddAsync(new Room().ToEntity(room));
@@ -20,31 +32,32 @@ public class RoomsDB : IRoomsDB
         return id;
     }
 
-    public async Task<RoomModel> JoinRoomAsync(string code, UserModel user)
+    public async Task<RoomModel> JoinRoomAsync(JoinRoomModel joinRoomModel, User user)
     {
         var room = await _dbContext.Rooms
             .Include(x => x.Users)
             .ThenInclude(x => x.Instrument)
             .Include(x => x.Setlist)            
-            .FirstOrDefaultAsync(x => x.Code == code)
-            ?? throw new Exception($"Room with code {code} does not exist");
+            .FirstOrDefaultAsync(x => x.Code == joinRoomModel.RoomCode)
+            ?? throw new Exception($"Room with code {joinRoomModel.RoomCode} does not exist");
 
-        room.Users.Add(await _dbContext.Users.FirstOrDefaultAsync(x => x.Id == user.Id));
+        room.Users.Add(user);
 
         return room.ToModel();
     }
 
-    public async Task<int> ChangeCurrentSongAsync(int roomId)
+    public async Task<int> ChangeCurrentSongAsync(ChangeCurrentSongModel changeCurrentSongModel)
     {
         var room = await _dbContext.Rooms
             .Include(x => x.Setlist)
             .ThenInclude(y => y.SongsSetlists)
             .ThenInclude(z => z.Song)
-            .FirstOrDefaultAsync(x => x.Id == roomId) ?? throw new Exception($"Room with Id {roomId} does not exist"); ;
+            .FirstOrDefaultAsync(x => x.Id == changeCurrentSongModel.RoomId) 
+                ?? throw new Exception($"Room with Id {changeCurrentSongModel.RoomId} does not exist");
 
         if (room.Setlist == null || room.Setlist.SongsSetlists == null || !room.Setlist.SongsSetlists.Any())
             throw new Exception("Room does not have a valid setlist with songs");
-        //if (room.Setlist)
+
         return 0;
     }
 }
