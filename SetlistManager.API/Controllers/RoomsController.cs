@@ -20,7 +20,7 @@ public class RoomsController : BaseController
         _roomsDB = roomsDB;
     }
 
-    [HttpGet]
+    [HttpPost("Join")]
     public async Task<ActionResult<RoomModel>> JoinRoomAsync(JoinRoomModel joinRoomModel)
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
@@ -74,10 +74,11 @@ public class RoomsController : BaseController
         }
     }
 
-    //public async Task<ActionResult<RoomModel>> CreateRoomAsync()
-    //{
-    //    //To-Do
+    [HttpPost]
+    public async Task<ActionResult<RoomModel>> CreateRoomAsync(RoomModel roomModel)
+    {
+        await _roomsDB.CreateRoomAsync(roomModel);
 
-    //    return BadRequest("ok");
-    //}
+        return BadRequest("ok");
+    }
 }

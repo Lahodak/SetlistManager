@@ -18,25 +18,14 @@ public partial class JammingRoom
     [Inject]
     public required LyricsMarkupService LyricsMarkupService { get; set; }
 
-    public RoomModel Room = new();
+    public RoomModel Room;
     private SongLyrics SongLyrics = new();
 
     protected async override Task OnInitializedAsync()
     {
-        await FillRoomSampleData();
-        await GetLyrics();
+        
     }
 
-    public async Task FillRoomSampleData()
-    {
-        Room = new()
-        {
-            Setlist = await SetlistService.GetSetlistById(5),
-            Id = 1,
-            Name = "JammingrRoom",
-            CurrentSong = 0
-        };
-    }
     private async Task NextSong()
     {
         if (Room.CurrentSong == Room.Setlist.Songs.Count - 1)

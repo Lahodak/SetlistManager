@@ -1,4 +1,5 @@
 ﻿using SetlistManager.Common.Models;
+using System.Security.Cryptography;
 
 namespace SetlistManager.API.Data.Entities;
 
@@ -51,7 +52,7 @@ public class Room : Base
     public Room ToEntity(RoomModel model)
     {
         Name = model.Name;
-        Code = model.Code;
+        Code = Name;
         IsActive = model.IsActive;
         IsPublic = model.IsPublic;
         HostId = model.HostId;
@@ -59,8 +60,7 @@ public class Room : Base
         UpdatedAt = model.UpdatedAt;
         UpdatedBy = model.UpdatedBy;
         CurrentSongId = model.CurrentSong;
-        Id = model.Id;
-
+        SetlistId = model.Setlist?.Id;
         return this;
     }
 }

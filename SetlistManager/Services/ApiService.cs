@@ -53,6 +53,47 @@ public class ApiService
         return result;
     }
 
+    public async Task<T> GetAsync<T>(string endpoint, T data)
+    {
+        using var httpClient = _httpClientFactory.CreateClient();
+        await ConfigureHttpClientAsync(httpClient);
+
+        string jsonData;
+        try
+        {
+            jsonData = JsonConvert.SerializeObject(data);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            return default;
+        }
+        var content = new StringContent(jsonData, System.Text.Encoding.UTF8, "application/json");
+
+        var response = await httpClient.GetAsync(endpoint);
+        response.EnsureSuccessStatusCode();
+
+        var json = await response.Content.ReadAsStringAsync();
+
+        if (string.IsNullOrWhiteSpace(json))
+        {
+            return default;
+        }
+
+        T result;
+        try
+        {
+            result = JsonConvert.DeserializeObject<T>(json);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            return default;
+        }
+
+        return result;
+    }
+
     public async Task<T> PostAsync<T>(string endpoint, T data)
     {
         using var httpClient = _httpClientFactory.CreateClient();

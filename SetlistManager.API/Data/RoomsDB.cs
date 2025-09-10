@@ -23,19 +23,18 @@ public class RoomsDB : IRoomsDB
         return room.ToModel();
     }
 
-
-    public async Task<int> CreateRoomAsync(RoomModel room)
+    public async Task<RoomModel> CreateRoomAsync(RoomModel room)
     {
-        await _dbContext.AddAsync(new Room().ToEntity(room));
+        var x = await _dbContext.AddAsync(new Room().ToEntity(room));
         await _dbContext.SaveChangesAsync();
-        int id = (await _dbContext.Rooms.FirstOrDefaultAsync(x => x.Code == room.Code))!.Id;
-        return id;
+        var id = (await _dbContext.Rooms.FirstOrDefaultAsync(x => x.Code == room.Code))!.Id;
+        return new();
     }
 
     public async Task<RoomModel> JoinRoomAsync(JoinRoomModel joinRoomModel, User user)
     {
         var room = await _dbContext.Rooms
-            .Include(x => x.Users)
+            .Include(x => x.Users)!
             .ThenInclude(x => x.Instrument)
             .Include(x => x.Setlist)            
             .FirstOrDefaultAsync(x => x.Code == joinRoomModel.RoomCode)
