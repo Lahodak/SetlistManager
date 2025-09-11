@@ -11,7 +11,7 @@ using SetlistManager.API.Data;
 
 namespace SetlistManager.API.Migrations;
 
-[DbContext(typeof(APIDbContext))]
+[DbContext(typeof(Data.AppDbContext))]
 [Migration("20250821222039_Init")]
 partial class Init
 {

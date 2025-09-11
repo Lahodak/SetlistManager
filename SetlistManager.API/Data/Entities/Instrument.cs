@@ -2,6 +2,6 @@
 
 public class Instrument : Base
 {
-    public string Name { get; set; }
-    public List<User> Users { get; set; }
+    public string Name { get; set; } = default!;
+    public virtual List<User>? Users { get; set; }
 }

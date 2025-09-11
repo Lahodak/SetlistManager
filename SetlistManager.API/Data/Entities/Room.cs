@@ -1,5 +1,4 @@
 ﻿using SetlistManager.Common.Models;
-using System.Security.Cryptography;
 
 namespace SetlistManager.API.Data.Entities;
 
@@ -11,26 +10,30 @@ public class Room : Base
     public bool IsPublic { get; set; }    
     public int HostId { get; set; }
     public DateTime CreatedAt { get; set; }
-    public DateTime UpdatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
     public int UpdatedBy { get; set; }
     public int CurrentSongId { get; set; }
     public int? SetlistId { get; set; }
-    public Setlist? Setlist { get; set; }
-    public List<User>? Users { get; set; }
+    public virtual Setlist? Setlist { get; set; }
+    public virtual List<User> Users { get; set; } = [];
 
     public RoomModel ToModel()
     {
         List<UserModel> userModels = [];
-        foreach (var user in Users)
-        { 
-            var x = user.ToModel();
-            userModels.Add(x);
-        }
+        
+        if(Users is not null)
+        {
+            foreach (var user in Users)
+            {
+                var x = user.ToModel();
+                userModels.Add(x);
+            }
+        }        
 
-        SetlistModel? setlist = new ();
+        SetlistModel? setlist = null;
 
         if (Setlist is not null)
-            setlist = Setlist.ToModel() ?? new();
+            setlist = Setlist.ToModel();
 
         RoomModel roomModel = new()
         {
@@ -49,6 +52,7 @@ public class Room : Base
         };
         return roomModel;
     }
+
     public Room ToEntity(RoomModel model)
     {
         Name = model.Name;

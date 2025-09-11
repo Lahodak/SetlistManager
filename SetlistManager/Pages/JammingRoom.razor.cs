@@ -2,8 +2,6 @@ namespace SetlistManager.Pages;
 using Microsoft.AspNetCore.Components;
 using SetlistManager.Services;
 using SetlistManager.Common.Models;
-using MudBlazor;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using SetlistManager.Models;
 
@@ -21,13 +19,15 @@ public partial class JammingRoom
     public RoomModel Room;
     private SongLyrics SongLyrics = new();
 
-    protected async override Task OnInitializedAsync()
-    {
+    //protected async override Task OnInitializedAsync()
+    //{
         
-    }
+    //}
 
     private async Task NextSong()
     {
+        if (Room.Setlist is null)
+            return;
         if (Room.CurrentSong == Room.Setlist.Songs.Count - 1)
             return;
         Room.CurrentSong++;

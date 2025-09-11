@@ -25,10 +25,11 @@ builder.Services.AddSingleton(serviceProvider =>
     return new SqlConnectionFactory(connectionString);
 });
 
-builder.Services.AddScoped<ISongsDB, SongsDB>();
-builder.Services.AddScoped<ISetlistsDB, SetlistsDB>();
-builder.Services.AddScoped<IRoomsDB, RoomsDB>();
+builder.Services.AddScoped<ISongService, SongService>();
+builder.Services.AddScoped<ISetlistsService, SetlistsService>();
+builder.Services.AddScoped<IRoomsService, RoomsService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<ILanguageService, LanguageService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<OrderMappingService>();
 builder.Services.AddControllers();
@@ -42,7 +43,7 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.AddDbContext<APIDbContext>(options =>
+builder.Services.AddDbContext<SetlistManager.API.Data.AppDbContext>(options =>
 {
     var connectionString = builder.Configuration.GetConnectionString("SetlistManagerDB")
         ?? throw new InvalidOperationException("Connection string 'SetlistManagerDB' not found.");
@@ -59,7 +60,7 @@ builder.Services.AddIdentity<User, Role>(options =>
 
     options.User.RequireUniqueEmail = true;
 })
-.AddEntityFrameworkStores<APIDbContext>()
+.AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders();
 
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.SectionName));

@@ -2,39 +2,43 @@
 using SetlistManager.API.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace SetlistManager.API.Data;
+namespace SetlistManager.API.Services;
 
-public class RoomsDB : IRoomsDB
+public class RoomsService : IRoomsService
 {
-    private readonly APIDbContext _dbContext;
+    private readonly Data.AppDbContext _dbContext;
 
-    public RoomsDB (APIDbContext dbContext)
+    public RoomsService(Data.AppDbContext dbContext)
     {
         _dbContext = dbContext;
     }
 
-    public async Task<RoomModel> GetRoomById(int roomId)
+    public async Task<RoomModel?> GetRoomByIdAsync(int roomId)
     {
-        Room room = await _dbContext.Rooms.Include(x => x.Setlist)
-            .ThenInclude(x => x.SongsSetlists)
+        var room = await _dbContext.Rooms
+            .Include(x => x.Setlist)
+            .ThenInclude(x => x!.SongsSetlists)
             .ThenInclude(x => x.Song)
-            .FirstAsync(x => x.Id == roomId) 
-            ?? throw new Exception();
+            .FirstOrDefaultAsync(x => x.Id == roomId);
+
+        if (room is null)
+            return null;
+
         return room.ToModel();
     }
 
-    public async Task<RoomModel> CreateRoomAsync(RoomModel room)
+    public async Task CreateRoomAsync(RoomModel room)
     {
         var x = await _dbContext.AddAsync(new Room().ToEntity(room));
         await _dbContext.SaveChangesAsync();
         var id = (await _dbContext.Rooms.FirstOrDefaultAsync(x => x.Code == room.Code))!.Id;
-        return new();
+        return;
     }
 
     public async Task<RoomModel> JoinRoomAsync(JoinRoomModel joinRoomModel, User user)
     {
         var room = await _dbContext.Rooms
-            .Include(x => x.Users)!
+            .Include(x => x.Users)
             .ThenInclude(x => x.Instrument)
             .Include(x => x.Setlist)            
             .FirstOrDefaultAsync(x => x.Code == joinRoomModel.RoomCode)
@@ -45,11 +49,11 @@ public class RoomsDB : IRoomsDB
         return room.ToModel();
     }
 
-    public async Task<int> ChangeCurrentSongAsync(ChangeCurrentSongModel changeCurrentSongModel)
+    public async Task ChangeCurrentSongAsync(ChangeCurrentSongModel changeCurrentSongModel)
     {
         var room = await _dbContext.Rooms
             .Include(x => x.Setlist)
-            .ThenInclude(y => y.SongsSetlists)
+            .ThenInclude(y => y!.SongsSetlists)
             .ThenInclude(z => z.Song)
             .FirstOrDefaultAsync(x => x.Id == changeCurrentSongModel.RoomId) 
                 ?? throw new Exception($"Room with Id {changeCurrentSongModel.RoomId} does not exist");
@@ -57,6 +61,6 @@ public class RoomsDB : IRoomsDB
         if (room.Setlist == null || room.Setlist.SongsSetlists == null || !room.Setlist.SongsSetlists.Any())
             throw new Exception("Room does not have a valid setlist with songs");
 
-        return 0;
+        return;
     }
 }

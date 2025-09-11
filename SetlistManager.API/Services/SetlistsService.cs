@@ -1,17 +1,13 @@
-﻿using Dapper;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using SetlistManager.Common.Models;
 using SetlistManager.API.Data.Entities;
-using System.Runtime.Serialization;
-using Microsoft.AspNetCore.Mvc;
-using SetlistManager.API.Services;
 
-namespace SetlistManager.API.Data;
-public class SetlistsDB : ISetlistsDB
+namespace SetlistManager.API.Services;
+public class SetlistsService : ISetlistsService
 {
-    private readonly APIDbContext _dbContext;
+    private readonly Data.AppDbContext _dbContext;
     private readonly OrderMappingService _orderMappingService;
-    public SetlistsDB(APIDbContext dbContext, OrderMappingService orderMappingService)
+    public SetlistsService(Data.AppDbContext dbContext, OrderMappingService orderMappingService)
     {
         _dbContext = dbContext;
         _orderMappingService = orderMappingService;
@@ -37,15 +33,14 @@ public class SetlistsDB : ISetlistsDB
             .ThenInclude(s => s.Song)
             .FirstOrDefaultAsync(x => x.Name.Contains(name));
 
-        if (setlist is null)
+        if(setlist is null) 
             return null;
 
         return _orderMappingService.MapSongEntityToModelOrder(setlist);
     }
 
-    public async Task<int> SaveSetlistAsync(SetlistModel setlistModel)
+    public async Task SaveSetlistAsync(SetlistModel setlistModel)
     {
-
         var songs = new List<Song>();
         foreach (var x in setlistModel.Songs)
         {
@@ -62,49 +57,32 @@ public class SetlistsDB : ISetlistsDB
             Creator = await _dbContext.Users.FirstAsync(x => x.Id == setlistModel.CreatorId),
             CreatorId = setlistModel.CreatorId,
             UpdatedBy = setlistModel.CreatorId,
-            SongsSetlists = new()
+            SongsSetlists = []
         };
 
         await _dbContext.Setlists.AddAsync(_orderMappingService.MapSongModelToEntity(setlistModel, setlistToCreate));
         await _dbContext.SaveChangesAsync();
 
-        return setlistToCreate.Id;
+        return;
     }
 
-    public async Task<IEnumerable<SetlistModel>> GetAllSetlistsOfUserAsync(int userId)
-    {
-        var userSetlists = await _dbContext.Setlists
+    public async Task<IEnumerable<SetlistModel>?> GetAllSetlistsOfUserAsync(int userId) 
+        => (await _dbContext.Setlists
             .Include(s => s.SongsSetlists)
             .ThenInclude(s => s.Song)
             .Where(x => x.Id == userId)
-            .ToListAsync();
+            .ToListAsync())
+            .Select(_orderMappingService.MapSongEntityToModelOrder)
+            ?? null;
 
-        List<SetlistModel> result = [];
-        foreach(var s in userSetlists)
-        {
-            result.Add(_orderMappingService.MapSongEntityToModelOrder(s));
-        }
-
-        return result;
-    }
-
-    public async Task<IEnumerable<SetlistModel>> GetAllSetlistsAsync()
-    {
-        var setlists = await _dbContext.Setlists
+    public async Task<IEnumerable<SetlistModel>?> GetAllSetlistsAsync() 
+            => (await _dbContext.Setlists
             .Include(s => s.SongsSetlists)
             .ThenInclude(s => s.Song)
-            .ToListAsync();
+            .ToListAsync()).Select(_orderMappingService.MapSongEntityToModelOrder)
+            ?? null;
 
-        List<SetlistModel> result = [];
-        foreach (var s in setlists)
-        {            
-            result.Add(_orderMappingService.MapSongEntityToModelOrder(s));
-        }
-
-        return result;
-    }
-
-    public async Task<bool> EditSetlistAsync(SetlistModel setlistModel)
+    public async Task EditSetlistAsync(SetlistModel setlistModel)
     {
         var setlistToBeEdited = await _dbContext.Setlists
             .Include(x => x.SongsSetlists)
@@ -122,6 +100,6 @@ public class SetlistsDB : ISetlistsDB
 
         await _dbContext.SaveChangesAsync();
 
-        return true;
+        return;
     }
 }

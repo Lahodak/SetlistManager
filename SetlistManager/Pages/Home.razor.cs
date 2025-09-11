@@ -95,26 +95,26 @@ public partial class Home
         await LocalStorage.SetItemAsync(_localStorageKey, _setlistToBeLoadedId);
     } 
 
-    protected override async Task OnInitializedAsync()
-    {
-        //_songCollection.AddRange(await SongsDatabase.GetSongCollection());
-        //_maxNumber = SongsDatabase.GetCount();
-        //var localData = await LocalStorage.GetItemAsync<string>(_localStorageKey);
+    //protected override async Task OnInitializedAsync()
+    //{
+    //    //_songCollection.AddRange(await SongsDatabase.GetSongCollection());
+    //    //_maxNumber = SongsDatabase.GetCount();
+    //    //var localData = await LocalStorage.GetItemAsync<string>(_localStorageKey);
 
-        //if(!int.TryParse(localData, out int lastLoadedSetlistId))        
-        //    return;    
+    //    //if(!int.TryParse(localData, out int lastLoadedSetlistId))        
+    //    //    return;    
         
-        //if(lastLoadedSetlistId <= 0)
-        //{
-        //    return;
-        //}
-        //else
-        //{
-        //    _setlistToBeLoadedId = lastLoadedSetlistId;
-        //    await GetSetlist();
-        //    ShowLoadSetlistUI();
-        //}
-    }
+    //    //if(lastLoadedSetlistId <= 0)
+    //    //{
+    //    //    return;
+    //    //}
+    //    //else
+    //    //{
+    //    //    _setlistToBeLoadedId = lastLoadedSetlistId;
+    //    //    await GetSetlist();
+    //    //    ShowLoadSetlistUI();
+    //    //}
+    //}
 
     private async Task SaveSetlist()
     {

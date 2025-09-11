@@ -1,6 +1,9 @@
-﻿namespace SetlistManager.Common.Models;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace SetlistManager.Common.Models;
 
 public class JoinRoomModel
 {
-    public string RoomCode { get; set; }
+    [Required]
+    public string RoomCode { get; set; } = default!;
 }

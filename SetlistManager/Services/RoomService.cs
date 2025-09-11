@@ -14,5 +14,5 @@ public class RoomService
     }
 
     public async Task JoinRoomAsync(JoinRoomModel joinRoomModel)
-        => await _apiService.GetAsync<RoomModel>(_roomsEndpointPath, joinRoomModel);
+        => await _apiService.GetAsync<RoomModel>(_roomsEndpointPath);
 }

@@ -3,8 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using SetlistManager.Common.Models;
 using SetlistManager.API.Data.Entities;
 using System.Security.Claims;
-using SetlistManager.API.Data;
-using Microsoft.AspNetCore.Routing.Constraints;
+using SetlistManager.API.Services;
 namespace SetlistManager.API.Controllers;
 
 [Route("api/rooms")]
@@ -12,9 +11,9 @@ namespace SetlistManager.API.Controllers;
 public class RoomsController : BaseController
 {
     private readonly UserManager<User> _userManager;
-    private readonly IRoomsDB _roomsDB;
+    private readonly IRoomsService _roomsDB;
 
-    public RoomsController(UserManager<User> userManager, IRoomsDB roomsDB)
+    public RoomsController(UserManager<User> userManager, IRoomsService roomsDB)
     {
         _userManager = userManager;
         _roomsDB = roomsDB;

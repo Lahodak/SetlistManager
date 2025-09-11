@@ -6,8 +6,8 @@ namespace SetlistManager.API.Services;
 
 public class OrderMappingService
 {
-    private readonly APIDbContext _dbContext;
-    public OrderMappingService(APIDbContext dbContext)
+    private readonly AppDbContext _dbContext;
+    public OrderMappingService(AppDbContext dbContext)
     {
         _dbContext = dbContext;
     }
@@ -18,7 +18,7 @@ public class OrderMappingService
 
         foreach (var songSetlist in setlist.SongsSetlists)
         {
-            setlistModel.Songs.FirstOrDefault(s => s.Id == songSetlist.SongId).Order = songSetlist.Order;
+            setlistModel.Songs.First(s => s.Id == songSetlist.SongId).Order = songSetlist.Order;
         }
         setlistModel.Songs = setlistModel.Songs.OrderBy(x => x.Order).ToList();
 

@@ -1,8 +1,17 @@
-﻿namespace SetlistManager.API.Data.Entities;
+﻿using SetlistManager.Common.Models;
+
+namespace SetlistManager.API.Data.Entities;
 
 public class Language : Base
 {
     public string Name { get; set; } = default!;
     public string Code { get; set; } = default!;
-    public List<Song>? Songs { get; set; }
+    public virtual List<Song>? Songs { get; set; }
+
+    public LanguageModel ToModel() => new()
+    {
+        Name = Name,
+        Code = Code,
+        Id = Id
+    };
 }

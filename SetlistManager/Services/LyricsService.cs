@@ -12,7 +12,7 @@ public class LyricsService(IHttpClientFactory httpClientFactory)
 
     public async Task<SongLyrics?> SearchLyricsAsync(SongModel song)
     {
-        if (song.Language != Language.EN)
+        if (song.Language.Code != "EN")
         {
             return null;
         }

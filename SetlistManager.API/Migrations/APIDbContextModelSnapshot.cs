@@ -10,7 +10,7 @@ using SetlistManager.API.Data;
 
 namespace SetlistManager.API.Migrations
 {
-    [DbContext(typeof(APIDbContext))]
+    [DbContext(typeof(Data.AppDbContext))]
     partial class APIDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

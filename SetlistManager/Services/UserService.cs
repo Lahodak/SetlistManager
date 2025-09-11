@@ -1,10 +1,7 @@
 ﻿using Blazored.LocalStorage;
-using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using SetlistManager.Common.Models;
 using System.IdentityModel.Tokens.Jwt;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Text;
 
 namespace SetlistManager.Services;
@@ -28,7 +25,7 @@ public class UserService
         _apiService = apiService;
     }
 
-    public async Task<UserModel?> GetUserAsync() 
+    public async Task<UserModel> GetUserAsync() 
         => await _apiService.GetAsync<UserModel>(_usersEndpointPath);
 
     public async Task<List<SetlistModel>?> GetAllUserSetlists()

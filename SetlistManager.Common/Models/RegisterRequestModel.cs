@@ -6,12 +6,12 @@ public class RegisterRequestModel
 {
     [Required]
     [EmailAddress]
-    public string Email { get; set; } = null!;
+    public string Email { get; set; } = default!;
 
     [Required]
-    public string UserName { get; set; } = null!;
+    public string UserName { get; set; } = default!;
 
     [Required]
     [MinLength(9)]
-    public string Password { get; set; } = null!;
+    public string Password { get; set; } = default!;
 }

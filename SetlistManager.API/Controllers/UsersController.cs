@@ -1,7 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using SetlistManager.API.Data;
 using SetlistManager.API.Data.Entities;
 using SetlistManager.API.Services;
 using SetlistManager.Common.Models;
@@ -13,9 +11,9 @@ public class UsersController : BaseController
 {
     private readonly UserManager<User> _userManager;
     private readonly UserService _userService;
-    private ISetlistsDB _setlistsDB;
+    private ISetlistsService _setlistsDB;
 
-    public UsersController(UserManager<User> userManager, UserService userService, ISetlistsDB setlistsDB)
+    public UsersController(UserManager<User> userManager, UserService userService, ISetlistsService setlistsDB)
     {
         _userManager = userManager;
         _userService = userService;
@@ -48,6 +46,6 @@ public class UsersController : BaseController
     [HttpGet("{id:int}/setlists")]
     public async Task<ActionResult<List<SetlistModel>>> GetUserSetlists(int id)
     {
-        return (await _setlistsDB.GetAllSetlistsOfUserAsync(id)).ToList();
+        return Ok(await _setlistsDB.GetAllSetlistsOfUserAsync(id));
     }
 }

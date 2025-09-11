@@ -3,13 +3,13 @@
 public class RoomModel
 {
     public int Id { get; set; }
-    public string Name { get; set; }
-    public string Code { get; set; }
+    public required string Name { get; set; }
+    public required string Code { get; set; }
     public bool IsActive { get; set; }
     public bool IsPublic { get; set; }
     public int HostId { get; set; }
     public DateTime CreatedAt { get; set; }
-    public DateTime UpdatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
     public int UpdatedBy { get; set; }
     public List<UserModel> Users { get; set; } = [];
     public SetlistModel? Setlist { get; set; }

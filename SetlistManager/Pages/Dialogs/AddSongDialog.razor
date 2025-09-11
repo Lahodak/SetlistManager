@@ -48,10 +48,14 @@
                                      Variant="Variant.Outlined" />
                 </MudItem>
                 <MudItem xs="12" sm="6">
-                    <MudSelect @bind-Value="_song.LanguageId" Label="Language" Variant="Variant.Outlined">
-                        <MudSelectItem Value="1">English</MudSelectItem>
-                        <MudSelectItem Value="2">Spanish</MudSelectItem>
-                        <MudSelectItem Value="3">German</MudSelectItem>
+                    <MudSelect @bind-Value="_song.Language" Label="Language" Variant="Variant.Outlined">
+                        @if(languages is not null)
+                        {
+                            @foreach(var language in languages)
+                            {
+                                <MudSelectItem Value="language">@language.Name</MudSelectItem>
+                            }
+                        }
                     </MudSelect>
                 </MudItem>
             </MudGrid>
@@ -68,16 +72,28 @@
     [CascadingParameter]
     public required IMudDialogInstance MudDialog { get; set; }
     [Inject]
-	public required ISnackbar Snackbar { get; set; }
+    public required ISnackbar Snackbar { get; set; }
     [Inject]
-	public required SongService SongService { get; set; }
+    public required SongService SongService { get; set; }
+    [Inject]
+    public required LanguageService LanguageService { get; set; }
+    [Inject]
+    public required UserService UserService { get; set; }
+
+    private List<LanguageModel>? languages;
 
     private SongModel _song = new()
     {
         CreatedAt = DateTime.UtcNow,
-        UpdatedAt = DateTime.UtcNow,
-        UpdatedBy = 1
+        UpdatedAt = DateTime.UtcNow      
     };
+
+    protected override async Task OnInitializedAsync()
+    {
+        languages = await LanguageService.GetAvailableSetlistAsync();
+        _song.Language = languages[0];
+        StateHasChanged();
+    }
 
     private async Task SaveSong()
     {
@@ -97,6 +113,9 @@
         {
             Snackbar.Add($"Error adding song: {ex.Message}", Severity.Error);
         }
+
+        var userId = (await UserService.GetUserAsync()).Id;
+        _song.LanguageId = _song.Language.Id;
     }
 
     private void Cancel() => MudDialog.Cancel();

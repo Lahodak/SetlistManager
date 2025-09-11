@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using SetlistManager.API.Data;
+using SetlistManager.API.Services;
 using SetlistManager.Common.Models;
 
 namespace SetlistManager.API.Controllers;
@@ -7,33 +7,30 @@ namespace SetlistManager.API.Controllers;
 
 public class SetlistsController : BaseController
 {
-    private readonly ISetlistsDB _setlistsDB;
+    private readonly ISetlistsService _setlistService;
 
-    public SetlistsController(ISetlistsDB setlistsDB)
+    public SetlistsController(ISetlistsService setlistsDB)
     {
-        _setlistsDB = setlistsDB;
+        _setlistService = setlistsDB;
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<SetlistModel>>> GetSetlists()
-    {
-        return (await _setlistsDB.GetAllSetlistsAsync()).ToList();
-    }
+    public async Task<ActionResult<IEnumerable<SetlistModel>>> GetSetlists() 
+        => Ok(await _setlistService.GetAllSetlistsAsync());
 
     [HttpPost]
-    public async Task<int> UploadSetlistToDb(SetlistModel setlistModel)
-        => await _setlistsDB.SaveSetlistAsync(setlistModel);
+    public async Task UploadSetlistToDb(SetlistModel setlistModel)
+        => await _setlistService.SaveSetlistAsync(setlistModel);
 
     [HttpGet("{id:int}")]
     public async Task<ActionResult<SetlistModel>> GetSetlistById(int id)
     {
-        var result = await _setlistsDB.GetSetlistByIdAsync(id) ?? new SetlistModel();
-
+        var result = await _setlistService.GetSetlistByIdAsync(id) ?? new SetlistModel();
 
         if (result == null)
             return NotFound();
 
-        return result;
+        return Ok(result);
     }
 
     //[HttpGet("{name:text}")]
@@ -52,8 +49,7 @@ public class SetlistsController : BaseController
         if(setlist == null)
             return BadRequest();
 
-        if (!await _setlistsDB.EditSetlistAsync(setlist)) 
-            return BadRequest();
+        await _setlistService.EditSetlistAsync(setlist);
 
         return Ok();    
     }

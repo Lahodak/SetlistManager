@@ -4,6 +4,7 @@ namespace SetlistManager.API.Controllers;
 
 [ApiController]
 [Authorize]
+
 public class BaseController : ControllerBase
 {
 }

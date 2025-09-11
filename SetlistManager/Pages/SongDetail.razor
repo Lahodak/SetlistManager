@@ -10,7 +10,7 @@
 
             <MudPaper Class="pa-4 mt-3" Elevation="2">
                 <MudText Typo="Typo.body1" Class="mt-2">Artist: <b>@song.Artist</b></MudText>
-                <MudText Typo="Typo.body1" Class="mt-2">Language: <b>@song.Language.ToString()</b></MudText>
+                <MudText Typo="Typo.body1" Class="mt-2">Language: <b>@song.Language.Code</b></MudText>
 
                 <MudText Typo="Typo.body1" Class="mt-2">
                     Tabs:
@@ -27,7 +27,7 @@
                 </MudText>                                                   
             </MudPaper>
 
-            @if (song.Language == Language.EN)
+            @if (song.Language.Code == "EN")
             {
                 <MudPaper Class="pa-4 mt-3" Elevation="2">
                     <MudText Typo="Typo.h6">Lyrics:</MudText>

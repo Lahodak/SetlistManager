@@ -1,6 +1,9 @@
-﻿namespace SetlistManager.Common.Models;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace SetlistManager.Common.Models;
 
 public class LoginResultModel
 {
-    public required string Token { get; set; }
+    [Required]
+    public string Token { get; set; } = default!;
 }

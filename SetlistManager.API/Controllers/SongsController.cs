@@ -1,36 +1,53 @@
 using Microsoft.AspNetCore.Mvc;
-using SetlistManager.API.Data;
+using SetlistManager.API.Data.Entities;
 using SetlistManager.API.Models;
+using SetlistManager.API.Services;
 using SetlistManager.Common.Models;
 
 namespace SetlistManager.API.Controllers;
 [Route("api/songs")]
 public partial class SongsController : BaseController
 {
-    private readonly ISongsDB _songsDB;
+    private readonly ISongService _songService;
+    private readonly ILanguageService _languageService;
 
-    public SongsController(ISongsDB songsDB)
+    public SongsController(ISongService songService, ILanguageService languageService)
     {
-        _songsDB = songsDB;
+        _songService = songService;
+        _languageService = languageService;
     }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<SongModel>>> GetSongs([FromQuery] string? name)
     {
-        if (!string.IsNullOrWhiteSpace(name))
+        IEnumerable<Song> songs;
+
+        if (string.IsNullOrWhiteSpace(name))
         {
-            var songs = await _songsDB.GetSongByNameAsync(name);
-
-            if (songs is null || !songs.Any())
-            {
-                return NotFound();
-            }
-
-            return songs.Select(s => s!.ToModel()).ToList();
+            songs = await _songService.GetSongsAsync();
+        }
+        else
+        {
+            songs = await _songService.GetSongByNameAsync(name) ?? Enumerable.Empty<Song>();
         }
 
-        var allSongs = await _songsDB.GetSongsAsync();
-        return allSongs.Select(s => s.ToModel()).ToList();
+        if (!songs.Any())
+        {
+            return NotFound();
+        }
+
+        var songModels = new List<SongModel>();
+        var languages = await _languageService.GetAvailableLanguagesAsync();
+
+        foreach (var song in songs)
+        {
+            var songModel = song.ToModel();
+            var language = languages.First(x => x.Id == songModel.LanguageId);
+            songModel.Language = language;
+            songModels.Add(songModel);
+        }
+
+        return Ok(songModels);
     }
 
 
@@ -39,8 +56,9 @@ public partial class SongsController : BaseController
     {
         foreach(var song in addSongs.Songs)
         {
-            await _songsDB.UploadSong(new()
+            await _songService.UploadSongAsync(new()
             {
+                Language = await _languageService.GetLanguageByIdAsync(song.Language.Id),
                 Name = song.Name,
                 Artist = song.Artist,
                 TabsURL = song.TabsURL,
@@ -59,7 +77,7 @@ public partial class SongsController : BaseController
     [HttpPost]
     public async Task AddSong(SongModel addSong)
     {
-        await _songsDB.UploadSong(new()
+        await _songService.UploadSongAsync(new()
         {
             Name = addSong.Name,
             Artist = addSong.Artist,
@@ -71,20 +89,25 @@ public partial class SongsController : BaseController
             BPM = addSong.BPM,
             CreatedAt = addSong.CreatedAt,
             UpdatedAt = addSong.UpdatedAt,
-            UpdatedBy = addSong.UpdatedBy
+            UpdatedBy = addSong.UpdatedBy,
+            Language = await _languageService.GetLanguageByIdAsync(addSong.Language.Id),
         });
     }
 
     [HttpGet("{id:int}")]
     public async Task<ActionResult<SongModel>> GetSongById(int id)
     {
-        var song = await _songsDB.GetSongByIdAsync(id);
+        var song = await _songService.GetSongByIdAsync(id);
 
         if (song is null)
         {
             return NotFound();
         }
 
-        return song.ToModel();
+        var songModel = song.ToModel();
+
+        songModel.Language = (await _languageService.GetLanguageByIdAsync(songModel.LanguageId)).ToModel();
+
+        return Ok(songModel);
     }
 }

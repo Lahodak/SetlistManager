@@ -22,7 +22,7 @@ public partial class SongDetail
         if(SongsDatabase.GetCount() == 0)
             await SongsDatabase.CheckForData();
 		song = SongsDatabase.GetSong(SongId)!;
-		if (song.Language == Language.EN)
+		if (song.Language.Code == "EN")
 		{
 			await SearchLyrics();
 		}
