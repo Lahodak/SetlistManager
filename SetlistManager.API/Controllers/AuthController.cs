@@ -14,6 +14,7 @@ public class AuthController : BaseController
     private readonly SignInManager<User> _signInManager;
     private readonly IJwtService _jwtService;
     private readonly UserManager<User> _userManager;
+
     public AuthController(UserManager<User> userManager, IJwtService jwtService, SignInManager<User> signInManager)
     {
         _userManager = userManager;
@@ -26,6 +27,7 @@ public class AuthController : BaseController
     public async Task<ActionResult> Register(RegisterRequestModel model)
     {
         var existingUser = await _userManager.FindByEmailAsync(model.Email);
+
         if (existingUser != null)
         {
             return BadRequest(new RegisterResultModel

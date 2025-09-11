@@ -22,7 +22,7 @@ public class SetlistsController : BaseController
     public async Task UploadSetlistToDb(SetlistModel setlistModel)
         => await _setlistService.SaveSetlistAsync(setlistModel);
 
-    [HttpGet("{id:int}")]
+    [HttpGet("{id}")]
     public async Task<ActionResult<SetlistModel>> GetSetlistById(int id)
     {
         var result = await _setlistService.GetSetlistByIdAsync(id) ?? new SetlistModel();
@@ -33,20 +33,10 @@ public class SetlistsController : BaseController
         return Ok(result);
     }
 
-    //[HttpGet("{name:text}")]
-    //public async Task<ActionResult<SetlistModel>> GetSetlistByName(string name)
-    //{
-    //    var setlist = await _setlistsDB.GetSetlistByNameAsync(name);
-
-    //    if (setlist == null)
-    //        return NotFound();
-    //    return setlist;
-    //}
-
     [HttpPut]
     public async Task<ActionResult> EditSetlist(SetlistModel setlist)
     {
-        if(setlist == null)
+        if(setlist.Songs is null)
             return BadRequest();
 
         await _setlistService.EditSetlistAsync(setlist);

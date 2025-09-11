@@ -5,7 +5,9 @@ using SetlistManager.API.Services;
 using SetlistManager.Common.Models;
 
 namespace SetlistManager.API.Controllers;
+
 [Route("api/songs")]
+
 public partial class SongsController : BaseController
 {
     private readonly ISongService _songService;
@@ -20,7 +22,7 @@ public partial class SongsController : BaseController
     [HttpGet]
     public async Task<ActionResult<IEnumerable<SongModel>>> GetSongs([FromQuery] string? name)
     {
-        IEnumerable<Song> songs;
+        IEnumerable<Song?> songs;
 
         if (string.IsNullOrWhiteSpace(name))
         {
@@ -28,20 +30,18 @@ public partial class SongsController : BaseController
         }
         else
         {
-            songs = await _songService.GetSongByNameAsync(name) ?? Enumerable.Empty<Song>();
+            songs = await _songService.GetSongByNameAsync(name);
         }
 
-        if (!songs.Any())
-        {
-            return NotFound();
-        }
+        if (songs is null)        
+            return NotFound();        
 
         var songModels = new List<SongModel>();
         var languages = await _languageService.GetAvailableLanguagesAsync();
 
         foreach (var song in songs)
         {
-            var songModel = song.ToModel();
+            var songModel = song!.ToModel();
             var language = languages.First(x => x.Id == songModel.LanguageId);
             songModel.Language = language;
             songModels.Add(songModel);
@@ -49,7 +49,6 @@ public partial class SongsController : BaseController
 
         return Ok(songModels);
     }
-
 
     [HttpPost("bulk")]
     public async Task AddSongs(AddSongsModel addSongs)

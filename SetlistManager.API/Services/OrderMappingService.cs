@@ -7,12 +7,15 @@ namespace SetlistManager.API.Services;
 public class OrderMappingService
 {
     private readonly AppDbContext _dbContext;
-    public OrderMappingService(AppDbContext dbContext)
+    private readonly ILanguageService _languageService;
+
+    public OrderMappingService(AppDbContext dbContext, ILanguageService languageService)
     {
         _dbContext = dbContext;
+        _languageService = languageService;
     }
 
-    public SetlistModel MapSongEntityToModelOrder(Setlist setlist)
+    public async Task<SetlistModel> MapSongEntityToModelOrder(Setlist setlist)
     {
         var setlistModel = setlist.ToModel();
 
@@ -20,7 +23,16 @@ public class OrderMappingService
         {
             setlistModel.Songs.First(s => s.Id == songSetlist.SongId).Order = songSetlist.Order;
         }
+        
         setlistModel.Songs = setlistModel.Songs.OrderBy(x => x.Order).ToList();
+
+        var languages =  await _languageService.GetAvailableLanguagesAsync();
+
+        setlistModel.Songs = setlistModel.Songs.Select(song => 
+        {
+            song.Language = languages.First(x => x.Id == song.LanguageId);
+            return song;
+        }).ToList();
 
         return setlistModel;
     }

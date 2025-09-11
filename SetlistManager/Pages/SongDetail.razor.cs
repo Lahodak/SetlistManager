@@ -24,7 +24,7 @@ public partial class SongDetail
 		song = SongsDatabase.GetSong(SongId)!;
 		if (song.Language.Code == "EN")
 		{
-			await SearchLyrics();
+			//await SearchLyrics();
 		}
 	}    
 

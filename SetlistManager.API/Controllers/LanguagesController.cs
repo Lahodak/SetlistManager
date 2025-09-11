@@ -8,6 +8,7 @@ namespace SetlistManager.API.Controllers;
 public class LanguagesController : BaseController
 {
     private readonly ILanguageService _languageService;
+
     public LanguagesController(ILanguageService languageService)
     {
         _languageService = languageService;

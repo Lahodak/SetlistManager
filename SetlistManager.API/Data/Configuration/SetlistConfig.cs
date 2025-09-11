@@ -10,6 +10,6 @@ public class SetlistConfig : IEntityTypeConfiguration<Setlist>
     {
         builder.HasMany(r => r.Rooms)
             .WithOne(s => s.Setlist)
-            .OnDelete(DeleteBehavior.Restrict); // optional: delete rooms if setlist is deleted
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

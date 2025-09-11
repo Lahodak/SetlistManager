@@ -18,12 +18,13 @@ public class SetlistsService : ISetlistsService
         var setlist = await _dbContext.Setlists
             .Include(s => s.SongsSetlists)
             .ThenInclude(s => s.Song)
+            .ThenInclude(s => s.Language)
             .FirstOrDefaultAsync(x => x.Id == id);
 
         if (setlist is null)
             return null;
 
-        return _orderMappingService.MapSongEntityToModelOrder(setlist);
+        return await _orderMappingService.MapSongEntityToModelOrder(setlist);
     }
 
     public async Task<SetlistModel?> GetSetlistByNameAsync(string name)
@@ -36,7 +37,7 @@ public class SetlistsService : ISetlistsService
         if(setlist is null) 
             return null;
 
-        return _orderMappingService.MapSongEntityToModelOrder(setlist);
+        return await _orderMappingService.MapSongEntityToModelOrder(setlist);
     }
 
     public async Task SaveSetlistAsync(SetlistModel setlistModel)
@@ -66,21 +67,25 @@ public class SetlistsService : ISetlistsService
         return;
     }
 
-    public async Task<IEnumerable<SetlistModel>?> GetAllSetlistsOfUserAsync(int userId) 
-        => (await _dbContext.Setlists
+    public async Task<IEnumerable<SetlistModel>?> GetAllSetlistsOfUserAsync(int userId)
+    {
+        var setlists = await _dbContext.Setlists
             .Include(s => s.SongsSetlists)
             .ThenInclude(s => s.Song)
             .Where(x => x.Id == userId)
-            .ToListAsync())
-            .Select(_orderMappingService.MapSongEntityToModelOrder)
-            ?? null;
+            .ToListAsync();
 
-    public async Task<IEnumerable<SetlistModel>?> GetAllSetlistsAsync() 
-            => (await _dbContext.Setlists
+        return setlists.Select(setlists => _orderMappingService.MapSongEntityToModelOrder(setlists).Result);
+    }
+    public async Task<IEnumerable<SetlistModel>?> GetAllSetlistsAsync()
+    {
+        var setlists = await _dbContext.Setlists
             .Include(s => s.SongsSetlists)
             .ThenInclude(s => s.Song)
-            .ToListAsync()).Select(_orderMappingService.MapSongEntityToModelOrder)
-            ?? null;
+            .ToListAsync();        
+        
+        return setlists.Select(setlists => _orderMappingService.MapSongEntityToModelOrder(setlists).Result);
+    }
 
     public async Task EditSetlistAsync(SetlistModel setlistModel)
     {
@@ -99,7 +104,5 @@ public class SetlistsService : ISetlistsService
         }
 
         await _dbContext.SaveChangesAsync();
-
-        return;
     }
 }

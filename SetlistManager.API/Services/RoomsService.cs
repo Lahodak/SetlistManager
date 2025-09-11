@@ -29,9 +29,11 @@ public class RoomsService : IRoomsService
 
     public async Task CreateRoomAsync(RoomModel room)
     {
-        var x = await _dbContext.AddAsync(new Room().ToEntity(room));
+        var x = await _dbContext.AddAsync(new Room().ToEntity(room));        
         await _dbContext.SaveChangesAsync();
+        
         var id = (await _dbContext.Rooms.FirstOrDefaultAsync(x => x.Code == room.Code))!.Id;
+
         return;
     }
 
@@ -55,11 +57,13 @@ public class RoomsService : IRoomsService
             .Include(x => x.Setlist)
             .ThenInclude(y => y!.SongsSetlists)
             .ThenInclude(z => z.Song)
-            .FirstOrDefaultAsync(x => x.Id == changeCurrentSongModel.RoomId) 
-                ?? throw new Exception($"Room with Id {changeCurrentSongModel.RoomId} does not exist");
+            .FirstOrDefaultAsync(x => x.Id == changeCurrentSongModel.RoomId)
+            ?? throw new Exception($"Room with id {changeCurrentSongModel.RoomId} does not exist");
 
-        if (room.Setlist == null || room.Setlist.SongsSetlists == null || !room.Setlist.SongsSetlists.Any())
-            throw new Exception("Room does not have a valid setlist with songs");
+        room.CurrentSongId = changeCurrentSongModel.NewCurrentSongId;
+
+        _dbContext.Rooms.Update(room);
+        _dbContext.SaveChanges();
 
         return;
     }
