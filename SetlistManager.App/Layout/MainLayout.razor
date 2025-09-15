@@ -1,0 +1,94 @@
+﻿@inherits LayoutComponentBase
+@using Blazored.LocalStorage;
+@using SetlistManager.App.Services
+
+<MudThemeProvider @bind-IsDarkMode="@_isDarkMode" Theme="_theme" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+    <MudAppBar Position="MudAppBarPosition.Top">
+        <MudIconButton Icon="@Icons.Material.Filled.Home" Color="Color.Inherit" OnClick="NavigateHome"/>
+        <MudSpacer />
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+        <MudIconButton Icon="@(_isDarkMode? Icons.Material.Filled.DarkMode : Icons.Material.Filled.WbSunny)"
+                       OnClick="ToggleTheme"
+                       Color="Color.Inherit"
+                       Class="ma-4" />
+        <MudStack AlignItems="AlignItems.Start" Spacing="0">
+            <MudText Typo="Typo.caption">Welcome</MudText>
+            <MudText Typo="Typo.subtitle2">@userModel?.Username</MudText>
+        </MudStack>
+
+        <MudIconButton Icon="@Icons.Material.Filled.ManageAccounts" Color="Color.Inherit" OnClick="OpenUserDetail"/>
+    </MudAppBar>
+
+    <MudDrawer @bind-Open="_drawerOpen" Elevation="2">
+        <MudDrawerHeader>
+            <MudText Typo="Typo.h6">Setlist Manager</MudText>
+        </MudDrawerHeader>
+        <MudDrawerContainer>
+            <NavMenu />
+        </MudDrawerContainer>
+    </MudDrawer>
+
+    <MudMainContent>
+        @Body
+    </MudMainContent>
+</MudLayout>
+
+@code {
+    [Inject]
+    public required NavigationManager Navigation { get; set; }
+    [Inject]
+    public required ILocalStorageService LocalStorage { get; set; }
+    [Inject]
+    public required UserService UserService { get; set; }
+
+    private bool _drawerOpen = true;
+    private const string _localStorageKey = "ToggleDarkMode";
+    private MudTheme _theme = new();
+    private bool _isDarkMode;
+    private UserModel userModel = new();
+
+    protected override async Task OnInitializedAsync()
+    {        
+        var localData = await LocalStorage.GetItemAsync<bool>(_localStorageKey);
+        _isDarkMode = localData;
+        StateHasChanged();
+
+        var token = await LocalStorage.GetItemAsStringAsync("authToken");
+
+        if (string.IsNullOrWhiteSpace(token) && !Navigation.Uri.Contains("/login"))
+        {
+            Navigation.NavigateTo("/login", true);
+            return;
+        }
+
+        userModel = await UserService.GetUserAsync();
+        StateHasChanged();
+    }
+
+    void DrawerToggle()
+    {
+        _drawerOpen = !_drawerOpen;
+    }
+
+    void NavigateHome()
+    {
+        Navigation.NavigateTo("/Home");
+    }
+
+    private void OpenUserDetail()
+    {
+        Navigation.NavigateTo("/UserPortal");
+	}
+
+    private async Task ToggleTheme()
+    {
+        _isDarkMode = !_isDarkMode;
+        await LocalStorage.SetItemAsync(_localStorageKey, _isDarkMode);
+        StateHasChanged();
+    }
+}

@@ -1,11 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using SetlistManager.API.Data.Entities;
-using SetlistManager.API.Services;
+using SetlistManager. Api.Services;
 using SetlistManager.Common.Models;
+using SetlistManager.Data.Entities;
 
-namespace SetlistManager.API.Controllers;
+namespace SetlistManager. Api.Controllers;
 
 [Route("api/auth")]
 

@@ -1,11 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
-using SetlistManager.API.Data.Entities;
-using SetlistManager.API.Models;
-using SetlistManager.API.Services;
+using SetlistManager. Api.Controllers;
+using SetlistManager. Api.Models;
 using SetlistManager.Common.Models;
-using SetlistManager.API.Mappers;
+using SetlistManager.Data.Entities;
+using SetlistManger.Business.Mappers;
+using SetlistManger.Business.Services;
 
-namespace SetlistManager.API.Controllers;
+namespace SetlistManager.Api.Controllers;
 
 [Route("api/songs")]
 

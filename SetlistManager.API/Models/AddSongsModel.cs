@@ -1,6 +1,6 @@
 ﻿using SetlistManager.Common.Models;
 
-namespace SetlistManager.API.Models;
+namespace SetlistManager. Api.Models;
 
 public class AddSongsModel
 {

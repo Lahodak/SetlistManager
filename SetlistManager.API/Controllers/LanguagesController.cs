@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SetlistManager.Common.Models;
-using SetlistManager.API.Services;
-namespace SetlistManager.API.Controllers;
+using SetlistManger.Business.Services;  
+namespace SetlistManager.Api.Controllers;
 
 [Route("api/languages")]
 

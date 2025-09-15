@@ -2,11 +2,14 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using SetlistManager.API;
-using SetlistManager.API.Data;
-using SetlistManager.API.Data.Entities;
-using SetlistManager.API.Options;
-using SetlistManager.API.Services;
+using SetlistManager. Api;
+using SetlistManager. Api.Extentions;
+using SetlistManager. Api.Options;
+using SetlistManager. Api.Services;
+using SetlistManager.Data;
+using SetlistManager.Data.Entities;
+using SetlistManger.Business.Extentions;
+using SetlistManger.Business.Services;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,14 +18,11 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddScoped<ISongService, SongService>();
-builder.Services.AddScoped<ISetlistsService, SetlistsService>();
-builder.Services.AddScoped<IRoomsService, RoomsService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
-builder.Services.AddScoped<ILanguageService, LanguageService>();
-builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICurrentUserContext, CurrentUserContext>();
-builder.Services.AddScoped<OrderMappingService>();
+
+builder.Services.AddApiServices()
+    .AddBusinessServices();
 
 builder.Services.AddControllers();
 

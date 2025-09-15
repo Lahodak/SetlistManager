@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-namespace SetlistManager.API.Controllers;
+namespace SetlistManager. Api.Controllers;
 
 [ApiController]
 [Authorize]

@@ -1,13 +1,13 @@
-﻿using SetlistManager.API.Options;
+﻿using SetlistManager. Api.Options;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using SetlistManager.API.Data.Entities;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using SetlistManager.Data.Entities;
 
-namespace SetlistManager.API.Services;
+namespace SetlistManager. Api.Services;
 
 public class JwtService : IJwtService
 {

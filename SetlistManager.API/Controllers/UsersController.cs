@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using SetlistManager.API.Services;
+using SetlistManager. Api.Services;
 using SetlistManager.Common.Models;
+using SetlistManger.Business.Services;
 
-namespace SetlistManager.API.Controllers;
+namespace SetlistManager. Api.Controllers;
 
 [Route("api/users")]
 public class UsersController : BaseController
