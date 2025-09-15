@@ -43,4 +43,12 @@ public class UserService : IUserService
         }
         await _userManager.UpdateAsync(user);
     }
+
+    public async Task<UserModel> GetCurrentUserAsync(int userId)
+    {
+        User? user = await _dbContext.Users
+            .Include(u => u.Instrument)
+            .FirstAsync(u => u.Id == userId);
+        return user.ToModel();
+    }   
 }
