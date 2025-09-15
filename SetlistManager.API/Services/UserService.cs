@@ -5,17 +5,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace SetlistManager.API.Services;
 
-public class UserService
+public class UserService : IUserService
 {
     public readonly UserManager<User> _userManager;
     private readonly Data.AppDbContext _dbContext;
+
     public UserService(UserManager<User> userManager, Data.AppDbContext dbContext)
     {
         _userManager = userManager;
         _dbContext = dbContext;
     }
 
-    public async Task UpdateUser(UserModel model)
+    public async Task UpdateUserAsync(UserModel model)
     {
         User? user = await _userManager.FindByIdAsync(model.Id.ToString());
         if (user == null)
@@ -26,9 +27,9 @@ public class UserService
         user.UserName = model.Username;
         user.Email = model.Email;
         
-        if (!string.IsNullOrEmpty(model.Instrument) && model.Instrument != "No Instrument")
+        if (model.Instrument is null && model.Instrument.Name != "No Instrument")
         {
-            var instrument = await _dbContext.Instruments.FirstOrDefaultAsync(i => i.Name == model.Instrument);
+            var instrument = await _dbContext.Instruments.FirstOrDefaultAsync(i => i.Name == model.Instrument.Name);
             if (instrument != null)
             {
                 user.InstrumentId = instrument.Id;

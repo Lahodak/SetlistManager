@@ -21,8 +21,11 @@ public class User : IdentityUser<int>
             Id = Id,
             Username = UserName!,
             Email = Email!,
-            Instrument = Instrument?.Name ?? "No Instrument"
-        };
+            Instrument = new()
+            {
+                Name = Instrument.Name ?? "No Instrument"
+            }
+        };        
 
         return model;
     }

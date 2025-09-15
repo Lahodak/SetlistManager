@@ -1,16 +1,8 @@
-﻿namespace SetlistManager.Common.Models;
-public enum InstrumentModel
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace SetlistManager.Common.Models;
+public class InstrumentModel
 {
-    Singer,
-    Guitar,
-    Bassist,
-    Keyboardist,
-    Drummer,
-    Flautists,
-    Violinist,
-    Cellist,
-    Pianist,
-    SoundEngineer,
-    Percussionist,
-    Accordionist
+    [Required]
+    public string Name { get; set; } = default!;
 }

@@ -30,7 +30,7 @@ builder.Services.AddScoped<ISetlistsService, SetlistsService>();
 builder.Services.AddScoped<IRoomsService, RoomsService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<ILanguageService, LanguageService>();
-builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<OrderMappingService>();
 builder.Services.AddControllers();
 builder.Services.AddCors(options =>

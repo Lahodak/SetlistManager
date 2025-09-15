@@ -23,7 +23,7 @@
                         {
                             @foreach (var user in Room.Users)
                             {
-                                <MudListItem>@user.Username | @user.Instrument </MudListItem>
+                                <MudListItem>@user.Username | @user.Instrument.Name </MudListItem>
                             }
                         }
                     </MudList>
