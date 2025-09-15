@@ -1,7 +1,7 @@
 ﻿using SetlistManager.Common.Models;
-using SetlistManager.API.Data.Entities;
 using SetlistManager.API.Data;
 using Microsoft.EntityFrameworkCore;
+using SetlistManager.API.Mappers;
 
 namespace SetlistManager.API.Services;
 

@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using SetlistManager.Common.Models;
 using SetlistManager.API.Data.Entities;
-using System.Security.Claims;
 using SetlistManager.API.Services;
 namespace SetlistManager.API.Controllers;
 

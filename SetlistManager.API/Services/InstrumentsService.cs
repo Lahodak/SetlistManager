@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SetlistManager.API.Data;
 using SetlistManager.Common.Models;
+using SetlistManager.API.Mappers;
 
 namespace SetlistManager.API.Services;
 

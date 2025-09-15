@@ -1,6 +1,4 @@
-﻿using SetlistManager.Common.Models;
-
-namespace SetlistManager.API.Data.Entities;
+﻿namespace SetlistManager.API.Data.Entities;
 
 public class Setlist : Base
 {
@@ -12,20 +10,4 @@ public class Setlist : Base
     public int UpdatedBy { get; set; }
     public List<SongsSetlists> SongsSetlists { get; set; }
     public List<Room> Rooms { get; set; }
-
-    public SetlistModel ToModel()
-    {
-        return new SetlistModel
-        {
-            Id = Id,
-            Name = Name,
-            CreatorId = CreatorId,
-            Songs = SongsSetlists?
-                        .Select(ss => ss.Song.ToModel())
-                        .ToList()
-                        ?? []            
-        };
-
-        
-    }
 }

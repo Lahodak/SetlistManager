@@ -1,5 +1,4 @@
 ﻿using SetlistManager.Common.Models;
-using SetlistManager.API.Data.Entities;
 
 namespace SetlistManager.API.Services;
 

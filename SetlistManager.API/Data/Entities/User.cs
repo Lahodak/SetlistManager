@@ -1,6 +1,4 @@
-﻿
-using Microsoft.AspNetCore.Identity;
-using SetlistManager.Common.Models;
+﻿using Microsoft.AspNetCore.Identity;
 
 namespace SetlistManager.API.Data.Entities;
 

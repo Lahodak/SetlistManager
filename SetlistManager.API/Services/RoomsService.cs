@@ -1,5 +1,6 @@
 ﻿using SetlistManager.Common.Models;
 using SetlistManager.API.Data.Entities;
+using SetlistManager.API.Mappers;
 using Microsoft.EntityFrameworkCore;
 
 namespace SetlistManager.API.Services;
@@ -29,12 +30,8 @@ public class RoomsService : IRoomsService
 
     public async Task CreateRoomAsync(RoomModel room)
     {
-        var x = await _dbContext.AddAsync(new Room().ToEntity(room));        
-        await _dbContext.SaveChangesAsync();
-        
-        var id = (await _dbContext.Rooms.FirstOrDefaultAsync(x => x.Code == room.Code))!.Id;
-
-        return;
+        await _dbContext.AddAsync(room.ToEntity());        
+        await _dbContext.SaveChangesAsync();                
     }
 
     public async Task<RoomModel> JoinRoomAsync(JoinRoomModel joinRoomModel, User user)
