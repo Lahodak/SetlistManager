@@ -15,14 +15,6 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddSingleton(serviceProvider =>
-{
-    var configuration = serviceProvider.GetRequiredService<IConfiguration>();
-    var connectionString = configuration.GetConnectionString("SetlistManagerDB")
-        ?? throw new ApplicationException("The connection string is null");
-    return new SqlConnectionFactory(connectionString);
-});
-
 builder.Services.AddScoped<ISongService, SongService>();
 builder.Services.AddScoped<ISetlistsService, SetlistsService>();
 builder.Services.AddScoped<IRoomsService, RoomsService>();
@@ -44,7 +36,7 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.AddDbContext<SetlistManager.API.Data.AppDbContext>(options =>
+builder.Services.AddDbContext<AppDbContext>(options =>
 {
     var connectionString = builder.Configuration.GetConnectionString("SetlistManagerDB")
         ?? throw new InvalidOperationException("Connection string 'SetlistManagerDB' not found.");
