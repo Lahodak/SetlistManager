@@ -2,6 +2,7 @@
 using SetlistManager.API.Data.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using SetlistManager.API.Mappers;
 
 namespace SetlistManager.API.Services;
 

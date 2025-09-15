@@ -1,6 +1,12 @@
 ﻿@page "/UserPortal"
 
 <MudText>
+	@if(userModel is null)
+	{
+		<em>Loading...</em>
+		return;
+	}
+
 	@userModel.Username - @userModel.Email - @userModel.Instrument.Name - @userModel.Id
 </MudText>
 
@@ -8,10 +14,10 @@
 {
 	[Inject]
 	public required UserService _userService { get; set; }
-	private UserModel userModel = new();
+	private UserModel? userModel;
 
 	protected override async Task OnInitializedAsync()
 	{
-		userModel = await _userService.GetUserAsync() ?? new UserModel();
+		userModel = await _userService.GetUserAsync();
 	}
 }

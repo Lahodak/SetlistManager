@@ -1,4 +1,5 @@
-﻿using SetlistManager.Common.Models;
+﻿using SetlistManager.API.Mappers;
+using SetlistManager.Common.Models;
 
 namespace SetlistManager.API.Data.Entities;
 
