@@ -1,0 +1,120 @@
+﻿@page "/JammingRoom"
+
+<PageTitle>Jamming Room</PageTitle>
+
+<style>
+    .BackgroundBlur{
+        backdrop-filter: blur(10px);
+    }
+</style>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-5">   
+    @if(Room.Users != null && Room.Users.Count > 0 && Room.Setlist != null && Room.Setlist.Songs.Count > 0)
+    {
+        <MudGrid>
+            <MudItem xs="12" md="3">
+                <MudPaper Class="pa-4" Elevation="2">
+                    <MudText Typo="Typo.h3">@Room.Name | @Room.Id</MudText>
+                    <MudText Typo="Typo.body1">Hosted by: @Room.Users[0].Username</MudText>
+
+                    <MudText Typo="Typo.body1" Class="mt-2">Users attending:</MudText>
+                    <MudList T="string">
+                        @if (Room.Users != null && Room.Users.Count > 0)
+                        {
+                            @foreach (var user in Room.Users)
+                            {
+                                <MudListItem>@user.Username | @user.Instrument.Name </MudListItem>
+                            }
+                        }
+                    </MudList>
+                </MudPaper>
+            </MudItem>
+
+            <MudItem xs="12" md="9">
+                <MudGrid Class="mb-4">
+                    <MudItem xs="12" md="6">
+                        <MudPaper Class="pa-4" Elevation="2">
+                            <MudButton Color="Color.Primary">Join room</MudButton>
+                        </MudPaper>
+                    </MudItem>
+
+                    <MudItem xs="12" md="6">
+                        <MudPaper Class="pa-4" Elevation="2">
+                            <MudButton Color="Color.Primary">Create room</MudButton>
+                        </MudPaper>
+                    </MudItem>
+                </MudGrid>
+
+
+                <MudGrid>
+                    <MudItem xs="12" md="6">
+                        <MudPaper Class="pa-4" Elevation="2">
+                            <MudText Typo="Typo.h4">Previous song</MudText>
+                            @if(Room.CurrentSong != 0)
+                            {
+                                <MudText Typo="Typo.h5">@Room.Setlist.Songs[Room.CurrentSong - 1].Name</MudText>
+                            }
+                            else
+                            {
+                                <MudText Typo="Typo.h5">No song</MudText>
+                            }
+                            <MudGrid>
+                                <MudItem xs="12" class="d-flex justify-space-between">
+                                    <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" Color="Color.Primary" IconColor="Color.Secondary" OnClick="() => PreviousSong()"/>                                    
+                                </MudItem>
+                            </MudGrid>
+                        </MudPaper>
+                    </MudItem>
+
+                    <MudItem xs="12" md="6">
+                        <MudPaper Class="pa-4" Elevation="2">
+                            <MudText Typo="Typo.h4">Next song</MudText>
+                            @if(Room.CurrentSong != Room.Setlist.Songs.Count - 1)
+                            {
+                                <MudText Typo="Typo.h5">@Room.Setlist.Songs[Room.CurrentSong + 1].Name</MudText>
+                            }
+                            <MudGrid>
+                                <MudItem xs="12" class="d-flex justify-end">
+                                    <MudIconButton Icon="@Icons.Material.Filled.ArrowForward" Color="Color.Primary" IconColor="Color.Secondary" OnClick="() => NextSong()" />
+                                </MudItem>
+                            </MudGrid>
+                        </MudPaper>
+                    </MudItem>
+                </MudGrid>
+
+                <MudPaper Class="pa-4 mt-4" Elevation="2">
+                    <MudText Typo="Typo.h4">Current song</MudText>
+                    <MudText Typo="Typo.h5">@Room.Setlist.Songs[Room.CurrentSong].Name</MudText>
+                    <MudText Typo="Typo.h6">@Room.Setlist.Songs[Room.CurrentSong].Artist</MudText>
+                    <MudText Typo="Typo.body1" Class="mt-2">
+                        Tabs:
+                        <MudLink Href="@Room.Setlist.Songs[Room.CurrentSong].TabsURL" Target="_blank" Class="ml-1">
+                            View Tabs
+                        </MudLink>
+                    </MudText>
+
+                    <MudText Typo="Typo.body1" Class="mt-2">
+                        YouTube:
+                        <MudLink Href="@Room.Setlist.Songs[Room.CurrentSong].AudioURL" Target="_blank" Class="ml-1">
+                            Watch on YouTube
+                        </MudLink>
+                    </MudText>
+                    <MudText Typo="Typo.body2">Lyrics:</MudText>
+                    <MudText Typo="Typo.body1">@LyricsMarkupService.GetFormattedLyrics(SongLyrics)</MudText>
+                    <MudGrid>
+                        <MudItem xs="12" md="6">
+                            <MudButton Class="mt-2" Variant="Variant.Outlined" Color="Color.Primary">
+                                AutoScroll Button
+                            </MudButton>
+                        </MudItem>
+                        <MudItem xs="12" md="6">
+                            <MudButton Class="mt-2" Variant="Variant.Outlined" Color="Color.Primary">
+                                BPM Playback
+                            </MudButton>
+                        </MudItem>
+                    </MudGrid>
+                </MudPaper>
+            </MudItem>        
+        </MudGrid>    
+    }
+</MudContainer>

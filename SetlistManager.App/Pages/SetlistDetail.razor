@@ -1,0 +1,80 @@
+﻿@page "/setlistdetail/{setlistId:int}"
+
+<PageTitle>Setlist Detail</PageTitle>
+
+<MudContainer Class="mt-5">
+    <MudPaper Class="pa-4" Elevation="2">
+        @if (_setlist != null)
+        {
+            <MudStack Spacing="2">
+                <MudText Typo="Typo.h4" Class="font-weight-bold">@_setlist.Name</MudText>
+                <MudText Typo="Typo.subtitle2" Color="Color.Secondary">
+                    Created by: @_setlist.CreatorId
+                </MudText>
+            </MudStack>
+
+            <MudPaper Class="pa-4 mt-4" Elevation="1">
+                <MudText Typo="Typo.h6" Class="mb-2">Songs in this Setlist</MudText>
+
+                @if (_setlist.Songs != null && _setlist.Songs.Count > 0)
+                {
+                    <MudTable T="SongModel" Items="_setlist.Songs" Hover="true" Dense="true">
+                        <HeaderContent>
+                            <MudTh>Name</MudTh>
+                            <MudTh>Artist</MudTh>
+                            <MudTh>Language</MudTh>
+                            <MudTh>BPM</MudTh>
+                            <MudTh>Key</MudTh>
+                            <MudTh>Links</MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd DataLabel="Name">
+                                <MudLink Href="@($"/songdetail/{context.Id}")" Class="font-weight-medium">
+                                    @context.Name
+                                </MudLink>
+                            </MudTd>
+                            <MudTd DataLabel="Artist">@context.Artist</MudTd>
+                            <MudTd DataLabel="Language">@context.Language.Code</MudTd>
+                            <MudTd DataLabel="BPM">@context.BPM</MudTd>
+                            <MudTd DataLabel="Key">@context.Key</MudTd>
+                            <MudTd DataLabel="Links">
+                                @if (!string.IsNullOrWhiteSpace(context.TabsURL))
+                                {
+                                    <MudLink Href="@context.TabsURL" Target="_blank">Tabs</MudLink>
+                                }
+                                @if (!string.IsNullOrWhiteSpace(context.AudioURL))
+                                {
+                                    <MudLink Href="@context.AudioURL" Target="_blank" Class="ml-2">Audio</MudLink>
+                                }
+                            </MudTd>
+                        </RowTemplate>
+
+                    </MudTable>
+                }
+                else
+                {
+                    <MudAlert Severity="Severity.Info" Class="mt-3">No songs in this setlist yet.</MudAlert>
+                }
+            </MudPaper>
+        }
+        else
+        {
+            <MudAlert Severity="Severity.Warning" Class="mt-3">Setlist not found!</MudAlert>
+        }
+    </MudPaper>
+</MudContainer>
+
+@code {
+    [Parameter]
+    public int setlistId { get; set; }
+
+    [Inject]
+    public required SetlistService SetlistService { get; set; }
+
+    private SetlistModel _setlist = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _setlist = await SetlistService.GetSetlistById(setlistId);
+    }
+}
