@@ -1,10 +1,10 @@
 ﻿using SetlistManager.Common.Models;
 using Microsoft.EntityFrameworkCore;
 using SetlistManager.Data.Entities;
-using SetlistManger.Business.Mappers;
+using SetlistManager.Business.Mappers;
 using SetlistManager.Data;
 
-namespace SetlistManger.Business.Services;
+namespace SetlistManager.Business.Services;
 
 public class RoomsService : IRoomsService
 {

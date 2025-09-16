@@ -1,5 +1,5 @@
 ﻿using SetlistManager.Common.Models;
-namespace SetlistManger.Business.Services;
+namespace SetlistManager.Business.Services;
 public interface ISetlistsService
 {
     Task<SetlistModel?> GetSetlistByIdAsync (int id);

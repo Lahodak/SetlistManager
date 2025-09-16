@@ -1,7 +1,7 @@
 ﻿using SetlistManager.Common.Models;
 using SetlistManager.Data.Entities;
 
-namespace SetlistManger.Business.Services;
+namespace SetlistManager.Business.Services;
 
 public interface IRoomsService
 {

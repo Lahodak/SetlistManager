@@ -8,8 +8,8 @@ using SetlistManager. Api.Options;
 using SetlistManager. Api.Services;
 using SetlistManager.Data;
 using SetlistManager.Data.Entities;
-using SetlistManger.Business.Extentions;
-using SetlistManger.Business.Services;
+using SetlistManager.Business.Extentions;
+using SetlistManager.Business.Services;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);

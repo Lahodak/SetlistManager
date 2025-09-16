@@ -3,7 +3,7 @@ using SetlistManager.Common.Models;
 using SetlistManager.Data;
 using SetlistManager.Data.Entities;
 
-namespace SetlistManger.Business.Services;
+namespace SetlistManager.Business.Services;
 public class SetlistsService : ISetlistsService
 {
     private readonly AppDbContext _dbContext;

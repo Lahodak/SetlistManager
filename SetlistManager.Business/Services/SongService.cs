@@ -2,7 +2,7 @@
 using SetlistManager.Data;
 using SetlistManager.Data.Entities;
 
-namespace SetlistManger.Business.Services;
+namespace SetlistManager.Business.Services;
 
 public class SongService : ISongService
 {

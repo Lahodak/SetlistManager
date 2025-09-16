@@ -2,9 +2,9 @@
 using Microsoft.EntityFrameworkCore;
 using SetlistManager.Data;
 using SetlistManager.Data.Entities;
-using SetlistManger.Business.Mappers;
+using SetlistManager.Business.Mappers;
 
-namespace SetlistManger.Business.Services;
+namespace SetlistManager.Business.Services;
 
 public class LanguageService : ILanguageService
 {

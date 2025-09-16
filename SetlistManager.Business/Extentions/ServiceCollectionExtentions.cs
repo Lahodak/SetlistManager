@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using SetlistManger.Business.Services; 
+using SetlistManager.Business.Services; 
 
-namespace SetlistManger.Business.Extentions;
+namespace SetlistManager.Business.Extentions;
 
 public static class ServiceCollectionExtentions
 {

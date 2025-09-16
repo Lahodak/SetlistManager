@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using SetlistManager.Common.Models;
 using SetlistManager. Api.Services;
 using SetlistManager.Data.Entities;
-using SetlistManger.Business.Services;
+using SetlistManager.Business.Services;
 namespace SetlistManager. Api.Controllers;
 
 [Route("api/rooms")]

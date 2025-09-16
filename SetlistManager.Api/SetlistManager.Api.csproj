@@ -20,7 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SetlistManager.Common\SetlistManager.Common.csproj" />
-    <ProjectReference Include="..\SetlistManger.Business\SetlistManger.Business.csproj" />
+    <ProjectReference Include="..\SetlistManager.Business\SetlistManager.Business.csproj" />
   </ItemGroup>
 
 </Project>

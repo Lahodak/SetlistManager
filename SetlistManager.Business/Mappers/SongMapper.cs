@@ -1,7 +1,7 @@
 ﻿using SetlistManager.Common.Models;
 using SetlistManager.Data.Entities;
 
-namespace SetlistManger.Business.Mappers;
+namespace SetlistManager.Business.Mappers;
 
 public static class SongMapper
 {

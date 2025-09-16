@@ -3,8 +3,8 @@ using SetlistManager. Api.Controllers;
 using SetlistManager. Api.Models;
 using SetlistManager.Common.Models;
 using SetlistManager.Data.Entities;
-using SetlistManger.Business.Mappers;
-using SetlistManger.Business.Services;
+using SetlistManager.Business.Mappers;
+using SetlistManager.Business.Services;
 
 namespace SetlistManager.Api.Controllers;
 

@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SetlistManager. Api.Services;
 using SetlistManager.Common.Models;
-using SetlistManger.Business.Services;
+using SetlistManager.Business.Services;
 
 namespace SetlistManager. Api.Controllers;
 

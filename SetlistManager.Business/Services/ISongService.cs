@@ -1,6 +1,6 @@
 ﻿using SetlistManager.Data.Entities;
 
-namespace SetlistManger.Business.Services;
+namespace SetlistManager.Business.Services;
 public interface ISongService
 {
     Task<Song?> GetSongByIdAsync(int SongId);
