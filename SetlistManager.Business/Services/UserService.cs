@@ -24,7 +24,7 @@ public class UserService : IUserService
         if (user == null)
         {
             return;
-        }
+        }        
 
         user.UserName = model.Username;
         user.Email = model.Email;

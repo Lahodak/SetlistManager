@@ -21,6 +21,8 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<ICurrentUserContext, CurrentUserContext>();
 
+builder.Services.AddHttpClient();
+
 builder.Services.AddApiServices()
     .AddBusinessServices();
 
@@ -50,7 +52,7 @@ builder.Services.AddIdentity<User, Role>(options =>
     options.Password.RequireNonAlphanumeric = false;
     options.Password.RequireUppercase = true;
     options.Password.RequiredLength = 9;
-
+    options.SignIn.RequireConfirmedEmail = true;
     options.User.RequireUniqueEmail = true;
 })
 .AddEntityFrameworkStores<AppDbContext>()

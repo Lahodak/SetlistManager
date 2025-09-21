@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using SetlistManager. Api.Services;
+using SetlistManager.Business.Services;
 using SetlistManager.Common.Models;
 using SetlistManager.Data.Entities;
 
@@ -14,12 +15,14 @@ public class AuthController : BaseController
     private readonly SignInManager<User> _signInManager;
     private readonly IJwtService _jwtService;
     private readonly UserManager<User> _userManager;
+    private readonly IMailService _mailService;
 
-    public AuthController(UserManager<User> userManager, IJwtService jwtService, SignInManager<User> signInManager)
+    public AuthController(UserManager<User> userManager, IJwtService jwtService, SignInManager<User> signInManager, IMailService mailService)
     {
         _userManager = userManager;
         _jwtService = jwtService;
         _signInManager = signInManager;
+        _mailService = mailService;
     }
 
     [AllowAnonymous]
@@ -50,9 +53,11 @@ public class AuthController : BaseController
         var user = new User
         {
             UserName = model.UserName,
-            Email = model.Email,
-            EmailConfirmed = true
+            Email = model.Email
         };
+
+        var confirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        await _mailService.SendVerificationEmailAsync(user.Email, confirmationToken);
 
         var result = await _userManager.CreateAsync(user, model.Password);
 
@@ -97,5 +102,19 @@ public class AuthController : BaseController
         var token = await _jwtService.GenerateTokenAsync(user);
 
         return Ok(new LoginResultModel { Token = token });
+    }
+
+    [AllowAnonymous]
+    [HttpPost("verify")]
+    public async Task<ActionResult> VerifyEmail(VerifyEmailModel verifyModel)
+    {
+        var user = await _userManager.FindByEmailAsync(verifyModel.Email);
+
+        if (user is null)
+            return Unauthorized();
+
+        await _userManager.ConfirmEmailAsync(user, verifyModel.Token);
+
+        return Ok();
     }
 }
