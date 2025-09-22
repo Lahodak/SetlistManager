@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.Extensions.Configuration;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -45,12 +46,11 @@ public class MailService : IMailService
     private async Task SendEmailAsync(string recipientEmail, string subject, string htmlContent)
     {
         var client = _httpClientFactory.CreateClient();
-        client.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", _apiKey);
+        client.DefaultRequestHeaders.Add("api-key", _apiKey);
 
         var payload = new
         {
-            sender = new { email = _senderEmail, name = _senderName },
+            sender = new { name = _senderName, email = _senderEmail },
             to = new[] { new { email = recipientEmail } },
             subject = subject,
             htmlContent = htmlContent

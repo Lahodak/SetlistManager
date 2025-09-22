@@ -56,10 +56,13 @@ public class AuthController : BaseController
             Email = model.Email
         };
 
-        var confirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-        await _mailService.SendVerificationEmailAsync(user.Email, confirmationToken);
 
         var result = await _userManager.CreateAsync(user, model.Password);
+
+        var createdUser = await _userManager.FindByEmailAsync(user.Email);
+
+        var confirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(createdUser);
+        await _mailService.SendVerificationEmailAsync(user.Email, confirmationToken);
 
         if (!result.Succeeded)
         {
@@ -113,8 +116,11 @@ public class AuthController : BaseController
         if (user is null)
             return Unauthorized();
 
-        await _userManager.ConfirmEmailAsync(user, verifyModel.Token);
+        var x = await _userManager.ConfirmEmailAsync(user, verifyModel.Token);
 
-        return Ok();
+        if (x.Succeeded)
+            return Ok();
+
+        return BadRequest();
     }
 }

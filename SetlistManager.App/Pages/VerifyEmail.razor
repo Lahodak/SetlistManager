@@ -1,0 +1,63 @@
+@page "/verify-email"
+@layout EmptyLayout
+@using Blazored.LocalStorage
+@using MudBlazor
+@using SetlistManager.Common.Models
+
+<MudForm>
+    <MudPaper Class="mx-auto mt-12 p-6" Style="max-width:400px;" Elevation="8">
+        <MudText Typo="Typo.h5" Class="mb-4">Verify Email</MudText>
+
+        <MudTextField @bind-Value="token" Label="Verification Token" Variant="Variant.Outlined" FullWidth="true" />
+
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="VerifyEmailAsync" FullWidth="true" Class="mt-4">
+            Verify
+        </MudButton>
+
+        @if (successMessage != null)
+        {
+            <MudText Color="Color.Success" Class="mt-4">@successMessage</MudText>
+        }
+        @if (errorMessage != null)
+        {
+            <MudText Color="Color.Error" Class="mt-4">@errorMessage</MudText>
+        }
+    </MudPaper>
+</MudForm>
+
+@code {
+
+
+
+    [Inject]
+    public required UserService UserService { get; set; }
+    [Inject]
+    public required NavigationManager NavigationManager { get; set; }
+    [Inject]
+    public required ILocalStorageService LocalStorage { get; set; }
+
+    private const string _emailKey = "registeredEmail";
+    private string token = string.Empty;
+    private string? successMessage;
+    private string? errorMessage;
+
+    private async Task VerifyEmailAsync()
+    {
+
+        var email = await LocalStorage.GetItemAsStringAsync(_emailKey);
+
+        successMessage = null;
+        errorMessage = null;
+
+        
+
+        var result = await UserService.VerifyEmailAsync(token, email);
+        if (result)
+        {
+            successMessage = "Email verified successfully!";
+            NavigationManager.NavigateTo("/login");
+        }
+        else
+            errorMessage = "Verification failed. Please check your token and email.";
+    }
+}

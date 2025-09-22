@@ -13,6 +13,7 @@ public class UserService
     private const string _loginUserSuffix = "/login";
     private const string _tokenKey = "authToken";
     private const string _getUserSetlistsSuffix = "/Setlists";
+    private const string _verifyEmailSuffix = "/verify";
 
     private readonly IHttpClientFactory _httpClientFactory; 
     private readonly ILocalStorageService _localStorage;
@@ -110,5 +111,24 @@ public class UserService
         }
 
         await _localStorage.SetItemAsync(_tokenKey, loginResult.Token);
+    }
+
+    public async Task<bool> VerifyEmailAsync(string token, string email)
+    {
+        var verifyModel = new VerifyEmailModel
+        {
+            Email = email,
+            Token = token
+        };
+
+        try
+        {
+            var response = await _apiService.PostAsync(_authEndpointPath + _verifyEmailSuffix, verifyModel);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
     }
 }
