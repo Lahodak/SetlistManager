@@ -56,7 +56,6 @@ public class AuthController : BaseController
             Email = model.Email
         };
 
-
         var result = await _userManager.CreateAsync(user, model.Password);
 
         var createdUser = await _userManager.FindByEmailAsync(user.Email);

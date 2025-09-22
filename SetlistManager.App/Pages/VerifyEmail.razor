@@ -26,9 +26,6 @@
 </MudForm>
 
 @code {
-
-
-
     [Inject]
     public required UserService UserService { get; set; }
     [Inject]
@@ -43,13 +40,15 @@
 
     private async Task VerifyEmailAsync()
     {
-
         var email = await LocalStorage.GetItemAsStringAsync(_emailKey);
+
+        if(email is null)
+        {
+            errorMessage = "Failed to retrieve email to confirm";
+            return;        }
 
         successMessage = null;
         errorMessage = null;
-
-        
 
         var result = await UserService.VerifyEmailAsync(token, email);
         if (result)
