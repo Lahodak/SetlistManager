@@ -14,6 +14,9 @@ public class UserService
     private const string _tokenKey = "authToken";
     private const string _getUserSetlistsSuffix = "/Setlists";
     private const string _verifyEmailSuffix = "/verify";
+    private const string _resetPasswordSuffix = "/reset-password";
+    private const string _resetPasswordRequestSuffix = "/request-password-reset";
+
 
     private readonly IHttpClientFactory _httpClientFactory; 
     private readonly ILocalStorageService _localStorage;
@@ -115,20 +118,40 @@ public class UserService
 
     public async Task<bool> VerifyEmailAsync(string token, string email)
     {
-        var verifyModel = new VerifyEmailModel
+        var verifyModel = new VerifyModel
         {
             Email = email,
             Token = token
         };
 
-        try
-        {
-            var response = await _apiService.PostAsync(_authEndpointPath + _verifyEmailSuffix, verifyModel);
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
+        await _apiService.PostAsync(_authEndpointPath + _verifyEmailSuffix, verifyModel);
+        
+        return true;                
     }
+
+    public async Task<bool> RequestPasswordResetAsync(string email)
+    {
+        var model = new PasswordResetRequestModel
+        {
+            Email = email
+        };
+
+        await _apiService.PostAsync(_authEndpointPath + _resetPasswordRequestSuffix, model);
+
+        return true;
+    }
+
+    public async Task<bool> ResetPasswordAsync(string email, string newPassword, string token)
+    {
+        var resetModel = new ResetPasswordModel
+        {
+            Email = email,
+            NewPassword = newPassword,
+            Token = token
+        };
+
+        await _apiService.PostAsync(_authEndpointPath + _resetPasswordSuffix, resetModel);
+        
+        return true;
+    }   
 }

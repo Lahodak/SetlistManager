@@ -34,7 +34,8 @@
         StateHasChanged();
 
         var token = await LocalStorage.GetItemAsStringAsync("authToken");
-        if (string.IsNullOrWhiteSpace(token) && !NavigationManager.Uri.Contains("/login"))
+        if (string.IsNullOrWhiteSpace(token) && !NavigationManager.Uri.Contains("/login") && !NavigationManager.Uri.Contains("/reset-password") 
+        && !NavigationManager.Uri.Contains("/request-password-reset"))
         {
             NavigationManager.NavigateTo("/login", true);
             return;

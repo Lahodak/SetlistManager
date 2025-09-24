@@ -2,14 +2,12 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using SetlistManager. Api;
-using SetlistManager. Api.Extentions;
-using SetlistManager. Api.Options;
-using SetlistManager. Api.Services;
+using SetlistManager.Api.Extentions;
+using SetlistManager.Api.Options;
+using SetlistManager.Api.Services;
 using SetlistManager.Data;
 using SetlistManager.Data.Entities;
 using SetlistManager.Business.Extentions;
-using SetlistManager.Business.Services;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);

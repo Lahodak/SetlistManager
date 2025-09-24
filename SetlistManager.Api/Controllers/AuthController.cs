@@ -108,18 +108,51 @@ public class AuthController : BaseController
 
     [AllowAnonymous]
     [HttpPost("verify")]
-    public async Task<ActionResult> VerifyEmail(VerifyEmailModel verifyModel)
+    public async Task<ActionResult<bool>> VerifyEmail(VerifyModel verifyModel)
     {
         var user = await _userManager.FindByEmailAsync(verifyModel.Email);
 
         if (user is null)
-            return Unauthorized();
+            return Unauthorized(false);
 
         var x = await _userManager.ConfirmEmailAsync(user, verifyModel.Token);
 
         if (x.Succeeded)
-            return Ok();
+            return Ok(true);
 
-        return BadRequest();
+        return BadRequest(false);
+    }
+
+    [AllowAnonymous]
+    [HttpPost("reset-password")]
+    public async Task<ActionResult<bool>> ResetPassword(ResetPasswordModel resetModel)
+    {
+        var user = await _userManager.FindByEmailAsync(resetModel.Email);
+
+        if (user is null)
+            return Unauthorized(false);
+
+        var x = await _userManager.ResetPasswordAsync(user, resetModel.Token, resetModel.NewPassword);
+
+        if (x.Succeeded)
+            return Ok(true);
+
+        return BadRequest(false);
+    }
+
+    [AllowAnonymous]
+    [HttpPost("request-password-reset")]
+    public async Task<ActionResult> RequestPasswordReset(PasswordResetRequestModel resetRequestModel)
+    {
+        var user = await _userManager.FindByEmailAsync(resetRequestModel.Email);
+
+        if(user is null)
+            return Unauthorized();
+
+        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+        await _mailService.SendPasswordResetEmailAsync(resetRequestModel.Email, token);
+
+        return Ok();
     }
 }

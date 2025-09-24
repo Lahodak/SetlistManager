@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using SetlistManager. Api.Controllers;
-using SetlistManager. Api.Models;
+using SetlistManager.Api.Models;
 using SetlistManager.Common.Models;
 using SetlistManager.Data.Entities;
 using SetlistManager.Business.Mappers;

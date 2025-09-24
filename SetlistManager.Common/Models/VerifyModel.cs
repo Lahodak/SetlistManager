@@ -2,7 +2,7 @@
 
 namespace SetlistManager.Common.Models;
 
-public class VerifyEmailModel
+public class VerifyModel
 {
     [Required]
     public string Email { get; set; } = default!;
