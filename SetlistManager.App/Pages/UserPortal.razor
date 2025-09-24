@@ -1,23 +1,77 @@
 ﻿@page "/UserPortal"
 
-<MudText>
-	@if(userModel is null)
-	{
-		<em>Loading...</em>
-		return;
-	}
-
-	@userModel.Username - @userModel.Email - @userModel.Instrument.Name - @userModel.Id
-</MudText>
-
-@code 
+@if (userModel is null)
 {
-	[Inject]
-	public required UserService _userService { get; set; }
-	private UserModel? userModel;
+    <MudProgressCircular Color="Color.Primary" Size="Size.Large" />    
+}
+else
+{    
+    <MudCard Class=" max-w-md p-6 shadow-lg rounded-2xl justify-content-center">
+        <MudCardContent>
+            <MudText Typo="Typo.h5" Class="mb-4 font-semibold text-center">
+                User Profile
+            </MudText>
 
-	protected override async Task OnInitializedAsync()
-	{
-		userModel = await _userService.GetUserAsync();
-	}
+            <MudTextField @bind-Value="userModel.Username" Label="Username" Variant="Variant.Outlined" Class="mb-3" />
+            <MudTextField @bind-Value="userModel.Email" Label="Email" Variant="Variant.Outlined" Class="mb-3" />
+
+            <MudSelect T="InstrumentModel" @bind-Value="userModel.Instrument" Label="Instrument" Variant="Variant.Outlined" Class="mb-3">
+                @if (instruments is not null)
+                {
+                    @foreach (var instrument in instruments)
+                    {
+                        <MudSelectItem Value="@instrument">@instrument.Name</MudSelectItem>
+                    }
+                }
+            </MudSelect>
+        </MudCardContent>
+
+        <MudCardActions>
+            <MudButton Class="me-3"OnClick="SaveAsync" Color="Color.Primary" Variant="Variant.Filled">
+                Save
+            </MudButton>
+            <MudButton OnClick="LogOutAsync" Color="Color.Error" Variant="Variant.Filled">
+                Logout
+            </MudButton>
+        </MudCardActions>
+    </MudCard>    
+}
+
+@code
+{
+    [Inject]
+    public required UserService UserService { get; set; }
+    [Inject]
+    public required NavigationManager NavigationManager { get; set; }
+    [Inject]
+    public required InstrumentService InstrumentService { get; set; }
+
+    private UserModel? userModel;
+    private List<InstrumentModel>? instruments;
+
+    protected override async Task OnInitializedAsync()
+    {
+        userModel = await UserService.GetUserAsync();
+        instruments = await InstrumentService.GetAvailableInstrumentsAsync();
+
+        if (userModel?.Instrument != null)
+        {
+            userModel.Instrument = instruments.FirstOrDefault(i => i.Id == userModel.Instrument.Id)!;
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        if (userModel is not null)
+        {
+            await UserService.UpdateUser(userModel);
+            NavigationManager.Refresh(true);
+        }
+    }
+
+    private async Task LogOutAsync()
+    {
+        await UserService.LogOutAsync();
+        NavigationManager.NavigateTo("/login");
+    }
 }

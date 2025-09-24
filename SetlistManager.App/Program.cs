@@ -21,6 +21,7 @@ builder.Services.AddSingleton<UserService>();
 builder.Services.AddSingleton<ApiService>();
 builder.Services.AddSingleton<LanguageService>();
 builder.Services.AddTransient<LyricsMarkupService>();
+builder.Services.AddScoped<InstrumentService>();
 
 builder.Services.AddBlazoredLocalStorageAsSingleton(); 
 

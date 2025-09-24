@@ -46,7 +46,7 @@ public class UserService
         await _localStorage.RemoveItemAsync(_tokenKey);
     }   
 
-    public async Task<string> GetUserToken()
+    public async Task<string?> GetUserToken()
     {
         return await _localStorage.GetItemAsync<string>(_tokenKey);
     }
@@ -71,6 +71,9 @@ public class UserService
 
         return true;
     }
+
+    public async Task UpdateUser(UserModel user) 
+        => await _apiService.PutAsync(_usersEndpointPath, user);
 
     public async Task LogInAsync(LoginRequestModel model)
     {
@@ -98,13 +101,13 @@ public class UserService
         if (json is null)
             return;
         
-        LoginResultModel loginResult;
+        LoginResultModel? loginResult;
 
         try
         {
             loginResult = JsonConvert.DeserializeObject<LoginResultModel>(json);
             
-            if (loginResult.Token is null  || loginResult is null)
+            if (loginResult!.Token is null  || loginResult is null)
                 return;
         }
         catch (Exception ex)
