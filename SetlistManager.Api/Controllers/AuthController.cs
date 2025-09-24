@@ -125,19 +125,19 @@ public class AuthController : BaseController
 
     [AllowAnonymous]
     [HttpPost("reset-password")]
-    public async Task<ActionResult<bool>> ResetPassword(ResetPasswordModel resetModel)
+    public async Task<ActionResult> ResetPassword(ResetPasswordModel resetModel)
     {
         var user = await _userManager.FindByEmailAsync(resetModel.Email);
 
         if (user is null)
-            return Unauthorized(false);
+            return Unauthorized();
 
         var x = await _userManager.ResetPasswordAsync(user, resetModel.Token, resetModel.NewPassword);
 
         if (x.Succeeded)
-            return Ok(true);
+            return Ok();
 
-        return BadRequest(false);
+        return BadRequest();
     }
 
     [AllowAnonymous]
