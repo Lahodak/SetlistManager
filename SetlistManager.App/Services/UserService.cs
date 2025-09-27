@@ -13,6 +13,10 @@ public class UserService
     private const string _loginUserSuffix = "/login";
     private const string _tokenKey = "authToken";
     private const string _getUserSetlistsSuffix = "/Setlists";
+    private const string _verifyEmailSuffix = "/verify";
+    private const string _resetPasswordSuffix = "/reset-password";
+    private const string _resetPasswordRequestSuffix = "/request-password-reset";
+
 
     private readonly IHttpClientFactory _httpClientFactory; 
     private readonly ILocalStorageService _localStorage;
@@ -42,7 +46,7 @@ public class UserService
         await _localStorage.RemoveItemAsync(_tokenKey);
     }   
 
-    public async Task<string> GetUserToken()
+    public async Task<string?> GetUserToken()
     {
         return await _localStorage.GetItemAsync<string>(_tokenKey);
     }
@@ -67,6 +71,9 @@ public class UserService
 
         return true;
     }
+
+    public async Task UpdateUser(UserModel user) 
+        => await _apiService.PutAsync(_usersEndpointPath, user);
 
     public async Task LogInAsync(LoginRequestModel model)
     {
@@ -94,13 +101,13 @@ public class UserService
         if (json is null)
             return;
         
-        LoginResultModel loginResult;
+        LoginResultModel? loginResult;
 
         try
         {
             loginResult = JsonConvert.DeserializeObject<LoginResultModel>(json);
             
-            if (loginResult.Token is null  || loginResult is null)
+            if (loginResult!.Token is null  || loginResult is null)
                 return;
         }
         catch (Exception ex)
@@ -111,4 +118,43 @@ public class UserService
 
         await _localStorage.SetItemAsync(_tokenKey, loginResult.Token);
     }
+
+    public async Task<bool> VerifyEmailAsync(string token, string email)
+    {
+        var verifyModel = new VerifyModel
+        {
+            Email = email,
+            Token = token
+        };
+
+        await _apiService.PostAsync(_authEndpointPath + _verifyEmailSuffix, verifyModel);
+        
+        return true;                
+    }
+
+    public async Task<bool> RequestPasswordResetAsync(string email)
+    {
+        var model = new PasswordResetRequestModel
+        {
+            Email = email
+        };
+
+        await _apiService.PostAsync(_authEndpointPath + _resetPasswordRequestSuffix, model);
+
+        return true;
+    }
+
+    public async Task<bool> ResetPasswordAsync(string email, string newPassword, string token)
+    {
+        var resetModel = new ResetPasswordModel
+        {
+            Email = email,
+            NewPassword = newPassword,
+            Token = token
+        };
+
+        await _apiService.PostAsync(_authEndpointPath + _resetPasswordSuffix, resetModel);
+        
+        return true;
+    }   
 }

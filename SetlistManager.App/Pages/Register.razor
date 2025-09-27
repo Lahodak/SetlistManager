@@ -2,6 +2,7 @@
 @layout EmptyLayout;
 @using MudBlazor;
 @using SetlistManager.Common.Models;
+@using Blazored.LocalStorage
 
 <MudForm>
     <MudPaper Class="mx-auto mt-12 p-6" Style="max-width:400px;" Elevation="8">
@@ -23,7 +24,10 @@
     public required UserService UserService { get; set; }
     [Inject]
     public required NavigationManager Navigation { get; set; }
+    [Inject]
+    public required ILocalStorageService LocalStorage { get; set; }
 
+    private const string _emailKey = "registeredEmail";
     private RegisterRequestModel registerRequestModel = new();
     private string confirmPassword = string.Empty;
 
@@ -36,6 +40,8 @@
             return;
 
         await UserService.RegisterAsync(registerRequestModel);
-		Navigation.NavigateTo("/login");
+        await LocalStorage.SetItemAsStringAsync(_emailKey, registerRequestModel.Email);
+
+        Navigation.NavigateTo("/verify-email");
     }
 }

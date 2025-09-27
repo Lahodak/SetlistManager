@@ -15,6 +15,8 @@
         </MudButton>
 
         <MudText Class="mt-4"> Don't have an account? <MudLink Href="/register">Register here</MudLink> </MudText>
+
+        <MudLink Href="/request-password-reset">Reset password</MudLink>
     </MudPaper>
 </MudForm>
 
@@ -35,7 +37,9 @@
 
         if(await UserService.GetUserToken() is not null)
         {
-			Navigation.NavigateTo("/");
+            Navigation.NavigateTo("/");
         }
     }
+
+
 }

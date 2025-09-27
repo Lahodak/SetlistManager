@@ -2,14 +2,12 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using SetlistManager. Api;
-using SetlistManager. Api.Extentions;
-using SetlistManager. Api.Options;
-using SetlistManager. Api.Services;
+using SetlistManager.Api.Extentions;
+using SetlistManager.Api.Options;
+using SetlistManager.Api.Services;
 using SetlistManager.Data;
 using SetlistManager.Data.Entities;
 using SetlistManager.Business.Extentions;
-using SetlistManager.Business.Services;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,6 +18,8 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<ICurrentUserContext, CurrentUserContext>();
+
+builder.Services.AddHttpClient();
 
 builder.Services.AddApiServices()
     .AddBusinessServices();
@@ -50,7 +50,7 @@ builder.Services.AddIdentity<User, Role>(options =>
     options.Password.RequireNonAlphanumeric = false;
     options.Password.RequireUppercase = true;
     options.Password.RequiredLength = 9;
-
+    options.SignIn.RequireConfirmedEmail = true;
     options.User.RequireUniqueEmail = true;
 })
 .AddEntityFrameworkStores<AppDbContext>()

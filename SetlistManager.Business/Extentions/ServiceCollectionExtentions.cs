@@ -14,6 +14,7 @@ public static class ServiceCollectionExtentions
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<ISetlistsService, SetlistsService>();
         services.AddScoped<IInstrumentsService, InstrumentsService>();
+        services.AddScoped<IMailService, MailService>();
         services.AddScoped<OrderMappingService>();
         return services;
     }

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using SetlistManager. Api.Services;
+using SetlistManager.Business.Services;
 using SetlistManager.Common.Models;
 using SetlistManager.Data.Entities;
 
@@ -14,12 +15,14 @@ public class AuthController : BaseController
     private readonly SignInManager<User> _signInManager;
     private readonly IJwtService _jwtService;
     private readonly UserManager<User> _userManager;
+    private readonly IMailService _mailService;
 
-    public AuthController(UserManager<User> userManager, IJwtService jwtService, SignInManager<User> signInManager)
+    public AuthController(UserManager<User> userManager, IJwtService jwtService, SignInManager<User> signInManager, IMailService mailService)
     {
         _userManager = userManager;
         _jwtService = jwtService;
         _signInManager = signInManager;
+        _mailService = mailService;
     }
 
     [AllowAnonymous]
@@ -50,11 +53,15 @@ public class AuthController : BaseController
         var user = new User
         {
             UserName = model.UserName,
-            Email = model.Email,
-            EmailConfirmed = true
+            Email = model.Email
         };
 
         var result = await _userManager.CreateAsync(user, model.Password);
+
+        var createdUser = await _userManager.FindByEmailAsync(user.Email);
+
+        var confirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(createdUser);
+        await _mailService.SendVerificationEmailAsync(user.Email, confirmationToken);
 
         if (!result.Succeeded)
         {
@@ -97,5 +104,55 @@ public class AuthController : BaseController
         var token = await _jwtService.GenerateTokenAsync(user);
 
         return Ok(new LoginResultModel { Token = token });
+    }
+
+    [AllowAnonymous]
+    [HttpPost("verify")]
+    public async Task<ActionResult<bool>> VerifyEmail(VerifyModel verifyModel)
+    {
+        var user = await _userManager.FindByEmailAsync(verifyModel.Email);
+
+        if (user is null)
+            return Unauthorized(false);
+
+        var x = await _userManager.ConfirmEmailAsync(user, verifyModel.Token);
+
+        if (x.Succeeded)
+            return Ok(true);
+
+        return BadRequest(false);
+    }
+
+    [AllowAnonymous]
+    [HttpPost("reset-password")]
+    public async Task<ActionResult> ResetPassword(ResetPasswordModel resetModel)
+    {
+        var user = await _userManager.FindByEmailAsync(resetModel.Email);
+
+        if (user is null)
+            return Unauthorized();
+
+        var x = await _userManager.ResetPasswordAsync(user, resetModel.Token, resetModel.NewPassword);
+
+        if (x.Succeeded)
+            return Ok();
+
+        return BadRequest();
+    }
+
+    [AllowAnonymous]
+    [HttpPost("request-password-reset")]
+    public async Task<ActionResult> RequestPasswordReset(PasswordResetRequestModel resetRequestModel)
+    {
+        var user = await _userManager.FindByEmailAsync(resetRequestModel.Email);
+
+        if(user is null)
+            return Unauthorized();
+
+        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+        await _mailService.SendPasswordResetEmailAsync(resetRequestModel.Email, token);
+
+        return Ok();
     }
 }

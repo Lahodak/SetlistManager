@@ -117,6 +117,7 @@ public class ApiService
             return default;
         }
         T result;
+
         try
         {
             result = JsonConvert.DeserializeObject<T>(jsonResponse);
