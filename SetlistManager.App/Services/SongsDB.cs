@@ -1,5 +1,7 @@
 ﻿using SetlistManager.Common.Models;
+
 namespace SetlistManager.App.Services;
+
 public class SongsDB
 {
     private readonly SongService _songService;
@@ -27,8 +29,9 @@ public class SongsDB
     
     public async Task CheckForData()
     {
-        if (_songsDB.Count != 0)
-            return;
+        if (_songsDB.Count != 0)        
+            _songsDB.Clear();
+        
         _songsDB.AddRange(await _songService.GetAllSongsAsync() ?? []);
     }
 }
