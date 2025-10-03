@@ -12,4 +12,5 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
     public DbSet<Setlist> Setlists { get; set; }
     public DbSet<Song> Songs { get; set; }
     public DbSet<SongsSetlists> SongsSetlists { get; set; }
+    public DbSet<Artist> Artists { get; set; }
 }
