@@ -5,15 +5,15 @@ namespace SetlistManager.Business.Mappers;
 
 public static class ArtistMapper
 {
-    public static ArtistModel ToModel(this Artist artist)
+    public static ArtistModel ToModel(this Artist artist, bool includeSongs = true)
     {
         return new()
         {
             Id = artist.Id,
             Nick = artist.Nick,
-            Songs = artist.Songs?
-                        .Select(ss => ss.ToModel())
-                        .ToList()
+            Songs = includeSongs
+                ? artist.Songs?.Select(s => s.ToModel(false)).ToList()
+                : null
         };
     }
 

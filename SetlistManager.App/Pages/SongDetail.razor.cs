@@ -11,7 +11,7 @@ public partial class SongDetail
     [Inject]
 	public required SongsDB SongsDatabase { get; set; }   	
 
-    SongModel song = new();
+    SongModel? song;
 
 	protected override async Task OnInitializedAsync()
 	{

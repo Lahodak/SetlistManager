@@ -20,6 +20,7 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddSingleton<ApiService>();
 builder.Services.AddScoped<LanguageService>();
 builder.Services.AddScoped<InstrumentService>();
+builder.Services.AddScoped<ArtistService>();
 
 builder.Services.AddBlazoredLocalStorageAsSingleton(); 
 

@@ -3,7 +3,7 @@ public class SongModel
 {
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
-    public string Artist { get; set; } = string.Empty;
+    public ArtistModel? Artist { get; set; } = new();
     public string TabsURL { get; set; } = string.Empty;
     public string AudioURL { get; set; } = string.Empty;
     public string Tuning { get; set; } = string.Empty;

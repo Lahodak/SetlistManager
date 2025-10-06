@@ -12,8 +12,6 @@ public class LanguageService
         _apiService = apiService;
     }
 
-    public async Task<List<LanguageModel>> GetAvailableSetlistAsync()
-    {
-        return await _apiService.GetAsync<List<LanguageModel>>(_languagesEndpointPath);
-    }
+    public async Task<List<LanguageModel>> GetAvailableSetlistAsync() 
+        => await _apiService.GetAsync<List<LanguageModel>>(_languagesEndpointPath);
 }

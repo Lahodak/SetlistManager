@@ -1,22 +1,22 @@
-﻿@page "/SongsPortal"
+﻿@page "/ArtistsPortal"
 @using SetlistManager.App.Pages.Dialogs;
 
-<PageTitle>Songs Portal</PageTitle>
+<PageTitle>Artists Portal</PageTitle>
 
 <MudContainer Class="mt-5">
     <MudPaper Class="pa-4 mt-3" Elevation="2">
-        <MudText Typo="Typo.h3" Class="ml-2">All Songs</MudText>
+        <MudText Typo="Typo.h3" Class="ml-2">All Artists</MudText>
 
         <MudTable ServerData="ServerReload" Hover="true" @ref="table">
             <ToolBarContent>
-                <MudText Typo="Typo.h6">Song Library</MudText>
+                <MudText Typo="Typo.h6">Artist Library</MudText>
                 <MudSpacer />
 
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OpenAddSongDialog" StartIcon="@Icons.Material.Filled.Add">
-                    Add Song
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OpenCreateArtistDialog" StartIcon="@Icons.Material.Filled.Add">
+                    Add Artist
                 </MudButton>
 
-                <MudTextField T="string" ValueChanged="@(s => OnSearch(s))" Placeholder="Search songs"
+                <MudTextField T="string" ValueChanged="@(s => OnSearch(s))" Placeholder="Search artists"
                               Adornment="Adornment.Start"
                               AdornmentIcon="@Icons.Material.Filled.Search"
                               IconSize="Size.Medium" Class="mt-0 ml-4">
@@ -24,18 +24,18 @@
             </ToolBarContent>
 
             <HeaderContent>
-                <MudTh><MudTableSortLabel SortLabel="title_field" T="SongModel">Title</MudTableSortLabel></MudTh>
-                <MudTh><MudTableSortLabel SortLabel="artist_field" T="SongModel">Artist</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortLabel="nick_field" T="ArtistModel">Nick</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortLabel="songs_field" T="ArtistModel">Songs Count</MudTableSortLabel></MudTh>
             </HeaderContent>
 
             <RowTemplate>
-                <MudTd DataLabel="Title">
-                    <MudLink Href="@($"songdetail/{context.Id}")"
+                <MudTd DataLabel="Nick">
+                    <MudLink Href="@($"artistdetail/{context.Id}")"
                              Style="color: black; text-decoration: none; font-size: medium;">
-                        @context.Name
+                        @context.Nick
                     </MudLink>
                 </MudTd>
-                <MudTd DataLabel="Artist">@context.Artist</MudTd>
+                <MudTd DataLabel="Songs Count">@(context.Songs?.Count ?? 0)</MudTd>
             </RowTemplate>
 
             <NoRecordsContent>
@@ -58,34 +58,32 @@
     public required IDialogService DialogService { get; set; }
     [Inject]
     public required ISnackbar Snackbar { get; set; }
-    [Inject] 
-    public required SongsDB SongsDatabase { get; set; }
     [Inject]
-    public required SongService SongService { get; set; } 
-    
-    private MudTable<SongModel> table = new ();
+    public required ArtistService ArtistService { get; set; }
+
+    private MudTable<ArtistModel> table = new();
     private string? searchString;
 
-    private async Task<TableData<SongModel>> ServerReload(TableState state, CancellationToken token)
+    private async Task<TableData<ArtistModel>> ServerReload(TableState state, CancellationToken token)
     {
-        var allSongs = await SongService.GetAllSongsAsync();
+        var allArtists = await ArtistService.GetAvailableArtistsAsync();
         await Task.Delay(300, token);
 
-        var filtered = allSongs.Where(song =>
+        var filtered = allArtists.Where(artist =>
             string.IsNullOrWhiteSpace(searchString)
-            || song.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase)
+            || artist.Nick.Contains(searchString, StringComparison.OrdinalIgnoreCase)
         );
 
         filtered = state.SortLabel switch
         {
-            "title_field" => filtered.OrderByDirection(state.SortDirection, s => s.Name),
-            "artist_field" => filtered.OrderByDirection(state.SortDirection, s => s.Artist),
+            "nick_field" => filtered.OrderByDirection(state.SortDirection, a => a.Nick),
+            "songs_field" => filtered.OrderByDirection(state.SortDirection, a => a.Songs?.Count ?? 0),
             _ => filtered
         };
 
         var items = filtered.Skip(state.Page * state.PageSize).Take(state.PageSize).ToArray();
 
-        return new TableData<SongModel>
+        return new TableData<ArtistModel>
         {
             TotalItems = filtered.Count(),
             Items = items
@@ -98,17 +96,17 @@
         table.ReloadServerData();
     }
 
-    private async Task OpenAddSongDialog()
+    private async Task OpenCreateArtistDialog()
     {
         var parameters = new DialogParameters();
         var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
 
-        var dialog = await DialogService.ShowAsync<AddSongDialog>("Add New Song", parameters, options);
+        var dialog = await DialogService.ShowAsync<CreateNewArtistDialog>("Create New Artist", parameters, options);
         var result = await dialog.Result;
 
         if (!result.Canceled)
         {
-            Snackbar.Add("Song added successfully!", Severity.Success);
+            Snackbar.Add("Artist created successfully!", Severity.Success);
             await table.ReloadServerData();
         }
     }

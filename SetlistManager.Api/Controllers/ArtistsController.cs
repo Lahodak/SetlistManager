@@ -7,9 +7,9 @@ namespace SetlistManager.Api.Controllers;
 [Route("api/artists")]
 public class ArtistsController : BaseController
 {
-    private readonly ArtistService _artistService;
+    private readonly IArtistService _artistService;
 
-    public ArtistsController(ArtistService artistService)
+    public ArtistsController(IArtistService artistService)
     {
         _artistService = artistService;
     }

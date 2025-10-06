@@ -24,7 +24,7 @@ public class SongService : ISongService
 
     public async Task<IEnumerable<Song?>> GetSongByNameAsync(string name) 
         => await _dbContext.Songs
-        .Where(x => x.Name.Contains(name) || x.Artist.Contains(name))
+        .Where(x => x.Name.Contains(name) || x.Artist.Nick.Contains(name))
         .Take(10)
         .ToListAsync();
 

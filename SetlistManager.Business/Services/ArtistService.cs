@@ -2,6 +2,7 @@
 using SetlistManager.Business.Mappers;
 using SetlistManager.Common.Models;
 using SetlistManager.Data;
+using SetlistManager.Data.Entities;
 
 namespace SetlistManager.Business.Services;
 
@@ -14,12 +15,15 @@ public class ArtistService : IArtistService
         _dbContext = dbContext;
     }
 
-    public async Task<List<ArtistModel>> GetAllArtistsAsync() 
-        => (await _dbContext.Artists
-        .Include(x => x.Songs)
-        .ToListAsync())
-        .Select(a => a.ToModel())
-        .ToList();
+    public async Task<List<ArtistModel>> GetAllArtistsAsync()
+    {
+        var artists = await _dbContext.Artists
+            .Include(x => x.Songs)!
+            .ThenInclude(x => x.Language)            
+            .ToListAsync();
+        var what = artists.Select(a => a.ToModel(false)).ToList();
+        return what;
+    }
 
     public async Task UploadArtistAsync(ArtistModel artistModel)
     {            
@@ -27,9 +31,8 @@ public class ArtistService : IArtistService
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task<ArtistModel> GetArtistByIdAsync(int id)
+    public async Task<Artist> GetArtistByIdAsync(int id)
         => (await _dbContext.Artists
         .Include(x => x.Songs)
-        .FirstAsync(x => x.Id == id))
-        .ToModel();
+        .FirstAsync(x => x.Id == id));
 }

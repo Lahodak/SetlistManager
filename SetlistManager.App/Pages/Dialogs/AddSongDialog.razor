@@ -4,66 +4,78 @@
     <DialogContent>
         <MudText Typo="Typo.h5">Add New Song</MudText>
 
-        <MudPaper Class="pa-4 mt-3" Elevation="2">
-            <MudGrid Spacing="2">
-                <MudItem xs="12" sm="6">
-                    <MudTextField @bind-Value="_song.Name"
-                                  Label="Song Name"
-                                  Required="true"
-                                  Variant="Variant.Outlined" />
-                </MudItem>
-                <MudItem xs="12" sm="6">
-                    <MudTextField @bind-Value="_song.Artist"
-                                  Label="Artist"
-                                  Required="true"
-                                  Variant="Variant.Outlined" />
-                </MudItem>
-
-                <MudItem xs="12" sm="6">
-                    <MudTextField @bind-Value="_song.TabsURL"
-                                  Label="Tabs URL"
-                                  Variant="Variant.Outlined" />
-                </MudItem>
-                <MudItem xs="12" sm="6">
-                    <MudTextField @bind-Value="_song.AudioURL"
-                                  Label="Audio URL"
-                                  Variant="Variant.Outlined" />
-                </MudItem>
-
-                <MudItem xs="12" sm="6">
-                    <MudTextField @bind-Value="_song.Tuning"
-                                  Label="Tuning"
-                                  Variant="Variant.Outlined" />
-                </MudItem>
-                <MudItem xs="12" sm="6">
-                    <MudTextField @bind-Value="_song.Key"
-                                  Label="Key"
-                                  Variant="Variant.Outlined" />
-                </MudItem>
-
-                <MudItem xs="12" sm="6">
-                    <MudNumericField @bind-Value="_song.BPM"
-                                     Label="BPM"
-                                     Min="40" Max="300"
-                                     Variant="Variant.Outlined" />
-                </MudItem>
-                <MudItem xs="12" sm="6">
-                    <MudSelect @bind-Value="_song.Language" Label="Language" Variant="Variant.Outlined">
-                        @if(languages is not null)
-                        {
-                            @foreach(var language in languages)
+        @if (_song is not null)
+        {
+            <MudPaper Class="pa-4 mt-3" Elevation="2">
+                <MudGrid Spacing="2">
+                    <MudItem xs="12" sm="6">
+                        <MudTextField @bind-Value="_song.Name"
+                                      Label="Song Name"
+                                      Required="true"
+                                      Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudSelect @bind-Value="_song.Artist" Label="Artist" Variant="Variant.Outlined">
+                            @if (artists is not null)
                             {
-                                <MudSelectItem Value="language">@language.Name</MudSelectItem>
+                                @foreach (var artist in artists)
+                                {
+                                    <MudSelectItem Value="artist">@artist.Nick</MudSelectItem>
+                                }
                             }
-                        }
-                    </MudSelect>
-                </MudItem>
-            </MudGrid>
-        </MudPaper>
+                        </MudSelect>
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6">
+                        <MudTextField @bind-Value="_song.TabsURL"
+                                      Label="Tabs URL"
+                                      Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField @bind-Value="_song.AudioURL"
+                                      Label="Audio URL"
+                                      Variant="Variant.Outlined" />
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6">
+                        <MudTextField @bind-Value="_song.Tuning"
+                                      Label="Tuning"
+                                      Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField @bind-Value="_song.Key"
+                                      Label="Key"
+                                      Variant="Variant.Outlined" />
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6">
+                        <MudNumericField @bind-Value="_song.BPM"
+                                         Label="BPM"
+                                         Min="40" Max="300"
+                                         Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudSelect @bind-Value="_song.Language" Label="Language" Variant="Variant.Outlined">
+                            @if (languages is not null)
+                            {
+                                @foreach (var language in languages)
+                                {
+                                    <MudSelectItem Value="language">@language.Name</MudSelectItem>
+                                }
+                            }
+                        </MudSelect>
+                    </MudItem>
+                </MudGrid>
+            </MudPaper>
+        }
+        else
+        {
+            <MudProgressCircular Indeterminate="true" />
+        }
     </DialogContent>
 
     <DialogActions>
-        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="SaveSong">Save</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="SaveSong" Disabled="_song is null">Save</MudButton>
         <MudButton Variant="Variant.Text" OnClick="Cancel">Cancel</MudButton>
     </DialogActions>
 </MudDialog>
@@ -79,32 +91,60 @@
     public required LanguageService LanguageService { get; set; }
     [Inject]
     public required UserService UserService { get; set; }
+    [Inject]
+    public required ArtistService ArtistService { get; set; }
 
     private List<LanguageModel>? languages;
-
-    private SongModel _song = new()
-    {
-        CreatedAt = DateTime.UtcNow,
-        UpdatedAt = DateTime.UtcNow      
-    };
+    private List<ArtistModel>? artists;
+    private SongModel? _song;
 
     protected override async Task OnInitializedAsync()
     {
         languages = await LanguageService.GetAvailableSetlistAsync();
-        _song.Language = languages[0];
-        StateHasChanged();
+        artists = await ArtistService.GetAvailableArtistsAsync();
+
+        if (artists is null || artists.Count == 0)
+        {
+            Snackbar.Add("Add Artists First!", Severity.Warning);
+        }
+
+        _song = new SongModel
+        {
+            Name = string.Empty,
+            Language = languages?.FirstOrDefault(),
+            TabsURL = string.Empty,
+            AudioURL = string.Empty,
+            Tuning = string.Empty,
+            Key = string.Empty,
+            BPM = 120
+        };
     }
 
     private async Task SaveSong()
     {
-        if (string.IsNullOrWhiteSpace(_song.Name) || string.IsNullOrWhiteSpace(_song.Artist))
+        if (_song is null) return;
+
+        if (artists is null || artists.Count == 0)
         {
-            Snackbar.Add("Please provide at least Song Name and Artist.", Severity.Error);
+            Snackbar.Add("Add Artists First!", Severity.Error);
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_song.Name) || _song.Artist is null)
+        {
+            Snackbar.Add("Please provide Song Name and Artist.", Severity.Error);
+            return;
+        }
+
+        if (_song.Language is null)
+        {
+            Snackbar.Add("Please select a Language.", Severity.Error);
             return;
         }
 
         try
         {
+            _song.LanguageId = _song.Language.Id;
             await SongService.UploadSongAsync(_song);
             Snackbar.Add("Song added successfully!", Severity.Success);
             MudDialog.Close(DialogResult.Ok(_song));
@@ -113,9 +153,6 @@
         {
             Snackbar.Add($"Error adding song: {ex.Message}", Severity.Error);
         }
-
-        var userId = (await UserService.GetUserAsync()).Id;
-        _song.LanguageId = _song.Language.Id;
     }
 
     private void Cancel() => MudDialog.Cancel();

@@ -1,0 +1,61 @@
+﻿@page "/artistdetail/{artistId:int}"
+<PageTitle>Artist Detail</PageTitle>
+<MudContainer Class="mt-5">
+    <MudPaper Class="pa-4" Elevation="2">
+        @if (artist is not null)
+        {
+            <MudStack Spacing="2">
+                <MudText Typo="Typo.h4" Class="font-weight-bold">@artist.Nick</MudText>
+            </MudStack>
+            <MudPaper Class="pa-4 mt-4" Elevation="1">
+                <MudText Typo="Typo.h6" Class="mb-2">Songs by @artist.Nick</MudText>
+                @if (artist.Songs is not null && artist.Songs.Count > 0)
+                {
+                    <MudTable T="SongModel" Items="artist.Songs" Hover="true" Dense="true">
+                        <HeaderContent>
+                            <MudTh>Name</MudTh>
+                            <MudTh>Artist</MudTh>
+                            <MudTh>Language</MudTh>
+                            <MudTh>BPM</MudTh>
+                            <MudTh>Key</MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd DataLabel="Name">
+                                <MudLink Href="@($"/songdetail/{context.Id}")" Class="font-weight-medium">
+                                    @context.Name
+                                </MudLink>
+                            </MudTd>
+                            <MudTd DataLabel="Artist">@context.Artist.Nick</MudTd>
+                            <MudTd DataLabel="Language">@context.Language.Code</MudTd>
+                            <MudTd DataLabel="BPM">@context.BPM</MudTd>
+                            <MudTd DataLabel="Key">@context.Key</MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                }
+                else
+                {
+                    <MudAlert Severity="Severity.Info" Class="mt-3">No songs by this artist yet.</MudAlert>
+                }
+            </MudPaper>
+        }
+        else
+        {
+            <MudAlert Severity="Severity.Warning" Class="mt-3">Artist not found!</MudAlert>
+        }
+    </MudPaper>
+</MudContainer>
+
+@code {
+    [Parameter]
+    public int artistId { get; set; }
+    [Inject]
+    public required ArtistService _artistService { get; set; }
+    [Inject]
+    public required NavigationManager _navigation { get; set; }
+    private ArtistModel? artist;
+
+    protected override async Task OnInitializedAsync()
+    {
+        artist = await _artistService.GetArtistByIdAsync(artistId)!;
+    }
+}
