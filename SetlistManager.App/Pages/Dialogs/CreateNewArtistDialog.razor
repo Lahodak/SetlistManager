@@ -18,7 +18,7 @@
     <DialogActions>
             <MudButton Class="pa-2 ml-2" Variant="Variant.Outlined" Style="height: 50px;"
                        OnClick="() => Save()">
-                Save Setlist
+                Create Artist
             </MudButton>
         <MudButton Variant="Variant.Text" OnClick="Cancel">Cancel</MudButton>
     </DialogActions>
@@ -37,6 +37,7 @@
         if (_artistModel.Nick == string.Empty)
             return;
         await ArtistService.UploadArtistAsync(_artistModel);
+        MudDialog.Close(DialogResult.Ok(_artistModel));
     }
 
     private void Cancel() => MudDialog.Cancel();

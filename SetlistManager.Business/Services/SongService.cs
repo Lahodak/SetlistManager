@@ -16,6 +16,7 @@ public class SongService : ISongService
     public async Task<IEnumerable<Song>> GetSongsAsync() 
         => await _dbContext.Songs
         .Include(x => x.Language)
+        .Include(x => x.Artist)
         .ToListAsync();
 
     public async Task<Song?> GetSongByIdAsync(int id) 

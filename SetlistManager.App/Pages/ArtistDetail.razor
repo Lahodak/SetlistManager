@@ -14,7 +14,6 @@
                     <MudTable T="SongModel" Items="artist.Songs" Hover="true" Dense="true">
                         <HeaderContent>
                             <MudTh>Name</MudTh>
-                            <MudTh>Artist</MudTh>
                             <MudTh>Language</MudTh>
                             <MudTh>BPM</MudTh>
                             <MudTh>Key</MudTh>
@@ -25,7 +24,6 @@
                                     @context.Name
                                 </MudLink>
                             </MudTd>
-                            <MudTd DataLabel="Artist">@context.Artist.Nick</MudTd>
                             <MudTd DataLabel="Language">@context.Language.Code</MudTd>
                             <MudTd DataLabel="BPM">@context.BPM</MudTd>
                             <MudTd DataLabel="Key">@context.Key</MudTd>

@@ -21,8 +21,8 @@ public class ArtistService : IArtistService
             .Include(x => x.Songs)!
             .ThenInclude(x => x.Language)            
             .ToListAsync();
-        var what = artists.Select(a => a.ToModel(false)).ToList();
-        return what;
+        var artistModels = artists.Select(a => a.ToModel(true)).ToList();
+        return artistModels;
     }
 
     public async Task UploadArtistAsync(ArtistModel artistModel)
@@ -31,8 +31,15 @@ public class ArtistService : IArtistService
         await _dbContext.SaveChangesAsync();
     }
 
+    public async Task<ArtistModel> GetArtistModelByIdAsync(int id)
+        => (await _dbContext.Artists
+        .Include(x => x.Songs)!
+        .ThenInclude(x => x.Language)
+        .FirstAsync(x => x.Id == id)).ToModel(true);
+
     public async Task<Artist> GetArtistByIdAsync(int id)
         => (await _dbContext.Artists
-        .Include(x => x.Songs)
+        .Include(x => x.Songs)!
+        .ThenInclude(x => x.Language)
         .FirstAsync(x => x.Id == id));
 }

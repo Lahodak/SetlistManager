@@ -40,7 +40,7 @@ public partial class SongsController : BaseController
             return NotFound();        
 
         var songModels = new List<SongModel>();
-        var languages = await _languageService.GetAvailableLanguagesAsync();
+        var languages = await _languageService.GetAvailableLanguagesAsync();        
 
         foreach (var song in songs)
         {

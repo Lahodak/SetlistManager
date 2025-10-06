@@ -30,6 +30,6 @@ public class ArtistsController : BaseController
     [HttpGet("{artistId}")]
     public async Task<ActionResult<ArtistModel>> GetArtistById(int artistId)
     {
-        return Ok(await _artistService.GetArtistByIdAsync(artistId));
+        return Ok(await _artistService.GetArtistModelByIdAsync(artistId));
     }
 }
