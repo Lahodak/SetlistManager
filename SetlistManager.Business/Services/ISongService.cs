@@ -3,8 +3,8 @@
 namespace SetlistManager.Business.Services;
 public interface ISongService
 {
-    Task<Song?> GetSongByIdAsync(int SongId);
+    Task<Song?> GetSongByIdAsync(int songId);
     Task<IEnumerable<Song>> GetSongsAsync();
-    Task UploadSongAsync(Song Song);
-    Task<IEnumerable<Song?>> GetSongByNameAsync(string Name);
+    Task UploadSongAsync(Song song);
+    Task<IEnumerable<Song?>> GetSongByNameAsync(string name);
 }

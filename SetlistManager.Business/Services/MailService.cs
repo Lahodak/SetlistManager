@@ -7,7 +7,6 @@ namespace SetlistManager.Business.Services;
 public class MailService : IMailService
 {
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly IConfiguration _configuration;
 
     private readonly string _apiKey;
     private readonly string _senderEmail;
@@ -17,8 +16,10 @@ public class MailService : IMailService
     public MailService(IHttpClientFactory httpClientFactory, IConfiguration configuration)
     {
         _httpClientFactory = httpClientFactory;
-        _configuration = configuration;
 
+        IConfiguration _configuration;
+        _configuration = configuration;
+        
         _apiKey = _configuration["Brevo:ApiKey"]!;
         _senderEmail = _configuration["Brevo:SenderEmail"]!;
         _senderName = _configuration["Brevo:SenderName"]!;

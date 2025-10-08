@@ -1,9 +1,12 @@
-﻿namespace SetlistManager.Data.Entities;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace SetlistManager.Data.Entities;
 
 public class Song : Base
 {
+    [Required]
     public string Name { get; set; } = default!;
-    public Artist Artist { get; set; } = default!;
+    public virtual required Artist Artist { get; set; }
     public string TabsURL { get; set; } = default!;
     public string AudioURL { get; set; } = default!;
     public string Tuning { get; set; } = default!;

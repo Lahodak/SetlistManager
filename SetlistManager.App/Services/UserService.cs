@@ -21,9 +21,12 @@ public class UserService
     private readonly IHttpClientFactory _httpClientFactory; 
     private readonly ILocalStorageService _localStorage;
     private readonly ApiService _apiService;
+    private readonly ILogger<UserService> _logger;
 
-    public UserService(IHttpClientFactory httpClientFactory, ILocalStorageService localStorageService, ApiService apiService)
+    public UserService(IHttpClientFactory httpClientFactory, ILocalStorageService localStorageService, ApiService apiService, 
+        ILogger<UserService> logger)
     {
+        _logger = logger;
         _httpClientFactory = httpClientFactory;
         _localStorage = localStorageService;
         _apiService = apiService;
@@ -86,7 +89,7 @@ public class UserService
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            _logger.Log(LogLevel.Error, ex, message: ex.Message);
             return;
         }
 
@@ -112,7 +115,7 @@ public class UserService
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            _logger.Log(LogLevel.Error, ex, message: ex.Message);
             return;
         }
 
