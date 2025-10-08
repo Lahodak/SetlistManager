@@ -18,8 +18,11 @@ public class SetlistsService : ISetlistsService
     {
         var setlist = await _dbContext.Setlists
             .Include(s => s.SongsSetlists)
-            .ThenInclude(s => s.Song)
-            .ThenInclude(s => s.Language)
+                .ThenInclude(s => s.Song)
+                    .ThenInclude(s => s.Artist)
+            .Include(s => s.SongsSetlists)
+                .ThenInclude(s => s.Song)
+                    .ThenInclude(s => s.Language)
             .FirstOrDefaultAsync(x => x.Id == id);
 
         if (setlist is null)
@@ -32,8 +35,12 @@ public class SetlistsService : ISetlistsService
     {
         var setlist = await _dbContext.Setlists
             .Include(s => s.SongsSetlists)
-            .ThenInclude(s => s.Song)
-            .FirstOrDefaultAsync(x => x.Name.Contains(name));
+                .ThenInclude(s => s.Song)
+                    .ThenInclude(l => l.Language)
+            .Include(s => s.SongsSetlists)
+                .ThenInclude(s => s.Song)
+                    .ThenInclude(s => s.Artist)
+                    .FirstOrDefaultAsync(x => x.Name.Contains(name));
 
         if(setlist is null) 
             return null;
@@ -72,7 +79,11 @@ public class SetlistsService : ISetlistsService
     {
         var setlists = await _dbContext.Setlists
             .Include(s => s.SongsSetlists)
-            .ThenInclude(s => s.Song)
+                .ThenInclude(s => s.Song)
+                    .ThenInclude(l => l.Language)
+            .Include(s => s.SongsSetlists)
+                .ThenInclude(s => s.Song)
+                    .ThenInclude(s => s.Artist)
             .Where(x => x.Id == userId)
             .ToListAsync();
 
@@ -82,7 +93,11 @@ public class SetlistsService : ISetlistsService
     {
         var setlists = await _dbContext.Setlists
             .Include(s => s.SongsSetlists)
-            .ThenInclude(s => s.Song)
+                .ThenInclude(s => s.Song)
+                    .ThenInclude(l => l.Language)
+            .Include(s => s.SongsSetlists)
+                .ThenInclude(s => s.Song)
+                    .ThenInclude(s => s.Artist)
             .ToListAsync();        
         
         return setlists.Select(setlists => _orderMappingService.MapSongEntityToModelOrder(setlists).Result);
@@ -93,6 +108,10 @@ public class SetlistsService : ISetlistsService
         var setlistToBeEdited = await _dbContext.Setlists
             .Include(x => x.SongsSetlists)
             .ThenInclude(x => x.Song)
+                .ThenInclude(l => l.Language)
+            .Include(s => s.SongsSetlists)
+                .ThenInclude(s => s.Song)
+                    .ThenInclude(s => s.Artist)
             .FirstAsync(x => x.Id == setlistModel.Id);
 
         setlistToBeEdited.Name = setlistModel.Name;
