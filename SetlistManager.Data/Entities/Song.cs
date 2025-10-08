@@ -3,7 +3,7 @@
 public class Song : Base
 {
     public string Name { get; set; } = default!;
-    public string Artist { get; set; } = default!;
+    public Artist Artist { get; set; } = default!;
     public string TabsURL { get; set; } = default!;
     public string AudioURL { get; set; } = default!;
     public string Tuning { get; set; } = default!;
