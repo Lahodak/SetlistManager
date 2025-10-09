@@ -4,12 +4,13 @@ namespace SetlistManager.App.Services;
 
 public class RoomService
 {
-    private const string _roomsEndpointPath = "https://localhost:7143/api/rooms";
+    private readonly string _roomsEndpointPath;
 
     private readonly ApiService _apiService;
 
-    public RoomService(ApiService apiService)
+    public RoomService(ApiService apiService, IConfiguration configuration)
     {
+        _roomsEndpointPath = configuration["SetlistManager.Api:RoomsEndpoint"]!;
         _apiService = apiService;
     }
 

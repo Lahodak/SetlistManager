@@ -4,11 +4,12 @@ namespace SetlistManager.App.Services;
 
 public class ArtistService
 {
-    private const string _artistsEndpointPath = "https://localhost:7143/api/artists";
+    private readonly string _artistsEndpointPath;
     private readonly ApiService _apiService;
     
-    public ArtistService(ApiService apiService)
+    public ArtistService(ApiService apiService, IConfiguration configuration)
     {
+        _artistsEndpointPath = configuration["SetlistManager.Api:ArtistsEndpoint"]!;
         _apiService = apiService;
     }
 

@@ -4,11 +4,12 @@ namespace SetlistManager.App.Services;
 
 public class LanguageService
 {
-    private const string _languagesEndpointPath = "https://localhost:7143/api/languages";
+    private readonly string _languagesEndpointPath;
 
     private readonly ApiService _apiService;
-    public LanguageService(ApiService apiService)
+    public LanguageService(ApiService apiService, IConfiguration configuration)
     {
+        _languagesEndpointPath = configuration["SetlistManager.Api:LanguagesEndpoint"]!;
         _apiService = apiService;
     }
 

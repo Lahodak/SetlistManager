@@ -6,10 +6,11 @@ public class InstrumentService
 {
     private readonly ApiService _apiService;
 
-    private const string _instrumentsEndpointPath = "https://localhost:7143/api/instruments";
+    private readonly string _instrumentsEndpointPath;
 
-    public InstrumentService(ApiService apiService)
+    public InstrumentService(ApiService apiService, IConfiguration configuration)
     {
+        _instrumentsEndpointPath = configuration["SetlistManager.Api:InstrumentsEndpoint"]!;
         _apiService = apiService;
     }
 

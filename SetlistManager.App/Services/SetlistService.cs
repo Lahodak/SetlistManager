@@ -4,14 +4,15 @@ namespace SetlistManager.App.Services;
 
 public class SetlistService
 {
-    private const string _setlistsEndpointPath = "https://localhost:7143/api/setlists";
+    private readonly string _setlistsEndpointPath;
     private const string _setlistByIdSuffix = "/";
     private const string _getSetlistByNameSuffix = "/";
 
     private readonly ApiService _apiService;
 
-    public SetlistService(ApiService apiService)
+    public SetlistService(ApiService apiService, IConfiguration configuration)
     {
+        _setlistsEndpointPath = configuration["SetlistManager.Api:SetlistsEndpoint"]!;
         _apiService = apiService;
     }
 
