@@ -33,7 +33,7 @@
                                     @context.Name
                                 </MudLink>
                             </MudTd>
-                            <MudTd DataLabel="Artist">@context.Artist</MudTd>
+                            <MudTd DataLabel="Artist">@context.Artist!.Nick</MudTd>
                             <MudTd DataLabel="Language">@context.Language.Code</MudTd>
                             <MudTd DataLabel="BPM">@context.BPM</MudTd>
                             <MudTd DataLabel="Key">@context.Key</MudTd>
@@ -71,10 +71,10 @@
     [Inject]
     public required SetlistService SetlistService { get; set; }
 
-    private SetlistModel _setlist = new();
+    private SetlistModel? _setlist = new();
 
     protected override async Task OnInitializedAsync()
     {
-        _setlist = await SetlistService.GetSetlistById(setlistId);
+        _setlist = await SetlistService.GetSetlistById(setlistId)!;
     }
 }

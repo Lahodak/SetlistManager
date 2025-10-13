@@ -13,11 +13,13 @@ public partial class SongsController : BaseController
 {
     private readonly ISongService _songService;
     private readonly ILanguageService _languageService;
+    private readonly IArtistService _artistService;
 
-    public SongsController(ISongService songService, ILanguageService languageService)
+    public SongsController(ISongService songService, ILanguageService languageService, IArtistService artistService)
     {
         _songService = songService;
         _languageService = languageService;
+        _artistService = artistService;
     }
 
     [HttpGet]
@@ -38,7 +40,7 @@ public partial class SongsController : BaseController
             return NotFound();        
 
         var songModels = new List<SongModel>();
-        var languages = await _languageService.GetAvailableLanguagesAsync();
+        var languages = await _languageService.GetAvailableLanguagesAsync();        
 
         foreach (var song in songs)
         {
@@ -60,7 +62,7 @@ public partial class SongsController : BaseController
             {
                 Language = await _languageService.GetLanguageByIdAsync(song.Language.Id),
                 Name = song.Name,
-                Artist = song.Artist,
+                Artist = await _artistService.GetArtistByIdAsync(song.Artist.Id),
                 TabsURL = song.TabsURL,
                 AudioURL = song.AudioURL,
                 LanguageId = song.LanguageId,
@@ -80,7 +82,7 @@ public partial class SongsController : BaseController
         await _songService.UploadSongAsync(new()
         {
             Name = addSong.Name,
-            Artist = addSong.Artist,
+            Artist = await _artistService.GetArtistByIdAsync(addSong.Artist.Id),
             TabsURL = addSong.TabsURL,
             AudioURL = addSong.AudioURL,
             LanguageId = addSong.LanguageId,

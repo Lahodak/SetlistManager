@@ -16,15 +16,15 @@ public class SongService : ISongService
     public async Task<IEnumerable<Song>> GetSongsAsync() 
         => await _dbContext.Songs
         .Include(x => x.Language)
+        .Include(x => x.Artist)
         .ToListAsync();
 
-    public async Task<Song?> GetSongByIdAsync(int id) 
-        => await _dbContext.Songs.FirstOrDefaultAsync(x => x.Id == id) 
-        ?? throw new Exception("Song wasn't found");
+    public async Task<Song?> GetSongByIdAsync(int songId)
+        => await _dbContext.Songs.FirstOrDefaultAsync(x => x.Id == songId);
 
     public async Task<IEnumerable<Song?>> GetSongByNameAsync(string name) 
         => await _dbContext.Songs
-        .Where(x => x.Name.Contains(name) || x.Artist.Contains(name))
+        .Where(x => x.Name.Contains(name) || x.Artist.Nick.Contains(name))
         .Take(10)
         .ToListAsync();
 

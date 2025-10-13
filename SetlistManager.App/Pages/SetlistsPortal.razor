@@ -108,7 +108,7 @@
         var dialog = await DialogService.ShowAsync<EditSetlistDialog>("New Setlist", parameters, options);
 
         var result = await dialog.Result;
-        if (!result.Canceled)
+        if (!result!.Canceled)
         {
             await table.ReloadServerData();
         }
@@ -131,7 +131,6 @@
 
     private async Task DeleteSetlist(int id)
     {
-        //await SetlistService.DeleteSetlist(id);
         await table.ReloadServerData();
     }
 

@@ -7,8 +7,8 @@ using System.Text;
 namespace SetlistManager.App.Services;
 public class UserService
 {
-    private const string _usersEndpointPath = "https://localhost:7143/api/users";
-    private const string _authEndpointPath = "https://localhost:7143/api/auth";
+    private readonly string _usersEndpointPath;
+    private readonly string _authEndpointPath;
 
     private const string _loginUserSuffix = "/login";
     private const string _tokenKey = "authToken";
@@ -21,9 +21,14 @@ public class UserService
     private readonly IHttpClientFactory _httpClientFactory; 
     private readonly ILocalStorageService _localStorage;
     private readonly ApiService _apiService;
+    private readonly ILogger<UserService> _logger;
 
-    public UserService(IHttpClientFactory httpClientFactory, ILocalStorageService localStorageService, ApiService apiService)
+    public UserService(IHttpClientFactory httpClientFactory, ILocalStorageService localStorageService, ApiService apiService, 
+        ILogger<UserService> logger, IConfiguration configuration)
     {
+        _usersEndpointPath = configuration["SetlistManager.Api:UsersEndpoint"]!;
+        _authEndpointPath = configuration["SetlistManager.Api:AuthEndpoint"]!;
+        _logger = logger;
         _httpClientFactory = httpClientFactory;
         _localStorage = localStorageService;
         _apiService = apiService;
@@ -86,7 +91,7 @@ public class UserService
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            _logger.Log(LogLevel.Error, ex, message: ex.Message);
             return;
         }
 
@@ -112,7 +117,7 @@ public class UserService
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            _logger.Log(LogLevel.Error, ex, message: ex.Message);
             return;
         }
 

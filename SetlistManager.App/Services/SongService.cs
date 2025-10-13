@@ -4,15 +4,16 @@ namespace SetlistManager.App.Services;
 
 public class SongService
 {
-    private const string _songsEndpointPath = "https://localhost:7143/api/songs";    
+    private readonly string _songsEndpointPath;    
     private const string _getSongbyIdSuffix = "/";
     private const string _getSongbyNameSuffix = "?name=";
     private const string _uploadSongCollectionSuffix = "/bulk";    
 
     private readonly ApiService _apiService;
 
-    public SongService(ApiService apiService)
+    public SongService(ApiService apiService, IConfiguration configuration)
     {
+        _songsEndpointPath = configuration["SetlistManager.Api:SongsEndpoint"]!;
         _apiService = apiService;
     }
 

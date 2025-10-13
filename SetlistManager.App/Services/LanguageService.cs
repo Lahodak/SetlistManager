@@ -4,16 +4,15 @@ namespace SetlistManager.App.Services;
 
 public class LanguageService
 {
-    private const string _languagesEndpointPath = "https://localhost:7143/api/languages";
+    private readonly string _languagesEndpointPath;
 
     private readonly ApiService _apiService;
-    public LanguageService(ApiService apiService)
+    public LanguageService(ApiService apiService, IConfiguration configuration)
     {
+        _languagesEndpointPath = configuration["SetlistManager.Api:LanguagesEndpoint"]!;
         _apiService = apiService;
     }
 
-    public async Task<List<LanguageModel>> GetAvailableSetlistAsync()
-    {
-        return await _apiService.GetAsync<List<LanguageModel>>(_languagesEndpointPath);
-    }
+    public async Task<List<LanguageModel>> GetAvailableSetlistAsync() 
+        => await _apiService.GetAsync<List<LanguageModel>>(_languagesEndpointPath);
 }

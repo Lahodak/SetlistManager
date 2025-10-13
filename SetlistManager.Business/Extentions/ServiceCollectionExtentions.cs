@@ -9,6 +9,7 @@ public static class ServiceCollectionExtentions
     {
         services.AddScoped<ILanguageService, LanguageService>();
         services.AddScoped<IRoomsService, RoomsService>();
+        services.AddScoped<IArtistService, ArtistService>();
         services.AddScoped<ISongService, SongService>();
         services.AddScoped<ISetlistsService, SetlistsService>();
         services.AddScoped<IUserService, UserService>();

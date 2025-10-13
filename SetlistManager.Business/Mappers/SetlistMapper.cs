@@ -10,7 +10,7 @@ public static class SetlistMapper
         return new SetlistModel
         {
             Id = setlist.Id,
-            Name = setlist.Name,
+            Name = setlist.Name,            
             CreatorId = setlist.CreatorId,
             Songs = setlist.SongsSetlists?
                         .Select(ss => ss.Song.ToModel())

@@ -15,13 +15,13 @@ builder.Services.AddHttpClient();
 
 builder.Services.AddSingleton<SongService>();
 builder.Services.AddSingleton<SongsDB>();
-builder.Services.AddSingleton<SetlistService>();
-builder.Services.AddScoped<LyricsService>();
-builder.Services.AddSingleton<UserService>();
+builder.Services.AddScoped<SetlistService>();
+builder.Services.AddScoped<UserService>();
 builder.Services.AddSingleton<ApiService>();
-builder.Services.AddSingleton<LanguageService>();
-builder.Services.AddTransient<LyricsMarkupService>();
+builder.Services.AddScoped<LanguageService>();
 builder.Services.AddScoped<InstrumentService>();
+builder.Services.AddScoped<ArtistService>();
+builder.Services.AddLogging();
 
 builder.Services.AddBlazoredLocalStorageAsSingleton(); 
 

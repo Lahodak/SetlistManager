@@ -35,17 +35,20 @@ public class RoomsService : IRoomsService
         await _dbContext.SaveChangesAsync();                
     }
 
-    public async Task<RoomModel> JoinRoomAsync(JoinRoomModel joinRoomModel, User user)
+    public async Task<RoomModel?> JoinRoomAsync(JoinRoomModel joinRoomModel, User user)
     {
         var room = await _dbContext.Rooms
             .Include(x => x.Users)
             .ThenInclude(x => x.Instrument)
-            .Include(x => x.Setlist)            
-            .FirstOrDefaultAsync(x => x.Code == joinRoomModel.RoomCode)
-            ?? throw new Exception($"Room with code {joinRoomModel.RoomCode} does not exist");
+            .Include(x => x.Setlist)
+            .FirstOrDefaultAsync(x => x.Code == joinRoomModel.RoomCode);
+
+        if(room is null)
+            return null;
 
         room.Users.Add(user);
 
+        await _dbContext.SaveChangesAsync();
         return room.ToModel();
     }
 
@@ -55,14 +58,14 @@ public class RoomsService : IRoomsService
             .Include(x => x.Setlist)
             .ThenInclude(y => y!.SongsSetlists)
             .ThenInclude(z => z.Song)
-            .FirstOrDefaultAsync(x => x.Id == changeCurrentSongModel.RoomId)
-            ?? throw new Exception($"Room with id {changeCurrentSongModel.RoomId} does not exist");
+            .FirstOrDefaultAsync(x => x.Id == changeCurrentSongModel.RoomId);
+
+        if(room is null) 
+            return;    
 
         room.CurrentSongId = changeCurrentSongModel.NewCurrentSongId;
 
         _dbContext.Rooms.Update(room);
-        _dbContext.SaveChanges();
-
-        return;
+        await _dbContext.SaveChangesAsync();
     }
 }
