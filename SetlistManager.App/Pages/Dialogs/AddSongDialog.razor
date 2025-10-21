@@ -100,7 +100,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        languages = await LanguageService.GetAvailableSetlistAsync();
+        languages = await LanguageService.GetAvailableLanguagesAsync();
         artists = await ArtistService.GetAvailableArtistsAsync();
 
         if (artists is null || artists.Count == 0)
