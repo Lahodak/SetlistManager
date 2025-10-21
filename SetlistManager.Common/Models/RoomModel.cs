@@ -17,5 +17,5 @@ public class RoomModel
     public int UpdatedBy { get; set; }
     public List<UserModel> Users { get; set; } = [];
     public SetlistModel? Setlist { get; set; }
-    public int CurrentSong { get; set; }    
+    public int? CurrentSong { get; set; }    
 }

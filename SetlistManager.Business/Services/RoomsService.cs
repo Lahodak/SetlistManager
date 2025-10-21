@@ -1,13 +1,16 @@
-﻿using SetlistManager.Common.Models;
-using Microsoft.EntityFrameworkCore;
-using SetlistManager.Data.Entities;
+﻿using Microsoft.EntityFrameworkCore;
 using SetlistManager.Business.Mappers;
+using SetlistManager.Common.Models;
 using SetlistManager.Data;
+using SetlistManager.Data.Entities;
+using System.Text;
 
 namespace SetlistManager.Business.Services;
 
 public class RoomsService : IRoomsService
 {
+    private const string roomCodeAvailableCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    private const int roomCodeLength = 6;
     private readonly AppDbContext _dbContext;
 
     public RoomsService(AppDbContext dbContext)
@@ -29,10 +32,36 @@ public class RoomsService : IRoomsService
         return room.ToModel();
     }
 
-    public async Task CreateRoomAsync(RoomModel room)
+    public async Task<RoomModel> CreateRoomAsync(CreateRoomModel createRoomModel, int hostId)
     {
-        await _dbContext.AddAsync(room.ToEntity());        
-        await _dbContext.SaveChangesAsync();                
+        Room room = new()
+        {
+            Name = createRoomModel.Name,
+            HostId = hostId,
+            SetlistId = createRoomModel.SetlistModel!.Id,
+            IsPublic = createRoomModel.IsPublic,
+            UpdatedBy = hostId,
+            CreatedAt = DateTime.UtcNow,
+            IsActive = true
+        };
+
+        
+        Random random = new();
+        
+        StringBuilder code = new(roomCodeLength);
+        
+        for (int i = 0; i < roomCodeLength; i++)
+        {
+            int index = random.Next(roomCodeAvailableCharacters.Length - 1);
+            code.Append(roomCodeAvailableCharacters[index]);
+        }
+
+        room.Code = code.ToString();
+
+        await _dbContext.Rooms.AddAsync(room);
+        await _dbContext.SaveChangesAsync();      
+        
+        return room.ToModel();
     }
 
     public async Task<RoomModel?> JoinRoomAsync(JoinRoomModel joinRoomModel, User user)
@@ -67,5 +96,46 @@ public class RoomsService : IRoomsService
 
         _dbContext.Rooms.Update(room);
         await _dbContext.SaveChangesAsync();
+    }
+
+    public async Task<List<RoomModel>> GetPublicRoomsAsync()
+    {
+        var rooms = await _dbContext.Rooms            
+            .Where(x => x.IsPublic)
+            .Where(x => x.IsActive)
+            .Include(x => x.Setlist)
+                .ThenInclude(x => x!.SongsSetlists)
+                .ThenInclude(x => x.Song)
+                .ThenInclude(x => x.Language)
+            .Include(x => x.Setlist)
+                .ThenInclude(x => x!.SongsSetlists)
+                .ThenInclude(x => x.Song)
+                .ThenInclude(x => x.Artist)
+            .Include(x => x.Users)
+                .ThenInclude(x => x.Instrument)
+            .ToListAsync();
+
+        return rooms.Select(x => x.ToModel()).ToList();
+    }
+
+    public async Task<RoomModel?> GetRoomByCodeAsync(string roomCode)
+    {
+        var room = await _dbContext.Rooms
+            .Include(x => x.Setlist)
+                .ThenInclude(x => x!.SongsSetlists)
+                .ThenInclude(x => x.Song)
+                .ThenInclude(x => x.Language)
+            .Include(x => x.Setlist)
+                .ThenInclude(x => x!.SongsSetlists)
+                .ThenInclude(x => x.Song)
+                .ThenInclude(x => x.Artist)
+            .Include(x => x.Users)
+                .ThenInclude(x => x.Instrument)
+            .FirstOrDefaultAsync(x => x.Code == roomCode);
+
+        if (room is null)
+            return null;
+        
+        return room.ToModel();
     }
 }

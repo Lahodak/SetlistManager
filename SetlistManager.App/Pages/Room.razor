@@ -84,4 +84,10 @@
     private string key = "A";
     private string prevNextSong = "Prev/Next_Song_Name";
     private string prevNextArtist = "Previous_Artist";
+
+    protected async override Task OnInitializedAsync()
+    {
+     
+		await base.OnInitializedAsync();
+    }
 }

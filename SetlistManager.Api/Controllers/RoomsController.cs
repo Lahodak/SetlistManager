@@ -65,11 +65,40 @@ public class RoomsController : BaseController
     }
 
     [HttpPost]
-    public async Task<ActionResult<RoomModel>> CreateRoomAsync(RoomModel roomModel)
+    public async Task<ActionResult<RoomModel>> CreateRoomAsync(CreateRoomModel roomModel)
     {
-        roomModel.HostId = (int)_currentUserContext.GetCurrentUserId()!;
-        await _roomsService.CreateRoomAsync(roomModel);        
+        var userId = (int)_currentUserContext.GetCurrentUserId()!;
+        await _roomsService.CreateRoomAsync(roomModel, userId);        
 
         return Ok();
+    }
+
+    [HttpGet("{roomId}")]
+    public async Task<ActionResult<RoomModel>> GetRoomByIdAsync(int roomId)
+    {
+        var roomModel = await _roomsService.GetRoomByIdAsync(roomId);
+        
+        if (roomModel is null)
+            return NotFound("Room not found");
+        
+        return Ok(roomModel);
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<RoomModel>> GetRoomByCodeAsync([FromQuery] string roomCode)
+    {
+        var roomModel = await _roomsService.GetRoomByCodeAsync(roomCode);
+        
+        if (roomModel is null)
+            return NotFound("Room not found");
+        
+        return Ok(roomModel);
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<List<RoomModel>>> GetAllActiveRoomsAsync()
+    {
+        var rooms = await _roomsService.GetPublicRoomsAsync();
+        return Ok(rooms);
     }
 }

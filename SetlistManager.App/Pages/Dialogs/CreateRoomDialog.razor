@@ -1,0 +1,46 @@
+﻿@using SetlistManager.App.Services
+@using SetlistManager.Common.Models
+
+<MudDialog>
+    <DialogContent>
+        <MudText Typo="Typo.h5">Create new Room</MudText>
+
+        <MudPaper Class="pa-4 mt-3" Elevation="2">
+            <MudText Typo="Typo.body1">Add new Room:</MudText>
+            <MudGrid>
+                <MudItem>
+                    <MudTextField @bind-Value="_createRoomModel.Name" Style="width: 200px; height: 50px;" />
+                </MudItem>
+            </MudGrid>
+        </MudPaper>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Class="pa-2 ml-2" Variant="Variant.Outlined" Style="height: 50px;"
+                   OnClick="() => Save()">
+            Create Artist
+        </MudButton>
+        <MudButton Variant="Variant.Text" OnClick="Cancel">Cancel</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    public required IMudDialogInstance MudDialog { get; set; }
+    [Inject]
+    public required RoomService RoomService { get; set; }
+
+    private readonly CreateRoomModel _createRoomModel = new();
+
+    private async Task Save()
+    {
+        if (_createRoomModel.Name == string.Empty)
+            return;
+
+		RoomModel? createdRoom = await RoomService.CreateRoomAsync(_createRoomModel);
+
+        MudDialog.Close(DialogResult.Ok(createdRoom));
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}
