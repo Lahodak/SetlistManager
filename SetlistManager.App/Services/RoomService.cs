@@ -19,4 +19,7 @@ public class RoomService
 
     public async Task<RoomModel?> CreateRoomAsync(CreateRoomModel createRoomModel)
         => await _apiService.PostAsync<CreateRoomModel, RoomModel> (_roomsEndpointPath, createRoomModel);
+
+    public async Task<RoomModel?> GetRoomByCodeAsync(string roomCode)
+        => await _apiService.GetAsync<RoomModel>($"{_roomsEndpointPath}/{roomCode}");
 }

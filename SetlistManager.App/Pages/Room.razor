@@ -1,11 +1,14 @@
-﻿@page "/room"
+﻿@page "/room/{RoomCode}"
 @layout EmptyLayout
+@using SetlistManager.App.Services
+@using SetlistManager.Common.Models
+@using Microsoft.AspNetCore.Components
 
 <MudContainer MaxWidth="MaxWidth.False" Class="pa-0">
     <MudAppBar Elevation="0">
-        <MudText Typo="Typo.h5" Style="font-weight: 300;">Room_Name</MudText>
+        <MudText Typo="Typo.h5" Style="font-weight: 300;">@(_roomModel?.Name ?? "Loading...")</MudText>
         <MudText Typo="Typo.body2" Class="ml-4 px-3 py-1" Style="background: rgba(0,0,0,0.3); border-radius: 4px;">
-            Code: <span style="font-weight: 600;">6XAH7#DSX</span>
+            Code: <span style="font-weight: 600;">@RoomCode</span>
         </MudText>
         <MudSpacer />
         <MudText Typo="Typo.h5" Style="font-weight: 300;">User - Instrument</MudText>
@@ -13,81 +16,119 @@
     </MudAppBar>
 
     <MudContainer MaxWidth="MaxWidth.Large" Class="mt-8 px-4">
-        <MudPaper Elevation="4" Class="pa-10 mb-6" Style="border-radius: 16px;">
-            <MudText Typo="Typo.h2" Align="Align.Start" Style="font-weight: 1000; word-break: break-word;">
-                Current_Song_Name_ExtraSpaceForLonger
-            </MudText>
-            <MudText Typo="Typo.h4" Align="Align.Start" Class="mt-4">
-                Artist: The Band
-            </MudText>
-        </MudPaper>
+        @if (_roomModel == null || CurrentSong == null)
+        {
+            <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+        }
+        else
+        {
+            <MudPaper Elevation="4" Class="pa-10 mb-6" Style="border-radius: 16px;">
+                <MudText Typo="Typo.h2" Align="Align.Start" Style="font-weight: 1000; word-break: break-word;">
+                    @CurrentSong.Name
+                </MudText>
+                <MudText Typo="Typo.h4" Align="Align.Start" Class="mt-4">
+                    Artist: @(CurrentSong.Artist?.Nick ?? "N/A")
+                </MudText>
+            </MudPaper>
 
-        <div class="d-flex justify-center align-center flex-wrap gap-3 mb-6">
-            <MudPaper Elevation="3" Class="pa-4 d-flex flex-column align-center" Style="min-width: 120px; height: 80px; border-radius: 12px;">
-                <MudText Typo="Typo.caption" Color="Color.Default">BPM:</MudText>
-                <MudText Typo="Typo.h6" Style="font-weight: 500;">180</MudText>
-            </MudPaper>
-            <MudPaper Elevation="3" Class="pa-4 d-flex flex-column align-center" Style="min-width: 120px; height: 80px; border-radius: 12px;">
-                <MudText Typo="Typo.caption" Color="Color.Default">Tuning:</MudText>
-                <MudText Typo="Typo.h6" Style="font-weight: 500;">Drop C#</MudText>
-            </MudPaper>
-            <MudPaper Elevation="3" Class="pa-4 d-flex flex-column align-center" Style="min-width: 120px; height: 80px; border-radius: 12px;">
-                <MudText Typo="Typo.caption" Color="Color.Default">Key:</MudText>
-                <MudText Typo="Typo.h6" Style="font-weight: 500;">A</MudText>
-            </MudPaper>
-            <MudPaper Elevation="3" Class="pa-4 d-flex align-center justify-center" Style="width: 120px; height: 80px; border-radius: 12px;">
-                <MudIconButton Icon="@Icons.Material.Filled.QueueMusic" Size="Size.Large" />
-            </MudPaper>
-            <MudPaper Elevation="3" Class="pa-4 d-flex align-center justify-center" Style="width: 120px; height: 80px; border-radius: 12px;">
-                <MudIconButton Icon="@Icons.Material.Filled.Menu" Size="Size.Large" />
-            </MudPaper>
-        </div>
-
-        <MudGrid>
-            <MudItem xs="12" md="6">
-                <MudPaper Elevation="3" Class="pa-6 d-flex flex-column align-center justify-center" Style="min-height: 200px; border-radius: 16px">
-                    <MudText Typo="Typo.h6" Color="Color.Primary" Class="mb-2 d-flex align-center">
-                        <MudIcon Icon="@Icons.Material.Filled.ArrowBack" Class="mr-1" /> Previous
-                    </MudText>
-                    <MudText Typo="Typo.h3" Align="Align.Center" Class="font-weight-medium">
-                        Prev_Song_Name
-                    </MudText>
-                    <MudText Typo="Typo.h4" Align="Align.Center" Color="Color.Primary" Style="margin-top: 5px">
-                        Previous_Artist
-                    </MudText>
+            <div class="d-flex justify-center align-center flex-wrap gap-3 mb-6">
+                <MudPaper Elevation="3" Class="pa-4 d-flex flex-column align-center" Style="min-width: 120px; height: 80px; border-radius: 12px;">
+                    <MudText Typo="Typo.caption" Color="Color.Default">BPM:</MudText>
+                    <MudText Typo="Typo.h6" Style="font-weight: 500;">@CurrentSong.BPM</MudText>
                 </MudPaper>
-            </MudItem>
-
-            <MudItem xs="12" md="6">
-                <MudPaper Elevation="3" Class="pa-6 d-flex flex-column align-center justify-center" Style="min-height: 200px; border-radius: 16px">
-                    <MudText Typo="Typo.h6" Color="Color.Primary" Class="mb-2 d-flex align-center">
-                        Next <MudIcon Icon="@Icons.Material.Filled.ArrowForward" Class="ml-1" />
-                    </MudText>
-                    <MudText Typo="Typo.h3" Align="Align.Center" Class="font-weight-medium">
-                        Next_Song_Name
-                    </MudText>
-                    <MudText Typo="Typo.h4" Align="Align.Center" Color="Color.Primary" Style="margin-top: 5px">
-                        Next_Artist
-                    </MudText>
+                <MudPaper Elevation="3" Class="pa-4 d-flex flex-column align-center" Style="min-width: 120px; height: 80px; border-radius: 12px;">
+                    <MudText Typo="Typo.caption" Color="Color.Default">Tuning:</MudText>
+                    <MudText Typo="Typo.h6" Style="font-weight: 500;">@CurrentSong.Tuning</MudText>
                 </MudPaper>
-            </MudItem>
-        </MudGrid>
+                <MudPaper Elevation="3" Class="pa-4 d-flex flex-column align-center" Style="min-width: 120px; height: 80px; border-radius: 12px;">
+                    <MudText Typo="Typo.caption" Color="Color.Default">Key:</MudText>
+                    <MudText Typo="Typo.h6" Style="font-weight: 500;">@CurrentSong.Key</MudText>
+                </MudPaper>
+                <MudPaper Elevation="3" Class="pa-4 d-flex align-center justify-center" Style="width: 120px; height: 80px; border-radius: 12px;">
+                    <MudIconButton Icon="@Icons.Material.Filled.QueueMusic" Size="Size.Large" />
+                </MudPaper>
+                <MudPaper Elevation="3" Class="pa-4 d-flex align-center justify-center" Style="width: 120px; height: 80px; border-radius: 12px;">
+                    <MudIconButton Icon="@Icons.Material.Filled.Menu" Size="Size.Large" />
+                </MudPaper>
+            </div>
 
+            <MudGrid>
+                <MudItem xs="12" md="6">
+                    <MudPaper Elevation="3" Class="pa-6 d-flex flex-column align-center justify-center" Style="min-height: 200px; border-radius: 16px">
+                        <MudText Typo="Typo.h6" Color="Color.Primary" Class="mb-2 d-flex align-center">
+                            <MudIcon Icon="@Icons.Material.Filled.ArrowBack" Class="mr-1" /> Previous
+                        </MudText>
+                        <MudText Typo="Typo.h3" Align="Align.Center" Class="font-weight-medium">
+                            @PrevSong?.Name
+                        </MudText>
+                        <MudText Typo="Typo.h4" Align="Align.Center" Color="Color.Primary" Style="margin-top: 5px">
+                            @(PrevSong?.Artist?.Nick ?? "N/A")
+                        </MudText>
+                    </MudPaper>
+                </MudItem>
+
+                <MudItem xs="12" md="6">
+                    <MudPaper Elevation="3" Class="pa-6 d-flex flex-column align-center justify-center" Style="min-height: 200px; border-radius: 16px">
+                        <MudText Typo="Typo.h6" Color="Color.Primary" Class="mb-2 d-flex align-center">
+                            Next <MudIcon Icon="@Icons.Material.Filled.ArrowForward" Class="ml-1" />
+                        </MudText>
+                        <MudText Typo="Typo.h3" Align="Align.Center" Class="font-weight-medium">
+                            @NextSong?.Name
+                        </MudText>
+                        <MudText Typo="Typo.h4" Align="Align.Center" Color="Color.Primary" Style="margin-top: 5px">
+                            @(NextSong?.Artist?.Nick ?? "N/A")
+                        </MudText>
+                    </MudPaper>
+                </MudItem>
+            </MudGrid>
+        }
     </MudContainer>
 </MudContainer>
 
 @code {
-    private string currentSongName = "Current_Song_Name_ExtraSpaceForLonger";
-    private string currentArtist = "The Band";
-    private int bpm = 180;
-    private string tuning = "Drop C#";
-    private string key = "A";
-    private string prevNextSong = "Prev/Next_Song_Name";
-    private string prevNextArtist = "Previous_Artist";
+    [Parameter]
+    public string RoomCode { get; set; } = string.Empty;
+    [Inject]
+    public required RoomService RoomService { get; set; }
+    [Inject]
+    public required NavigationManager NavigationManager { get; set; }
 
-    protected async override Task OnInitializedAsync()
+    private RoomModel? _roomModel;
+    private SongModel? CurrentSong;
+    private SongModel? PrevSong;
+    private SongModel? NextSong;
+
+    protected override async Task OnInitializedAsync()
     {
-     
-		await base.OnInitializedAsync();
+        if (string.IsNullOrWhiteSpace(RoomCode))
+        {
+            NavigationManager.NavigateTo("/error");
+            return;
+        }
+
+        _roomModel = await RoomService.GetRoomByCodeAsync(RoomCode);
+
+        if (_roomModel == null)
+        {
+            NavigationManager.NavigateTo("/roomnotfound");
+            return;
+        }
+
+        CurrentSong = _roomModel.Setlist?.Songs.FirstOrDefault();
+
+        if (CurrentSong != null)
+        {
+            var currentIndex = _roomModel.Setlist!.Songs.IndexOf(CurrentSong);
+
+            if (currentIndex > 0)
+            {
+                PrevSong = _roomModel.Setlist.Songs[currentIndex - 1];
+            }
+
+            if (currentIndex < _roomModel.Setlist.Songs.Count - 1)
+            {
+                NextSong = _roomModel.Setlist.Songs[currentIndex + 1];
+            }
+        }
     }
 }

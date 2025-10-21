@@ -72,7 +72,7 @@
 
     private async Task<TableData<SetlistModel>> ServerReload(TableState state, CancellationToken token)
     {
-        var allSetlists = await SetlistService.GetAllSetlists();
+        var allSetlists = await SetlistService.GetAllSetlistsAsync();
         await Task.Delay(300, token);
 
         var filtered = allSetlists.Where(setlist =>

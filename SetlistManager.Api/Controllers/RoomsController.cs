@@ -65,15 +65,15 @@ public class RoomsController : BaseController
     }
 
     [HttpPost]
-    public async Task<ActionResult<RoomModel>> CreateRoomAsync(CreateRoomModel roomModel)
+    public async Task<ActionResult<RoomModel>> CreateRoomAsync(CreateRoomModel roomCreateModel)
     {
         var userId = (int)_currentUserContext.GetCurrentUserId()!;
-        await _roomsService.CreateRoomAsync(roomModel, userId);        
+        var roomModel = await _roomsService.CreateRoomAsync(roomCreateModel, userId);        
 
-        return Ok();
+        return Ok(roomModel);
     }
 
-    [HttpGet("{roomId}")]
+    [HttpGet("{roomId:int}")]
     public async Task<ActionResult<RoomModel>> GetRoomByIdAsync(int roomId)
     {
         var roomModel = await _roomsService.GetRoomByIdAsync(roomId);
@@ -84,8 +84,8 @@ public class RoomsController : BaseController
         return Ok(roomModel);
     }
 
-    [HttpGet]
-    public async Task<ActionResult<RoomModel>> GetRoomByCodeAsync([FromQuery] string roomCode)
+    [HttpGet("{roomCode}")]
+    public async Task<ActionResult<RoomModel>> GetRoomByCodeAsync(string roomCode)
     {
         var roomModel = await _roomsService.GetRoomByCodeAsync(roomCode);
         

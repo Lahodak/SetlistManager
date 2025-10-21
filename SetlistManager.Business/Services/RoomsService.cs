@@ -59,8 +59,13 @@ public class RoomsService : IRoomsService
         room.Code = code.ToString();
 
         await _dbContext.Rooms.AddAsync(room);
-        await _dbContext.SaveChangesAsync();      
-        
+
+        if (room.Setlist is not null)
+            room.CurrentSongId = room.Setlist.SongsSetlists
+                .First(x => x.Order == 1).SongId;
+
+        await _dbContext.SaveChangesAsync();
+
         return room.ToModel();
     }
 

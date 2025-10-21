@@ -22,7 +22,7 @@ public class SetlistService
     public async Task<SetlistModel>? GetSetlistById(int id) 
         => await _apiService.GetAsync<SetlistModel>(_setlistsEndpointPath + _setlistByIdSuffix + id.ToString());
 
-    public async Task<List<SetlistModel>> GetAllSetlists() 
+    public async Task<List<SetlistModel>> GetAllSetlistsAsync() 
         => await _apiService.GetAsync<List<SetlistModel>>(_setlistsEndpointPath);
 
     public async Task<SetlistModel?> GetSetlistByNameAsync(string name)

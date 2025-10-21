@@ -6,19 +6,105 @@
         <MudText Typo="Typo.h5">Create new Room</MudText>
 
         <MudPaper Class="pa-4 mt-3" Elevation="2">
-            <MudText Typo="Typo.body1">Add new Room:</MudText>
+            <MudText Typo="Typo.body1" Class="mb-3">Add new Room Name:</MudText>
             <MudGrid>
-                <MudItem>
-                    <MudTextField @bind-Value="_createRoomModel.Name" Style="width: 200px; height: 50px;" />
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="_createRoomModel.Name"
+                                  Label="Room Name"
+                                  Variant="Variant.Outlined" />
+                </MudItem>
+                <MudItem xs="12" Class="mt-2">
+                    <MudCheckBox T="bool" @bind-Value="_createRoomModel.IsPublic"
+                                 Color="Color.Primary"
+                                 Label="Make Room Public (visible to others)"/>
                 </MudItem>
             </MudGrid>
         </MudPaper>
+
+        <MudPaper Class="pa-4 mt-4" Elevation="2">
+            <MudText Typo="Typo.h6" Class="mb-3">Select a Setlist to assign:</MudText>
+            <MudText Typo="Typo.body2" Class="mb-2">Selected Setlist: **@(_selectedSetlist?.Name ?? "None")**</MudText>
+            
+            @if (_availableSetlists == null)
+            {
+                <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7" />
+            }
+            else
+            {
+                <MudTable Items="@_availableSetlists.Where(FilterSetlists)"
+                          Dense="true"
+                          Hover="true"
+                          Bordered="true"
+                          SortLabel="Sort By"
+                          T="SetlistModel">
+
+                    <ToolBarContent>
+                        <MudTextField @bind-Value="_searchString"
+                                      Placeholder="Search Setlists"
+                                      Adornment="Adornment.Start"
+                                      AdornmentIcon="@Icons.Material.Filled.Search"
+                                      IconSize="Size.Medium"
+                                      Class="mt-0" />
+                    </ToolBarContent>
+
+                    <HeaderContent>
+                        <MudTh><MudTableSortLabel SortBy="new Func<SetlistModel, object>(x => x.Name)">Name</MudTableSortLabel></MudTh>
+                        <MudTh>Songs</MudTh>
+                        <MudTh>Peek</MudTh>
+                        <MudTh>Select</MudTh>
+                    </HeaderContent>
+
+                    <RowTemplate>
+                        <MudTd DataLabel="Name">@context.Name</MudTd>
+                        <MudTd DataLabel="Songs Count">@context.Songs.Count</MudTd>
+                        <MudTd DataLabel="Peek">
+                            <MudIconButton Icon="@Icons.Material.Filled.Visibility"
+                                           OnClick="@(() => ToggleRowExpand(context))"
+                                           Size="Size.Small"
+                                           Color="Color.Info" />
+                        </MudTd>
+                        <MudTd DataLabel="Select">
+                            <MudButton Variant="Variant.Filled"
+                                       Size="Size.Small"
+                                       Color="@(_selectedSetlist == context ? Color.Success : Color.Primary)"
+                                       OnClick="@(() => SelectSetlist(context))">
+                                @(_selectedSetlist == context ? "Selected" : "Select")
+                            </MudButton>
+                        </MudTd>
+                    </RowTemplate>
+
+                    <ChildRowContent>
+                        @if (IsRowExpanded(context))
+                        {
+                            <td colspan="4">
+                                <div class="d-flex flex-column pa-3">
+                                    <MudText Typo="Typo.subtitle2" Class="mb-2">Songs in Setlist:</MudText>
+                                    @if (context.Songs.Any())
+                                    {
+                                        @foreach (var song in context.Songs)
+                                        {
+                                            <MudText Typo="Typo.body2">- @song.Name (by @(song.Artist?.Nick ?? "N/A"))</MudText>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <MudText Typo="Typo.body2">No songs found in this setlist.</MudText>
+                                    }
+                                </div>
+                            </td>
+                        }
+                    </ChildRowContent>
+
+                </MudTable>
+            }
+        </MudPaper>
+
     </DialogContent>
 
     <DialogActions>
-        <MudButton Class="pa-2 ml-2" Variant="Variant.Outlined" Style="height: 50px;"
+        <MudButton Class="pa-2 ml-2" Variant="Variant.Outlined" Color="Color.Primary" Style="height: 50px;"
                    OnClick="() => Save()">
-            Create Artist
+            Create Room
         </MudButton>
         <MudButton Variant="Variant.Text" OnClick="Cancel">Cancel</MudButton>
     </DialogActions>
@@ -29,18 +115,78 @@
     public required IMudDialogInstance MudDialog { get; set; }
     [Inject]
     public required RoomService RoomService { get; set; }
+    [Inject]
+    public required SetlistService SetlistService { get; set; }
+    [Inject]
+    public required NavigationManager NavigationManager { get; set; }
 
     private readonly CreateRoomModel _createRoomModel = new();
+    private List<SetlistModel>? _availableSetlists;
+    private SetlistModel? _selectedSetlist;
+    private string _searchString = string.Empty;
+    private readonly HashSet<SetlistModel> _expandedSetlists = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadSetlistsAsync();
+    }
+
+    private async Task LoadSetlistsAsync()
+    {
+        try
+        {
+            _availableSetlists = await SetlistService.GetAllSetlistsAsync();
+        }
+        catch
+        {
+            _availableSetlists = new List<SetlistModel>();
+        }
+    }
+
+    private void SelectSetlist(SetlistModel setlist)
+    {
+        _selectedSetlist = setlist;
+    }
 
     private async Task Save()
     {
-        if (_createRoomModel.Name == string.Empty)
+        if (string.IsNullOrWhiteSpace(_createRoomModel.Name))
             return;
 
-		RoomModel? createdRoom = await RoomService.CreateRoomAsync(_createRoomModel);
+        _createRoomModel.SetlistModel = _selectedSetlist;
+
+        RoomModel? createdRoom = await RoomService.CreateRoomAsync(_createRoomModel);
+
+        if(createdRoom is not null && createdRoom.Code is not null)
+            NavigationManager.NavigateTo($"/room/{createdRoom.Code}");
 
         MudDialog.Close(DialogResult.Ok(createdRoom));
     }
 
     private void Cancel() => MudDialog.Cancel();
+
+    private bool FilterSetlists(SetlistModel setlist)
+    {
+        if (string.IsNullOrWhiteSpace(_searchString))
+            return true;
+
+        if (setlist.Name.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        return false;
+    }
+
+    private void ToggleRowExpand(SetlistModel setlist)
+    {
+        if (_expandedSetlists.Contains(setlist))
+        {
+            _expandedSetlists.Remove(setlist);
+        }
+        else
+        {
+            _expandedSetlists.Add(setlist);
+        }
+    }
+
+    private bool IsRowExpanded(SetlistModel setlist) => _expandedSetlists.Contains(setlist);
 }
