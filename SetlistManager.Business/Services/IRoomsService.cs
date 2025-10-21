@@ -9,6 +9,6 @@ public interface IRoomsService
     Task<RoomModel?> JoinRoomAsync(JoinRoomModel joinRoomModel, User user);
     Task ChangeCurrentSongAsync(ChangeCurrentSongModel changeCurrentSongModel);
     Task<RoomModel?> GetRoomByIdAsync(int roomId);
-    Task<List<RoomModel>> GetPublicRoomsAsync();
+    Task<List<RoomModel>> GetPublicActiveRoomsAsync();
     Task<RoomModel?> GetRoomByCodeAsync(string roomCode);
 }

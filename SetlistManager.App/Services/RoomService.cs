@@ -22,4 +22,7 @@ public class RoomService
 
     public async Task<RoomModel?> GetRoomByCodeAsync(string roomCode)
         => await _apiService.GetAsync<RoomModel>($"{_roomsEndpointPath}/{roomCode}");
+
+    public async Task<List<RoomModel>?> GetPublicActiveRoomsAsync()
+        => await _apiService.GetAsync<List<RoomModel>?>($"{_roomsEndpointPath}");
 }

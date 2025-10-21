@@ -98,7 +98,7 @@ public class RoomsController : BaseController
     [HttpGet]
     public async Task<ActionResult<List<RoomModel>>> GetAllActiveRoomsAsync()
     {
-        var rooms = await _roomsService.GetPublicRoomsAsync();
+        var rooms = await _roomsService.GetPublicActiveRoomsAsync();
         return Ok(rooms);
     }
 }

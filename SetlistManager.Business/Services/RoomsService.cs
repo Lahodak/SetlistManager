@@ -103,7 +103,7 @@ public class RoomsService : IRoomsService
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task<List<RoomModel>> GetPublicRoomsAsync()
+    public async Task<List<RoomModel>> GetPublicActiveRoomsAsync()
     {
         var rooms = await _dbContext.Rooms            
             .Where(x => x.IsPublic)
