@@ -66,7 +66,6 @@ public class SetlistsService : ISetlistsService
             UpdatedAt = DateTime.UtcNow,
             Creator = await _dbContext.Users.FirstAsync(x => x.Id == setlistModel.CreatorId),
             CreatorId = setlistModel.CreatorId,
-            UpdatedBy = setlistModel.CreatorId,
             SongsSetlists = []
         };
 
@@ -117,7 +116,6 @@ public class SetlistsService : ISetlistsService
 
         setlistToBeEdited.Name = setlistModel.Name;
         setlistToBeEdited.UpdatedAt = DateTime.Now;
-        setlistToBeEdited.UpdatedBy = setlistModel.CreatorId;
         
         foreach(var song in setlistToBeEdited.SongsSetlists)
         {
