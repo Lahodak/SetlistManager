@@ -12,10 +12,12 @@ public class RoomsService : IRoomsService
     private const string roomCodeAvailableCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     private const int roomCodeLength = 6;
     private readonly AppDbContext _dbContext;
+    private readonly OrderMappingService _orderMappingService;
 
-    public RoomsService(AppDbContext dbContext)
+    public RoomsService(AppDbContext dbContext, OrderMappingService orderMappingService)
     {
         _dbContext = dbContext;
+        _orderMappingService = orderMappingService;
     }
 
     public async Task<RoomModel?> GetRoomByIdAsync(int roomId)
@@ -115,7 +117,7 @@ public class RoomsService : IRoomsService
             .Include(x => x.Setlist)
                 .ThenInclude(x => x!.SongsSetlists)
                 .ThenInclude(x => x.Song)
-                .ThenInclude(x => x.Artist)
+                .ThenInclude(x => x.Artist)            
             .Include(x => x.Users)
                 .ThenInclude(x => x.Instrument)
             .ToListAsync();
@@ -141,6 +143,13 @@ public class RoomsService : IRoomsService
         if (room is null)
             return null;
         
-        return room.ToModel();
+        var model = room.ToModel();
+
+        if (room.Setlist is null)
+            return model;
+
+        model.Setlist = await _orderMappingService.MapSongEntityToModelOrder(room.Setlist);
+
+        return model;
     }
 }

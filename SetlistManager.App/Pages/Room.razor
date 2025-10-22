@@ -11,12 +11,12 @@
             Code: <span style="font-weight: 600;">@RoomCode</span>
         </MudText>
         <MudSpacer />
-        <MudText Typo="Typo.h5" Style="font-weight: 300;">User - Instrument</MudText>
+        <MudText Typo="Typo.h5" Style="font-weight: 300;">@(_user?.Username ?? "Loading...") - @(_user?.Instrument.Name ?? "Loading...")</MudText>
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.End" Size="Size.Large" />
     </MudAppBar>
 
     <MudContainer MaxWidth="MaxWidth.Large" Class="mt-8 px-4">
-        @if (_roomModel == null || CurrentSong == null)
+        @if (_roomModel == null || _currentSong == null)
         {
             <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
         }
@@ -24,25 +24,25 @@
         {
             <MudPaper Elevation="4" Class="pa-10 mb-6" Style="border-radius: 16px;">
                 <MudText Typo="Typo.h2" Align="Align.Start" Style="font-weight: 1000; word-break: break-word;">
-                    @CurrentSong.Name
+                    @_currentSong.Name
                 </MudText>
                 <MudText Typo="Typo.h4" Align="Align.Start" Class="mt-4">
-                    Artist: @(CurrentSong.Artist?.Nick ?? "N/A")
+                    Artist: @(_currentSong.Artist?.Nick ?? "N/A")
                 </MudText>
             </MudPaper>
 
             <div class="d-flex justify-center align-center flex-wrap gap-3 mb-6">
                 <MudPaper Elevation="3" Class="pa-4 d-flex flex-column align-center" Style="min-width: 120px; height: 80px; border-radius: 12px;">
                     <MudText Typo="Typo.caption" Color="Color.Default">BPM:</MudText>
-                    <MudText Typo="Typo.h6" Style="font-weight: 500;">@CurrentSong.BPM</MudText>
+                    <MudText Typo="Typo.h6" Style="font-weight: 500;">@_currentSong.BPM</MudText>
                 </MudPaper>
                 <MudPaper Elevation="3" Class="pa-4 d-flex flex-column align-center" Style="min-width: 120px; height: 80px; border-radius: 12px;">
                     <MudText Typo="Typo.caption" Color="Color.Default">Tuning:</MudText>
-                    <MudText Typo="Typo.h6" Style="font-weight: 500;">@CurrentSong.Tuning</MudText>
+                    <MudText Typo="Typo.h6" Style="font-weight: 500;">@_currentSong.Tuning</MudText>
                 </MudPaper>
                 <MudPaper Elevation="3" Class="pa-4 d-flex flex-column align-center" Style="min-width: 120px; height: 80px; border-radius: 12px;">
                     <MudText Typo="Typo.caption" Color="Color.Default">Key:</MudText>
-                    <MudText Typo="Typo.h6" Style="font-weight: 500;">@CurrentSong.Key</MudText>
+                    <MudText Typo="Typo.h6" Style="font-weight: 500;">@_currentSong.Key</MudText>
                 </MudPaper>
                 <MudPaper Elevation="3" Class="pa-4 d-flex align-center justify-center" Style="width: 120px; height: 80px; border-radius: 12px;">
                     <MudIconButton Icon="@Icons.Material.Filled.QueueMusic" Size="Size.Large" />
@@ -56,13 +56,13 @@
                 <MudItem xs="12" md="6">
                     <MudPaper Elevation="3" Class="pa-6 d-flex flex-column align-center justify-center" Style="min-height: 200px; border-radius: 16px">
                         <MudText Typo="Typo.h6" Color="Color.Primary" Class="mb-2 d-flex align-center">
-                            <MudIcon Icon="@Icons.Material.Filled.ArrowBack" Class="mr-1" /> Previous
+                            <MudButton Class="mr-1" Color="Color.Primary" OnClick="MoveToPrevSong"> <MudIcon Icon="@Icons.Material.Filled.ArrowBack" />Previous </MudButton>
                         </MudText>
                         <MudText Typo="Typo.h3" Align="Align.Center" Class="font-weight-medium">
-                            @PrevSong?.Name
+                            @_prevSong?.Name
                         </MudText>
                         <MudText Typo="Typo.h4" Align="Align.Center" Color="Color.Primary" Style="margin-top: 5px">
-                            @(PrevSong?.Artist?.Nick ?? "N/A")
+                            @(_prevSong?.Artist?.Nick ?? "N/A")
                         </MudText>
                     </MudPaper>
                 </MudItem>
@@ -70,13 +70,13 @@
                 <MudItem xs="12" md="6">
                     <MudPaper Elevation="3" Class="pa-6 d-flex flex-column align-center justify-center" Style="min-height: 200px; border-radius: 16px">
                         <MudText Typo="Typo.h6" Color="Color.Primary" Class="mb-2 d-flex align-center">
-                            Next <MudIcon Icon="@Icons.Material.Filled.ArrowForward" Class="ml-1" />
+                            <MudButton Class="mr-1" Color="Color.Primary" OnClick="MoveToNextSong">Next <MudIcon Icon="@Icons.Material.Filled.ArrowForward" /> </MudButton>
                         </MudText>
                         <MudText Typo="Typo.h3" Align="Align.Center" Class="font-weight-medium">
-                            @NextSong?.Name
+                            @_nextSong?.Name
                         </MudText>
                         <MudText Typo="Typo.h4" Align="Align.Center" Color="Color.Primary" Style="margin-top: 5px">
-                            @(NextSong?.Artist?.Nick ?? "N/A")
+                            @(_nextSong?.Artist?.Nick ?? "N/A")
                         </MudText>
                     </MudPaper>
                 </MudItem>
@@ -92,11 +92,16 @@
     public required RoomService RoomService { get; set; }
     [Inject]
     public required NavigationManager NavigationManager { get; set; }
+    [Inject]
+    public required UserService UserService { get; set; }
 
     private RoomModel? _roomModel;
-    private SongModel? CurrentSong;
-    private SongModel? PrevSong;
-    private SongModel? NextSong;
+    private SongModel? _currentSong;
+    private SongModel? _prevSong;
+    private SongModel? _nextSong;
+    private UserModel? _user;
+
+    private int _currentIndex = 1;
 
     protected override async Task OnInitializedAsync()
     {
@@ -108,27 +113,72 @@
 
         _roomModel = await RoomService.GetRoomByCodeAsync(RoomCode);
 
-        if (_roomModel == null)
+        if (_roomModel is null)
         {
             NavigationManager.NavigateTo("/roomnotfound");
             return;
         }
 
-        CurrentSong = _roomModel.Setlist?.Songs.FirstOrDefault();
+        if (_roomModel.Setlist is null)
+            return;
 
-        if (CurrentSong != null)
+        _currentSong = _roomModel!.Setlist?.Songs.FirstOrDefault(x => x.Order == 1);
+
+        if (_currentSong is null)
+            return;
+
+        _currentIndex = _currentSong.Order;
+
+        if (_currentIndex > 1)
         {
-            var currentIndex = _roomModel.Setlist!.Songs.IndexOf(CurrentSong);
+            _prevSong = _roomModel.Setlist!.Songs.First(x => x.Order == _currentIndex - 1);
+        }
 
-            if (currentIndex > 0)
-            {
-                PrevSong = _roomModel.Setlist.Songs[currentIndex - 1];
-            }
+        if (_currentIndex < _roomModel.Setlist!.Songs.Count)
+        {
+            _nextSong = _roomModel.Setlist.Songs.First(x => x.Order == _currentIndex + 1);
+        }
 
-            if (currentIndex < _roomModel.Setlist.Songs.Count - 1)
-            {
-                NextSong = _roomModel.Setlist.Songs[currentIndex + 1];
-            }
+        _user = await UserService.GetUserAsync();
+    }
+
+    private void MoveToNextSong()
+    {
+        UpdateCurrentSong(1);
+        StateHasChanged();
+    }
+
+    private void MoveToPrevSong()
+    {
+        UpdateCurrentSong(-1);
+        StateHasChanged();
+    }
+
+    private void UpdateCurrentSong(int operation)
+    {
+        if (_currentIndex + operation == 0 || _currentIndex + operation > _roomModel!.Setlist!.Songs.Count || _roomModel.Setlist is null)
+            return;
+
+        _currentIndex = _currentIndex + operation;
+
+        _currentSong = _roomModel!.Setlist.Songs.First(x => x.Order == _currentIndex);
+
+        if (_currentIndex > 1)
+        {
+            _prevSong = _roomModel.Setlist.Songs.First(x => x.Order == _currentIndex - 1);
+        }
+        else
+        {
+            _prevSong = null;
+        }
+
+        if (_currentIndex < _roomModel.Setlist.Songs.Count)
+        {
+            _nextSong = _roomModel.Setlist.Songs.First(x => x.Order == _currentIndex + 1);
+        }
+        else
+        {
+            _nextSong = null;
         }
     }
 }
