@@ -1,0 +1,57 @@
+﻿@using SetlistManager.Common.Models
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h5">@Setlist.Name</MudText>
+    </TitleContent>
+    <DialogContent>
+        @if (Setlist.Songs is null || !Setlist.Songs.Any())
+        {
+            <MudText>This setlist is empty.</MudText>
+        }
+        else
+        {
+            <MudList T="SongModel" Class="pa-0">
+                @foreach (var song in Setlist.Songs.OrderBy(s => s.Order))
+                {
+                    <MudListItem Class="@(song.Id == CurrentSongId ? "pa-2 mud-primary-text mud-theme-primary mud-ripple-light" : "pa-2")"
+                                 Style="@(song.Id == CurrentSongId ? "background-color: var(--mud-palette-primary-lighten) !important; border-radius: 4px;" : "")">
+
+                        <MudText Typo="Typo.body1" Color="@(song.Id == CurrentSongId ? Color.Dark : Color.Default)">
+                            @song.Order.
+                            <MudLink Href="@($"/songdetail/{song.Id}")"
+                                     Typo="Typo.body1"
+                                     Color="@(song.Id == CurrentSongId ? Color.Dark : Color.Primary)">
+                                @song.Name
+                            </MudLink>
+                            @if (song.Artist is not null && !string.IsNullOrEmpty(song.Artist.Nick))
+                            {
+                                <span class="mud-text-secondary"> | @song.Artist.Nick</span>
+                            }
+                        </MudText>
+                    </MudListItem>
+                }
+            </MudList>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Close</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    public required IMudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public required SetlistModel Setlist { get; set; }
+
+    // This parameter will be used for highlighting
+    [Parameter]
+    public required int CurrentSongId { get; set; }
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+}

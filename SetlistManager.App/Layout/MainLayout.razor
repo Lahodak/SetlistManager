@@ -18,7 +18,7 @@
                        Class="ma-4" />
         <MudStack AlignItems="AlignItems.Start" Spacing="0">
             <MudText Typo="Typo.caption">Welcome</MudText>
-            <MudText Typo="Typo.subtitle2">@userModel?.Username</MudText>
+            <MudText Typo="Typo.subtitle2">@(userModel?.Username ?? "Loading...")</MudText>
         </MudStack>
 
         <MudIconButton Icon="@Icons.Material.Filled.ManageAccounts" Color="Color.Inherit" OnClick="OpenUserDetail"/>
@@ -48,9 +48,10 @@
 
     private bool _drawerOpen = true;
     private const string _localStorageKey = "ToggleDarkMode";
+    private const string _authTokenKey = "authToken";
     private readonly MudTheme _theme = new();
     private bool _isDarkMode;
-    private UserModel userModel = new();
+    private UserModel? userModel;
 
     protected override async Task OnInitializedAsync()
     {        
@@ -58,7 +59,7 @@
         _isDarkMode = localData;
         StateHasChanged();
 
-        var token = await LocalStorage.GetItemAsStringAsync("authToken");
+        var token = await LocalStorage.GetItemAsStringAsync(_authTokenKey);
 
         if (string.IsNullOrWhiteSpace(token) && !Navigation.Uri.Contains("/login"))
         {
@@ -67,7 +68,6 @@
         }
 
         userModel = await UserService.GetUserAsync();
-        StateHasChanged();
     }
 
     void DrawerToggle()

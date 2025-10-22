@@ -3,6 +3,7 @@
 @using SetlistManager.App.Services
 @using SetlistManager.Common.Models
 @using Microsoft.AspNetCore.Components
+@using SetlistManager.App.Pages.Dialogs
 
 <MudContainer MaxWidth="MaxWidth.False" Class="pa-0">
     <MudAppBar Elevation="0">
@@ -45,7 +46,7 @@
                     <MudText Typo="Typo.h6" Style="font-weight: 500;">@_currentSong.Key</MudText>
                 </MudPaper>
                 <MudPaper Elevation="3" Class="pa-4 d-flex align-center justify-center" Style="width: 120px; height: 80px; border-radius: 12px;">
-                    <MudIconButton Icon="@Icons.Material.Filled.QueueMusic" Size="Size.Large" />
+                    <MudIconButton Icon="@Icons.Material.Filled.QueueMusic" OnClick="@(() => OpenSetlistContentDialog())" Size="Size.Large" />
                 </MudPaper>
                 <MudPaper Elevation="3" Class="pa-4 d-flex align-center justify-center" Style="width: 120px; height: 80px; border-radius: 12px;">
                     <MudIconButton Icon="@Icons.Material.Filled.Menu" Size="Size.Large" />
@@ -94,6 +95,8 @@
     public required NavigationManager NavigationManager { get; set; }
     [Inject]
     public required UserService UserService { get; set; }
+    [Inject]
+    public required IDialogService DialogService { get; set; }
 
     private RoomModel? _roomModel;
     private SongModel? _currentSong;
@@ -180,5 +183,21 @@
         {
             _nextSong = null;
         }
+    }
+
+    private async Task OpenSetlistContentDialog()
+    {
+        if (_roomModel is null || _roomModel.Setlist is null || _currentSong is null)
+            return;
+
+        var parameters = new DialogParameters<ShowSetlistContentDialog>
+        {
+            { nameof(ShowSetlistContentDialog.Setlist), _roomModel.Setlist },
+            { nameof(ShowSetlistContentDialog.CurrentSongId), _currentSong.Id }
+        };
+
+        var options = new DialogOptions { CloseButton = true };
+
+        var dialog = await DialogService.ShowAsync<ShowSetlistContentDialog>("Setlist Content", parameters, options);
     }
 }
