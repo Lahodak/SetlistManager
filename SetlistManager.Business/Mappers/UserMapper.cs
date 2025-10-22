@@ -16,7 +16,13 @@ public static class UserMapper
             {
                 Id = user.Instrument?.Id ?? 0,
                 Name = user.Instrument?.Name ?? "No Instrument"
-            }
+            },
+            Tokens = user.Tokens?.Select(t => new TokenModel
+            {
+                AccessToken = t.AccessToken,
+                RefreshToken = t.RefreshToken,
+                Provider = t.Provider.Name
+            }).ToList()
         };
     }
 
