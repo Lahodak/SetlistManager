@@ -34,6 +34,9 @@ public class UserService
         _apiService = apiService;
     }
 
+    public async Task AddNewProviderToken(AddTokenModel tokenModel) 
+        => await _apiService.PutAsync(_usersEndpointPath + "/tokens", tokenModel);
+
     public async Task<UserModel> GetUserAsync() 
         => await _apiService.GetAsync<UserModel>(_usersEndpointPath);
 

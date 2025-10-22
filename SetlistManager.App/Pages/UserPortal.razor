@@ -57,9 +57,11 @@ else
     public required NavigationManager NavigationManager { get; set; }
     [Inject]
     public required InstrumentService InstrumentService { get; set; }
-
+    [Inject]
+	public required GeniusService GeniusService { get; set; }
     private UserModel? _userModel;
     private List<InstrumentModel>? instruments;
+    private string _authorizeWithGeniusUri = default!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -70,6 +72,7 @@ else
         {
             _userModel.Instrument = instruments.FirstOrDefault(i => i.Id == _userModel.Instrument.Id)!;
         }
+		_authorizeWithGeniusUri = GeniusService.GetGrantAccessTokenRequestUri();
     }
 
     private async Task SaveAsync()

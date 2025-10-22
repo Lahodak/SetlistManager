@@ -31,9 +31,6 @@ public class UsersController : BaseController
     {        
         var userId = _currentUserContext.GetCurrentUserId();
         
-        if (userId is null)        
-            return Unauthorized();
-        
         return Ok(await _userService.GetCurrentUserAsync((int)userId));
     }
 
@@ -41,5 +38,17 @@ public class UsersController : BaseController
     public async Task<ActionResult<List<SetlistModel>>> GetUserSetlists(int id)
     {
         return Ok(await _setlistsService.GetAllSetlistsOfUserAsync(id));
+    }
+
+    [HttpPut("/tokens")]
+    public async Task<ActionResult> AddUserToken([FromBody] AddTokenModel tokenModel)
+    {
+        var userId = _currentUserContext.GetCurrentUserId();
+
+        if (tokenModel is null)
+            return BadRequest();
+
+        await _userService.AddUserTokenAsync(userId!.Value, tokenModel);
+        return Ok();
     }
 }

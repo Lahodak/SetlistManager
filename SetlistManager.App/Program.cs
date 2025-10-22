@@ -22,6 +22,7 @@ builder.Services.AddScoped<LanguageService>();
 builder.Services.AddScoped<InstrumentService>();
 builder.Services.AddScoped<ArtistService>();
 builder.Services.AddScoped<RoomService>();
+builder.Services.AddScoped<GeniusService>();
 builder.Services.AddLogging();
 
 builder.Services.AddBlazoredLocalStorageAsSingleton(); 

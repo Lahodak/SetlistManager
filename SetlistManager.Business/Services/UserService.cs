@@ -23,11 +23,11 @@ public class UserService : IUserService
         User? user = await _dbContext.Users.FindAsync(model.Id);
 
         if (user is null)
-            return;               
+            return;
 
         user.UserName = model.Username;
         user.Email = model.Email;
-        
+
         if (model.Instrument is not null)
         {
             var instrument = await _dbContext.Instruments.FirstOrDefaultAsync(i => i.Name == model.Instrument.Name);
@@ -49,7 +49,21 @@ public class UserService : IUserService
     {
         User? user = await _dbContext.Users
             .Include(u => u.Instrument)
+            .Include(u => u.Tokens)!
+                .ThenInclude(t => t.Provider)
             .FirstAsync(u => u.Id == userId);
         return user.ToModel();
-    }   
+    }
+
+    public async Task AddUserTokenAsync(int userId, AddTokenModel tokenModel)
+    {
+        await _dbContext.Tokens.AddAsync(new Token
+        {
+            UserId = userId,
+            Provider = await _dbContext.Providers.FirstAsync(x => x.Name == tokenModel.Provider.ToString()),
+            AccessToken = tokenModel.AccessToken
+        });
+
+        await _dbContext.SaveChangesAsync();
+    }
 }

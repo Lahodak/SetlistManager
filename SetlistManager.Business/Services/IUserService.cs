@@ -6,4 +6,5 @@ public interface IUserService
 {
     Task UpdateUserAsync(UserModel model);   
     Task<UserModel> GetCurrentUserAsync(int userId);
+    Task AddUserTokenAsync(int userId, AddTokenModel tokenModel);
 }
