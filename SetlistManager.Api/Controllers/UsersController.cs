@@ -1,7 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SetlistManager. Api.Services;
-using SetlistManager.Common.Models;
 using SetlistManager.Business.Services;
+using SetlistManager.Common.Genius.Models;
+using SetlistManager.Common.Models;
+using System.Net.Http;
 
 namespace SetlistManager. Api.Controllers;
 
@@ -11,12 +14,14 @@ public class UsersController : BaseController
     private readonly IUserService _userService;
     private readonly ISetlistsService _setlistsService;
     private readonly ICurrentUserContext _currentUserContext;
+    private readonly IHttpClientFactory _httpClientFactory;
 
-    public UsersController(IUserService userService, ISetlistsService setlistsService, ICurrentUserContext currentUserContext)
+    public UsersController(IUserService userService, ISetlistsService setlistsService, ICurrentUserContext currentUserContext, IHttpClientFactory httpClientFactory)
     {
         _userService = userService;
         _setlistsService = setlistsService;
         _currentUserContext = currentUserContext;
+        _httpClientFactory = httpClientFactory;
     }
 
     [HttpPut]
@@ -40,15 +45,13 @@ public class UsersController : BaseController
         return Ok(await _setlistsService.GetAllSetlistsOfUserAsync(id));
     }
 
-    [HttpPut("/tokens")]
-    public async Task<ActionResult> AddUserToken([FromBody] AddTokenModel tokenModel)
+    [AllowAnonymous]
+    [HttpGet("tokens")]
+    public async Task<ActionResult> AddUserToken([FromQuery] GrantAccessTokenResultModel grantResultModel)
     {
-        var userId = _currentUserContext.GetCurrentUserId();
+        var userId = int.Parse(grantResultModel.State);
 
-        if (tokenModel is null)
-            return BadRequest();
 
-        await _userService.AddUserTokenAsync(userId!.Value, tokenModel);
         return Ok();
     }
 }

@@ -24,9 +24,9 @@ else
                     }
                 }
             </MudSelect>
-            @if(_userModel.Tokens is null)
+            @if(_userModel.Tokens!.Count == 0)
             {
-                <MudButton Variant="Variant.Outlined">
+                <MudButton Variant="Variant.Outlined" OnClick="AuthorizeWithGenius">
                     Authorize with Genius  <MudImage Src="GENIUS_Logo_Transparent.png" Width="20" Height="20" />
                 </MudButton>
             }
@@ -58,7 +58,7 @@ else
     [Inject]
     public required InstrumentService InstrumentService { get; set; }
     [Inject]
-	public required GeniusService GeniusService { get; set; }
+    public required GeniusService GeniusService { get; set; }
     private UserModel? _userModel;
     private List<InstrumentModel>? instruments;
     private string _authorizeWithGeniusUri = default!;
@@ -72,7 +72,7 @@ else
         {
             _userModel.Instrument = instruments.FirstOrDefault(i => i.Id == _userModel.Instrument.Id)!;
         }
-		_authorizeWithGeniusUri = GeniusService.GetGrantAccessTokenRequestUri();
+        _authorizeWithGeniusUri = await GeniusService.GetGrantAccessTokenRequestUri();
     }
 
     private async Task SaveAsync()
@@ -88,5 +88,10 @@ else
     {
         await UserService.LogOutAsync();
         NavigationManager.NavigateTo("/login");
+    }
+
+    private void AuthorizeWithGenius()
+    {
+		NavigationManager.NavigateTo(_authorizeWithGeniusUri);
     }
 }
