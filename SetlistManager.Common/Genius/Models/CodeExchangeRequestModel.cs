@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using Newtonsoft.Json;
+
 
 namespace SetlistManager.Common.Genius.Models;
 
@@ -7,16 +8,16 @@ public class CodeExchangeRequestModel
     private const string _responseType = "code";
     private const string _grantType = "authorization_code";
 
-    [JsonPropertyName("code")]
+    [JsonProperty("code")]
     public string Code { get; set; } = default!;
-    [JsonPropertyName("client_secret")]
+    [JsonProperty("client_secret")]
     public string ClientSecret { get; set; } = default!;    
-    [JsonPropertyName("grant_type")]
+    [JsonProperty("grant_type")]
     public string GrantType { get; set; } = _grantType;
-    [JsonPropertyName("client_id")]
+    [JsonProperty("client_id")]
     public string ClientId { get; set; } = default!;
-    [JsonPropertyName("redirect_uri")]
+    [JsonProperty("redirect_uri")]
     public string RedirectUri { get; set; } = default!;
-    [JsonPropertyName("response_type")]
+    [JsonProperty("response_type")]
     public string ResponseType { get; set; } = _responseType;
 }

@@ -66,4 +66,19 @@ public class UserService : IUserService
 
         await _dbContext.SaveChangesAsync();
     }
+
+    public async Task<User?> GetUserByTempSalt(string salt)
+    {
+        var tempAuth = await _dbContext.TempAuthStorage
+            .FirstOrDefaultAsync(x => x.TempSalt == salt);
+
+        if (tempAuth is null)
+            return null;
+
+        return await _dbContext.Users
+            .Include(u => u.Instrument)
+            .Include(u => u.Tokens)!
+                .ThenInclude(t => t.Provider)
+            .FirstOrDefaultAsync(u => u.Id == tempAuth.UserId);
+    }
 }

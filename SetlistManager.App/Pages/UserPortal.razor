@@ -61,7 +61,6 @@ else
     public required GeniusService GeniusService { get; set; }
     private UserModel? _userModel;
     private List<InstrumentModel>? instruments;
-    private string _authorizeWithGeniusUri = default!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -72,7 +71,6 @@ else
         {
             _userModel.Instrument = instruments.FirstOrDefault(i => i.Id == _userModel.Instrument.Id)!;
         }
-        _authorizeWithGeniusUri = await GeniusService.GetGrantAccessTokenRequestUri();
     }
 
     private async Task SaveAsync()
@@ -90,8 +88,8 @@ else
         NavigationManager.NavigateTo("/login");
     }
 
-    private void AuthorizeWithGenius()
+    private async Task AuthorizeWithGenius()
     {
-		NavigationManager.NavigateTo(_authorizeWithGeniusUri);
+        NavigationManager.NavigateTo(await UserService.AuthorizeWithGenius());
     }
 }

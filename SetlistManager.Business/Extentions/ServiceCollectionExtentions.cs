@@ -16,6 +16,7 @@ public static class ServiceCollectionExtentions
         services.AddScoped<ISetlistsService, SetlistsService>();
         services.AddScoped<IInstrumentsService, InstrumentsService>();
         services.AddScoped<IMailService, MailService>();
+        services.AddScoped<ITempAuthStorageService, TempAuthStorageService>();
         services.AddScoped<OrderMappingService>();
         return services;
     }

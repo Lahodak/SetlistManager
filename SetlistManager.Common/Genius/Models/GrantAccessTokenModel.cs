@@ -1,18 +1,18 @@
-﻿using System.Text.Json.Serialization;
+﻿using Newtonsoft.Json;
 
 namespace SetlistManager.Common.Genius.Models;
 
 public class GrantAccessTokenModel
 {
     private const string _responseType = "code";
-    [JsonPropertyName("client_id")]
+    [JsonProperty("client_id")]
     public string ClientId { get; set; } = default!;
-    [JsonPropertyName("redirect_uri")]
+    [JsonProperty("redirect_uri")]
     public string RedirectUri { get; set; } = default!;
-    [JsonPropertyName("scope")]
+    [JsonProperty("scope")]
     public string Scope { get; set; } = default!;
-    [JsonPropertyName("state")]
+    [JsonProperty("state")]
     public string State { get; set; } = default!;
-    [JsonPropertyName("response_type")]
+    [JsonProperty("response_type")]
     public string ResponseType { get; set; } = _responseType;
 }
