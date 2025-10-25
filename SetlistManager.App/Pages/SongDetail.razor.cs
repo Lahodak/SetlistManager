@@ -9,19 +9,16 @@ public partial class SongDetail
 	[Parameter]
 	public int SongId { get; set; }
     [Inject]
-	public required SongsDB SongsDatabase { get; set; }
+	public required SongService SongService { get; set; }
 	[Inject]
 	public required GeniusService GeniusService { get; set; }
 
-	private string _lyrics;
+	private string? _lyrics;
     private SongModel? _song;
 
 	protected override async Task OnInitializedAsync()
-	{
-		if (SongsDatabase.GetCount() == 0)
-			await SongsDatabase.CheckForData();
-
-		_song = SongsDatabase.GetSong(SongId)!;
+	{	
+		_song = await SongService.GetSongByIdAsync(SongId);
 
 		if(_song is not null)
 			_lyrics = await GeniusService.FetchSongLyricsAsync(_song);

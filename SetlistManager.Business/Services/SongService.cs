@@ -20,7 +20,10 @@ public class SongService : ISongService
         .ToListAsync();
 
     public async Task<Song?> GetSongByIdAsync(int songId)
-        => await _dbContext.Songs.FirstOrDefaultAsync(x => x.Id == songId);
+        => await _dbContext.Songs
+        .Include(x => x.Language)
+        .Include(x => x.Artist)
+        .FirstOrDefaultAsync(x => x.Id == songId);
 
     public async Task<IEnumerable<Song?>> GetSongByNameAsync(string name) 
         => await _dbContext.Songs
