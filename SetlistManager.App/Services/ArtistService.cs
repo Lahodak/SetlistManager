@@ -13,10 +13,10 @@ public class ArtistService
         _apiService = apiService;
     }
 
-    public async Task<List<ArtistModel>>? GetAvailableArtistsAsync() 
+    public async Task<List<ArtistModel>?> GetAvailableArtistsAsync() 
         => await _apiService.GetAsync<List<ArtistModel>>(_artistsEndpointPath);
 
-    public async Task<ArtistModel>? GetArtistByIdAsync(int id) 
+    public async Task<ArtistModel?> GetArtistByIdAsync(int id) 
         => await _apiService.GetAsync<ArtistModel>(_artistsEndpointPath + "/" + id.ToString());
 
     public async Task UploadArtistAsync(ArtistModel artist)

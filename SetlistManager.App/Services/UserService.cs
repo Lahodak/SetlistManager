@@ -49,12 +49,16 @@ public class UserService
     public async Task AddNewProviderToken(AddTokenModel tokenModel) 
         => await _apiService.PutAsync(_usersEndpointPath + "/tokens", tokenModel);
 
-    public async Task<UserModel> GetUserAsync() 
+    public async Task<UserModel?> GetUserAsync() 
         => await _apiService.GetAsync<UserModel>(_usersEndpointPath);
 
     public async Task<List<SetlistModel>?> GetAllUserSetlists()
     {
-        UserModel user = await GetUserAsync();
+        UserModel? user = await GetUserAsync();
+        
+        if(user is null)
+            return null;
+
         return await _apiService.GetAsync<List<SetlistModel>?>(_usersEndpointPath + "/" + user.Id.ToString() + _getUserSetlistsSuffix);
     }
 
