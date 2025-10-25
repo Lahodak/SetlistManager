@@ -36,7 +36,7 @@
     [CascadingParameter]
     IMudDialogInstance MudDialog { get; set; } = default!;
     [Parameter]
-    public SetlistModel Setlist { get; set; } = new();
+    public SetlistModel setlist { get; set; } = new();
     [Inject]
     public required SetlistService SetlistService { get; set; }
     [Inject]
@@ -48,30 +48,28 @@
     {
         _setlist = new SetlistModel
         {
-            Id = Setlist.Id,
-            Name = Setlist.Name,
-            Songs = new List<SongModel>(Setlist.Songs)
+            Id = setlist.Id,
+            Name = setlist.Name,
+            Songs = new List<SongModel>(setlist.Songs)
         };
     }
 
     private async Task Save()
     {
-        if (Setlist is null)
+        if (setlist is null)
             return;
 
         await SetlistService.EditSetlist(_setlist);
         MudDialog.Close(DialogResult.Ok(_setlist));
     }
 
-    private void Cancel()
+    public void AddSong()
     {
-        MudDialog.Cancel();
+        
     }
 
-    private void AddSong()
-    {
-
-    }
+    private void Cancel() => MudDialog.Cancel();
+    
 
     private void RemoveSong(SongModel song) => _setlist.Songs.Remove(song);
 
