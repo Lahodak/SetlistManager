@@ -39,7 +39,6 @@ public class ApiService
         if(string.IsNullOrWhiteSpace(json))        
             return default;
         
-
         T? result;   
         
         try

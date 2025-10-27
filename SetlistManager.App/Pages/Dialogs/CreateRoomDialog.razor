@@ -117,6 +117,8 @@
     public required SetlistService SetlistService { get; set; }
     [Inject]
     public required NavigationManager NavigationManager { get; set; }
+    [Inject]
+    public required ISnackbar Snackbar { get; set; }
 
     private readonly CreateRoomModel _createRoomModel = new();
     private List<SetlistModel>? _availableSetlists;
@@ -126,18 +128,10 @@
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadSetlistsAsync();
-    }
-
-    private async Task LoadSetlistsAsync()
-    {
-        try
+        _availableSetlists = await SetlistService.GetAllSetlistsAsync();
+        if(_availableSetlists is null)
         {
-            _availableSetlists = await SetlistService.GetAllSetlistsAsync();
-        }
-        catch
-        {
-            _availableSetlists = new List<SetlistModel>();
+            Snackbar.Add("Couldn't find any available Setlists", Severity.Error);
         }
     }
 
@@ -161,7 +155,6 @@
         MudDialog.Close(DialogResult.Ok(createdRoom));
     }
 
-    private void Cancel() => MudDialog.Cancel();
 
     private bool FilterSetlists(SetlistModel setlist)
     {
@@ -187,4 +180,6 @@
     }
 
     private bool IsRowExpanded(SetlistModel setlist) => _expandedSetlists.Contains(setlist);
+    
+    private void Cancel() => MudDialog.Cancel();
 }

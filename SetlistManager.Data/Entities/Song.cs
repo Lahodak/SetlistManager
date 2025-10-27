@@ -4,9 +4,8 @@ namespace SetlistManager.Data.Entities;
 
 public class Song : Base
 {
-    [Required]
     public string Name { get; set; } = default!;
-    public virtual required Artist Artist { get; set; }
+    public virtual Artist Artist { get; set; } = default!;
     public string TabsURL { get; set; } = default!;
     public string AudioURL { get; set; } = default!;
     public string Tuning { get; set; } = default!;
@@ -16,6 +15,6 @@ public class Song : Base
     public DateTime? UpdatedAt { get; set; }
     public int UpdatedBy { get; set; }
     public int LanguageId { get; set; }
-    public virtual required Language Language { get; set; }
-    public virtual List<SongsSetlists>? SongsSetlists { get; set; } 
+    public virtual Language Language { get; set; } = default!;
+    public virtual List<SongsSetlists>? SongsSetlists { get; set; } = [];
 }

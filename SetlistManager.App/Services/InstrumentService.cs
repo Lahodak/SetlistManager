@@ -14,6 +14,6 @@ public class InstrumentService
         _apiService = apiService;
     }
 
-    public async Task<List<InstrumentModel>> GetAvailableInstrumentsAsync()
+    public async Task<List<InstrumentModel>?> GetAvailableInstrumentsAsync()
         => await _apiService.GetAsync<List<InstrumentModel>>(_instrumentsEndpointPath);
 }

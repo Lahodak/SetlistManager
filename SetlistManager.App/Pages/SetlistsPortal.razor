@@ -66,7 +66,9 @@
     public required SetlistService SetlistService { get; set; }
     [Inject] 
     public required IDialogService DialogService { get; set; }
-    
+    [Inject]
+    public required ISnackbar Snackbar { get; set; }
+
     private MudTable<SetlistModel> table = new();
     private string? searchString;
 
@@ -117,20 +119,27 @@
     private async Task EditSetlist(int id)
     {
         var existing = await SetlistService.GetSetlistById(id);
+
+        if (existing is null)
+        {
+            Snackbar.Add("Failed editing setlist", Severity.Error);
+            return;
+        }
+
         var parameters = new DialogParameters { ["Setlist"] = existing };
         var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Large, FullWidth = true };
         var dialog = await DialogService.ShowAsync<EditSetlistDialog>($"Edit Setlist", parameters, options);
 
         var result = await dialog.Result;
-        if (!result.Canceled)
+        
+        if (result is null || !result.Canceled)
         {
-            var updated = (SetlistModel)result.Data;
             await table.ReloadServerData();
         }
     }
 
     private async Task DeleteSetlist(int id)
-    {
+    {        
         await table.ReloadServerData();
     }
 
@@ -140,7 +149,7 @@
         var dialog = await DialogService.ShowAsync<CreateNewSetlistDialog>("",options);
 
         var result = await dialog.Result;
-        if (!result.Canceled)
+        if (result is null || !result.Canceled)
         {
             await table.ReloadServerData();
         }

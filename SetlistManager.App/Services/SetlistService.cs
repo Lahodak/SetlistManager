@@ -19,15 +19,15 @@ public class SetlistService
     public async Task PushSetlist(SetlistModel setlistModel) 
         => await _apiService.PostAsync(_setlistsEndpointPath, setlistModel);
 
-    public async Task<SetlistModel>? GetSetlistById(int id) 
+    public async Task<SetlistModel?> GetSetlistById(int id) 
         => await _apiService.GetAsync<SetlistModel>(_setlistsEndpointPath + _setlistByIdSuffix + id.ToString());
 
-    public async Task<List<SetlistModel>> GetAllSetlistsAsync() 
+    public async Task<List<SetlistModel>?> GetAllSetlistsAsync() 
         => await _apiService.GetAsync<List<SetlistModel>>(_setlistsEndpointPath);
 
     public async Task<SetlistModel?> GetSetlistByNameAsync(string name)
         => await _apiService.GetAsync<SetlistModel?>(_setlistsEndpointPath + _getSetlistByNameSuffix + name);
 
     public async Task EditSetlist(SetlistModel setlistModel) 
-        => await _apiService.PutAsync(_setlistsEndpointPath, setlistModel);
+        => await _apiService.PutAsync(_setlistsEndpointPath, setlistModel); 
 }

@@ -9,7 +9,7 @@ namespace SetlistManager.Api.Controllers;
 
 [Route("api/songs")]
 
-public partial class SongsController : BaseController
+public class SongsController : BaseController
 {
     private readonly ISongService _songService;
     private readonly ILanguageService _languageService;

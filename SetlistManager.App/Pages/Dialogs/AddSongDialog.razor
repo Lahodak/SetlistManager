@@ -111,7 +111,8 @@
         _song = new SongModel
         {
             Name = string.Empty,
-            Language = languages?.FirstOrDefault(),
+            Artist = null,
+            Language = null!,
             TabsURL = string.Empty,
             AudioURL = string.Empty,
             Tuning = string.Empty,
@@ -122,7 +123,8 @@
 
     private async Task SaveSong()
     {
-        if (_song is null) return;
+        if (_song is null) 
+            return;
 
         if (artists is null || artists.Count == 0)
         {
@@ -130,29 +132,30 @@
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(_song.Name) || _song.Artist is null)
+        if (string.IsNullOrWhiteSpace(_song.Name))
         {
-            Snackbar.Add("Please provide Song Name and Artist.", Severity.Error);
+            Snackbar.Add("Please provide Song Name", Severity.Error);
+            return;
+        }
+
+        if(_song.Artist is null)
+        {
+            Snackbar.Add("Please select an Artist", Severity.Error);
             return;
         }
 
         if (_song.Language is null)
         {
-            Snackbar.Add("Please select a Language.", Severity.Error);
+            Snackbar.Add("Please select a Language", Severity.Error);
             return;
         }
 
-        try
-        {
-            _song.LanguageId = _song.Language.Id;
-            await SongService.UploadSongAsync(_song);
-            Snackbar.Add("Song added successfully!", Severity.Success);
-            MudDialog.Close(DialogResult.Ok(_song));
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add($"Error adding song: {ex.Message}", Severity.Error);
-        }
+        _song.LanguageId = _song.Language.Id;
+
+        await SongService.UploadSongAsync(_song);
+
+        Snackbar.Add("Song added successfully!", Severity.Success);
+        MudDialog.Close(DialogResult.Ok(_song));
     }
 
     private void Cancel() => MudDialog.Cancel();

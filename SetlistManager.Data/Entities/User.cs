@@ -10,5 +10,6 @@ public class User : IdentityUser<int>
     public int? RoomId { get; set; }
     public virtual Room? Room { get; set; }
     public int? InstrumentId { get; set; }
-    public virtual Instrument? Instrument { get; set; }    
+    public virtual Instrument? Instrument { get; set; }
+    public virtual List<Token>? Tokens { get; set; } = [];
 }

@@ -1,4 +1,5 @@
 ﻿using Blazored.LocalStorage;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using SetlistManager.Common.Models;
 using System.IdentityModel.Tokens.Jwt;
@@ -9,6 +10,7 @@ public class UserService
 {
     private readonly string _usersEndpointPath;
     private readonly string _authEndpointPath;
+    private readonly string _tokensEndpointPath;
 
     private const string _loginUserSuffix = "/login";
     private const string _tokenKey = "authToken";
@@ -16,7 +18,6 @@ public class UserService
     private const string _verifyEmailSuffix = "/verify";
     private const string _resetPasswordSuffix = "/reset-password";
     private const string _resetPasswordRequestSuffix = "/request-password-reset";
-
 
     private readonly IHttpClientFactory _httpClientFactory; 
     private readonly ILocalStorageService _localStorage;
@@ -28,18 +29,36 @@ public class UserService
     {
         _usersEndpointPath = configuration["SetlistManager.Api:UsersEndpoint"]!;
         _authEndpointPath = configuration["SetlistManager.Api:AuthEndpoint"]!;
+        _tokensEndpointPath = configuration["SetlistManager.Api:TokensEndpoint"]!;
         _logger = logger;
         _httpClientFactory = httpClientFactory;
         _localStorage = localStorageService;
         _apiService = apiService;
     }
 
-    public async Task<UserModel> GetUserAsync() 
+    public async Task<string> AuthorizeWithGenius()
+    {
+        var response = await _apiService.GetAsync<UrlResponseModel>(_tokensEndpointPath);
+
+        if (response == null)
+            return "/error";
+
+        return response.Url;
+    }
+
+    public async Task AddNewProviderToken(AddTokenModel tokenModel) 
+        => await _apiService.PutAsync(_usersEndpointPath + "/tokens", tokenModel);
+
+    public async Task<UserModel?> GetUserAsync() 
         => await _apiService.GetAsync<UserModel>(_usersEndpointPath);
 
     public async Task<List<SetlistModel>?> GetAllUserSetlists()
     {
-        UserModel user = await GetUserAsync();
+        UserModel? user = await GetUserAsync();
+        
+        if(user is null)
+            return null;
+
         return await _apiService.GetAsync<List<SetlistModel>?>(_usersEndpointPath + "/" + user.Id.ToString() + _getUserSetlistsSuffix);
     }
 

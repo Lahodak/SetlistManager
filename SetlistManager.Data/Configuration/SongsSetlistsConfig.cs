@@ -17,5 +17,14 @@ public class SongsSetlistsConfig : IEntityTypeConfiguration<SongsSetlists>
                .WithMany(sl => sl.SongsSetlists)
                .HasForeignKey(ss => ss.SetlistId)
                .OnDelete(DeleteBehavior.NoAction);
+
+        builder.Property(ss => ss.SongId)
+            .IsRequired();
+        builder.Property(ss => ss.Song)
+            .IsRequired();
+        builder.Property(sl => sl.SetlistId)
+            .IsRequired();
+        builder.Property(sl => sl.Setlist)
+            .IsRequired();
     }
 }

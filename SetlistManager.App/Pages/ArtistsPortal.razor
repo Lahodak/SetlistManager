@@ -7,7 +7,7 @@
     <MudPaper Class="pa-4 mt-3" Elevation="2">
         <MudText Typo="Typo.h3" Class="ml-2">All Artists</MudText>
 
-        <MudTable ServerData="ServerReload" Hover="true" @ref="table">
+        <MudTable ServerData="ServerReload" Hover="true" @ref="_table">
             <ToolBarContent>
                 <MudText Typo="Typo.h6">Artist Library</MudText>
                 <MudSpacer />
@@ -61,7 +61,7 @@
     [Inject]
     public required ArtistService ArtistService { get; set; }
 
-    private MudTable<ArtistModel> table = new();
+    private MudTable<ArtistModel> _table = new();
     private string? searchString;
 
     private async Task<TableData<ArtistModel>> ServerReload(TableState state, CancellationToken token)
@@ -69,7 +69,7 @@
         var allArtists = await ArtistService.GetAvailableArtistsAsync();
         await Task.Delay(300, token);
 
-        var filtered = allArtists.Where(artist =>
+        var filtered = allArtists!.Where(artist =>
             string.IsNullOrWhiteSpace(searchString)
             || artist.Nick.Contains(searchString, StringComparison.OrdinalIgnoreCase)
         );
@@ -93,7 +93,7 @@
     private void OnSearch(string text)
     {
         searchString = text;
-        table.ReloadServerData();
+        _table.ReloadServerData();
     }
 
     private async Task OpenCreateArtistDialog()
@@ -104,10 +104,10 @@
         var dialog = await DialogService.ShowAsync<CreateNewArtistDialog>("Create New Artist", parameters, options);
         var result = await dialog.Result;
 
-        if (!result.Canceled)
+        if (!result!.Canceled)
         {
             Snackbar.Add("Artist created successfully!", Severity.Success);
-            await table.ReloadServerData();
+            await _table.ReloadServerData();
         }
     }
 }

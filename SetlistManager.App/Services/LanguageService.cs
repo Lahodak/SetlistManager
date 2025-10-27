@@ -13,6 +13,6 @@ public class LanguageService
         _apiService = apiService;
     }
 
-    public async Task<List<LanguageModel>> GetAvailableLanguagesAsync() 
+    public async Task<List<LanguageModel>?> GetAvailableLanguagesAsync() 
         => await _apiService.GetAsync<List<LanguageModel>>(_languagesEndpointPath);
 }
