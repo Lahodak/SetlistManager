@@ -13,17 +13,17 @@ public class UsersController : BaseController
     private readonly IUserService _userService;
     private readonly ISetlistsService _setlistsService;
     private readonly ICurrentUserContext _currentUserContext;
-    private readonly ITempAuthStorageService _tempAuthStorageService;
+    private readonly IGeniusAuthService _geniusAuthService;
     private readonly IConfiguration _configuration;
 
     public UsersController(IUserService userService, ISetlistsService setlistsService, ICurrentUserContext currentUserContext,
-        ITempAuthStorageService tempAuthStorageService, IConfiguration configuration)
+        IGeniusAuthService geniusAuthService, IConfiguration configuration)
     {
         _userService = userService;
         _setlistsService = setlistsService;
         _currentUserContext = currentUserContext;
-        _tempAuthStorageService = tempAuthStorageService;
         _configuration = configuration;
+        _geniusAuthService = geniusAuthService;
     }
 
     [HttpPut]
@@ -59,9 +59,9 @@ public class UsersController : BaseController
         if(user is null)
             return NotFound("User not found");
 
-        var resultAccessTokenModel = await _tempAuthStorageService.ExchangeGeniusCode(grantResultModel.Code);
+        var resultAccessTokenModel = await _geniusAuthService.ExchangeGeniusCode(grantResultModel.Code);
 
-        if (resultAccessTokenModel!.AccessToken is null || resultAccessTokenModel is null)
+        if (resultAccessTokenModel is null || resultAccessTokenModel.AccessToken is null )
             return BadRequest();
 
         AddTokenModel tokenModel = new()

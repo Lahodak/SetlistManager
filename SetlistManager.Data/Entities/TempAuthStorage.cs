@@ -2,7 +2,7 @@
 
 public class TempAuthStorage : Base
 {
-    public string TempSalt { get; set; } = default!;
+    public string TempSecret { get; set; } = default!;
     public int UserId { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

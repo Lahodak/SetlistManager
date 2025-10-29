@@ -70,7 +70,7 @@ public class UserService : IUserService
     public async Task<User?> GetUserByTempSalt(string salt)
     {
         var tempAuth = await _dbContext.TempAuthStorage
-            .FirstOrDefaultAsync(x => x.TempSalt == salt);
+            .FirstOrDefaultAsync(x => x.TempSecret == salt);
 
         if (tempAuth is null)
             return null;

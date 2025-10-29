@@ -9,12 +9,13 @@ namespace SetlistManager.Api.Controllers;
 [Route("api/tokens")]
 public class TokensController : BaseController
 {
-    private readonly ICurrentUserContext _userContext;
-    private readonly ITempAuthStorageService _tempAuthStorageService;
-    public TokensController(ICurrentUserContext userContext, ITempAuthStorageService tempAuthStorageService)
+    private readonly ICurrentUserContext _userContext;    
+    private readonly IGeniusAuthService _geniusAuthService;
+
+    public TokensController(ICurrentUserContext userContext, IGeniusAuthService geniusAuthService)
     {        
         _userContext = userContext;
-        _tempAuthStorageService = tempAuthStorageService;
+        _geniusAuthService = geniusAuthService;
     }
 
     [HttpGet]
@@ -27,7 +28,7 @@ public class TokensController : BaseController
 
         UrlResponseModel model = new()
         {
-            Url = await _tempAuthStorageService.GetGrantAccessTokenRequestUri(userId.Value)
+            Url = await _geniusAuthService.GetGrantAccessTokenRequestUri(userId.Value)
         };
 
         return Ok(model);
