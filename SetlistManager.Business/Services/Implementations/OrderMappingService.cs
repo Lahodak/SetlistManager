@@ -3,9 +3,9 @@ using SetlistManager.Data;
 using SetlistManager.Data.Entities;
 using SetlistManager.Business.Mappers;
 
-namespace SetlistManager.Business.Services;
+namespace SetlistManager.Business.Services.Implementations;
 
-public class OrderMappingService
+public class OrderMappingService : IOrderMappingService
 {
     private readonly AppDbContext _dbContext;
     private readonly ILanguageService _languageService;

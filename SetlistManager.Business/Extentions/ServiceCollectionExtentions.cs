@@ -19,7 +19,7 @@ public static class ServiceCollectionExtentions
         services.AddScoped<IMailService, MailService>();
         services.AddScoped<ITempAuthStorageService, TempAuthStorageService>();
         services.AddScoped<IGeniusAuthService, GeniusAuthService>();
-        services.AddScoped<OrderMappingService>();
+        services.AddScoped<IOrderMappingService, OrderMappingService>();
         return services;
     }
 }

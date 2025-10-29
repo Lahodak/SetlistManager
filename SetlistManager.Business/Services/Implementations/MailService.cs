@@ -2,7 +2,7 @@
 using System.Text;
 using System.Text.Json;
 
-namespace SetlistManager.Business.Services;
+namespace SetlistManager.Business.Services.Implementations;
 
 public class MailService : IMailService
 {

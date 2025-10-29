@@ -1,6 +1,6 @@
 ﻿using SetlistManager.Data;
 using System.Security.Cryptography;
-namespace SetlistManager.Business.Services;
+namespace SetlistManager.Business.Services.Implementations;
 
 public class TempAuthStorageService : ITempAuthStorageService
 {

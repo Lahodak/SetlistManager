@@ -5,16 +5,16 @@ using SetlistManager.Data;
 using SetlistManager.Data.Entities;
 using System.Text;
 
-namespace SetlistManager.Business.Services;
+namespace SetlistManager.Business.Services.Implementations;
 
 public class RoomsService : IRoomsService
 {
     private const string roomCodeAvailableCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     private const int roomCodeLength = 6;
     private readonly AppDbContext _dbContext;
-    private readonly OrderMappingService _orderMappingService;
+    private readonly IOrderMappingService _orderMappingService;
 
-    public RoomsService(AppDbContext dbContext, OrderMappingService orderMappingService)
+    public RoomsService(AppDbContext dbContext, IOrderMappingService orderMappingService)
     {
         _dbContext = dbContext;
         _orderMappingService = orderMappingService;

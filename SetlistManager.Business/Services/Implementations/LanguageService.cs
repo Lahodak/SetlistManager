@@ -4,7 +4,7 @@ using SetlistManager.Data;
 using SetlistManager.Data.Entities;
 using SetlistManager.Business.Mappers;
 
-namespace SetlistManager.Business.Services;
+namespace SetlistManager.Business.Services.Implementations;
 
 public class LanguageService : ILanguageService
 {

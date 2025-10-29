@@ -3,13 +3,13 @@ using SetlistManager.Common.Models;
 using SetlistManager.Data;
 using SetlistManager.Data.Entities;
 
-namespace SetlistManager.Business.Services;
+namespace SetlistManager.Business.Services.Implementations;
 public class SetlistsService : ISetlistsService
 {
     private readonly AppDbContext _dbContext;
-    private readonly OrderMappingService _orderMappingService;
+    private readonly IOrderMappingService _orderMappingService;
 
-    public SetlistsService(AppDbContext dbContext, OrderMappingService orderMappingService)
+    public SetlistsService(AppDbContext dbContext, IOrderMappingService orderMappingService)
     {
         _dbContext = dbContext;
         _orderMappingService = orderMappingService;
