@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using SetlistManager.Api.Services;
+using SetlistManager.Business.Options;
 using SetlistManager.Business.Services;
 using SetlistManager.Common.Genius.Models;
 using SetlistManager.Common.Models;
@@ -14,15 +16,15 @@ public class UsersController : BaseController
     private readonly ISetlistsService _setlistsService;
     private readonly ICurrentUserContext _currentUserContext;
     private readonly IGeniusAuthService _geniusAuthService;
-    private readonly IConfiguration _configuration;
+    private readonly IOptions<AppOptions> _appOptions;
 
     public UsersController(IUserService userService, ISetlistsService setlistsService, ICurrentUserContext currentUserContext,
-        IGeniusAuthService geniusAuthService, IConfiguration configuration)
+        IGeniusAuthService geniusAuthService, IOptions<AppOptions> appOptions)
     {
+        _appOptions = appOptions;
         _userService = userService;
         _setlistsService = setlistsService;
         _currentUserContext = currentUserContext;
-        _configuration = configuration;
         _geniusAuthService = geniusAuthService;
     }
 
@@ -38,7 +40,10 @@ public class UsersController : BaseController
     {        
         var userId = _currentUserContext.GetCurrentUserId();
         
-        return Ok(await _userService.GetCurrentUserAsync((int)userId));
+        if (userId is null)
+            return Unauthorized();
+
+        return Ok(await _userService.GetCurrentUserAsync(userId.Value));
     }
 
     [HttpGet("{id:int}/setlists")]
@@ -73,6 +78,6 @@ public class UsersController : BaseController
 
         await _userService.AddUserTokenAsync(user.Id, tokenModel);
 
-        return Redirect(_configuration["SetlistManager.App:Url"]!);
+        return Redirect(_appOptions.Value.UserPortalUrl);
     }
 }

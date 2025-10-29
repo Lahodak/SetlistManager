@@ -1,4 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
+using SetlistManager.Business.Options;
 using System.Text;
 using System.Text.Json;
 
@@ -7,20 +9,12 @@ namespace SetlistManager.Business.Services.Implementations;
 public class MailService : IMailService
 {
     private readonly IHttpClientFactory _httpClientFactory;
+    private readonly IOptions<BrevoOptions> _brevoOptions;
 
-    private readonly string _apiKey;
-    private readonly string _senderEmail;
-    private readonly string _senderName;
-    private readonly string _smtpApiURL;
-
-    public MailService(IHttpClientFactory httpClientFactory, IConfiguration configuration)
+    public MailService(IHttpClientFactory httpClientFactory, IOptions<BrevoOptions> brevoOptions)
     {
         _httpClientFactory = httpClientFactory;
-        
-        _apiKey = configuration["Brevo:ApiKey"]!;
-        _senderEmail = configuration["Brevo:SenderEmail"]!;
-        _senderName = configuration["Brevo:SenderName"]!;
-        _smtpApiURL = configuration["Brevo:SmtpApi"]!;
+        _brevoOptions = brevoOptions;
     }
 
     public async Task SendVerificationEmailAsync(string email, string token)
@@ -70,11 +64,11 @@ public class MailService : IMailService
     private async Task SendEmailAsync(string recipientEmail, string subject, string htmlContent)
     {
         var client = _httpClientFactory.CreateClient();
-        client.DefaultRequestHeaders.Add("api-key", _apiKey);
+        client.DefaultRequestHeaders.Add("api-key", _brevoOptions.Value.ApiKey);
 
         var payload = new
         {
-            sender = new { name = _senderName, email = _senderEmail },
+            sender = new { name = _brevoOptions.Value.SenderName, email = _brevoOptions.Value.SenderEmail },
             to = new[] { new { email = recipientEmail } },
             subject,
             htmlContent
@@ -83,7 +77,7 @@ public class MailService : IMailService
         var json = JsonSerializer.Serialize(payload);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-        var response = await client.PostAsync(_smtpApiURL, content);
+        var response = await client.PostAsync(_brevoOptions.Value.SmtpApi, content);
         response.EnsureSuccessStatusCode();
     }
 }

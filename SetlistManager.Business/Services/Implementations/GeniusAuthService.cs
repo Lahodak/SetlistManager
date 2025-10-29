@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using SetlistManager.Business.Options;
 using SetlistManager.Common.Genius.Models;
 
 namespace SetlistManager.Business.Services.Implementations;
@@ -10,14 +12,14 @@ public class GeniusAuthService : IGeniusAuthService
     private const string _authorizeEndpointSuffix = "/oauth/authorize";
     private const string _codeExchangeEndpointSuffix = "/oauth/token";
     private readonly string _geniusApiBaseUrl;
-    private readonly IConfiguration _configuration;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ITempAuthStorageService _tempAuthStorageService;
+    private readonly IOptions<GeniusOptions> _geniusOptions;
 
-    public GeniusAuthService(IConfiguration configuration, IHttpClientFactory httpClientFactory, ITempAuthStorageService tempAuthStorageService)
+    public GeniusAuthService(IOptions<GeniusOptions> geniusOptions, IHttpClientFactory httpClientFactory, ITempAuthStorageService tempAuthStorageService)
     {
-        _configuration = configuration;
-        _geniusApiBaseUrl = _configuration["Genius:ApiBaseUrl"]!;
+        _geniusOptions = geniusOptions;
+        _geniusApiBaseUrl = _geniusOptions.Value.ApiBaseUrl;
         _httpClientFactory = httpClientFactory;
         _tempAuthStorageService = tempAuthStorageService;
     }
@@ -26,8 +28,8 @@ public class GeniusAuthService : IGeniusAuthService
     {
         var grantModel = new GrantAccessTokenModel
         {
-            ClientId = _configuration["Genius:ClientId"]!,
-            RedirectUri = _configuration["Genius:GetGrantAccessTokenRequest:RedirectUri"]!,
+            ClientId = _geniusOptions.Value.ClientId,
+            RedirectUri = _geniusOptions.Value.GetGrantAccessTokenRequest.RedirectUri,
             ResponseType = "code",
             Scope = "me",
             State = await _tempAuthStorageService.CreateNewTempAuthSecret(userId)
@@ -52,10 +54,10 @@ public class GeniusAuthService : IGeniusAuthService
     {
         CodeExchangeRequestModel data = new()
         {
-            ClientId = _configuration["Genius:ClientId"]!,
-            ClientSecret = _configuration["Genius:ClientSecret"]!,
+            ClientId = _geniusOptions.Value.ClientId,
+            ClientSecret = _geniusOptions.Value.ClientSecret,
             Code = code,
-            RedirectUri = _configuration["Genius:GetGrantAccessTokenRequest:RedirectUri"]!
+            RedirectUri = _geniusOptions.Value.GetGrantAccessTokenRequest.RedirectUri
         };
         UriBuilder uri = new(_geniusApiBaseUrl + _codeExchangeEndpointSuffix);
 
