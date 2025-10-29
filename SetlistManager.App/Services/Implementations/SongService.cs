@@ -1,17 +1,17 @@
 ﻿using SetlistManager.Common.Models;
 
-namespace SetlistManager.App.Services;
+namespace SetlistManager.App.Services.Implementations;
 
-public class SongService
+public class SongService : ISongService
 {
     private readonly string _songsEndpointPath;    
     private const string _getSongbyIdSuffix = "/";
     private const string _getSongbyNameSuffix = "?name=";
     private const string _uploadSongCollectionSuffix = "/bulk";    
 
-    private readonly ApiService _apiService;
+    private readonly IApiService _apiService;
 
-    public SongService(ApiService apiService, IConfiguration configuration)
+    public SongService(IApiService apiService, IConfiguration configuration)
     {
         _songsEndpointPath = configuration["SetlistManager.Api:SongsEndpoint"]!;
         _apiService = apiService;

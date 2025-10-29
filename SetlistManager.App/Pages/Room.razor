@@ -1,9 +1,10 @@
 ﻿@page "/room/{RoomCode}"
 @layout EmptyLayout
-@using SetlistManager.App.Services
-@using SetlistManager.Common.Models
 @using Microsoft.AspNetCore.Components
 @using SetlistManager.App.Pages.Dialogs
+@using SetlistManager.App.Services
+@using SetlistManager.App.Services.Implementations
+@using SetlistManager.Common.Models
 
 <MudContainer MaxWidth="MaxWidth.False" Class="pa-0">
     <MudAppBar Elevation="0">
@@ -90,11 +91,11 @@
     [Parameter]
     public string RoomCode { get; set; } = string.Empty;
     [Inject]
-    public required RoomService RoomService { get; set; }
+    public required IRoomService RoomService { get; set; }
     [Inject]
     public required NavigationManager NavigationManager { get; set; }
     [Inject]
-    public required UserService UserService { get; set; }
+    public required IUserService UserService { get; set; }
     [Inject]
     public required IDialogService DialogService { get; set; }
 

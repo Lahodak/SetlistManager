@@ -1,13 +1,13 @@
 ﻿using SetlistManager.Common.Models;
 
-namespace SetlistManager.App.Services;
+namespace SetlistManager.App.Services.Implementations;
 
-public class LanguageService
+public class LanguageService : ILanguageService
 {
     private readonly string _languagesEndpointPath;
 
-    private readonly ApiService _apiService;
-    public LanguageService(ApiService apiService, IConfiguration configuration)
+    private readonly IApiService _apiService;
+    public LanguageService(IApiService apiService, IConfiguration configuration)
     {
         _languagesEndpointPath = configuration["SetlistManager.Api:LanguagesEndpoint"]!;
         _apiService = apiService;

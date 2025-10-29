@@ -1,14 +1,14 @@
 ﻿using SetlistManager.Common.Models;
 
-namespace SetlistManager.App.Services;
+namespace SetlistManager.App.Services.Implementations;
 
-public class InstrumentService
+public class InstrumentService : IInstrumentService
 {
-    private readonly ApiService _apiService;
+    private readonly IApiService _apiService;
 
     private readonly string _instrumentsEndpointPath;
 
-    public InstrumentService(ApiService apiService, IConfiguration configuration)
+    public InstrumentService(IApiService apiService, IConfiguration configuration)
     {
         _instrumentsEndpointPath = configuration["SetlistManager.Api:InstrumentsEndpoint"]!;
         _apiService = apiService;

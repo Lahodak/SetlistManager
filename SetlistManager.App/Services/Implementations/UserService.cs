@@ -4,8 +4,8 @@ using SetlistManager.Common.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 
-namespace SetlistManager.App.Services;
-public class UserService
+namespace SetlistManager.App.Services.Implementations;
+public class UserService : IUserService
 {
     private readonly string _usersEndpointPath;
     private readonly string _authEndpointPath;
@@ -20,10 +20,10 @@ public class UserService
 
     private readonly IHttpClientFactory _httpClientFactory; 
     private readonly ILocalStorageService _localStorage;
-    private readonly ApiService _apiService;
+    private readonly IApiService _apiService;
     private readonly ILogger<UserService> _logger;
 
-    public UserService(IHttpClientFactory httpClientFactory, ILocalStorageService localStorageService, ApiService apiService, 
+    public UserService(IHttpClientFactory httpClientFactory, ILocalStorageService localStorageService, IApiService apiService, 
         ILogger<UserService> logger, IConfiguration configuration)
     {
         _usersEndpointPath = configuration["SetlistManager.Api:UsersEndpoint"]!;
@@ -39,7 +39,7 @@ public class UserService
     {
         var response = await _apiService.GetAsync<UrlResponseModel>(_tokensEndpointPath);
 
-        if (response == null)
+        if (response is null)
             return "/error";
 
         return response.Url;

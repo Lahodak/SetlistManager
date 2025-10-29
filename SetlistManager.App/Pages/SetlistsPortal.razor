@@ -1,5 +1,6 @@
 ﻿@page "/SetlistsPortal"
 @using SetlistManager.App.Pages.Dialogs
+@using SetlistManager.App.Services.Implementations
 
 <PageTitle>Setlist Portal</PageTitle>
 
@@ -63,7 +64,7 @@
 
 @code {
     [Inject] 
-    public required SetlistService SetlistService { get; set; }
+    public required ISetlistService SetlistService { get; set; }
     [Inject] 
     public required IDialogService DialogService { get; set; }
     [Inject]

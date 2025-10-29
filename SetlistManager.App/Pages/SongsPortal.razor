@@ -1,5 +1,6 @@
 ﻿@page "/SongsPortal"
 @using SetlistManager.App.Pages.Dialogs;
+@using SetlistManager.App.Services.Implementations
 
 <PageTitle>Songs Portal</PageTitle>
 
@@ -59,7 +60,7 @@
     [Inject]
     public required ISnackbar Snackbar { get; set; }
     [Inject]
-    public required SongService SongService { get; set; } 
+    public required ISongService SongService { get; set; } 
 
     private MudTable<SongModel> table = new ();
     private string? searchString;

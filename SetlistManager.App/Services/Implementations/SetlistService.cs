@@ -1,16 +1,16 @@
 ﻿using SetlistManager.Common.Models;
 
-namespace SetlistManager.App.Services;
+namespace SetlistManager.App.Services.Implementations;
 
-public class SetlistService
+public class SetlistService : ISetlistService
 {
     private readonly string _setlistsEndpointPath;
     private const string _setlistByIdSuffix = "/";
     private const string _getSetlistByNameSuffix = "/";
 
-    private readonly ApiService _apiService;
-
-    public SetlistService(ApiService apiService, IConfiguration configuration)
+    private readonly IApiService _apiService;
+     
+    public SetlistService(IApiService apiService, IConfiguration configuration)
     {
         _setlistsEndpointPath = configuration["SetlistManager.Api:SetlistsEndpoint"]!;
         _apiService = apiService;

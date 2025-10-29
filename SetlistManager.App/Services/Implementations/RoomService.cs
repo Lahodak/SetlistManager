@@ -1,14 +1,14 @@
 ﻿using SetlistManager.Common.Models;
 
-namespace SetlistManager.App.Services;
+namespace SetlistManager.App.Services.Implementations;
 
-public class RoomService
+public class RoomService : IRoomService
 {
     private readonly string _roomsEndpointPath;
 
-    private readonly ApiService _apiService;
+    private readonly IApiService _apiService;
 
-    public RoomService(ApiService apiService, IConfiguration configuration)
+    public RoomService(IApiService apiService, IConfiguration configuration)
     {
         _roomsEndpointPath = configuration["SetlistManager.Api:RoomsEndpoint"]!;
         _apiService = apiService;

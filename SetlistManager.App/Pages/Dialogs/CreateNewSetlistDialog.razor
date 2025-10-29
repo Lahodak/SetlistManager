@@ -1,4 +1,5 @@
 ﻿@using SetlistManager.App.Services
+@using SetlistManager.App.Services.Implementations
 @using SetlistManager.Common.Models
 
 
@@ -75,11 +76,11 @@
     [CascadingParameter]
     public required IMudDialogInstance MudDialog { get; set; }
     [Inject]
-    public required SetlistService SetlistService { get; set; }
+    public required ISetlistService SetlistService { get; set; }
     [Inject]
-    public required UserService UserService { get; set; }
+    public required IUserService UserService { get; set; }
     [Inject]
-    public required SongService SongService { get; set; }
+    public required ISongService SongService { get; set; }
     [Inject]
     public required ISnackbar Snackbar { get; set; }
 

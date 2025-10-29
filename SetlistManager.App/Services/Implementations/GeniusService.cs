@@ -5,16 +5,16 @@ using SetlistManager.Common.Genius.Models.Search;
 using SetlistManager.Common.Genius.Models.Songs;
 using Microsoft.AspNetCore.Http;
 
-namespace SetlistManager.App.Services;
+namespace SetlistManager.App.Services.Implementations;
 
-public class GeniusService
+public class GeniusService : IGeniusService
 {
     private const string _baseApiUrl = "https://api.genius.com"; //do konfigurace
     private const string _searchEndpointSuffix = "/search?";
     private const string _textFormat = "html";
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly UserService _userService;
-    public GeniusService(IHttpClientFactory factory, IConfiguration configuration, UserService userService)
+    private readonly IUserService _userService;
+    public GeniusService(IHttpClientFactory factory, IConfiguration configuration, IUserService userService)
     {
         _httpClientFactory = factory;
         _userService = userService;

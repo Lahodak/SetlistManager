@@ -1,4 +1,5 @@
 ﻿@page "/UserPortal"
+@using SetlistManager.App.Services.Implementations
 
 @if (_userModel is null)
 {
@@ -16,9 +17,9 @@ else
             <MudTextField @bind-Value="_userModel.Email" Label="Email" Variant="Variant.Outlined" Class="mb-3" />
 
             <MudSelect T="InstrumentModel" @bind-Value="_userModel.Instrument" Label="Instrument" Variant="Variant.Outlined" Class="mb-3">
-                @if (instruments is not null)
+                @if (_instruments is not null)
                 {
-                    @foreach (var instrument in instruments)
+                    @foreach (var instrument in _instruments)
                     {
                         <MudSelectItem Value="@instrument">@instrument.Name</MudSelectItem>
                     }
@@ -52,24 +53,24 @@ else
 @code
 {
     [Inject]
-    public required UserService UserService { get; set; }
+    public required IUserService UserService { get; set; }
     [Inject]
     public required NavigationManager NavigationManager { get; set; }
     [Inject]
-    public required InstrumentService InstrumentService { get; set; }
+    public required IInstrumentService InstrumentService { get; set; }
     [Inject]
-    public required GeniusService GeniusService { get; set; }
+    public required IGeniusService GeniusService { get; set; }
     private UserModel? _userModel;
-    private List<InstrumentModel>? instruments;
+    private List<InstrumentModel>? _instruments;
 
     protected override async Task OnInitializedAsync()
     {
         _userModel = await UserService.GetUserAsync();
-        instruments = await InstrumentService.GetAvailableInstrumentsAsync();
+        _instruments = await InstrumentService.GetAvailableInstrumentsAsync();
 
-        if (_userModel?.Instrument != null)
+        if (_userModel is not null || _instruments is not null || _userModel.Instrument is not null)
         {
-            _userModel.Instrument = instruments.FirstOrDefault(i => i.Id == _userModel.Instrument.Id)!;
+            _userModel.Instrument = _instruments.FirstOrDefault(i => i.Id == _userModel.Instrument.Id)!;
         }
     }
 

@@ -1,13 +1,13 @@
 ﻿using SetlistManager.Common.Models;
 
-namespace SetlistManager.App.Services;
+namespace SetlistManager.App.Services.Implementations;
 
-public class ArtistService
+public class ArtistService : IArtistService
 {
     private readonly string _artistsEndpointPath;
-    private readonly ApiService _apiService;
+    private readonly IApiService _apiService;
     
-    public ArtistService(ApiService apiService, IConfiguration configuration)
+    public ArtistService(IApiService apiService, IConfiguration configuration)
     {
         _artistsEndpointPath = configuration["SetlistManager.Api:ArtistsEndpoint"]!;
         _apiService = apiService;

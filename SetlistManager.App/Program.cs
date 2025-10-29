@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using MudBlazor.Services;
 using SetlistManager.App.Services;
 using SetlistManager.App;
+using SetlistManager.App.Services.Implementations;
+using SetlistManager.App.Services.Extentions;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
@@ -13,15 +15,8 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 builder.Services.AddMudServices();
 builder.Services.AddHttpClient();
 
-builder.Services.AddScoped<SongService>();
-builder.Services.AddScoped<SetlistService>();
-builder.Services.AddScoped<UserService>();
-builder.Services.AddScoped<ApiService>();
-builder.Services.AddScoped<LanguageService>();
-builder.Services.AddScoped<InstrumentService>();
-builder.Services.AddScoped<ArtistService>();
-builder.Services.AddScoped<RoomService>();
-builder.Services.AddScoped<GeniusService>();
+builder.Services.AddServices();
+
 builder.Services.AddLogging();
 
 builder.Services.AddBlazoredLocalStorageAsSingleton(); 
