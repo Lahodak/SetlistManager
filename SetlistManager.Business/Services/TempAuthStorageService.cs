@@ -1,19 +1,14 @@
 ﻿using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using SetlistManager.Common.Genius.Models;
 using SetlistManager.Data;
-using SetlistManager.Data.Entities;
 using System.Security.Cryptography;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using System.Text.Json;
 namespace SetlistManager.Business.Services;
 
 public class TempAuthStorageService : ITempAuthStorageService
 {
-    private const string _geniusApiBaseUrl = "https://api.genius.com";
+    private const string _geniusApiBaseUrl = "https://api.genius.com"; //do konfigurace
     private const string _authorizeEndpointSuffix = "/oauth/authorize";
     private const string _codeExchangeEndpointSuffix = "/oauth/token";
     private readonly AppDbContext _dbContext;
@@ -79,14 +74,7 @@ public class TempAuthStorageService : ITempAuthStorageService
 
         string jsonData;
 
-        try
-        {
-            jsonData = JsonConvert.SerializeObject(data);
-        }
-        catch (Exception ex)
-        {
-            return default;
-        }
+        jsonData = JsonConvert.SerializeObject(data);
 
         var content = new StringContent(jsonData, System.Text.Encoding.UTF8, "application/json");
 
@@ -99,7 +87,7 @@ public class TempAuthStorageService : ITempAuthStorageService
         {
             resultModel = JsonConvert.DeserializeObject<CodeExchangeResponseModel>(responseModel);
         }
-        catch (Exception ex) 
+        catch (Exception) 
         {
             return default;
         }

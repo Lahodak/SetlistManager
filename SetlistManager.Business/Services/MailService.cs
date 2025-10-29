@@ -16,14 +16,11 @@ public class MailService : IMailService
     public MailService(IHttpClientFactory httpClientFactory, IConfiguration configuration)
     {
         _httpClientFactory = httpClientFactory;
-
-        IConfiguration _configuration;
-        _configuration = configuration;
         
-        _apiKey = _configuration["Brevo:ApiKey"]!;
-        _senderEmail = _configuration["Brevo:SenderEmail"]!;
-        _senderName = _configuration["Brevo:SenderName"]!;
-        _smtpApiURL = _configuration["Brevo:SmtpApi"]!;
+        _apiKey = configuration["Brevo:ApiKey"]!;
+        _senderEmail = configuration["Brevo:SenderEmail"]!;
+        _senderName = configuration["Brevo:SenderName"]!;
+        _smtpApiURL = configuration["Brevo:SmtpApi"]!;
     }
 
     public async Task SendVerificationEmailAsync(string email, string token)

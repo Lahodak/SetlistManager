@@ -4,7 +4,6 @@ using SetlistManager.Api.Services;
 using SetlistManager.Business.Services;
 using SetlistManager.Common.Genius.Models;
 using SetlistManager.Common.Models;
-using System.Net.Http;
 
 namespace SetlistManager. Api.Controllers;
 

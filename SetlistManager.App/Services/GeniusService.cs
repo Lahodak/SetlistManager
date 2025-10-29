@@ -1,17 +1,15 @@
 ﻿using Microsoft.AspNetCore.Http.Extensions;
-using SetlistManager.Common.Genius.Models;
 using SetlistManager.Common.Models;
-using System.Net.Http.Json;
 using Newtonsoft.Json;
 using SetlistManager.Common.Genius.Models.Search;
 using SetlistManager.Common.Genius.Models.Songs;
-using MudBlazor.Interfaces;
+using Microsoft.AspNetCore.Http;
 
 namespace SetlistManager.App.Services;
 
 public class GeniusService
 {
-    private const string _baseApiUrl = "https://api.genius.com";
+    private const string _baseApiUrl = "https://api.genius.com"; //do konfigurace
     private const string _searchEndpointSuffix = "/search?";
     private const string _textFormat = "html";
     private readonly IHttpClientFactory _httpClientFactory;
@@ -22,18 +20,18 @@ public class GeniusService
         _userService = userService;
     }
 
-    public async Task<string> FetchSongLyricsAsync(SongModel song)
+    public async Task<string?> FetchSongLyricsAsync(SongModel song)
     {
         var client = _httpClientFactory.CreateClient();
-        var token = (await _userService.GetUserAsync()).Tokens?.FirstOrDefault(x => x.Provider == ProviderEnum.Genius.ToString());
+        var token = (await _userService.GetUserAsync())?.Tokens?.FirstOrDefault(x => x.Provider == ProviderEnum.Genius.ToString());
 
         if (token is null)
-            return "No Lyrics";
+            return null;
 
         UriBuilder uri = new(_baseApiUrl + _searchEndpointSuffix);
         uri.Query = new QueryBuilder
         {
-            {"access_token", token.AccessToken },
+            { "access_token", token.AccessToken },
             { "q", song.Name }
         }.ToString();
 
@@ -45,19 +43,19 @@ public class GeniusService
         {
             responseModel = JsonConvert.DeserializeObject<SearchResponseModel>(response);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            return ex.Message;
+            return null;
         }
 
-        if (responseModel!.Meta.Status != 200 || responseModel is null || responseModel.Response.Hits.Count == 0)
-            return "Failed to fetch";
+        if (responseModel is null || responseModel.Meta.Status != StatusCodes.Status200OK || responseModel.Response.Hits.Count == 0)
+            return null;
         
         UriBuilder uriSongs = new(_baseApiUrl + responseModel.Response.Hits[0].Result.ApiPath);
         uriSongs.Query = new QueryBuilder
         {
-            {"access_token", token.AccessToken },
-            {"text_format", _textFormat }
+            { "access_token", token.AccessToken },
+            { "text_format", _textFormat }
         }.ToString();
 
         GetSongResponseModel? songResponseModel;
@@ -68,13 +66,13 @@ public class GeniusService
         {
             songResponseModel = JsonConvert.DeserializeObject<GetSongResponseModel>(responseContent);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            return ex.Message;
+            return null;
         }
 
-        if (songResponseModel!.Meta.Status != 200)
-            return "Failed to fetch song";
+        if (songResponseModel is null || songResponseModel.Meta.Status != StatusCodes.Status200OK)
+            return null;
 
         return songResponseModel.Response.Song.EmbedContent;
     }

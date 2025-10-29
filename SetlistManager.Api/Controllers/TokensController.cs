@@ -1,8 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using SetlistManager.Api.Services;
 using SetlistManager.Business.Services;
-using SetlistManager.Common.Genius.Models;
 using SetlistManager.Common.Models;
 
 
