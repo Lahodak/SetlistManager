@@ -4,7 +4,6 @@ namespace SetlistManager.App.Services;
 
 public interface IUserService
 {
-    Task<string> AuthorizeWithGenius();
     Task AddNewProviderToken(AddTokenModel tokenModel);
     Task<UserModel?> GetUserAsync();
     Task<List<SetlistModel>?> GetAllUserSetlists();

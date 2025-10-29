@@ -68,9 +68,9 @@ else
         _userModel = await UserService.GetUserAsync();
         _instruments = await InstrumentService.GetAvailableInstrumentsAsync();
 
-        if (_userModel is not null || _instruments is not null || _userModel.Instrument is not null)
+        if (_userModel is not null && _instruments is not null && _userModel.Instrument is not null)
         {
-            _userModel.Instrument = _instruments.FirstOrDefault(i => i.Id == _userModel.Instrument.Id)!;
+            _userModel.Instrument = _instruments.FirstOrDefault(i => i.Id == _userModel.Instrument.Id);
         }
     }
 
@@ -91,6 +91,6 @@ else
 
     private async Task AuthorizeWithGenius()
     {
-        NavigationManager.NavigateTo(await UserService.AuthorizeWithGenius());
+        NavigationManager.NavigateTo(await GeniusService.AuthorizeAsync());
     }
 }

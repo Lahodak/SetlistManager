@@ -61,7 +61,8 @@ public class UserService : IUserService
         {
             UserId = userId,
             Provider = await _dbContext.Providers.FirstAsync(x => x.Name == tokenModel.Provider.ToString()),
-            AccessToken = tokenModel.AccessToken
+            AccessToken = tokenModel.AccessToken,
+            CreatedAt = DateTime.UtcNow
         });
 
         await _dbContext.SaveChangesAsync();

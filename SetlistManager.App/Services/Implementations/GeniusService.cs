@@ -11,18 +11,31 @@ namespace SetlistManager.App.Services.Implementations;
 
 public class GeniusService : IGeniusService
 {
+    private const string _searchEndpointSuffix = "/search?";
+    
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IUserService _userService;
     private readonly IOptions<GeniusOptions> _geniusOptions;
-    private const string _searchEndpointSuffix = "/search?";
-    public GeniusService(IHttpClientFactory factory, IOptions<GeniusOptions> geniusOptions, IUserService userService)
+    private readonly IOptions<SetlistManagerApiOptions> _apiOptions;
+    private readonly IApiService _apiService;
+    
+    public GeniusService(IHttpClientFactory factory, IOptions<GeniusOptions> geniusOptions, IUserService userService, IApiService apiService, IOptions<SetlistManagerApiOptions> apiOptions)
     {
+        _apiService = apiService;
+        _apiOptions = apiOptions;
         _geniusOptions = geniusOptions;
         _httpClientFactory = factory;
         _userService = userService;
     }
+    public async Task<string> AuthorizeAsync()
+    {
+        var response = await _apiService.GetAsync<UrlResponseModel>(_apiOptions.Value.TokensEndpoint);
 
+        if (response is null)
+            return "/error";
 
+        return response.Url;
+    }
 
     public async Task<string?> FetchSongLyricsAsync(SongModel song)
     {
@@ -32,12 +45,14 @@ public class GeniusService : IGeniusService
         if (token is null)
             return null;
 
-        UriBuilder uri = new(_geniusOptions.Value.BaseApiUrl + _searchEndpointSuffix);
-        uri.Query = new QueryBuilder
+        UriBuilder uri = new(_geniusOptions.Value.BaseApiUrl + _searchEndpointSuffix)
         {
-            { "access_token", token.AccessToken },
-            { "q", song.Name }
-        }.ToString();
+            Query = new QueryBuilder
+            {
+                { "access_token", token.AccessToken },
+                { "q", song.Name }
+            }.ToString()
+        };
 
         SearchResponseModel? responseModel;
         var searchResponse = await client.GetAsync(uri.ToString());
@@ -54,13 +69,15 @@ public class GeniusService : IGeniusService
 
         if (responseModel is null || responseModel.Meta.Status != StatusCodes.Status200OK || responseModel.Response.Hits.Count == 0)
             return null;
-        
-        UriBuilder uriSongs = new(_geniusOptions.Value.BaseApiUrl + responseModel.Response.Hits[0].Result.ApiPath);
-        uriSongs.Query = new QueryBuilder
+
+        UriBuilder uriSongs = new(_geniusOptions.Value.BaseApiUrl + responseModel.Response.Hits[0].Result.ApiPath)
         {
-            { "access_token", token.AccessToken },
-            { "text_format", _geniusOptions.Value.TextFormat }
-        }.ToString();
+            Query = new QueryBuilder
+            {
+                { "access_token", token.AccessToken },
+                { "text_format", _geniusOptions.Value.TextFormat }
+            }.ToString()
+        };
 
         GetSongResponseModel? songResponseModel;
         var songResponse = await client.GetAsync(uriSongs.ToString());

@@ -32,16 +32,6 @@ public class UserService : IUserService
         _apiService = apiService;
     }
 
-    public async Task<string> AuthorizeWithGenius()
-    {
-        var response = await _apiService.GetAsync<UrlResponseModel>(_apiOptions.Value.TokensEndpoint);
-
-        if (response is null)
-            return "/error";
-
-        return response.Url;
-    }
-
     public async Task AddNewProviderToken(AddTokenModel tokenModel) 
         => await _apiService.PutAsync(_apiOptions.Value.UsersEndpoint + "/tokens", tokenModel);
 
