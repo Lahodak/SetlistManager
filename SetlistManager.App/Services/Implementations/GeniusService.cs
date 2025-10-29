@@ -4,21 +4,25 @@ using Newtonsoft.Json;
 using SetlistManager.Common.Genius.Models.Search;
 using SetlistManager.Common.Genius.Models.Songs;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Options;
+using SetlistManager.App.Options;
 
 namespace SetlistManager.App.Services.Implementations;
 
 public class GeniusService : IGeniusService
 {
-    private const string _baseApiUrl = "https://api.genius.com"; //do konfigurace
-    private const string _searchEndpointSuffix = "/search?";
-    private const string _textFormat = "html";
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IUserService _userService;
-    public GeniusService(IHttpClientFactory factory, IConfiguration configuration, IUserService userService)
+    private readonly IOptions<GeniusOptions> _geniusOptions;
+    private const string _searchEndpointSuffix = "/search?";
+    public GeniusService(IHttpClientFactory factory, IOptions<GeniusOptions> geniusOptions, IUserService userService)
     {
+        _geniusOptions = geniusOptions;
         _httpClientFactory = factory;
         _userService = userService;
     }
+
+
 
     public async Task<string?> FetchSongLyricsAsync(SongModel song)
     {
@@ -28,7 +32,7 @@ public class GeniusService : IGeniusService
         if (token is null)
             return null;
 
-        UriBuilder uri = new(_baseApiUrl + _searchEndpointSuffix);
+        UriBuilder uri = new(_geniusOptions.Value.BaseApiUrl + _searchEndpointSuffix);
         uri.Query = new QueryBuilder
         {
             { "access_token", token.AccessToken },
@@ -51,11 +55,11 @@ public class GeniusService : IGeniusService
         if (responseModel is null || responseModel.Meta.Status != StatusCodes.Status200OK || responseModel.Response.Hits.Count == 0)
             return null;
         
-        UriBuilder uriSongs = new(_baseApiUrl + responseModel.Response.Hits[0].Result.ApiPath);
+        UriBuilder uriSongs = new(_geniusOptions.Value.BaseApiUrl + responseModel.Response.Hits[0].Result.ApiPath);
         uriSongs.Query = new QueryBuilder
         {
             { "access_token", token.AccessToken },
-            { "text_format", _textFormat }
+            { "text_format", _geniusOptions.Value.TextFormat }
         }.ToString();
 
         GetSongResponseModel? songResponseModel;

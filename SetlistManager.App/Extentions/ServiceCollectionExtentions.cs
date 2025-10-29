@@ -1,6 +1,7 @@
-﻿using SetlistManager.App.Services.Implementations;
+﻿using SetlistManager.App.Services;
+using SetlistManager.App.Services.Implementations;
 
-namespace SetlistManager.App.Services.Extentions;
+namespace SetlistManager.App.Extentions;
 
 public static class ServiceCollectionExtentions
 {

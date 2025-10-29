@@ -1,5 +1,7 @@
 ﻿using Blazored.LocalStorage;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using SetlistManager.App.Options;
 using SetlistManager.Common.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
@@ -7,10 +9,6 @@ using System.Text;
 namespace SetlistManager.App.Services.Implementations;
 public class UserService : IUserService
 {
-    private readonly string _usersEndpointPath;
-    private readonly string _authEndpointPath;
-    private readonly string _tokensEndpointPath;
-
     private const string _loginUserSuffix = "/login";
     private const string _tokenKey = "authToken";
     private const string _getUserSetlistsSuffix = "/Setlists";
@@ -22,13 +20,12 @@ public class UserService : IUserService
     private readonly ILocalStorageService _localStorage;
     private readonly IApiService _apiService;
     private readonly ILogger<UserService> _logger;
+    private readonly IOptions<SetlistManagerApiOptions> _apiOptions;
 
     public UserService(IHttpClientFactory httpClientFactory, ILocalStorageService localStorageService, IApiService apiService, 
-        ILogger<UserService> logger, IConfiguration configuration)
+        ILogger<UserService> logger, IOptions<SetlistManagerApiOptions> apiOptions)
     {
-        _usersEndpointPath = configuration["SetlistManager.Api:UsersEndpoint"]!;
-        _authEndpointPath = configuration["SetlistManager.Api:AuthEndpoint"]!;
-        _tokensEndpointPath = configuration["SetlistManager.Api:TokensEndpoint"]!;
+        _apiOptions = apiOptions;
         _logger = logger;
         _httpClientFactory = httpClientFactory;
         _localStorage = localStorageService;
@@ -37,7 +34,7 @@ public class UserService : IUserService
 
     public async Task<string> AuthorizeWithGenius()
     {
-        var response = await _apiService.GetAsync<UrlResponseModel>(_tokensEndpointPath);
+        var response = await _apiService.GetAsync<UrlResponseModel>(_apiOptions.Value.TokensEndpoint);
 
         if (response is null)
             return "/error";
@@ -46,10 +43,10 @@ public class UserService : IUserService
     }
 
     public async Task AddNewProviderToken(AddTokenModel tokenModel) 
-        => await _apiService.PutAsync(_usersEndpointPath + "/tokens", tokenModel);
+        => await _apiService.PutAsync(_apiOptions.Value.UsersEndpoint + "/tokens", tokenModel);
 
     public async Task<UserModel?> GetUserAsync() 
-        => await _apiService.GetAsync<UserModel>(_usersEndpointPath);
+        => await _apiService.GetAsync<UserModel>(_apiOptions.Value.UsersEndpoint);
 
     public async Task<List<SetlistModel>?> GetAllUserSetlists()
     {
@@ -58,11 +55,11 @@ public class UserService : IUserService
         if(user is null)
             return null;
 
-        return await _apiService.GetAsync<List<SetlistModel>?>(_usersEndpointPath + "/" + user.Id.ToString() + _getUserSetlistsSuffix);
+        return await _apiService.GetAsync<List<SetlistModel>?>(_apiOptions.Value.UsersEndpoint + "/" + user.Id.ToString() + _getUserSetlistsSuffix);
     }
 
     public async Task RegisterAsync(RegisterRequestModel model) 
-        => await _apiService.PostAsync(_authEndpointPath, model);
+        => await _apiService.PostAsync(_apiOptions.Value.AuthEndpoint, model);
 
     public async Task LogOutAsync()
     {
@@ -96,7 +93,7 @@ public class UserService : IUserService
     }
 
     public async Task UpdateUser(UserModel user) 
-        => await _apiService.PutAsync(_usersEndpointPath, user);
+        => await _apiService.PutAsync(_apiOptions.Value.UsersEndpoint, user);
 
     public async Task LogInAsync(LoginRequestModel model)
     {
@@ -114,7 +111,7 @@ public class UserService : IUserService
         }
 
         var content = new StringContent(user, Encoding.UTF8, "application/json");
-        HttpResponseMessage message = await client.PostAsync(_authEndpointPath + _loginUserSuffix, content);
+        HttpResponseMessage message = await client.PostAsync(_apiOptions.Value.AuthEndpoint + _loginUserSuffix, content);
 
         if (!message.IsSuccessStatusCode)
             return;
@@ -150,7 +147,7 @@ public class UserService : IUserService
             Token = token
         };
 
-        await _apiService.PostAsync(_authEndpointPath + _verifyEmailSuffix, verifyModel);
+        await _apiService.PostAsync(_apiOptions.Value.AuthEndpoint + _verifyEmailSuffix, verifyModel);
         
         return true;                
     }
@@ -162,7 +159,7 @@ public class UserService : IUserService
             Email = email
         };
 
-        await _apiService.PostAsync(_authEndpointPath + _resetPasswordRequestSuffix, model);
+        await _apiService.PostAsync(_apiOptions.Value.AuthEndpoint + _resetPasswordRequestSuffix, model);
 
         return true;
     }
@@ -176,7 +173,7 @@ public class UserService : IUserService
             Token = token
         };
 
-        await _apiService.PostAsync(_authEndpointPath + _resetPasswordSuffix, resetModel);
+        await _apiService.PostAsync(_apiOptions.Value.AuthEndpoint + _resetPasswordSuffix, resetModel);
         
         return true;
     }   

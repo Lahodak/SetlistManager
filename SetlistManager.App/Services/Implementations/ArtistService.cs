@@ -1,24 +1,26 @@
-﻿using SetlistManager.Common.Models;
+﻿using Microsoft.Extensions.Options;
+using SetlistManager.App.Options;
+using SetlistManager.Common.Models;
 
 namespace SetlistManager.App.Services.Implementations;
 
 public class ArtistService : IArtistService
 {
-    private readonly string _artistsEndpointPath;
     private readonly IApiService _apiService;
-    
-    public ArtistService(IApiService apiService, IConfiguration configuration)
+    private readonly IOptions<SetlistManagerApiOptions> _apiOptions;
+
+    public ArtistService(IApiService apiService, IOptions<SetlistManagerApiOptions> apiOptions)
     {
-        _artistsEndpointPath = configuration["SetlistManager.Api:ArtistsEndpoint"]!;
+        _apiOptions = apiOptions;
         _apiService = apiService;
     }
 
     public async Task<List<ArtistModel>?> GetAvailableArtistsAsync() 
-        => await _apiService.GetAsync<List<ArtistModel>>(_artistsEndpointPath);
+        => await _apiService.GetAsync<List<ArtistModel>>(_apiOptions.Value.ArtistsEndpoint);
 
     public async Task<ArtistModel?> GetArtistByIdAsync(int id) 
-        => await _apiService.GetAsync<ArtistModel>(_artistsEndpointPath + "/" + id.ToString());
+        => await _apiService.GetAsync<ArtistModel>(_apiOptions.Value.ArtistsEndpoint + "/" + id.ToString());
 
     public async Task UploadArtistAsync(ArtistModel artist)
-        => await _apiService.PostAsync(_artistsEndpointPath, artist);
+        => await _apiService.PostAsync(_apiOptions.Value.ArtistsEndpoint, artist);
 }

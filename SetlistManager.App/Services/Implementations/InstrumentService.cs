@@ -1,19 +1,20 @@
-﻿using SetlistManager.Common.Models;
+﻿using Microsoft.Extensions.Options;
+using SetlistManager.App.Options;
+using SetlistManager.Common.Models;
 
 namespace SetlistManager.App.Services.Implementations;
 
 public class InstrumentService : IInstrumentService
 {
+    private readonly IOptions<SetlistManagerApiOptions> _apiOptions;
     private readonly IApiService _apiService;
 
-    private readonly string _instrumentsEndpointPath;
-
-    public InstrumentService(IApiService apiService, IConfiguration configuration)
+    public InstrumentService(IApiService apiService, IOptions<SetlistManagerApiOptions> apiOptions)
     {
-        _instrumentsEndpointPath = configuration["SetlistManager.Api:InstrumentsEndpoint"]!;
+        _apiOptions = apiOptions;
         _apiService = apiService;
     }
 
     public async Task<List<InstrumentModel>?> GetAvailableInstrumentsAsync()
-        => await _apiService.GetAsync<List<InstrumentModel>>(_instrumentsEndpointPath);
+        => await _apiService.GetAsync<List<InstrumentModel>>(_apiOptions.Value.InstrumentsEndpoint);
 }

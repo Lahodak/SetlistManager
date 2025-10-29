@@ -1,18 +1,19 @@
-﻿using SetlistManager.Common.Models;
+﻿using Microsoft.Extensions.Options;
+using SetlistManager.App.Options;
+using SetlistManager.Common.Models;
 
 namespace SetlistManager.App.Services.Implementations;
 
 public class LanguageService : ILanguageService
 {
-    private readonly string _languagesEndpointPath;
-
+    private readonly IOptions<SetlistManagerApiOptions> _apiOptions;
     private readonly IApiService _apiService;
-    public LanguageService(IApiService apiService, IConfiguration configuration)
+    public LanguageService(IApiService apiService, IOptions<SetlistManagerApiOptions> apiOptions)
     {
-        _languagesEndpointPath = configuration["SetlistManager.Api:LanguagesEndpoint"]!;
+        _apiOptions = apiOptions;
         _apiService = apiService;
     }
 
     public async Task<List<LanguageModel>?> GetAvailableLanguagesAsync() 
-        => await _apiService.GetAsync<List<LanguageModel>>(_languagesEndpointPath);
+        => await _apiService.GetAsync<List<LanguageModel>>(_apiOptions.Value.LanguagesEndpoint);
 }
