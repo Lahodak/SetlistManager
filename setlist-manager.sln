@@ -12,6 +12,11 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SetlistManager.Api", "SetlistManager.Api\SetlistManager.Api.csproj", "{34C87EB8-7AEE-5C17-1F55-2615DA857679}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SetlistManager.Business", "SetlistManager.Business\SetlistManager.Business.csproj", "{82522D5F-AAF5-EB47-A663-ED414E624516}"
+	ProjectSection(ProjectDependencies) = postProject
+		{524F78C6-23F9-40F6-815C-239DD54FD2BD} = {524F78C6-23F9-40F6-815C-239DD54FD2BD}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SetlistManager.Resources", "SetlistManager.Resources\SetlistManager.Resources.csproj", "{524F78C6-23F9-40F6-815C-239DD54FD2BD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +44,10 @@ Global
 		{82522D5F-AAF5-EB47-A663-ED414E624516}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{82522D5F-AAF5-EB47-A663-ED414E624516}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{82522D5F-AAF5-EB47-A663-ED414E624516}.Release|Any CPU.Build.0 = Release|Any CPU
+		{524F78C6-23F9-40F6-815C-239DD54FD2BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{524F78C6-23F9-40F6-815C-239DD54FD2BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{524F78C6-23F9-40F6-815C-239DD54FD2BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{524F78C6-23F9-40F6-815C-239DD54FD2BD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
