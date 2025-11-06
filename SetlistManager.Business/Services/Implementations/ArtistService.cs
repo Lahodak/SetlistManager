@@ -4,7 +4,7 @@ using SetlistManager.Common.Models;
 using SetlistManager.Data;
 using SetlistManager.Data.Entities;
 
-namespace SetlistManager.Business.Services;
+namespace SetlistManager.Business.Services.Implementations;
 
 public class ArtistService : IArtistService
 {
@@ -38,8 +38,8 @@ public class ArtistService : IArtistService
         .FirstAsync(x => x.Id == id)).ToModel(true);
 
     public async Task<Artist> GetArtistByIdAsync(int id)
-        => (await _dbContext.Artists
+        => await _dbContext.Artists
         .Include(x => x.Songs)!
         .ThenInclude(x => x.Language)
-        .FirstAsync(x => x.Id == id));
+        .FirstAsync(x => x.Id == id);
 }

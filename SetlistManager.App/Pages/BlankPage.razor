@@ -1,5 +1,6 @@
 ﻿@layout EmptyLayout
 @page "/"
+@using SetlistManager.App.Services.Implementations
 
 <MudContainer Class="d-flex justify-center align-center" Style="height:100vh;">
     <MudText Typo="Typo.h1">Setlist Manager</MudText>
@@ -9,7 +10,7 @@
 	[Inject]
 	public required NavigationManager Navigation { get; set; }
 	[Inject]
-	public required UserService UserService { get; set; }
+	public required IUserService UserService { get; set; }
 
 	protected override async Task OnInitializedAsync()
 	{

@@ -5,7 +5,7 @@ using SetlistManager.Data.Entities;
 using SetlistManager.Business.Mappers;
 using SetlistManager.Data;
 
-namespace SetlistManager.Business.Services;
+namespace SetlistManager.Business.Services.Implementations;
 
 public class UserService : IUserService
 {
@@ -61,7 +61,8 @@ public class UserService : IUserService
         {
             UserId = userId,
             Provider = await _dbContext.Providers.FirstAsync(x => x.Name == tokenModel.Provider.ToString()),
-            AccessToken = tokenModel.AccessToken
+            AccessToken = tokenModel.AccessToken,
+            CreatedAt = DateTime.UtcNow
         });
 
         await _dbContext.SaveChangesAsync();
@@ -70,7 +71,7 @@ public class UserService : IUserService
     public async Task<User?> GetUserByTempSalt(string salt)
     {
         var tempAuth = await _dbContext.TempAuthStorage
-            .FirstOrDefaultAsync(x => x.TempSalt == salt);
+            .FirstOrDefaultAsync(x => x.TempSecret == salt);
 
         if (tempAuth is null)
             return null;

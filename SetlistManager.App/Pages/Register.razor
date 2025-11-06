@@ -1,16 +1,17 @@
 ﻿@page "/register"
 @layout EmptyLayout;
-@using MudBlazor;
-@using SetlistManager.Common.Models;
 @using Blazored.LocalStorage
+@using MudBlazor;
+@using SetlistManager.App.Services.Implementations
+@using SetlistManager.Common.Models;
 
 <MudForm>
     <MudPaper Class="mx-auto mt-12 p-6" Style="max-width:400px;" Elevation="8">
         <MudText Typo="Typo.h5" Class="mb-4">Register</MudText>
 
-        <MudTextField @bind-Value="registerRequestModel.Email" Label="Email" Variant="Variant.Outlined" FullWidth="true" />
-        <MudTextField @bind-Value="registerRequestModel.UserName" Label="UserName" Variant="Variant.Outlined" FullWidth="true" />
-        <MudTextField @bind-Value="registerRequestModel.Password" Label="Password" Variant="Variant.Outlined" InputType="InputType.Password" FullWidth="true" Class="mt-3" />
+        <MudTextField @bind-Value="_registerRequestModel.Email" Label="Email" Variant="Variant.Outlined" FullWidth="true" />
+        <MudTextField @bind-Value="_registerRequestModel.UserName" Label="UserName" Variant="Variant.Outlined" FullWidth="true" />
+        <MudTextField @bind-Value="_registerRequestModel.Password" Label="Password" Variant="Variant.Outlined" InputType="InputType.Password" FullWidth="true" Class="mt-3" />
         <MudTextField @bind-Value="confirmPassword" Label="Confirm Password" Variant="Variant.Outlined" InputType="InputType.Password" FullWidth="true" Class="mt-3" />
 
         <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="LoginUser" FullWidth="true" Class="mt-4">
@@ -21,26 +22,26 @@
 
 @code {
     [Inject]
-    public required UserService UserService { get; set; }
+    public required IUserService UserService { get; set; }
     [Inject]
     public required NavigationManager Navigation { get; set; }
     [Inject]
     public required ILocalStorageService LocalStorage { get; set; }
 
     private const string _emailKey = "registeredEmail";
-    private RegisterRequestModel registerRequestModel = new();
+    private readonly RegisterRequestModel _registerRequestModel = new();
     private string confirmPassword = string.Empty;
 
     private async Task LoginUser()
     {
-        if (registerRequestModel.Password == string.Empty 
-            || registerRequestModel.Email == string.Empty 
-            || registerRequestModel.UserName == string.Empty
-            || confirmPassword != registerRequestModel.Password)
+        if (_registerRequestModel.Password == string.Empty 
+            || _registerRequestModel.Email == string.Empty 
+            || _registerRequestModel.UserName == string.Empty
+            || confirmPassword != _registerRequestModel.Password)
             return;
 
-        await UserService.RegisterAsync(registerRequestModel);
-        await LocalStorage.SetItemAsStringAsync(_emailKey, registerRequestModel.Email);
+        await UserService.RegisterAsync(_registerRequestModel);
+        await LocalStorage.SetItemAsStringAsync(_emailKey, _registerRequestModel.Email);
 
         Navigation.NavigateTo("/verify-email");
     }

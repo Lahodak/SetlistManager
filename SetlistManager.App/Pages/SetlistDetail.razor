@@ -1,4 +1,5 @@
 ﻿@page "/setlistdetail/{setlistId:int}"
+@using SetlistManager.App.Services.Implementations
 
 <PageTitle>Setlist Detail</PageTitle>
 
@@ -66,15 +67,15 @@
 
 @code {
     [Parameter]
-    public int setlistId { get; set; }
+    public int SetlistId { get; set; }
 
     [Inject]
-    public required SetlistService SetlistService { get; set; }
+    public required ISetlistService SetlistService { get; set; }
 
     private SetlistModel? _setlist = new();
 
     protected override async Task OnInitializedAsync()
     {
-        _setlist = await SetlistService.GetSetlistById(setlistId)!;
+        _setlist = await SetlistService.GetSetlistById(SetlistId)!;
     }
 }

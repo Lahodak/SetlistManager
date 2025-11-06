@@ -1,4 +1,5 @@
 ﻿@using MudBlazor
+@using SetlistManager.App.Services.Implementations
 @namespace SetlistManager.App.Pages.Dialogs
 
 
@@ -34,11 +35,11 @@
 
 @code {
     [CascadingParameter]
-    IMudDialogInstance MudDialog { get; set; } = default!;
+    public required IMudDialogInstance MudDialog { get; set; }
     [Parameter]
-    public SetlistModel setlist { get; set; } = new();
+    public SetlistModel Setlist { get; set; } = new();
     [Inject]
-    public required SetlistService SetlistService { get; set; }
+    public required ISetlistService SetlistService { get; set; }
     [Inject]
     public required IDialogService dialogService { get; set; }
 
@@ -48,15 +49,15 @@
     {
         _setlist = new SetlistModel
         {
-            Id = setlist.Id,
-            Name = setlist.Name,
-            Songs = new List<SongModel>(setlist.Songs)
+            Id = Setlist.Id,
+            Name = Setlist.Name,
+            Songs = new List<SongModel>(Setlist.Songs)
         };
     }
 
     private async Task Save()
     {
-        if (setlist is null)
+        if (Setlist is null)
             return;
 
         await SetlistService.EditSetlist(_setlist);

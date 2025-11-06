@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using SetlistManager.Api.Services;
+using SetlistManager.Business.Options;
 using SetlistManager.Business.Services;
 using SetlistManager.Common.Genius.Models;
 using SetlistManager.Common.Models;
-using System.Net.Http;
 
 namespace SetlistManager. Api.Controllers;
 
@@ -14,17 +15,17 @@ public class UsersController : BaseController
     private readonly IUserService _userService;
     private readonly ISetlistsService _setlistsService;
     private readonly ICurrentUserContext _currentUserContext;
-    private readonly ITempAuthStorageService _tempAuthStorageService;
-    private readonly IConfiguration _configuration;
+    private readonly IGeniusAuthService _geniusAuthService;
+    private readonly IOptions<AppOptions> _appOptions;
 
     public UsersController(IUserService userService, ISetlistsService setlistsService, ICurrentUserContext currentUserContext,
-        ITempAuthStorageService tempAuthStorageService, IConfiguration configuration)
+        IGeniusAuthService geniusAuthService, IOptions<AppOptions> appOptions)
     {
+        _appOptions = appOptions;
         _userService = userService;
         _setlistsService = setlistsService;
         _currentUserContext = currentUserContext;
-        _tempAuthStorageService = tempAuthStorageService;
-        _configuration = configuration;
+        _geniusAuthService = geniusAuthService;
     }
 
     [HttpPut]
@@ -39,7 +40,10 @@ public class UsersController : BaseController
     {        
         var userId = _currentUserContext.GetCurrentUserId();
         
-        return Ok(await _userService.GetCurrentUserAsync((int)userId));
+        if (userId is null)
+            return Unauthorized();
+
+        return Ok(await _userService.GetCurrentUserAsync(userId.Value));
     }
 
     [HttpGet("{id:int}/setlists")]
@@ -60,9 +64,9 @@ public class UsersController : BaseController
         if(user is null)
             return NotFound("User not found");
 
-        var resultAccessTokenModel = await _tempAuthStorageService.ExchangeGeniusCode(grantResultModel.Code);
+        var resultAccessTokenModel = await _geniusAuthService.ExchangeGeniusCode(grantResultModel.Code);
 
-        if (resultAccessTokenModel!.AccessToken is null || resultAccessTokenModel is null)
+        if (resultAccessTokenModel is null || resultAccessTokenModel.AccessToken is null )
             return BadRequest();
 
         AddTokenModel tokenModel = new()
@@ -74,6 +78,6 @@ public class UsersController : BaseController
 
         await _userService.AddUserTokenAsync(user.Id, tokenModel);
 
-        return Redirect(_configuration["SetlistManager.App:Url"]!);
+        return Redirect(_appOptions.Value.UserPortalUrl);
     }
 }

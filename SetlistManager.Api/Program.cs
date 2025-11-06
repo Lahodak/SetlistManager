@@ -9,6 +9,7 @@ using SetlistManager.Data;
 using SetlistManager.Data.Entities;
 using SetlistManager.Business.Extentions;
 using System.Text;
+using SetlistManager.Business.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -56,7 +57,10 @@ builder.Services.AddIdentity<User, Role>(options =>
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders();
 
-builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.SectionName));
+builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.SectionName))
+    .Configure<GeniusOptions>(builder.Configuration.GetSection(GeniusOptions.SectionName))
+    .Configure<AppOptions>(builder.Configuration.GetSection(AppOptions.SectionName))
+    .Configure<BrevoOptions>(builder.Configuration.GetSection(BrevoOptions.SectionName));
 
 var jwtOptions = builder.Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>()
     ?? throw new InvalidOperationException("JWT configuration is missing");

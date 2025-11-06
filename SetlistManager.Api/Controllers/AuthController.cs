@@ -58,11 +58,6 @@ public class AuthController : BaseController
 
         var result = await _userManager.CreateAsync(user, model.Password);
 
-        var createdUser = await _userManager.FindByEmailAsync(user.Email);
-
-        var confirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(createdUser);
-        await _mailService.SendVerificationEmailAsync(user.Email, confirmationToken);
-
         if (!result.Succeeded)
         {
             return BadRequest(new RegisterResultModel
@@ -71,6 +66,11 @@ public class AuthController : BaseController
                 Message = string.Join(", ", result.Errors.Select(e => e.Description))
             });
         }
+
+        var createdUser = await _userManager.FindByEmailAsync(user.Email);
+
+        var confirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(createdUser!);
+        await _mailService.SendVerificationEmailAsync(user.Email, confirmationToken);
 
         return NoContent();
     }

@@ -1,4 +1,5 @@
 ﻿@page "/artistdetail/{artistId:int}"
+@using SetlistManager.App.Services.Implementations
 
 <PageTitle>Artist Detail</PageTitle>
 
@@ -47,14 +48,14 @@
 
 @code {
     [Parameter]
-    public int artistId { get; set; }
+    public int ArtistId { get; set; }
     [Inject]
-    public required ArtistService ArtistService { get; set; }
+    public required IArtistService ArtistService { get; set; }
 
     private ArtistModel? _artist;
 
     protected override async Task OnInitializedAsync()
     {
-        _artist = await ArtistService.GetArtistByIdAsync(artistId)!;
+        _artist = await ArtistService.GetArtistByIdAsync(ArtistId)!;
     }
 }

@@ -1,6 +1,7 @@
 ﻿@inherits LayoutComponentBase
 @using Blazored.LocalStorage;
 @using SetlistManager.App.Services
+@using SetlistManager.App.Services.Implementations
 
 <MudThemeProvider @bind-IsDarkMode="@_isDarkMode" Theme="_theme" />
 <MudPopoverProvider />
@@ -44,7 +45,7 @@
     [Inject]
     public required ILocalStorageService LocalStorage { get; set; }
     [Inject]
-    public required UserService UserService { get; set; }
+    public required IUserService UserService { get; set; }
 
     private bool _drawerOpen = true;
     private const string _localStorageKey = "ToggleDarkMode";

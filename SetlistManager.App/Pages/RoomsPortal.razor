@@ -1,7 +1,8 @@
 ﻿@page "/RoomsPortal"
-@using SetlistManager.Common.Models
 @using MudBlazor
 @using SetlistManager.App.Pages.Dialogs
+@using SetlistManager.App.Services.Implementations
+@using SetlistManager.Common.Models
 
 <PageTitle>Rooms Portal</PageTitle>
 
@@ -74,7 +75,7 @@
     [Inject]
     public required IDialogService DialogService { get; set; }
     [Inject]
-    public required RoomService RoomService { get; set; }
+    public required IRoomService RoomService { get; set; }
     [Inject]
     public required NavigationManager NavigationManager { get; set; }
 

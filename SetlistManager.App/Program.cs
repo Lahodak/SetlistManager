@@ -2,8 +2,9 @@ using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using MudBlazor.Services;
-using SetlistManager.App.Services;
 using SetlistManager.App;
+using SetlistManager.App.Extentions;
+using SetlistManager.App.Options;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
@@ -13,15 +14,11 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 builder.Services.AddMudServices();
 builder.Services.AddHttpClient();
 
-builder.Services.AddScoped<SongService>();
-builder.Services.AddScoped<SetlistService>();
-builder.Services.AddScoped<UserService>();
-builder.Services.AddScoped<ApiService>();
-builder.Services.AddScoped<LanguageService>();
-builder.Services.AddScoped<InstrumentService>();
-builder.Services.AddScoped<ArtistService>();
-builder.Services.AddScoped<RoomService>();
-builder.Services.AddScoped<GeniusService>();
+builder.Services.Configure<SetlistManagerApiOptions>(builder.Configuration.GetSection(SetlistManagerApiOptions.SectionName))
+    .Configure<GeniusOptions>(builder.Configuration.GetSection(GeniusOptions.SectionName));
+
+builder.Services.AddServices();
+
 builder.Services.AddLogging();
 
 builder.Services.AddBlazoredLocalStorageAsSingleton(); 

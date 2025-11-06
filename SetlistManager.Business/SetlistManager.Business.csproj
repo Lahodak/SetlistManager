@@ -18,6 +18,7 @@
   <ItemGroup>
     <ProjectReference Include="..\SetlistManager.Common\SetlistManager.Common.csproj" />
     <ProjectReference Include="..\SetlistManager.Data\SetlistManager.Data.csproj" />
+    <ProjectReference Include="..\SetlistManager.Resources\SetlistManager.Resources.csproj" />
   </ItemGroup>
 
 </Project>

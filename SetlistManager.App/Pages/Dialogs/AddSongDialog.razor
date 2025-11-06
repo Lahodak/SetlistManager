@@ -1,4 +1,5 @@
-﻿@using SetlistManager.Common.Models
+﻿@using SetlistManager.App.Services.Implementations
+@using SetlistManager.Common.Models
 
 <MudDialog>
     <DialogContent>
@@ -86,13 +87,13 @@
     [Inject]
     public required ISnackbar Snackbar { get; set; }
     [Inject]
-    public required SongService SongService { get; set; }
+    public required ISongService SongService { get; set; }
     [Inject]
-    public required LanguageService LanguageService { get; set; }
+    public required ILanguageService LanguageService { get; set; }
     [Inject]
-    public required UserService UserService { get; set; }
+    public required IUserService UserService { get; set; }
     [Inject]
-    public required ArtistService ArtistService { get; set; }
+    public required IArtistService ArtistService { get; set; }
 
     private List<LanguageModel>? languages;
     private List<ArtistModel>? artists;

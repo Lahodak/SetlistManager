@@ -9,9 +9,9 @@ public partial class SongDetail
 	[Parameter]
 	public int SongId { get; set; }
     [Inject]
-	public required SongService SongService { get; set; }
+	public required ISongService SongService { get; set; }
 	[Inject]
-	public required GeniusService GeniusService { get; set; }
+	public required IGeniusService GeniusService { get; set; }
 
 	private string? _lyrics;
     private SongModel? _song;

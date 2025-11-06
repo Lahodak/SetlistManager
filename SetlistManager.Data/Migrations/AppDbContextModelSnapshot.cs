@@ -394,7 +394,7 @@ namespace SetlistManager.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("TempSalt")
+                    b.Property<string>("TempSecret")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

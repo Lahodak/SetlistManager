@@ -1,9 +1,9 @@
 ﻿using Blazored.LocalStorage;
 using Newtonsoft.Json;
 
-namespace SetlistManager.App.Services;
+namespace SetlistManager.App.Services.Implementations;
 
-public class ApiService
+public class ApiService : IApiService
 {
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILocalStorageService _localStorage;
@@ -16,7 +16,7 @@ public class ApiService
         _localStorage = localStorageService;
     }
 
-    public async Task ConfigureHttpClientAsync(HttpClient httpClient)
+    private async Task ConfigureHttpClientAsync(HttpClient httpClient)
     {
         var token = await _localStorage.GetItemAsync<string>("authToken");
         if (!string.IsNullOrWhiteSpace(token))
