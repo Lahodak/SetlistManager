@@ -1,15 +1,17 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using SetlistManager.Api.Extentions;
+using SetlistManager.Api.Hubs;
 using SetlistManager.Api.Options;
 using SetlistManager.Api.Services;
+using SetlistManager.Business.Extentions;
+using SetlistManager.Business.Options;
 using SetlistManager.Data;
 using SetlistManager.Data.Entities;
-using SetlistManager.Business.Extentions;
 using System.Text;
-using SetlistManager.Business.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -85,6 +87,14 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+builder.Services.AddSignalR();
+
+builder.Services.AddResponseCompression(opts =>
+{
+    opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
+        ["application/octet-stream"]);
+});
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -99,6 +109,10 @@ app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
+app.UseResponseCompression();
+
 app.MapControllers();
+
+app.MapHub<RoomHub>("/hubs/room");
 
 await app.RunAsync();
