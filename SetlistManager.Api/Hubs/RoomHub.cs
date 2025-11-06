@@ -1,41 +1,79 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
 using SetlistManager.Api.Services;
-using SetlistManager.Business.Services.Implementations;
+using SetlistManager.Business.Services;
 using SetlistManager.Common.Models;
 using SetlistManager.Data.Entities;
+using System.Security.Claims;
 
 namespace SetlistManager.Api.Hubs;
 
 public class RoomHub : Hub
 {
-    private readonly RoomsService _roomsService;
-    private readonly UserManager<User> _userManager;
+    private readonly IRoomsService _roomsService;
     private readonly ICurrentUserContext _currentUserContext;
+    private readonly IUserService _userService;
+    private User? _currentUser;
 
-    public RoomHub(RoomsService roomsService, UserManager<User> userManager, ICurrentUserContext currentUserContext)
+    public RoomHub(IRoomsService roomsService, IUserService userService, ICurrentUserContext currentUserContext)
     {
         _roomsService = roomsService;
-        _userManager = userManager;
         _currentUserContext = currentUserContext;
+        _userService = userService;
     }
 
-    public async Task<RoomModel> JoinRoomAsync(string roomCode)
+    public override async Task OnConnectedAsync()
     {
-        var userId = _currentUserContext.GetCurrentUserId();
-        var user = await _userManager.FindByIdAsync(userId.ToString()!);
+        if (!Context.User.Identity.IsAuthenticated)
+        {
+            Context.Abort();
+            return;
+        }
 
-        if (user is null)
+        var userIdClaim = Context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (!int.TryParse(userIdClaim, out var userId))
+        {
+            Context.Abort();
+            return;
+        }
+
+        _currentUser = await _userService.GetUserEntityByIdAsync(userId);
+
+        if (_currentUser is null)
+        {
+            Context.Abort();            
+        }
+
+        await base.OnConnectedAsync();
+    }
+
+    public async Task<RoomModel> JoinRoomAsync(JoinRoomModel joinRoomModel)
+    {
+        if (!Context.User.Identity.IsAuthenticated)
+        {
+            return null;
+        }
+
+        var userIdClaim = Context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (!int.TryParse(userIdClaim, out var userId))
+        {
+            return null;
+        }
+
+        _currentUser = await _userService.GetUserEntityByIdAsync(userId);
+
+        if (_currentUser is null)
             throw new HubException("Couldn't find user");
 
-        var roomModel = await _roomsService.JoinRoomAsync(new JoinRoomModel { RoomCode = roomCode }, user);
+        var roomModel = await _roomsService.JoinRoomAsync(joinRoomModel, _currentUser);
 
         if (roomModel is null)
-            throw new HubException($"Couldn't find Room {roomCode}");
+            throw new HubException($"Couldn't find Room {joinRoomModel.RoomCode}");
 
         await Groups.AddToGroupAsync(Context.ConnectionId, roomModel.Id.ToString());
 
-        await Clients.Group(roomModel.Id.ToString()).SendAsync("UpdateData", Context.ConnectionId);
+        //await Clients.Group(roomModel.Id.ToString()).SendAsync("UpdateData", Context.ConnectionId);
 
         return roomModel;
     }

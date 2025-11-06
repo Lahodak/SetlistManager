@@ -12,4 +12,5 @@ public class SetlistManagerApiOptions
     public string InstrumentsEndpoint { get; set; } = default!;
     public string RoomsEndpoint { get; set; } = default!;
     public string TokensEndpoint { get; set; } = default!;
+    public string RoomHubEndpoint { get; set; } = default!;
 }

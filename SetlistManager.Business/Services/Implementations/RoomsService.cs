@@ -74,18 +74,32 @@ public class RoomsService : IRoomsService
     public async Task<RoomModel?> JoinRoomAsync(JoinRoomModel joinRoomModel, User user)
     {
         var room = await _dbContext.Rooms
-            .Include(x => x.Users)
-            .ThenInclude(x => x.Instrument)
             .Include(x => x.Setlist)
+                .ThenInclude(x => x!.SongsSetlists)
+                .ThenInclude(x => x.Song)
+                .ThenInclude(x => x.Language)
+            .Include(x => x.Setlist)
+                .ThenInclude(x => x!.SongsSetlists)
+                .ThenInclude(x => x.Song)
+                .ThenInclude(x => x.Artist)
+            .Include(x => x.Users)
+                .ThenInclude(x => x.Instrument)
             .FirstOrDefaultAsync(x => x.Code == joinRoomModel.RoomCode);
 
-        if(room is null)
+        if (room is null)
             return null;
 
         room.Users.Add(user);
 
+        var roomModel = room.ToModel();
+
+        if (room.Setlist is null)
+            return roomModel;
+
+        roomModel.Setlist = await _orderMappingService.MapSongEntityToModelOrder(room.Setlist);
+
         await _dbContext.SaveChangesAsync();
-        return room.ToModel();
+        return roomModel;
     }
 
     public async Task ChangeCurrentSongAsync(ChangeCurrentSongModel changeCurrentSongModel)

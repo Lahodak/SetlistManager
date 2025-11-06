@@ -115,7 +115,10 @@
             return;
         }
 
-        _roomModel = await RoomService.GetRoomByCodeAsync(RoomCode);
+        JoinRoomModel joinRoomModel = new ();
+		joinRoomModel.RoomCode = RoomCode;
+
+        _roomModel = await RoomService.JoinRoomAsync(joinRoomModel);
 
         if (_roomModel is null)
         {
@@ -125,7 +128,7 @@
 
         if (_roomModel.Setlist is null)
             return;
-
+        
         _currentSong = _roomModel!.Setlist?.Songs.FirstOrDefault(x => x.Order == 1);
 
         if (_currentSong is null)
@@ -144,6 +147,7 @@
         }
 
         _user = await UserService.GetUserAsync();
+        StateHasChanged();
     }
 
     private void MoveToNextSong()

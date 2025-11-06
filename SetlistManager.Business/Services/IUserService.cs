@@ -9,4 +9,5 @@ public interface IUserService
     Task<UserModel> GetCurrentUserAsync(int userId);
     Task AddUserTokenAsync(int userId, AddTokenModel tokenModel);
     Task<User?> GetUserByTempSalt(string salt);
+    Task<User?> GetUserEntityByIdAsync(int userId);
 }

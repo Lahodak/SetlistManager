@@ -55,6 +55,15 @@ public class UserService : IUserService
         return user.ToModel();
     }
 
+    public async Task<User?> GetUserEntityByIdAsync(int userId)
+    { 
+        return await _dbContext.Users
+            .Include(u => u.Instrument)
+            .Include(u => u.Tokens)!
+                .ThenInclude(t => t.Provider)
+            .FirstAsync(u => u.Id == userId);
+    }
+
     public async Task AddUserTokenAsync(int userId, AddTokenModel tokenModel)
     {
         await _dbContext.Tokens.AddAsync(new Token
