@@ -78,7 +78,18 @@ public partial class AddSongDialog
 
         _song.LanguageId = _song.Language.Id;
 
-        await SongService.UploadSongAsync(_song);
+        SongCreateModel songCreateModel = new()
+        {
+            Name = _song.Name,
+            ArtistId = _song.Artist.Id,
+            LanguageId = _song.Language.Id,
+            TabsURL = _song.TabsURL,
+            AudioURL = _song.AudioURL,
+            Key = _song.Key,
+            Tuning = _song.Tuning,
+            BPM = _song.BPM
+        };
+        await SongService.UploadSongAsync(songCreateModel);
 
         Snackbar.Add("Song added successfully!", Severity.Success);
         MudDialog.Close(DialogResult.Ok(_song));

@@ -8,5 +8,5 @@ public interface ISongService
     Task<SongModel?> GetSongByIdAsync(int id);
     Task<SongModel?> GetSongByNameAsync(string name);
     Task UploadSongsAsync(List<SongModel> songsToUpload);
-    Task UploadSongAsync(SongModel songToUpload);
+    Task UploadSongAsync(SongCreateModel songCreateModel);
 }

@@ -4,6 +4,7 @@ using SetlistManager.Common.Models;
 using SetlistManager.Data.Entities;
 using SetlistManager.Business.Mappers;
 using SetlistManager.Business.Services;
+using SetlistManager.Api.Services;
 
 namespace SetlistManager.Api.Controllers;
 
@@ -14,12 +15,14 @@ public class SongsController : BaseController
     private readonly ISongService _songService;
     private readonly ILanguageService _languageService;
     private readonly IArtistService _artistService;
+    private readonly ICurrentUserContext _userContext;
 
-    public SongsController(ISongService songService, ILanguageService languageService, IArtistService artistService)
+    public SongsController(ISongService songService, ILanguageService languageService, IArtistService artistService, ICurrentUserContext userContext)
     {
         _songService = songService;
         _languageService = languageService;
         _artistService = artistService;
+        _userContext = userContext;
     }
 
     [HttpGet]
@@ -54,23 +57,11 @@ public class SongsController : BaseController
     }
 
     [HttpPost]
-    public async Task AddSong(SongModel addSong)
+    public async Task AddSong(SongCreateModel createModel)
     {
-        await _songService.UploadSongAsync(new()
-        {
-            Name = addSong.Name,
-            Artist = await _artistService.GetArtistByIdAsync(addSong.Artist.Id),
-            TabsURL = addSong.TabsURL,
-            AudioURL = addSong.AudioURL,
-            LanguageId = addSong.LanguageId,
-            Key = addSong.Key,
-            Tuning = addSong.Tuning,
-            BPM = addSong.BPM,
-            CreatedAt = addSong.CreatedAt,
-            UpdatedAt = addSong.UpdatedAt,
-            UpdatedBy = addSong.UpdatedBy,
-            Language = await _languageService.GetLanguageByIdAsync(addSong.Language.Id),
-        });
+        var userId = _userContext.GetCurrentUserId();
+
+        await _songService.UploadSongAsync(createModel, userId!.Value);
     }
 
     [HttpGet("{id:int}")]

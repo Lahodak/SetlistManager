@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SetlistManager.Common.Models;
 using SetlistManager.Data;
 using SetlistManager.Data.Entities;
 
@@ -31,8 +32,23 @@ public class SongService : ISongService
         .Take(10)
         .ToListAsync();
 
-    public async Task UploadSongAsync(Song song)
+    public async Task UploadSongAsync(SongCreateModel songCreateModel, int userId)
     {
+        Song song = new()
+        {
+            Name = songCreateModel.Name,
+            ArtistId = songCreateModel.ArtistId,
+            TabsURL = songCreateModel.TabsURL,
+            AudioURL = songCreateModel.AudioURL,
+            Key = songCreateModel.Key,
+            Tuning = songCreateModel.Tuning,
+            BPM = songCreateModel.BPM,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = null,
+            UpdatedBy = userId,
+            LanguageId = songCreateModel.LanguageId,
+        };
+
         await _dbContext.Songs.AddAsync(song);
         await _dbContext.SaveChangesAsync();
     }

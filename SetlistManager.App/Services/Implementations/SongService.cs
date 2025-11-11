@@ -31,6 +31,6 @@ public class SongService : ISongService
     public async Task UploadSongsAsync(List<SongModel> songsToUpload) 
         => await _apiService.PostAsync(_apiOptions.Value.SongsEndpoint + _uploadSongCollectionSuffix, songsToUpload);
 
-    public async Task UploadSongAsync(SongModel songToUpload) 
-        => await _apiService.PostAsync(_apiOptions.Value.SongsEndpoint, songToUpload);
+    public async Task UploadSongAsync(SongCreateModel songCreateModel) 
+        => await _apiService.PostAsync(_apiOptions.Value.SongsEndpoint, songCreateModel);
 }
