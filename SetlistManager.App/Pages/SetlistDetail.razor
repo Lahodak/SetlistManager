@@ -1,11 +1,10 @@
 ﻿@page "/setlistdetail/{setlistId:int}"
-@using SetlistManager.App.Services.Implementations
 
 <PageTitle>Setlist Detail</PageTitle>
 
 <MudContainer Class="mt-5">
     <MudPaper Class="pa-4" Elevation="2">
-        @if (_setlist != null)
+        @if (_setlist is not null)
         {
             <MudStack Spacing="2">
                 <MudText Typo="Typo.h4" Class="font-weight-bold">@_setlist.Name</MudText>
@@ -17,7 +16,7 @@
             <MudPaper Class="pa-4 mt-4" Elevation="1">
                 <MudText Typo="Typo.h6" Class="mb-2">Songs in this Setlist</MudText>
 
-                @if (_setlist.Songs != null && _setlist.Songs.Count > 0)
+                @if (_setlist.Songs is not null && _setlist.Songs.Count > 0)
                 {
                     <MudTable T="SongModel" Items="_setlist.Songs" Hover="true" Dense="true">
                         <HeaderContent>
@@ -64,18 +63,3 @@
         }
     </MudPaper>
 </MudContainer>
-
-@code {
-    [Parameter]
-    public int SetlistId { get; set; }
-
-    [Inject]
-    public required ISetlistService SetlistService { get; set; }
-
-    private SetlistModel? _setlist = new();
-
-    protected override async Task OnInitializedAsync()
-    {
-        _setlist = await SetlistService.GetSetlistById(SetlistId)!;
-    }
-}

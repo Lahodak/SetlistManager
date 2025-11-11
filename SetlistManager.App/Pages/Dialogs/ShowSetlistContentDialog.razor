@@ -1,6 +1,4 @@
-﻿@using SetlistManager.Common.Models
-
-<MudDialog>
+﻿<MudDialog>
     <TitleContent>
         <MudText Typo="Typo.h5">@Setlist.Name</MudText>
     </TitleContent>
@@ -38,19 +36,3 @@
         <MudButton OnClick="Cancel">Close</MudButton>
     </DialogActions>
 </MudDialog>
-
-@code {
-    [CascadingParameter]
-    public required IMudDialogInstance MudDialog { get; set; }
-
-    [Parameter]
-    public required SetlistModel Setlist { get; set; }
-
-    [Parameter]
-    public required int CurrentSongId { get; set; }
-
-    private void Cancel()
-    {
-        MudDialog.Cancel();
-    }
-}

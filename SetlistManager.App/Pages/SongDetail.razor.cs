@@ -22,6 +22,7 @@ public partial class SongDetail
 
 		if(_song is not null)
 			_lyrics = await GeniusService.FetchSongLyricsAsync(_song);
+
 		if (_lyrics is not null)
 			StateHasChanged();
 	}

@@ -1,9 +1,5 @@
 ﻿@page "/register"
 @layout EmptyLayout;
-@using Blazored.LocalStorage
-@using MudBlazor;
-@using SetlistManager.App.Services.Implementations
-@using SetlistManager.Common.Models;
 
 <MudForm>
     <MudPaper Class="mx-auto mt-12 p-6" Style="max-width:400px;" Elevation="8">
@@ -19,30 +15,3 @@
         </MudButton>
     </MudPaper>
 </MudForm>
-
-@code {
-    [Inject]
-    public required IUserService UserService { get; set; }
-    [Inject]
-    public required NavigationManager Navigation { get; set; }
-    [Inject]
-    public required ILocalStorageService LocalStorage { get; set; }
-
-    private const string _emailKey = "registeredEmail";
-    private readonly RegisterRequestModel _registerRequestModel = new();
-    private string confirmPassword = string.Empty;
-
-    private async Task LoginUser()
-    {
-        if (_registerRequestModel.Password == string.Empty 
-            || _registerRequestModel.Email == string.Empty 
-            || _registerRequestModel.UserName == string.Empty
-            || confirmPassword != _registerRequestModel.Password)
-            return;
-
-        await UserService.RegisterAsync(_registerRequestModel);
-        await LocalStorage.SetItemAsStringAsync(_emailKey, _registerRequestModel.Email);
-
-        Navigation.NavigateTo("/verify-email");
-    }
-}

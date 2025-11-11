@@ -1,5 +1,4 @@
 ﻿@inherits LayoutComponentBase
-@using Blazored.LocalStorage;
 
 <MudThemeProvider @bind-IsDarkMode="@_isDarkMode" Theme="_theme" />
 <MudPopoverProvider />
@@ -15,47 +14,3 @@
         @Body
     </MudMainContent>
 </MudLayout>
-
-@code {
-    [Inject]
-    public required NavigationManager NavigationManager { get; set; }
-    [Inject]
-    public required ILocalStorageService LocalStorage { get; set; }
-
-    private bool _drawerOpen = true;
-    private const string _localStorageKey = "ToggleDarkMode";
-    private const string _authTokenKey = "authToken";
-    private readonly MudTheme _theme = new();
-    private bool _isDarkMode;
-
-    protected override async Task OnInitializedAsync()
-    {
-        var localData = await LocalStorage.GetItemAsync<bool>(_localStorageKey);
-        _isDarkMode = localData;
-        StateHasChanged();
-
-        var token = await LocalStorage.GetItemAsStringAsync(_authTokenKey);
-        if (string.IsNullOrWhiteSpace(token) && !NavigationManager.Uri.Contains("/login") && !NavigationManager.Uri.Contains("/reset-password") 
-        && !NavigationManager.Uri.Contains("/request-password-reset"))
-        {
-            NavigationManager.NavigateTo("/login", true);
-        }
-    }
-
-    void DrawerToggle()
-    {
-        _drawerOpen = !_drawerOpen;
-    }
-
-    void NavigateHome()
-    {
-        NavigationManager.NavigateTo("/");
-    }
-
-    private async Task ToggleTheme()
-    {
-        _isDarkMode = !_isDarkMode;
-        await LocalStorage.SetItemAsync(_localStorageKey, _isDarkMode);
-        StateHasChanged();
-    }
-}

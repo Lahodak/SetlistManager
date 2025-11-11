@@ -18,23 +18,3 @@
 		<MudButton Variant="Variant.Text" OnClick="Cancel">Cancel</MudButton>
 	</DialogActions>
 </MudDialog>
-
-@code {
-	[CascadingParameter]
-	public required IMudDialogInstance MudDialog { get; set; }
-	[Inject]
-	public required NavigationManager NavigationManager { get; set; }
-
-	private string? _roomCode;
-
-	private void JoinRoom()
-	{
-		if (!string.IsNullOrWhiteSpace(_roomCode))
-		{
-			NavigationManager.NavigateTo($"/room/{_roomCode}");
-			MudDialog.Close();
-		}
-	}
-
-	private void Cancel() => MudDialog.Cancel();
-}
