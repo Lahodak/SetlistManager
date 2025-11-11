@@ -60,15 +60,12 @@ public class RoomsService : IRoomsService
             CreatedAt = DateTime.UtcNow,
             IsActive = true
         };
-
-        
-        Random random = new();
-        
+                
         StringBuilder code = new(roomCodeLength);
         
         for (int i = 0; i < roomCodeLength; i++)
         {
-            int index = random.Next(roomCodeAvailableCharacters.Length - 1);
+            int index = Random.Shared.Next(roomCodeAvailableCharacters.Length - 1);
             code.Append(roomCodeAvailableCharacters[index]);
         }
 
@@ -77,18 +74,31 @@ public class RoomsService : IRoomsService
         await _dbContext.Rooms.AddAsync(room);
         await _dbContext.SaveChangesAsync();
 
-        if (room.Setlist is not null)
-            room.CurrentSongId = room.Setlist.SongsSetlists
+        var createdRoom = await _dbContext.Rooms
+            .Include(x => x.Setlist)
+                .ThenInclude(x => x!.SongsSetlists)
+                .ThenInclude(x => x.Song)
+                .ThenInclude(x => x.Language)
+            .Include(x => x.Setlist)
+                .ThenInclude(x => x!.SongsSetlists)
+                .ThenInclude(x => x.Song)
+                .ThenInclude(x => x.Artist)
+            .Include(x => x.Users)
+                .ThenInclude(x => x.Instrument)
+            .FirstAsync(x => x.Id == room.Id);
+
+        if (createdRoom.Setlist is not null)
+            createdRoom.CurrentSongId = createdRoom.Setlist.SongsSetlists
                 .First(x => x.Order == 1).SongId;
 
         await _dbContext.SaveChangesAsync();
 
-        var roomModel = room.ToModel();
+        var roomModel = createdRoom.ToModel();
 
-        if (room.Setlist is null)
+        if (createdRoom.Setlist is null)
             return roomModel;
 
-        roomModel.Setlist = await _orderMappingService.MapSongEntityToModelOrder(room.Setlist);
+        roomModel.Setlist = await _orderMappingService.MapSongEntityToModelOrder(createdRoom.Setlist);
 
         return roomModel;
     }
