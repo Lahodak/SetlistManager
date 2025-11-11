@@ -13,6 +13,7 @@ public class RoomService : IRoomService
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILocalStorageService _localStorage;
     public HubConnection HubConnection { get; }
+    public event Action<RoomModel>? RoomUpdated;
 
 
     public RoomService(IHttpClientFactory httpClientFactory, IOptions<SetlistManagerApiOptions> apiOptions, ILocalStorageService localStorage)
@@ -30,7 +31,12 @@ public class RoomService : IRoomService
                 };
             })
             .WithAutomaticReconnect()
-            .Build();        
+            .Build();
+
+        HubConnection.On<RoomModel>("UpdateData", (room) =>
+        {
+            RoomUpdated?.Invoke(room);
+        });
     }
 
     private async Task ConfigureHttpClientAsync(HttpClient httpClient)
@@ -54,7 +60,23 @@ public class RoomService : IRoomService
 
             return room;
         }
-        catch (Exception ex)
+        catch
+        {
+            return null;
+        }
+    }
+
+    public async Task<RoomModel?> ChangeCurrentSongAsync(ChangeCurrentSongModel changeCurrentSongModel)
+    {
+        if (HubConnection.State == HubConnectionState.Disconnected)
+            await HubConnection.StartAsync();
+
+        try
+        {
+            var room = await HubConnection.InvokeAsync<RoomModel>("ChangeCurrentSongAsync", changeCurrentSongModel);
+            return room;
+        }
+        catch
         {
             return null;
         }
@@ -70,7 +92,7 @@ public class RoomService : IRoomService
         {
             jsonData = JsonConvert.SerializeObject(createRoomModel);
         }
-        catch (Exception ex)
+        catch
         {
             return default;
         }

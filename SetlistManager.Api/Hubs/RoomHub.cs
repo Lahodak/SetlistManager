@@ -73,7 +73,7 @@ public class RoomHub : Hub
 
         await Groups.AddToGroupAsync(Context.ConnectionId, roomModel.Id.ToString());
 
-        //await Clients.Group(roomModel.Id.ToString()).SendAsync("UpdateData", Context.ConnectionId);
+        await Clients.Group(roomModel.Id.ToString()).SendAsync("UpdateData", roomModel);
 
         return roomModel;
     }
@@ -84,8 +84,10 @@ public class RoomHub : Hub
         await Clients.Group(roomId).SendAsync("UpdateData", Context.ConnectionId);
     }
 
-    public async Task ChangeCurrentSongAsync(string roomId, string songId)
+    public async Task ChangeCurrentSongAsync(ChangeCurrentSongModel changeCurrentSongModel)
     {
-        await Clients.Group(roomId).SendAsync("CurrentSongChanged", songId);
+        await _roomsService.ChangeCurrentSongAsync(changeCurrentSongModel);
+        var roomModel = await _roomsService.GetRoomByIdAsync(changeCurrentSongModel.RoomId);
+        await Clients.Group(changeCurrentSongModel.RoomId.ToString()).SendAsync("UpdateData", roomModel);
     }
 }

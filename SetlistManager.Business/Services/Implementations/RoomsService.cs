@@ -24,14 +24,28 @@ public class RoomsService : IRoomsService
     {
         var room = await _dbContext.Rooms
             .Include(x => x.Setlist)
-            .ThenInclude(x => x!.SongsSetlists)
-            .ThenInclude(x => x.Song)
+                .ThenInclude(x => x!.SongsSetlists)
+                .ThenInclude(x => x.Song)
+                .ThenInclude(x => x.Language)
+            .Include(x => x.Setlist)
+                .ThenInclude(x => x!.SongsSetlists)
+                .ThenInclude(x => x.Song)
+                .ThenInclude(x => x.Artist)
+            .Include(x => x.Users)
+                .ThenInclude(x => x.Instrument)
             .FirstOrDefaultAsync(x => x.Id == roomId);
 
-        if (room is null)
+        if(room is null)
             return null;
 
-        return room.ToModel();
+        var roomModel = room.ToModel();
+
+        if (room.Setlist is null)
+            return roomModel;
+
+        roomModel.Setlist = await _orderMappingService.MapSongEntityToModelOrder(room.Setlist);
+
+        return roomModel;
     }
 
     public async Task<RoomModel> CreateRoomAsync(CreateRoomModel createRoomModel, int hostId)
@@ -61,6 +75,7 @@ public class RoomsService : IRoomsService
         room.Code = code.ToString();
 
         await _dbContext.Rooms.AddAsync(room);
+        await _dbContext.SaveChangesAsync();
 
         if (room.Setlist is not null)
             room.CurrentSongId = room.Setlist.SongsSetlists
@@ -68,7 +83,14 @@ public class RoomsService : IRoomsService
 
         await _dbContext.SaveChangesAsync();
 
-        return room.ToModel();
+        var roomModel = room.ToModel();
+
+        if (room.Setlist is null)
+            return roomModel;
+
+        roomModel.Setlist = await _orderMappingService.MapSongEntityToModelOrder(room.Setlist);
+
+        return roomModel;
     }
 
     public async Task<RoomModel?> JoinRoomAsync(JoinRoomModel joinRoomModel, User user)
@@ -106,16 +128,22 @@ public class RoomsService : IRoomsService
     {
         var room = await _dbContext.Rooms
             .Include(x => x.Setlist)
-            .ThenInclude(y => y!.SongsSetlists)
-            .ThenInclude(z => z.Song)
+                .ThenInclude(x => x!.SongsSetlists)
+                .ThenInclude(x => x.Song)
+                .ThenInclude(x => x.Language)
+            .Include(x => x.Setlist)
+                .ThenInclude(x => x!.SongsSetlists)
+                .ThenInclude(x => x.Song)
+                .ThenInclude(x => x.Artist)
+            .Include(x => x.Users)
+                .ThenInclude(x => x.Instrument)
             .FirstOrDefaultAsync(x => x.Id == changeCurrentSongModel.RoomId);
 
-        if(room is null) 
+        if (room is null) 
             return;    
 
         room.CurrentSongId = changeCurrentSongModel.NewCurrentSongId;
 
-        _dbContext.Rooms.Update(room);
         await _dbContext.SaveChangesAsync();
     }
 
