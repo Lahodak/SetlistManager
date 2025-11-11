@@ -13,7 +13,7 @@
             Code: <span style="font-weight: 600;">@RoomCode</span>
         </MudText>
         <MudSpacer />
-        <MudText Typo="Typo.h5" Style="font-weight: 300;">@(_user?.Username ?? "Loading...") - @(_user?.Instrument.Name ?? "Loading...")</MudText>
+        <MudText Typo="Typo.h5" Style="font-weight: 300;">@(_user?.Username ?? "Loading...") - @(_user?.Instrument?.Name ?? "Loading...")</MudText>
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.End" Size="Size.Large" />
     </MudAppBar>
 
@@ -115,7 +115,12 @@
             return;
         }
 
-        _roomModel = await RoomService.GetRoomByCodeAsync(RoomCode);
+        JoinRoomModel joinRoomModel = new ();
+        joinRoomModel.RoomCode = RoomCode;
+
+        RoomService.RoomUpdated += OnRoomUpdated;
+
+        _roomModel = await RoomService.JoinRoomAsync(joinRoomModel);
 
         if (_roomModel is null)
         {
@@ -126,7 +131,11 @@
         if (_roomModel.Setlist is null)
             return;
 
-        _currentSong = _roomModel!.Setlist?.Songs.FirstOrDefault(x => x.Order == 1);
+        _currentSong = _roomModel!.Setlist?.Songs.FirstOrDefault(x => x.Id == _roomModel.CurrentSong);
+        _roomModel.CurrentSong = _currentSong?.Id;
+
+        if(_currentSong is not null)
+		    _currentIndex = _currentSong.Order;
 
         if (_currentSong is null)
             return;
@@ -144,47 +153,64 @@
         }
 
         _user = await UserService.GetUserAsync();
-    }
-
-    private void MoveToNextSong()
-    {
-        UpdateCurrentSong(1);
         StateHasChanged();
     }
 
-    private void MoveToPrevSong()
+    private async Task MoveToNextSong()
     {
-        UpdateCurrentSong(-1);
+        await UpdateCurrentSongAsync(1);
         StateHasChanged();
     }
 
-    private void UpdateCurrentSong(int operation)
+    private void OnRoomUpdated(RoomModel room)
     {
-        if (_currentIndex + operation == 0 || _currentIndex + operation > _roomModel!.Setlist!.Songs.Count || _roomModel.Setlist is null)
+        _roomModel = room;
+
+        if (_roomModel?.Setlist is null || _roomModel.CurrentSong is null)
             return;
 
-        _currentIndex = _currentIndex + operation;
+        _currentSong = _roomModel.Setlist.Songs.First(x => x.Id == _roomModel.CurrentSong);
+        _currentIndex = _currentSong.Order;
 
-        _currentSong = _roomModel!.Setlist.Songs.First(x => x.Order == _currentIndex);
+        _prevSong = _currentIndex > 1
+            ? _roomModel.Setlist.Songs.First(x => x.Order == _currentIndex - 1)
+            : null;
 
-        if (_currentIndex > 1)
-        {
-            _prevSong = _roomModel.Setlist.Songs.First(x => x.Order == _currentIndex - 1);
-        }
-        else
-        {
-            _prevSong = null;
-        }
+        _nextSong = _currentIndex < _roomModel.Setlist.Songs.Count
+            ? _roomModel.Setlist.Songs.First(x => x.Order == _currentIndex + 1)
+            : null;
 
-        if (_currentIndex < _roomModel.Setlist.Songs.Count)
-        {
-            _nextSong = _roomModel.Setlist.Songs.First(x => x.Order == _currentIndex + 1);
-        }
-        else
-        {
-            _nextSong = null;
-        }
+		StateHasChanged();
     }
+
+
+    private async Task MoveToPrevSong()
+    {
+        await UpdateCurrentSongAsync(-1);
+        StateHasChanged();
+    }
+
+    private async Task UpdateCurrentSongAsync(int operation)
+    {
+        if (_roomModel is null || _roomModel.Setlist is null || _currentIndex + operation > _roomModel.Setlist.Songs.Count || _currentIndex + operation < 1)
+            return;
+
+        ChangeCurrentSongModel changeCurrentSongModel = new ChangeCurrentSongModel
+        {
+			RoomId = _roomModel.Id,
+			AdminId = _roomModel.HostId,
+			CurrentSongId = _roomModel.CurrentSong!.Value,
+			NewCurrentSongId = _roomModel.Setlist.Songs.First(x => x.Order == _currentIndex + operation).Id
+		};
+
+        var room = await RoomService.ChangeCurrentSongAsync(changeCurrentSongModel);
+        
+        if (room is null)
+            return;
+        
+        OnRoomUpdated(room);
+    }
+
 
     private async Task OpenSetlistContentDialog()
     {
