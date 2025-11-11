@@ -111,7 +111,7 @@ public class RoomService : IRoomService
         {
             result = JsonConvert.DeserializeObject<RoomModel>(jsonResponse);
         }
-        catch (Exception ex)
+        catch
         {
             return default;
         }
@@ -138,7 +138,7 @@ public class RoomService : IRoomService
         {
             result = JsonConvert.DeserializeObject<List<RoomModel>>(jsonResponse);
         }
-        catch (Exception ex)
+        catch
         {
             return default;
         }

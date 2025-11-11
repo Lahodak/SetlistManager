@@ -13,7 +13,7 @@
             Code: <span style="font-weight: 600;">@RoomCode</span>
         </MudText>
         <MudSpacer />
-        <MudText Typo="Typo.h5" Style="font-weight: 300;">@(_user?.Username ?? "Loading...") - @(_user?.Instrument.Name ?? "Loading...")</MudText>
+        <MudText Typo="Typo.h5" Style="font-weight: 300;">@(_user?.Username ?? "Loading...") - @(_user?.Instrument?.Name ?? "Loading...")</MudText>
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.End" Size="Size.Large" />
     </MudAppBar>
 

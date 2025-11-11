@@ -11,35 +11,33 @@ namespace SetlistManager.Api.Hubs;
 public class RoomHub : Hub
 {
     private readonly IRoomsService _roomsService;
-    private readonly ICurrentUserContext _currentUserContext;
     private readonly IUserService _userService;
-    private User? _currentUser;
 
-    public RoomHub(IRoomsService roomsService, IUserService userService, ICurrentUserContext currentUserContext)
+    public RoomHub(IRoomsService roomsService, IUserService userService)
     {
         _roomsService = roomsService;
-        _currentUserContext = currentUserContext;
         _userService = userService;
     }
 
     public override async Task OnConnectedAsync()
     {
-        if (!Context.User.Identity.IsAuthenticated)
+        if (Context.User is null || Context.User.Identity is null || !Context.User.Identity.IsAuthenticated)
         {
             Context.Abort();
             return;
         }
 
         var userIdClaim = Context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
         if (!int.TryParse(userIdClaim, out var userId))
         {
             Context.Abort();
             return;
         }
 
-        _currentUser = await _userService.GetUserEntityByIdAsync(userId);
+        var currentUser = await _userService.GetUserEntityByIdAsync(userId);
 
-        if (_currentUser is null)
+        if (currentUser is null)
         {
             Context.Abort();            
         }
@@ -47,9 +45,9 @@ public class RoomHub : Hub
         await base.OnConnectedAsync();
     }
 
-    public async Task<RoomModel> JoinRoomAsync(JoinRoomModel joinRoomModel)
+    public async Task<RoomModel?> JoinRoomAsync(JoinRoomModel joinRoomModel)
     {
-        if (!Context.User.Identity.IsAuthenticated)
+        if (Context.User is null || Context.User.Identity is null || !Context.User.Identity.IsAuthenticated)
         {
             return null;
         }
@@ -61,12 +59,12 @@ public class RoomHub : Hub
             return null;
         }
 
-        _currentUser = await _userService.GetUserEntityByIdAsync(userId);
+        var currentUser = await _userService.GetUserEntityByIdAsync(userId);
 
-        if (_currentUser is null)
+        if (currentUser is null)
             throw new HubException("Couldn't find user");
 
-        var roomModel = await _roomsService.JoinRoomAsync(joinRoomModel, _currentUser);
+        var roomModel = await _roomsService.JoinRoomAsync(joinRoomModel, currentUser);
 
         if (roomModel is null)
             throw new HubException($"Couldn't find Room {joinRoomModel.RoomCode}");
