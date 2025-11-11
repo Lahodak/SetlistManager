@@ -32,4 +32,4 @@ RUN dotnet publish "SetlistManager.Api/SetlistManager.Api.csproj" -c $BUILD_CONF
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "SetlistManager.Api/SetlistManager.Api.dll"]
+ENTRYPOINT ["dotnet", "SetlistManager.Api.dll"]
