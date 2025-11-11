@@ -1,0 +1,50 @@
+using Microsoft.AspNetCore.Components;
+using SetlistManager.App.Services;
+using SetlistManager.Common.Models;
+
+namespace SetlistManager.App.Pages;
+
+public partial class UserPortal
+{
+    [Inject]
+    public required IUserService UserService { get; set; }
+    [Inject]
+    public required NavigationManager NavigationManager { get; set; }
+    [Inject]
+    public required IInstrumentService InstrumentService { get; set; }
+    [Inject]
+    public required IGeniusService GeniusService { get; set; }
+    private UserModel? _userModel;
+    private List<InstrumentModel>? _instruments;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _userModel = await UserService.GetUserAsync();
+        _instruments = await InstrumentService.GetAvailableInstrumentsAsync();
+
+        if (_userModel is not null && _instruments is not null && _userModel.Instrument is not null)
+        {
+            _userModel.Instrument = _instruments.FirstOrDefault(i => i.Id == _userModel.Instrument.Id);
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        if (_userModel is not null)
+        {
+            await UserService.UpdateUser(_userModel);
+            NavigationManager.Refresh(true);
+        }
+    }
+
+    private async Task LogOutAsync()
+    {
+        await UserService.LogOutAsync();
+        NavigationManager.NavigateTo("/login");
+    }
+
+    private async Task AuthorizeWithGenius()
+    {
+        NavigationManager.NavigateTo(await GeniusService.AuthorizeAsync());
+    }
+}

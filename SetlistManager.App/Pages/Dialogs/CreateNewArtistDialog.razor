@@ -1,7 +1,4 @@
-﻿@using SetlistManager.App.Services
-@using SetlistManager.Common.Models
-
-<MudDialog>
+﻿<MudDialog>
     <DialogContent>
         <MudText Typo="Typo.h5">Create new Artist</MudText>
 
@@ -23,22 +20,3 @@
         <MudButton Variant="Variant.Text" OnClick="Cancel">Cancel</MudButton>
     </DialogActions>
 </MudDialog>
-
-@code {
-    [CascadingParameter]
-    public required IMudDialogInstance MudDialog { get; set; }
-    [Inject]
-    public required ArtistService ArtistService { get; set; }
-
-    private readonly ArtistModel _artistModel = new();
-
-    private async Task Save()
-    {
-        if (_artistModel.Nick == string.Empty)
-            return;
-        await ArtistService.UploadArtistAsync(_artistModel);
-        MudDialog.Close(DialogResult.Ok(_artistModel));
-    }
-
-    private void Cancel() => MudDialog.Cancel();
-}

@@ -9,7 +9,7 @@ namespace SetlistManager.Api.Controllers;
 
 [Route("api/songs")]
 
-public partial class SongsController : BaseController
+public class SongsController : BaseController
 {
     private readonly ISongService _songService;
     private readonly ILanguageService _languageService;
@@ -51,29 +51,6 @@ public partial class SongsController : BaseController
         }
 
         return Ok(songModels);
-    }
-
-    [HttpPost("bulk")]
-    public async Task AddSongs(AddSongsModel addSongs)
-    {
-        foreach(var song in addSongs.Songs)
-        {
-            await _songService.UploadSongAsync(new()
-            {
-                Language = await _languageService.GetLanguageByIdAsync(song.Language.Id),
-                Name = song.Name,
-                Artist = await _artistService.GetArtistByIdAsync(song.Artist.Id),
-                TabsURL = song.TabsURL,
-                AudioURL = song.AudioURL,
-                LanguageId = song.LanguageId,
-                Key = song.Key,
-                Tuning = song.Tuning,
-                BPM = song.BPM,
-                CreatedAt = song.CreatedAt,
-                UpdatedAt = song.UpdatedAt,
-                UpdatedBy = song.UpdatedBy
-            });
-        }
     }
 
     [HttpPost]

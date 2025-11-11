@@ -1,17 +1,19 @@
 ﻿@page "/artistdetail/{artistId:int}"
+
 <PageTitle>Artist Detail</PageTitle>
+
 <MudContainer Class="mt-5">
     <MudPaper Class="pa-4" Elevation="2">
-        @if (artist is not null)
+        @if (_artist is not null)
         {
             <MudStack Spacing="2">
-                <MudText Typo="Typo.h4" Class="font-weight-bold">@artist.Nick</MudText>
+                <MudText Typo="Typo.h4" Class="font-weight-bold">@_artist.Nick</MudText>
             </MudStack>
             <MudPaper Class="pa-4 mt-4" Elevation="1">
-                <MudText Typo="Typo.h6" Class="mb-2">Songs by @artist.Nick</MudText>
-                @if (artist.Songs is not null && artist.Songs.Count > 0)
+                <MudText Typo="Typo.h6" Class="mb-2">Songs by @_artist.Nick</MudText>
+                @if (_artist.Songs is not null && _artist.Songs.Count > 0)
                 {
-                    <MudTable T="SongModel" Items="artist.Songs" Hover="true" Dense="true">
+                    <MudTable T="SongModel" Items="_artist.Songs" Hover="true" Dense="true">
                         <HeaderContent>
                             <MudTh>Name</MudTh>
                             <MudTh>Language</MudTh>
@@ -42,18 +44,3 @@
         }
     </MudPaper>
 </MudContainer>
-
-@code {
-    [Parameter]
-    public int artistId { get; set; }
-    [Inject]
-    public required ArtistService _artistService { get; set; }
-    [Inject]
-    public required NavigationManager _navigation { get; set; }
-    private ArtistModel? artist;
-
-    protected override async Task OnInitializedAsync()
-    {
-        artist = await _artistService.GetArtistByIdAsync(artistId)!;
-    }
-}

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using SetlistManager.Business.Services; 
+using SetlistManager.Business.Services.Implementations;
 
 namespace SetlistManager.Business.Extentions;
 
@@ -16,7 +17,9 @@ public static class ServiceCollectionExtentions
         services.AddScoped<ISetlistsService, SetlistsService>();
         services.AddScoped<IInstrumentsService, InstrumentsService>();
         services.AddScoped<IMailService, MailService>();
-        services.AddScoped<OrderMappingService>();
+        services.AddScoped<ITempAuthStorageService, TempAuthStorageService>();
+        services.AddScoped<IGeniusAuthService, GeniusAuthService>();
+        services.AddScoped<IOrderMappingService, OrderMappingService>();
         return services;
     }
 }

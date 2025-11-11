@@ -1,6 +1,6 @@
 ﻿@page "/UserPortal"
 
-@if (userModel is null)
+@if (_userModel is null)
 {
     <MudProgressCircular Color="Color.Primary" Size="Size.Large" />    
 }
@@ -12,18 +12,30 @@ else
                 User Profile
             </MudText>
 
-            <MudTextField @bind-Value="userModel.Username" Label="Username" Variant="Variant.Outlined" Class="mb-3" />
-            <MudTextField @bind-Value="userModel.Email" Label="Email" Variant="Variant.Outlined" Class="mb-3" />
+            <MudTextField @bind-Value="_userModel.Username" Label="Username" Variant="Variant.Outlined" Class="mb-3" />
+            <MudTextField @bind-Value="_userModel.Email" Label="Email" Variant="Variant.Outlined" Class="mb-3" />
 
-            <MudSelect T="InstrumentModel" @bind-Value="userModel.Instrument" Label="Instrument" Variant="Variant.Outlined" Class="mb-3">
-                @if (instruments is not null)
+            <MudSelect T="InstrumentModel" @bind-Value="_userModel.Instrument" Label="Instrument" Variant="Variant.Outlined" Class="mb-3">
+                @if (_instruments is not null)
                 {
-                    @foreach (var instrument in instruments)
+                    @foreach (var instrument in _instruments)
                     {
                         <MudSelectItem Value="@instrument">@instrument.Name</MudSelectItem>
                     }
                 }
             </MudSelect>
+            @if(_userModel.Tokens!.Count == 0)
+            {
+                <MudButton Variant="Variant.Outlined" OnClick="AuthorizeWithGenius">
+                    Authorize with Genius  <MudImage Src="GENIUS_Logo_Transparent.png" Width="20" Height="20" />
+                </MudButton>
+            }
+            else
+            {
+                <MudText Typo="Typo.body2" Class="mb-2">
+                    Connected to Genius <MudImage Src="GENIUS_Logo_Transparent.png" Width="20" Height="20" />
+                </MudText>
+			}
         </MudCardContent>
 
         <MudCardActions>
@@ -35,43 +47,4 @@ else
             </MudButton>
         </MudCardActions>
     </MudCard>    
-}
-
-@code
-{
-    [Inject]
-    public required UserService UserService { get; set; }
-    [Inject]
-    public required NavigationManager NavigationManager { get; set; }
-    [Inject]
-    public required InstrumentService InstrumentService { get; set; }
-
-    private UserModel? userModel;
-    private List<InstrumentModel>? instruments;
-
-    protected override async Task OnInitializedAsync()
-    {
-        userModel = await UserService.GetUserAsync();
-        instruments = await InstrumentService.GetAvailableInstrumentsAsync();
-
-        if (userModel?.Instrument != null)
-        {
-            userModel.Instrument = instruments.FirstOrDefault(i => i.Id == userModel.Instrument.Id)!;
-        }
-    }
-
-    private async Task SaveAsync()
-    {
-        if (userModel is not null)
-        {
-            await UserService.UpdateUser(userModel);
-            NavigationManager.Refresh(true);
-        }
-    }
-
-    private async Task LogOutAsync()
-    {
-        await UserService.LogOutAsync();
-        NavigationManager.NavigateTo("/login");
-    }
 }

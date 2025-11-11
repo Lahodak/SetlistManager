@@ -21,55 +21,41 @@ public class RoomsController : BaseController
         _currentUserContext = currentUserContext;
     }
 
-    [HttpPost("join")]
-    public async Task<ActionResult<RoomModel>> JoinRoomAsync(JoinRoomModel joinRoomModel)
+    [HttpPost]
+    public async Task<ActionResult<RoomModel>> CreateRoomAsync(CreateRoomModel roomCreateModel)
     {
-        var userId = _currentUserContext.GetCurrentUserId();        
-
-        var user = await _userManager.FindByIdAsync(userId.ToString()!);
-        
-        if (user is null)
-            return BadRequest("Couldn't find user");
-
-        RoomModel roomModel;
-
-        try
-        {
-            roomModel = await _roomsService.JoinRoomAsync(joinRoomModel, user);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ex.Message);            
-        }
+        var userId = (int)_currentUserContext.GetCurrentUserId()!;
+        var roomModel = await _roomsService.CreateRoomAsync(roomCreateModel, userId);        
 
         return Ok(roomModel);
     }
 
-    [HttpPut]
-    public async Task<ActionResult> ChangeSongAsync(ChangeCurrentSongModel changeCurrentModel)
-    {        
-        var userId = _currentUserContext.GetCurrentUserId();
-
-        if (changeCurrentModel.AdminId != userId)
-            return Unauthorized("User is not Room Admin");
-
-        try
-        {
-            await _roomsService.ChangeCurrentSongAsync(changeCurrentModel);
-            return Ok();
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ex.Message);
-        }
+    [HttpGet("{roomId:int}")]
+    public async Task<ActionResult<RoomModel>> GetRoomByIdAsync(int roomId)
+    {
+        var roomModel = await _roomsService.GetRoomByIdAsync(roomId);
+        
+        if (roomModel is null)
+            return NotFound("Room not found");
+        
+        return Ok(roomModel);
     }
 
-    [HttpPost]
-    public async Task<ActionResult<RoomModel>> CreateRoomAsync(RoomModel roomModel)
+    [HttpGet("{roomCode}")]
+    public async Task<ActionResult<RoomModel>> GetRoomByCodeAsync(string roomCode)
     {
-        roomModel.HostId = (int)_currentUserContext.GetCurrentUserId()!;
-        await _roomsService.CreateRoomAsync(roomModel);        
+        var roomModel = await _roomsService.GetRoomByCodeAsync(roomCode);
+        
+        if (roomModel is null)
+            return NotFound("Room not found");
+        
+        return Ok(roomModel);
+    }
 
-        return Ok();
+    [HttpGet]
+    public async Task<ActionResult<List<RoomModel>>> GetAllActiveRoomsAsync()
+    {
+        var rooms = await _roomsService.GetPublicActiveRoomsAsync();
+        return Ok(rooms);
     }
 }

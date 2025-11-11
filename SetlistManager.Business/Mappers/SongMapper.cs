@@ -11,7 +11,7 @@ public static class SongMapper
         {
             Id = entity.Id,
             Name = entity.Name,
-            Artist = includeArtist ? entity.Artist.ToModel(false) : null,
+            Artist = includeArtist ? entity.Artist.ToModel(false) : new(),
             TabsURL = entity.TabsURL,
             AudioURL = entity.AudioURL,
             Language = entity.Language.ToModel(),

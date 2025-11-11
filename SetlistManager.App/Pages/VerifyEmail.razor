@@ -1,8 +1,5 @@
 @page "/verify-email"
 @layout EmptyLayout
-@using Microsoft.AspNetCore.WebUtilities
-@inject NavigationManager NavigationManager
-@inject UserService UserService
 
 <MudPaper Class="mx-auto mt-12 p-6" Style="max-width:400px;" Elevation="8">
     <MudText Typo="Typo.h5" Class="mb-4">Verify Email</MudText>
@@ -21,37 +18,3 @@
         <MudText Color="Color.Error">@errorMessage</MudText>
     }
 </MudPaper>
-
-@code {
-    private bool isVerifying = false;
-    private string? successMessage;
-    private string? errorMessage;
-
-    protected override async Task OnInitializedAsync()
-    {
-        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
-        var queryParams = QueryHelpers.ParseQuery(uri.Query);
-
-        if (queryParams.TryGetValue("token", out var token) && queryParams.TryGetValue("email", out var email))
-        {
-            isVerifying = true;
-            var result = await UserService.VerifyEmailAsync(token!, email!);
-
-            isVerifying = false;
-            if (result)
-            {
-                successMessage = "Email verified successfully! Redirecting to login...";
-                await Task.Delay(2000);
-                NavigationManager.NavigateTo("/login");
-            }
-            else
-            {
-                errorMessage = "Verification failed. Invalid or expired token.";
-            }
-        }
-        else
-        {
-            errorMessage = "Invalid verification link.";
-        }
-    }
-}

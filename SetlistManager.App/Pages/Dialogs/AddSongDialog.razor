@@ -1,6 +1,4 @@
-﻿@using SetlistManager.Common.Models
-
-<MudDialog>
+﻿<MudDialog>
     <DialogContent>
         <MudText Typo="Typo.h5">Add New Song</MudText>
 
@@ -79,81 +77,3 @@
         <MudButton Variant="Variant.Text" OnClick="Cancel">Cancel</MudButton>
     </DialogActions>
 </MudDialog>
-
-@code {
-    [CascadingParameter]
-    public required IMudDialogInstance MudDialog { get; set; }
-    [Inject]
-    public required ISnackbar Snackbar { get; set; }
-    [Inject]
-    public required SongService SongService { get; set; }
-    [Inject]
-    public required LanguageService LanguageService { get; set; }
-    [Inject]
-    public required UserService UserService { get; set; }
-    [Inject]
-    public required ArtistService ArtistService { get; set; }
-
-    private List<LanguageModel>? languages;
-    private List<ArtistModel>? artists;
-    private SongModel? _song;
-
-    protected override async Task OnInitializedAsync()
-    {
-        languages = await LanguageService.GetAvailableSetlistAsync();
-        artists = await ArtistService.GetAvailableArtistsAsync();
-
-        if (artists is null || artists.Count == 0)
-        {
-            Snackbar.Add("Add Artists First!", Severity.Warning);
-        }
-
-        _song = new SongModel
-        {
-            Name = string.Empty,
-            Language = languages?.FirstOrDefault(),
-            TabsURL = string.Empty,
-            AudioURL = string.Empty,
-            Tuning = string.Empty,
-            Key = string.Empty,
-            BPM = 120
-        };
-    }
-
-    private async Task SaveSong()
-    {
-        if (_song is null) return;
-
-        if (artists is null || artists.Count == 0)
-        {
-            Snackbar.Add("Add Artists First!", Severity.Error);
-            return;
-        }
-
-        if (string.IsNullOrWhiteSpace(_song.Name) || _song.Artist is null)
-        {
-            Snackbar.Add("Please provide Song Name and Artist.", Severity.Error);
-            return;
-        }
-
-        if (_song.Language is null)
-        {
-            Snackbar.Add("Please select a Language.", Severity.Error);
-            return;
-        }
-
-        try
-        {
-            _song.LanguageId = _song.Language.Id;
-            await SongService.UploadSongAsync(_song);
-            Snackbar.Add("Song added successfully!", Severity.Success);
-            MudDialog.Close(DialogResult.Ok(_song));
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add($"Error adding song: {ex.Message}", Severity.Error);
-        }
-    }
-
-    private void Cancel() => MudDialog.Cancel();
-}

@@ -139,7 +139,7 @@ namespace SetlistManager.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Artists");
+                    b.ToTable("Artists", (string)null);
                 });
 
             modelBuilder.Entity("SetlistManager.Data.Entities.Instrument", b =>
@@ -156,7 +156,7 @@ namespace SetlistManager.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Instruments");
+                    b.ToTable("Instruments", (string)null);
                 });
 
             modelBuilder.Entity("SetlistManager.Data.Entities.Language", b =>
@@ -177,7 +177,24 @@ namespace SetlistManager.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Languages");
+                    b.ToTable("Languages", (string)null);
+                });
+
+            modelBuilder.Entity("SetlistManager.Data.Entities.Provider", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Providers", (string)null);
                 });
 
             modelBuilder.Entity("SetlistManager.Data.Entities.Role", b =>
@@ -225,7 +242,7 @@ namespace SetlistManager.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("CurrentSongId")
+                    b.Property<int?>("CurrentSongId")
                         .HasColumnType("int");
 
                     b.Property<int>("HostId")
@@ -254,7 +271,7 @@ namespace SetlistManager.Data.Migrations
 
                     b.HasIndex("SetlistId");
 
-                    b.ToTable("Rooms");
+                    b.ToTable("Rooms", (string)null);
                 });
 
             modelBuilder.Entity("SetlistManager.Data.Entities.Setlist", b =>
@@ -278,14 +295,11 @@ namespace SetlistManager.Data.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("UpdatedBy")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("CreatorId");
 
-                    b.ToTable("Setlists");
+                    b.ToTable("Setlists", (string)null);
                 });
 
             modelBuilder.Entity("SetlistManager.Data.Entities.Song", b =>
@@ -340,7 +354,7 @@ namespace SetlistManager.Data.Migrations
 
                     b.HasIndex("LanguageId");
 
-                    b.ToTable("Songs");
+                    b.ToTable("Songs", (string)null);
                 });
 
             modelBuilder.Entity("SetlistManager.Data.Entities.SongsSetlists", b =>
@@ -366,7 +380,66 @@ namespace SetlistManager.Data.Migrations
 
                     b.HasIndex("SongId");
 
-                    b.ToTable("SongsSetlists");
+                    b.ToTable("SongsSetlists", (string)null);
+                });
+
+            modelBuilder.Entity("SetlistManager.Data.Entities.TempAuthStorage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("TempSecret")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TempAuthStorage", (string)null);
+                });
+
+            modelBuilder.Entity("SetlistManager.Data.Entities.Token", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AccessToken")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ProviderId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("RefreshToken")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProviderId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Tokens", (string)null);
                 });
 
             modelBuilder.Entity("SetlistManager.Data.Entities.User", b =>
@@ -565,6 +638,25 @@ namespace SetlistManager.Data.Migrations
                     b.Navigation("Song");
                 });
 
+            modelBuilder.Entity("SetlistManager.Data.Entities.Token", b =>
+                {
+                    b.HasOne("SetlistManager.Data.Entities.Provider", "Provider")
+                        .WithMany("Tokens")
+                        .HasForeignKey("ProviderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SetlistManager.Data.Entities.User", "User")
+                        .WithMany("Tokens")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Provider");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("SetlistManager.Data.Entities.User", b =>
                 {
                     b.HasOne("SetlistManager.Data.Entities.Instrument", "Instrument")
@@ -595,6 +687,11 @@ namespace SetlistManager.Data.Migrations
                     b.Navigation("Songs");
                 });
 
+            modelBuilder.Entity("SetlistManager.Data.Entities.Provider", b =>
+                {
+                    b.Navigation("Tokens");
+                });
+
             modelBuilder.Entity("SetlistManager.Data.Entities.Room", b =>
                 {
                     b.Navigation("Users");
@@ -610,6 +707,11 @@ namespace SetlistManager.Data.Migrations
             modelBuilder.Entity("SetlistManager.Data.Entities.Song", b =>
                 {
                     b.Navigation("SongsSetlists");
+                });
+
+            modelBuilder.Entity("SetlistManager.Data.Entities.User", b =>
+                {
+                    b.Navigation("Tokens");
                 });
 #pragma warning restore 612, 618
         }

@@ -8,14 +8,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Http.Extensions" Version="2.3.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.20" />
     <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.1" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\SetlistManager.Common\SetlistManager.Common.csproj" />
     <ProjectReference Include="..\SetlistManager.Data\SetlistManager.Data.csproj" />
+    <ProjectReference Include="..\SetlistManager.Resources\SetlistManager.Resources.csproj" />
   </ItemGroup>
 
 </Project>
