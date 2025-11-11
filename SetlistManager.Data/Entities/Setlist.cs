@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace SetlistManager.Data.Entities;
+﻿namespace SetlistManager.Data.Entities;
 
 public class Setlist : Base
 {

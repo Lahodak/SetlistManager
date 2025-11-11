@@ -39,7 +39,7 @@ public static class UserMapper
             UserName = model.Username,
             Email = model.Email,
             IsActive = true,
-            InstrumentId = model.Instrument.Id
+            InstrumentId = model.Instrument?.Id
         };
     }
 }

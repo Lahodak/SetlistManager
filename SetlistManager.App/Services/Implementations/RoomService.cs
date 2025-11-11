@@ -113,7 +113,7 @@ public class RoomService : IRoomService
         }
         catch
         {
-            return default;
+            return null;
         }
 
         return result;
@@ -140,7 +140,7 @@ public class RoomService : IRoomService
         }
         catch
         {
-            return default;
+            return null;
         }
 
         return result;

@@ -1,7 +1,5 @@
 ﻿@using MudBlazor
 @using SetlistManager.App.Services.Implementations
-@namespace SetlistManager.App.Pages.Dialogs
-
 
 <MudDialog>
     <DialogContent>
@@ -20,7 +18,7 @@
             }
         </MudList>
 
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="AddSong" Class="mt-2">
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-2">
             + Add Song
         </MudButton>
     </DialogContent>
@@ -64,13 +62,7 @@
         MudDialog.Close(DialogResult.Ok(_setlist));
     }
 
-    public void AddSong()
-    {
-        
-    }
-
-    private void Cancel() => MudDialog.Cancel();
-    
+    private void Cancel() => MudDialog.Cancel();    
 
     private void RemoveSong(SongModel song) => _setlist.Songs.Remove(song);
 

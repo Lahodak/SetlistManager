@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using SetlistManager.Business.Options;
 using System.Text;
 using System.Text.Json;

@@ -21,49 +21,6 @@ public class RoomsController : BaseController
         _currentUserContext = currentUserContext;
     }
 
-    [HttpPost("join")]
-    public async Task<ActionResult<RoomModel>> JoinRoomAsync(JoinRoomModel joinRoomModel)
-    {
-        var userId = _currentUserContext.GetCurrentUserId();        
-
-        var user = await _userManager.FindByIdAsync(userId.ToString()!);
-        
-        if (user is null)
-            return BadRequest("Couldn't find user");
-
-        RoomModel roomModel;
-
-        try
-        {
-            roomModel = await _roomsService.JoinRoomAsync(joinRoomModel, user);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ex.Message);            
-        }
-
-        return Ok(roomModel);
-    }
-
-    [HttpPut]
-    public async Task<ActionResult> ChangeSongAsync(ChangeCurrentSongModel changeCurrentModel)
-    {        
-        var userId = _currentUserContext.GetCurrentUserId();
-
-        if (changeCurrentModel.AdminId != userId)
-            return Unauthorized("User is not Room Admin");
-
-        try
-        {
-            await _roomsService.ChangeCurrentSongAsync(changeCurrentModel);
-            return Ok();
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ex.Message);
-        }
-    }
-
     [HttpPost]
     public async Task<ActionResult<RoomModel>> CreateRoomAsync(CreateRoomModel roomCreateModel)
     {

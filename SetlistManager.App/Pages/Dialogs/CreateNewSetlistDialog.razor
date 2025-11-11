@@ -2,7 +2,6 @@
 @using SetlistManager.App.Services.Implementations
 @using SetlistManager.Common.Models
 
-
 <MudDialog>
     <DialogContent>
         <MudText Typo="Typo.h5">Generate New Setlist</MudText>
@@ -30,7 +29,7 @@
                 <MudText Typo="Typo.body1">Setlist Name:</MudText>
                 <MudGrid>
                     <MudItem>
-                        <MudTextField @bind-Value="_toBeSavedSetlistName" Dense="true" Style="width: 200px; height: 50px;" />
+                        <MudTextField @bind-Value="_toBeSavedSetlistName" Style="width: 200px; height: 50px;" />
                     </MudItem>
                 </MudGrid>
             </MudPaper>

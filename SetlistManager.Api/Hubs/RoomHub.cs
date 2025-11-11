@@ -1,9 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.SignalR;
-using SetlistManager.Api.Services;
+﻿using Microsoft.AspNetCore.SignalR;
 using SetlistManager.Business.Services;
 using SetlistManager.Common.Models;
-using SetlistManager.Data.Entities;
 using System.Security.Claims;
 
 namespace SetlistManager.Api.Hubs;

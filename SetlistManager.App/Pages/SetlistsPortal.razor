@@ -73,10 +73,19 @@
     private MudTable<SetlistModel> table = new();
     private string? searchString;
 
-    private async Task<TableData<SetlistModel>> ServerReload(TableState state, CancellationToken token)
+    private async Task<TableData<SetlistModel>?> ServerReload(TableState state, CancellationToken token)
     {
         var allSetlists = await SetlistService.GetAllSetlistsAsync();
         await Task.Delay(300, token);
+
+        if(allSetlists is null)
+        {
+            return new TableData<SetlistModel>
+            {
+                TotalItems = 0,
+                Items = Array.Empty<SetlistModel>()
+            };
+		};
 
         var filtered = allSetlists.Where(setlist =>
             string.IsNullOrWhiteSpace(searchString)

@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Http.Extensions;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using SetlistManager.Business.Options;
