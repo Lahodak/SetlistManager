@@ -12,23 +12,24 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["./SetlistManager.Api.csproj", "./"]
-COPY ["../SetlistManager.Common/SetlistManager.Common.csproj", "../SetlistManager.Common/"]
-COPY ["../SetlistManager.Business/SetlistManager.Business.csproj", "../SetlistManager.Business/"]
-COPY ["../SetlistManager.Data/SetlistManager.Data.csproj", "../SetlistManager.Data/"]
-COPY ["../SetlistManager.Resources/SetlistManager.Resources.csproj", "../SetlistManager.Resources/"]
-RUN dotnet restore "./SetlistManager.Api.csproj"
+COPY ["SetlistManager.Api/SetlistManager.Api.csproj", "SetlistManager.Api/"]
+COPY ["SetlistManager.App/SetlistManager.App.csproj", "SetlistManager.App/"]
+COPY ["SetlistManager.Business/SetlistManager.Business.csproj", "SetlistManager.Business/"]
+COPY ["SetlistManager.Common/SetlistManager.Common.csproj", "SetlistManager.Common/"]
+COPY ["SetlistManager.Data/SetlistManager.Data.csproj", "SetlistManager.Data/"]
+COPY ["SetlistManager.Resources/SetlistManager.Resources.csproj", "SetlistManager.Resources/"]
+RUN dotnet restore "SetlistManager.Api/SetlistManager.Api.csproj"
 COPY . .
 
-RUN dotnet build "./SetlistManager.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "SetlistManager.Api/SetlistManager.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # This stage is used to publish the service project to be copied to the final stage
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./SetlistManager.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "SetlistManager.Api/SetlistManager.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "SetlistManager.Api.dll"]
+ENTRYPOINT ["dotnet", "SetlistManager.Api/SetlistManager.Api.dll"]
