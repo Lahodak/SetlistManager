@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SetlistManager.Business.Mappers;
 using SetlistManager.Common.Models;
 using SetlistManager.Data;
 using SetlistManager.Data.Entities;
@@ -14,23 +15,46 @@ public class SongService : ISongService
         _dbContext = dbContext;
     }
 
-    public async Task<IEnumerable<Song>> GetSongsAsync() 
-        => await _dbContext.Songs
+    public async Task<List<SongModel>?> GetSongsAsync()
+    {
+        var songs = await _dbContext.Songs
         .Include(x => x.Language)
         .Include(x => x.Artist)
         .ToListAsync();
 
-    public async Task<Song?> GetSongByIdAsync(int songId)
-        => await _dbContext.Songs
+        return songs
+            .Select(x => x.ToModel())
+            .ToList();
+    }
+
+    public async Task<SongModel?> GetSongByIdAsync(int songId)
+    {
+        var song = await _dbContext.Songs
         .Include(x => x.Language)
         .Include(x => x.Artist)
         .FirstOrDefaultAsync(x => x.Id == songId);
 
-    public async Task<IEnumerable<Song?>> GetSongByNameAsync(string name) 
-        => await _dbContext.Songs
+        if (song is null)
+            return null;
+
+        return song.ToModel();
+    }
+
+    public async Task<List<SongModel>?> GetSongByNameAsync(string name)
+    {
+        var songs = await _dbContext.Songs
+        .Include(x => x.Language)
+        .Include(x => x.Artist)
         .Where(x => x.Name.Contains(name) || x.Artist.Nick.Contains(name))
-        .Take(10)
         .ToListAsync();
+
+        if (songs is null)
+            return null;
+
+        return songs
+            .Select(x => x.ToModel())
+            .ToList();
+    }
 
     public async Task UploadSongAsync(SongCreateModel songCreateModel, int userId)
     {

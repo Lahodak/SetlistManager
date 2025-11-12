@@ -4,8 +4,8 @@ using SetlistManager.Data.Entities;
 namespace SetlistManager.Business.Services;
 public interface ISongService
 {
-    Task<Song?> GetSongByIdAsync(int songId);
-    Task<IEnumerable<Song>> GetSongsAsync();
+    Task<SongModel?> GetSongByIdAsync(int songId);
+    Task<List<SongModel>?> GetSongsAsync();
     Task UploadSongAsync(SongCreateModel songCreateModel, int userId);
-    Task<IEnumerable<Song?>> GetSongByNameAsync(string name);
+    Task<List<SongModel>?> GetSongByNameAsync(string name);
 }
