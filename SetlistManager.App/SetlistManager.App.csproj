@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>892d756c-fa25-4fc7-9599-95a690ca9ae6</UserSecretsId>
+    <ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,14 +27,11 @@
     <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.1" />
     <PackageReference Include="MudBlazor" Version="8.2.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <ServiceWorker Include="wwwroot\service-worker.js" PublishedContent="wwwroot\service-worker.published.js" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\SetlistManager.Common\SetlistManager.Common.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="wwwroot\css\" />
   </ItemGroup>
 	
 
