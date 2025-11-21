@@ -22,7 +22,7 @@
             <MudGrid Spacing="4">
                 <!-- Left Column: Current Song -->
                 <MudItem xs="12" md="6">
-                    <MudPaper Elevation="4" Class="pa-10" Style="border-radius: 16px; min-height: 400px;">
+                    <MudPaper Elevation="4" Class="pa-10" Style="border-radius: 16px">
                         <MudText Typo="Typo.h2" Align="Align.Start" Style="font-weight: 1000; word-break: break-word;">
                             @_currentSong.Name
                         </MudText>
@@ -51,33 +51,33 @@
                             </MudPaper>
                         </div>
                     </MudPaper>
+
+                    <MudPaper Class="pa-10 mt-4" Style="border-radius: 16px">
+                        <div class="d-flex justify-space-between gap-3">
+                            <MudButton Variant="Variant.Filled"
+                                       Color="Color.Primary"
+                                       StartIcon="@Icons.Material.Filled.ArrowBack"
+                                       OnClick="MoveToPrevSong"
+                                       Size="Size.Large"
+                                       FullWidth="true"
+                                       Style="height: 56px; font-size: 1.1rem;">
+                                Previous
+                            </MudButton>
+                            <MudButton Variant="Variant.Filled"
+                                       Color="Color.Primary"
+                                       EndIcon="@Icons.Material.Filled.ArrowForward"
+                                       OnClick="MoveToNextSong"
+                                       Size="Size.Large"
+                                       FullWidth="true"
+                                       Style="height: 56px; font-size: 1.1rem;">
+                                Next
+                            </MudButton>
+                        </div>
+                    </MudPaper>
                 </MudItem>
 
                 <!-- Right Column: Setlist -->
-                <MudItem xs="12" md="6">
-                    <!-- Navigation Buttons -->
-                    <div class="d-flex justify-space-between mb-4 gap-3">
-                        <MudButton 
-                            Variant="Variant.Filled" 
-                            Color="Color.Primary" 
-                            StartIcon="@Icons.Material.Filled.ArrowBack"
-                            OnClick="MoveToPrevSong"
-                            Size="Size.Large"
-                            FullWidth="true"
-                            Style="height: 56px; font-size: 1.1rem;">
-                            Previous
-                        </MudButton>
-                        <MudButton 
-                            Variant="Variant.Filled" 
-                            Color="Color.Primary" 
-                            EndIcon="@Icons.Material.Filled.ArrowForward"
-                            OnClick="MoveToNextSong"
-                            Size="Size.Large"
-                            FullWidth="true"
-                            Style="height: 56px; font-size: 1.1rem;">
-                            Next
-                        </MudButton>
-                    </div>
+                <MudItem xs="12" md="6">                    
 
                     <div id="setlist-container" style="max-height: 500px; overflow-y: auto; padding-right: 8px;">
                         @if (_roomModel?.Setlist?.Songs != null)
@@ -93,7 +93,7 @@
                                 <MudPaper 
                                     Elevation="@(isCurrentSong ? 4 : 2)" 
                                     Class="@cardClass" 
-                                    Style="@cardStyle"
+                                    Style="@cardStyle"                                    
                                     @onclick="@(() => SelectSong(song))">
                                     <MudText Typo="Typo.h6" Style="@titleStyle">
                                         @song.Name
