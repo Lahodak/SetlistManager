@@ -131,4 +131,42 @@
 &lt;p&gt;If you cannot click the button, copy and paste this link into your browser:&lt;/p&gt;
 &lt;p&gt;{0}&lt;/p&gt;</value>
   </data>
+  <data name="ResetPasswordMailPlain" xml:space="preserve">
+    <value>Please reset your Setlist Manager password by clicking the link below:
+
+{0}
+
+If you cannot click the link, copy and paste it into your browser.
+
+If you did not request a password reset, please ignore this email.</value>
+  </data>
+  <data name="ResetPasswordMailSubject" xml:space="preserve">
+    <value>Reset your Setlist Manager password</value>
+  </data>
+  <data name="VerifyEmailMail" xml:space="preserve">
+    <value>&lt;p&gt;Please click the button below to verify your account:&lt;/p&gt;
+&lt;p&gt;&lt;a href='{0}' style='
+    display:inline-block;
+    padding:10px 20px;
+    background-color:#4CAF50;
+    color:white;
+    text-decoration:none;
+    border-radius:5px;'&gt;
+    Verify Email
+&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;If you cannot click the button, copy and paste this link into your browser:&lt;/p&gt;
+&lt;p&gt;{0}&lt;/p&gt;</value>
+  </data>
+  <data name="VerifyEmailMailSubject" xml:space="preserve">
+    <value>Verify your Setlist Manager account</value>
+  </data>
+  <data name="VerifyEmailMailPlain" xml:space="preserve">
+    <value>Please verify your Setlist Manager account by clicking the link below:
+
+{0}
+
+If you cannot click the link, copy and paste it into your browser.
+
+If you did not create an account, please ignore this email.</value>
+  </data>
 </root>

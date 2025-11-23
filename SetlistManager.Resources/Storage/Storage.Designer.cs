@@ -19,10 +19,10 @@ namespace SetlistManager.Resources.Storage {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Storage {
+    public class Storage {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -36,7 +36,7 @@ namespace SetlistManager.Resources.Storage {
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("SetlistManager.Resources.Storage.Storage", typeof(Storage).Assembly);
@@ -51,7 +51,7 @@ namespace SetlistManager.Resources.Storage {
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -74,9 +74,77 @@ namespace SetlistManager.Resources.Storage {
         ///&lt;p&gt;If you cannot click the button, copy and paste this link into your browser:&lt;/p&gt;
         ///&lt;p&gt;{0}&lt;/p&gt;.
         /// </summary>
-        internal static string ResetPasswordMail {
+        public static string ResetPasswordMail {
             get {
                 return ResourceManager.GetString("ResetPasswordMail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Please reset your Setlist Manager password by clicking the link below:
+        ///
+        ///{0}
+        ///
+        ///If you cannot click the link, copy and paste it into your browser.
+        ///
+        ///If you did not request a password reset, please ignore this email..
+        /// </summary>
+        public static string ResetPasswordMailPlain {
+            get {
+                return ResourceManager.GetString("ResetPasswordMailPlain", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reset your Setlist Manager password.
+        /// </summary>
+        public static string ResetPasswordMailSubject {
+            get {
+                return ResourceManager.GetString("ResetPasswordMailSubject", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;p&gt;Please click the button below to verify your account:&lt;/p&gt;
+        ///&lt;p&gt;&lt;a href=&apos;{0}&apos; style=&apos;
+        ///    display:inline-block;
+        ///    padding:10px 20px;
+        ///    background-color:#4CAF50;
+        ///    color:white;
+        ///    text-decoration:none;
+        ///    border-radius:5px;&apos;&gt;
+        ///    Verify Email
+        ///&lt;/a&gt;&lt;/p&gt;
+        ///&lt;p&gt;If you cannot click the button, copy and paste this link into your browser:&lt;/p&gt;
+        ///&lt;p&gt;{0}&lt;/p&gt;.
+        /// </summary>
+        public static string VerifyEmailMail {
+            get {
+                return ResourceManager.GetString("VerifyEmailMail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Please verify your Setlist Manager account by clicking the link below:
+        ///
+        ///{0}
+        ///
+        ///If you cannot click the link, copy and paste it into your browser.
+        ///
+        ///If you did not create an account, please ignore this email..
+        /// </summary>
+        public static string VerifyEmailMailPlain {
+            get {
+                return ResourceManager.GetString("VerifyEmailMailPlain", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Verify your Setlist Manager account.
+        /// </summary>
+        public static string VerifyEmailMailSubject {
+            get {
+                return ResourceManager.GetString("VerifyEmailMailSubject", resourceCulture);
             }
         }
     }

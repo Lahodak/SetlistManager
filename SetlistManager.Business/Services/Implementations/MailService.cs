@@ -1,5 +1,7 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.Extensions.Options;
 using SetlistManager.Business.Options;
+using SetlistManager.Resources.Storage;
 using System.Text;
 using System.Text.Json;
 
@@ -18,49 +20,43 @@ public class MailService : IMailService
 
     public async Task SendVerificationEmailAsync(string email, string token)
     {
-        var subject = "Verify your Setlist Manager account";
-        var verificationLink = $"https://localhost:7025/verify-email?token={Uri.EscapeDataString(token)}&email={Uri.EscapeDataString(email)}";
+        UriBuilder uri = new(_brevoOptions.Value.VerifyEmailRedirect)
+        {
+            Query = new QueryBuilder
+            {
+                { "token", token },
+                { "email", email }
+            }.ToString()
+        };
 
-        var body = $@"
-        <p>Please click the button below to verify your account:</p>
-        <p><a href='{verificationLink}' style='
-            display:inline-block;
-            padding:10px 20px;
-            background-color:#4CAF50;
-            color:white;
-            text-decoration:none;
-            border-radius:5px;'>
-            Verify Email
-        </a></p>
-        <p>If you cannot click the button, copy and paste this link into your browser:</p>
-        <p>{verificationLink}</p>";
+        var verificationLink = uri.ToString();
+        var subject = Storage.VerifyEmailMailSubject;
+        var htmlBody = string.Format(Storage.VerifyEmailMail, verificationLink);
+        var textBody = string.Format(Storage.VerifyEmailMailPlain, verificationLink);
 
-        await SendEmailAsync(email, subject, body);
+        await SendEmailAsync(email, subject, htmlBody, textBody);
     }
 
     public async Task SendPasswordResetEmailAsync(string email, string token)
     {
-        var subject = "Reset your Setlist Manager password";
-        var verificationLink = $"https://localhost:7025/reset-password?token={Uri.EscapeDataString(token)}&email={Uri.EscapeDataString(email)}";
+        UriBuilder uri = new(_brevoOptions.Value.ResetPasswordRedirect)
+        {
+            Query = new QueryBuilder
+            {
+                { "token", token },
+                { "email", email }
+            }.ToString()
+        };
 
-        var body = $@"
-        <p>Please click the button below to reset your password:</p>
-        <p><a href='{verificationLink}' style='
-            display:inline-block;
-            padding:10px 20px;
-            background-color:#4CAF50;
-            color:white;
-            text-decoration:none;
-            border-radius:5px;'>
-            Reset Password
-        </a></p>
-        <p>If you cannot click the button, copy and paste this link into your browser:</p>
-        <p>{verificationLink}</p>";
+        var resetLink = uri.ToString();
+        var subject = Storage.ResetPasswordMailSubject;
+        var htmlBody = string.Format(Storage.ResetPasswordMail, resetLink);
+        var textBody = string.Format(Storage.ResetPasswordMailPlain, resetLink);
 
-        await SendEmailAsync(email, subject, body);
+        await SendEmailAsync(email, subject, htmlBody, textBody);
     }
 
-    private async Task SendEmailAsync(string recipientEmail, string subject, string htmlContent)
+    private async Task SendEmailAsync(string recipientEmail, string subject, string htmlContent, string textContent)
     {
         var client = _httpClientFactory.CreateClient();
         client.DefaultRequestHeaders.Add("api-key", _brevoOptions.Value.ApiKey);
@@ -70,13 +66,14 @@ public class MailService : IMailService
             sender = new { name = _brevoOptions.Value.SenderName, email = _brevoOptions.Value.SenderEmail },
             to = new[] { new { email = recipientEmail } },
             subject,
-            htmlContent
+            htmlContent,
+            textContent
         };
 
         var json = JsonSerializer.Serialize(payload);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
-
         var response = await client.PostAsync(_brevoOptions.Value.SmtpApi, content);
+
         response.EnsureSuccessStatusCode();
     }
 }

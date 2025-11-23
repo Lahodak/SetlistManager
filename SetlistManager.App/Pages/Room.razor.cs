@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 using MudBlazor;
 using SetlistManager.App.Pages.Dialogs;
 using SetlistManager.App.Services;
@@ -18,14 +19,12 @@ public partial class Room
     public required IUserService UserService { get; set; }
     [Inject]
     public required IDialogService DialogService { get; set; }
+    [Inject]
+    public required IJSRuntime JSRuntime { get; set; }
 
     private RoomModel? _roomModel;
     private SongModel? _currentSong;
-    private SongModel? _prevSong;
-    private SongModel? _nextSong;
     private UserModel? _user;
-
-    private int _currentIndex = 1;
 
     protected override async Task OnInitializedAsync()
     {
@@ -53,35 +52,23 @@ public partial class Room
         if (_roomModel.Setlist is null)
             return;
 
-        _currentSong = _roomModel!.Setlist?.Songs.FirstOrDefault(x => x.Id == _roomModel.CurrentSong);
+        _currentSong = _roomModel.Setlist.Songs.FirstOrDefault(x => x.Id == _roomModel.CurrentSong);
         _roomModel.CurrentSong = _currentSong?.Id;
-
-        if (_currentSong is not null)
-            _currentIndex = _currentSong.Order;
-
-        if (_currentSong is null)
-            return;
-
-        _currentIndex = _currentSong.Order;
-
-        if (_currentIndex > 1)
-        {
-            _prevSong = _roomModel.Setlist!.Songs.First(x => x.Order == _currentIndex - 1);
-        }
-
-        if (_currentIndex < _roomModel.Setlist!.Songs.Count)
-        {
-            _nextSong = _roomModel.Setlist.Songs.First(x => x.Order == _currentIndex + 1);
-        }
 
         _user = await UserService.GetUserAsync();
         StateHasChanged();
+
+        await ScrollToCurrentSong();
     }
 
-    private async Task MoveToNextSong()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await UpdateCurrentSongAsync(1);
-        StateHasChanged();
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (!firstRender && _currentSong != null)
+        {
+            await ScrollToCurrentSong();
+        }
     }
 
     private void OnRoomUpdated(RoomModel room)
@@ -91,45 +78,72 @@ public partial class Room
         if (_roomModel?.Setlist is null || _roomModel.CurrentSong is null)
             return;
 
-        _currentSong = _roomModel.Setlist.Songs.First(x => x.Id == _roomModel.CurrentSong);
-        _currentIndex = _currentSong.Order;
-
-        _prevSong = _currentIndex > 1
-            ? _roomModel.Setlist.Songs.First(x => x.Order == _currentIndex - 1)
-            : null;
-
-        _nextSong = _currentIndex < _roomModel.Setlist.Songs.Count
-            ? _roomModel.Setlist.Songs.First(x => x.Order == _currentIndex + 1)
-            : null;
+        _currentSong = _roomModel.Setlist.Songs.FirstOrDefault(x => x.Id == _roomModel.CurrentSong);
 
         StateHasChanged();
     }
 
-    private async Task MoveToPrevSong()
+    private async Task SelectSong(SongModel song)
     {
-        await UpdateCurrentSongAsync(-1);
-        StateHasChanged();
-    }
-
-    private async Task UpdateCurrentSongAsync(int operation)
-    {
-        if (_roomModel is null || _roomModel.Setlist is null || _currentIndex + operation > _roomModel.Setlist.Songs.Count || _currentIndex + operation < 1)
+        if (_roomModel is null || _currentSong is null || song.Id == _currentSong.Id)
             return;
 
         ChangeCurrentSongModel changeCurrentSongModel = new()
         {
             RoomId = _roomModel.Id,
             AdminId = _roomModel.HostId,
-            CurrentSongId = _roomModel.CurrentSong!.Value,
-            NewCurrentSongId = _roomModel.Setlist.Songs.First(x => x.Order == _currentIndex + operation).Id
+            CurrentSongId = _currentSong.Id,
+            NewCurrentSongId = song.Id
         };
 
         var room = await RoomService.ChangeCurrentSongAsync(changeCurrentSongModel);
 
-        if (room is null)
+        if (room is not null)
+        {
+            OnRoomUpdated(room);
+        }
+    }
+
+    private async Task MoveToNextSong()
+    {
+        if (_roomModel?.Setlist?.Songs == null || _currentSong == null)
             return;
 
-        OnRoomUpdated(room);
+        var orderedSongs = _roomModel.Setlist.Songs.OrderBy(s => s.Order).ToList();
+        var currentIndex = orderedSongs.FindIndex(s => s.Id == _currentSong.Id);
+
+        if (currentIndex >= 0 && currentIndex < orderedSongs.Count - 1)
+        {
+            var nextSong = orderedSongs[currentIndex + 1];
+            await SelectSong(nextSong);
+        }
+    }
+
+    private async Task MoveToPrevSong()
+    {
+        if (_roomModel?.Setlist?.Songs == null || _currentSong == null)
+            return;
+
+        var orderedSongs = _roomModel.Setlist.Songs.OrderBy(s => s.Order).ToList();
+        var currentIndex = orderedSongs.FindIndex(s => s.Id == _currentSong.Id);
+
+        if (currentIndex > 0)
+        {
+            var prevSong = orderedSongs[currentIndex - 1];
+            await SelectSong(prevSong);
+        }
+    }
+
+    private async Task ScrollToCurrentSong()
+    {
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("scrollToCurrentSong");
+        }
+        catch
+        {
+            // Ignore JS interop errors
+        }
     }
 
     private async Task OpenSetlistContentDialog()
@@ -146,5 +160,10 @@ public partial class Room
         var options = new DialogOptions { CloseButton = true };
 
         await DialogService.ShowAsync<ShowSetlistContentDialog>("Setlist Content", parameters, options);
+    }
+
+    public void Dispose()
+    {
+        RoomService.RoomUpdated -= OnRoomUpdated;
     }
 }

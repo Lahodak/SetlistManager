@@ -7,4 +7,6 @@ public class BrevoOptions
     public string SenderEmail { get; set; } = default!;
     public string SenderName { get; set; } = default!;
     public string SmtpApi { get; set; } = default!;
+    public string VerifyEmailRedirect { get; set; } = default!;
+    public string ResetPasswordRedirect { get; set; } = default!;
 }
