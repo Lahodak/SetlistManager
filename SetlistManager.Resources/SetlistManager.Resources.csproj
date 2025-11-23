@@ -16,7 +16,7 @@
 
   <ItemGroup>
     <EmbeddedResource Update="Storage\Storage.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
+      <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Storage.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>

@@ -29,7 +29,7 @@ namespace SetlistManager.Resources.Storage {
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        public Storage() {
+        internal Storage() {
         }
         
         /// <summary>
@@ -81,6 +81,21 @@ namespace SetlistManager.Resources.Storage {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Please reset your Setlist Manager password by clicking the link below:
+        ///
+        ///{0}
+        ///
+        ///If you cannot click the link, copy and paste it into your browser.
+        ///
+        ///If you did not request a password reset, please ignore this email..
+        /// </summary>
+        public static string ResetPasswordMailPlain {
+            get {
+                return ResourceManager.GetString("ResetPasswordMailPlain", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Reset your Setlist Manager password.
         /// </summary>
         public static string ResetPasswordMailSubject {
@@ -106,6 +121,21 @@ namespace SetlistManager.Resources.Storage {
         public static string VerifyEmailMail {
             get {
                 return ResourceManager.GetString("VerifyEmailMail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Please verify your Setlist Manager account by clicking the link below:
+        ///
+        ///{0}
+        ///
+        ///If you cannot click the link, copy and paste it into your browser.
+        ///
+        ///If you did not create an account, please ignore this email..
+        /// </summary>
+        public static string VerifyEmailMailPlain {
+            get {
+                return ResourceManager.GetString("VerifyEmailMailPlain", resourceCulture);
             }
         }
         
