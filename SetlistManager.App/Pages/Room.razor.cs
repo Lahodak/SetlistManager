@@ -7,24 +7,21 @@ using SetlistManager.Common.Models;
 
 namespace SetlistManager.App.Pages;
 
-public partial class Room
+public partial class Room : IAsyncDisposable
 {
-    [Parameter]
-    public string RoomCode { get; set; } = string.Empty;
-    [Inject]
-    public required IRoomService RoomService { get; set; }
-    [Inject]
-    public required NavigationManager NavigationManager { get; set; }
-    [Inject]
-    public required IUserService UserService { get; set; }
-    [Inject]
-    public required IDialogService DialogService { get; set; }
-    [Inject]
-    public required IJSRuntime JSRuntime { get; set; }
+    [Parameter] public string RoomCode { get; set; } = string.Empty;
+
+    [Inject] public required IRoomService RoomService { get; set; }
+    [Inject] public required NavigationManager NavigationManager { get; set; }
+    [Inject] public required IUserService UserService { get; set; }
+    [Inject] public required IDialogService DialogService { get; set; }
+    [Inject] public required IJSRuntime JSRuntime { get; set; }
 
     private RoomModel? _roomModel;
     private SongModel? _currentSong;
     private UserModel? _user;
+    private bool _isFullscreen = false;
+    private IJSObjectReference? _jsModule;
 
     protected override async Task OnInitializedAsync()
     {
@@ -49,15 +46,14 @@ public partial class Room
             return;
         }
 
-        if (_roomModel.Setlist is null)
-            return;
+        if (_roomModel.Setlist is null) return;
 
         _currentSong = _roomModel.Setlist.Songs.FirstOrDefault(x => x.Id == _roomModel.CurrentSong);
         _roomModel.CurrentSong = _currentSong?.Id;
 
         _user = await UserService.GetUserAsync();
-        StateHasChanged();
 
+        StateHasChanged();
         await ScrollToCurrentSong();
     }
 
@@ -65,9 +61,37 @@ public partial class Room
     {
         await base.OnAfterRenderAsync(firstRender);
 
+        if (firstRender)
+        {
+            try
+            {
+                _jsModule = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "/js/fullscreen.js");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error loading JS module: {ex.Message}");
+            }
+        }
+
         if (!firstRender && _currentSong != null)
         {
             await ScrollToCurrentSong();
+        }
+    }
+
+    private async Task ToggleFullscreen()
+    {
+        try
+        {
+            if (_jsModule != null)
+            {
+                _isFullscreen = await _jsModule.InvokeAsync<bool>("toggleFullscreen");
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error toggling fullscreen: {ex.Message}");
         }
     }
 
@@ -75,8 +99,7 @@ public partial class Room
     {
         _roomModel = room;
 
-        if (_roomModel?.Setlist is null || _roomModel.CurrentSong is null)
-            return;
+        if (_roomModel?.Setlist is null || _roomModel.CurrentSong is null) return;
 
         _currentSong = _roomModel.Setlist.Songs.FirstOrDefault(x => x.Id == _roomModel.CurrentSong);
 
@@ -85,8 +108,7 @@ public partial class Room
 
     private async Task SelectSong(SongModel song)
     {
-        if (_roomModel is null || _currentSong is null || song.Id == _currentSong.Id)
-            return;
+        if (_roomModel is null || _currentSong is null || song.Id == _currentSong.Id) return;
 
         ChangeCurrentSongModel changeCurrentSongModel = new()
         {
@@ -106,8 +128,7 @@ public partial class Room
 
     private async Task MoveToNextSong()
     {
-        if (_roomModel?.Setlist?.Songs == null || _currentSong == null)
-            return;
+        if (_roomModel?.Setlist?.Songs == null || _currentSong == null) return;
 
         var orderedSongs = _roomModel.Setlist.Songs.OrderBy(s => s.Order).ToList();
         var currentIndex = orderedSongs.FindIndex(s => s.Id == _currentSong.Id);
@@ -121,8 +142,7 @@ public partial class Room
 
     private async Task MoveToPrevSong()
     {
-        if (_roomModel?.Setlist?.Songs == null || _currentSong == null)
-            return;
+        if (_roomModel?.Setlist?.Songs == null || _currentSong == null) return;
 
         var orderedSongs = _roomModel.Setlist.Songs.OrderBy(s => s.Order).ToList();
         var currentIndex = orderedSongs.FindIndex(s => s.Id == _currentSong.Id);
@@ -148,10 +168,9 @@ public partial class Room
 
     private async Task OpenSetlistContentDialog()
     {
-        if (_roomModel is null || _roomModel.Setlist is null || _currentSong is null)
-            return;
+        if (_roomModel is null || _roomModel.Setlist is null || _currentSong is null) return;
 
-        var parameters = new DialogParameters<ShowSetlistContentDialog>
+        var parameters = new DialogParameters
         {
             { nameof(ShowSetlistContentDialog.Setlist), _roomModel.Setlist },
             { nameof(ShowSetlistContentDialog.CurrentSongId), _currentSong.Id }
@@ -162,8 +181,13 @@ public partial class Room
         await DialogService.ShowAsync<ShowSetlistContentDialog>("Setlist Content", parameters, options);
     }
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
         RoomService.RoomUpdated -= OnRoomUpdated;
+
+        if (_jsModule != null)
+        {
+            await _jsModule.DisposeAsync();
+        }
     }
 }
