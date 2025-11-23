@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 using SetlistManager.Business.Options;
+using SetlistManager.Resources.Storage;
 using System.Text;
 using System.Text.Json;
 
@@ -56,6 +57,8 @@ public class MailService : IMailService
         </a></p>
         <p>If you cannot click the button, copy and paste this link into your browser:</p>
         <p>{verificationLink}</p>";
+
+        var mail = Storage.ResetPasswordMail;
 
         await SendEmailAsync(email, subject, body);
     }
