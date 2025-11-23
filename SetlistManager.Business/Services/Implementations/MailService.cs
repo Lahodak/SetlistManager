@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.Extensions.Options;
 using SetlistManager.Business.Options;
 using SetlistManager.Resources.Storage;
 using System.Text;
@@ -19,46 +20,34 @@ public class MailService : IMailService
 
     public async Task SendVerificationEmailAsync(string email, string token)
     {
-        var subject = "Verify your Setlist Manager account";
-        var verificationLink = $"https://localhost:7025/verify-email?token={Uri.EscapeDataString(token)}&email={Uri.EscapeDataString(email)}";
+        UriBuilder uri = new(_brevoOptions.Value.VerifyEmailRedirect)
+        {
+            Query = new QueryBuilder
+            {
+                { "token", Uri.EscapeDataString(token) },
+                { "email", Uri.EscapeDataString(email) }
+            }.ToString()
+        };
 
-        var body = $@"
-        <p>Please click the button below to verify your account:</p>
-        <p><a href='{verificationLink}' style='
-            display:inline-block;
-            padding:10px 20px;
-            background-color:#4CAF50;
-            color:white;
-            text-decoration:none;
-            border-radius:5px;'>
-            Verify Email
-        </a></p>
-        <p>If you cannot click the button, copy and paste this link into your browser:</p>
-        <p>{verificationLink}</p>";
+        var subject = Storage.VerifyEmailMailSubject;
+        var body = string.Format(Storage.VerifyEmailMail, uri.ToString());        
 
         await SendEmailAsync(email, subject, body);
     }
 
     public async Task SendPasswordResetEmailAsync(string email, string token)
     {
-        var subject = "Reset your Setlist Manager password";
-        var verificationLink = $"https://localhost:7025/reset-password?token={Uri.EscapeDataString(token)}&email={Uri.EscapeDataString(email)}";
+        UriBuilder uri = new(_brevoOptions.Value.ResetPasswordRedirect)
+        {
+            Query = new QueryBuilder
+            {
+                { "token", Uri.EscapeDataString(token) },
+                { "email", Uri.EscapeDataString(email) }
+            }.ToString()
+        };
 
-        var body = $@"
-        <p>Please click the button below to reset your password:</p>
-        <p><a href='{verificationLink}' style='
-            display:inline-block;
-            padding:10px 20px;
-            background-color:#4CAF50;
-            color:white;
-            text-decoration:none;
-            border-radius:5px;'>
-            Reset Password
-        </a></p>
-        <p>If you cannot click the button, copy and paste this link into your browser:</p>
-        <p>{verificationLink}</p>";
-
-        var mail = Storage.ResetPasswordMail;
+        var subject = Storage.ResetPasswordMailSubject;
+        var body = string.Format(Storage.ResetPasswordMail, uri.ToString());
 
         await SendEmailAsync(email, subject, body);
     }
@@ -78,8 +67,8 @@ public class MailService : IMailService
 
         var json = JsonSerializer.Serialize(payload);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
-
         var response = await client.PostAsync(_brevoOptions.Value.SmtpApi, content);
+
         response.EnsureSuccessStatusCode();
     }
 }

@@ -19,7 +19,7 @@ namespace SetlistManager.Resources.Storage {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class Storage {
@@ -77,6 +77,44 @@ namespace SetlistManager.Resources.Storage {
         public static string ResetPasswordMail {
             get {
                 return ResourceManager.GetString("ResetPasswordMail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reset your Setlist Manager password.
+        /// </summary>
+        public static string ResetPasswordMailSubject {
+            get {
+                return ResourceManager.GetString("ResetPasswordMailSubject", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;p&gt;Please click the button below to verify your account:&lt;/p&gt;
+        ///&lt;p&gt;&lt;a href=&apos;{0}&apos; style=&apos;
+        ///    display:inline-block;
+        ///    padding:10px 20px;
+        ///    background-color:#4CAF50;
+        ///    color:white;
+        ///    text-decoration:none;
+        ///    border-radius:5px;&apos;&gt;
+        ///    Verify Email
+        ///&lt;/a&gt;&lt;/p&gt;
+        ///&lt;p&gt;If you cannot click the button, copy and paste this link into your browser:&lt;/p&gt;
+        ///&lt;p&gt;{0}&lt;/p&gt;.
+        /// </summary>
+        public static string VerifyEmailMail {
+            get {
+                return ResourceManager.GetString("VerifyEmailMail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Verify your Setlist Manager account.
+        /// </summary>
+        public static string VerifyEmailMailSubject {
+            get {
+                return ResourceManager.GetString("VerifyEmailMailSubject", resourceCulture);
             }
         }
     }
