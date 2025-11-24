@@ -9,6 +9,12 @@
         </MudText>
         <MudSpacer />
         <MudText Typo="Typo.h5" Style="font-weight: 300;">@(_user?.Username ?? "Loading...") - @(_user?.Instrument?.Name ?? "Loading...")</MudText>
+        <MudIconButton Icon="@(_isFullscreen? Icons.Material.Filled.FullscreenExit : Icons.Material.Filled.Fullscreen)"
+                       Color="Color.Inherit"
+                       Edge="Edge.End"
+                       Size="Size.Large"
+                       OnClick="ToggleFullscreen"
+                       Title="@(_isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen")" />
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.End" Size="Size.Large" />
     </MudAppBar>
 
@@ -77,7 +83,7 @@
                 </MudItem>
 
                 <!-- Right Column: Setlist -->
-                <MudItem xs="12" md="6">                    
+                <MudItem xs="12" md="6">
 
                     <div id="setlist-container" style="max-height: 500px; overflow-y: auto; padding-right: 8px;">
                         @if (_roomModel?.Setlist?.Songs != null)
@@ -89,12 +95,11 @@
                                 var cardStyle = $"border-radius: 12px; cursor: pointer; transition: all 0.3s; {(isCurrentSong ? "background: linear-gradient(135deg, #7B2FBE 0%, #9C4DCC 100%);" : "")}";
                                 var titleStyle = isCurrentSong ? "color: white; font-weight: 600;" : "font-weight: 500;";
                                 var subtitleStyle = isCurrentSong ? "color: rgba(255,255,255,0.9);" : "";
-                                
-                                <MudPaper 
-                                    Elevation="@(isCurrentSong ? 4 : 2)" 
-                                    Class="@cardClass" 
-                                    Style="@cardStyle"                                    
-                                    @onclick="@(() => SelectSong(song))">
+
+                                <MudPaper Elevation="@(isCurrentSong ? 4 : 2)"
+                                          Class="@cardClass"
+                                          Style="@cardStyle"
+                                          @onclick="@(() => SelectSong(song))">
                                     <MudText Typo="Typo.h6" Style="@titleStyle">
                                         @song.Name
                                     </MudText>
@@ -136,7 +141,7 @@
         border-radius: 4px;
     }
 
-    div::-webkit-scrollbar-thumb:hover {
-        background: rgba(123, 47, 190, 0.7);
-    }
+        div::-webkit-scrollbar-thumb:hover {
+            background: rgba(123, 47, 190, 0.7);
+        }
 </style>
