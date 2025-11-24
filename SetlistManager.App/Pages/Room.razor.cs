@@ -67,9 +67,9 @@ public partial class Room : IAsyncDisposable
             {
                 _jsModule = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "/js/fullscreen.js");
             }
-            catch (Exception ex)
+            catch
             {
-                Console.WriteLine($"Error loading JS module: {ex.Message}");
+                // Ignore JS interop errors
             }
         }
 
@@ -89,9 +89,9 @@ public partial class Room : IAsyncDisposable
                 StateHasChanged();
             }
         }
-        catch (Exception ex)
+        catch
         {
-            Console.WriteLine($"Error toggling fullscreen: {ex.Message}");
+            // Ignore JS interop errors
         }
     }
 
