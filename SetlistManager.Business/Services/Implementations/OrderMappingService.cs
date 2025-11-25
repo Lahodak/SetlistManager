@@ -25,7 +25,9 @@ public class OrderMappingService : IOrderMappingService
             setlistModel.Songs.First(s => s.Id == songSetlist.SongId).Order = songSetlist.Order;
         }
         
-        setlistModel.Songs = setlistModel.Songs.OrderBy(x => x.Order).ToList();
+        setlistModel.Songs = setlistModel.Songs
+            .OrderBy(x => x.Order)
+            .ToList();
 
         var languages =  await _languageService.GetAvailableLanguagesAsync();
 

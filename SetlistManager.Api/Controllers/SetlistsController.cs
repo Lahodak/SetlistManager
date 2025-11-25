@@ -15,19 +15,24 @@ public class SetlistsController : BaseController
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<SetlistModel>>> GetSetlists() 
-        => Ok(await _setlistService.GetAllSetlistsAsync());
+    public async Task<ActionResult<IEnumerable<SetlistModel>>> GetSetlists()
+    {
+        return Ok(await _setlistService.GetAllSetlistsAsync());
+    }
 
     [HttpPost]
-    public async Task UploadSetlistToDb(SetlistModel setlistModel)
-        => await _setlistService.SaveSetlistAsync(setlistModel);
+    public async Task<ActionResult> SaveSetlist(SetlistModel setlistModel)
+    {
+        await _setlistService.SaveSetlistAsync(setlistModel);
+        return Created();
+    }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<SetlistModel>> GetSetlistById(int id)
     {
-        var result = await _setlistService.GetSetlistByIdAsync(id) ?? new SetlistModel();
+        var result = await _setlistService.GetSetlistByIdAsync(id);
 
-        if (result == null)
+        if (result is null)
             return NotFound();
 
         return Ok(result);

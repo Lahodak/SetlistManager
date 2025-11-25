@@ -32,47 +32,18 @@ public class SetlistsService : ISetlistsService
         return await _orderMappingService.MapSongEntityToModelOrder(setlist);
     }
 
-    public async Task<SetlistModel?> GetSetlistByNameAsync(string name)
-    {
-        var setlist = await _dbContext.Setlists
-            .Include(s => s.SongsSetlists)
-                .ThenInclude(s => s.Song)
-                    .ThenInclude(l => l.Language)
-            .Include(s => s.SongsSetlists)
-                .ThenInclude(s => s.Song)
-                    .ThenInclude(s => s.Artist)
-                    .FirstOrDefaultAsync(x => x.Name.Contains(name));
-
-        if(setlist is null) 
-            return null;
-
-        return await _orderMappingService.MapSongEntityToModelOrder(setlist);
-    }
-
     public async Task SaveSetlistAsync(SetlistModel setlistModel)
     {
-        var songs = new List<Song>();
-        foreach (var x in setlistModel.Songs)
-        {
-            var song = await _dbContext.Songs.FirstOrDefaultAsync(y => y.Id == x.Id);
-            if (song != null)
-                songs.Add(song);
-        }
-
         var setlistToCreate = new Setlist
         {
             Name = setlistModel.Name,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
-            Creator = await _dbContext.Users.FirstAsync(x => x.Id == setlistModel.CreatorId),
-            CreatorId = setlistModel.CreatorId,
-            SongsSetlists = []
+            CreatorId = setlistModel.CreatorId
         };
 
         await _dbContext.Setlists.AddAsync(_orderMappingService.MapSongModelToEntity(setlistModel, setlistToCreate));
         await _dbContext.SaveChangesAsync();
-
-        return;
     }
 
     public async Task<IEnumerable<SetlistModel>?> GetAllSetlistsOfUserAsync(int userId)
@@ -89,6 +60,7 @@ public class SetlistsService : ISetlistsService
 
         return setlists.Select(setlists => _orderMappingService.MapSongEntityToModelOrder(setlists).Result);
     }
+
     public async Task<IEnumerable<SetlistModel>?> GetAllSetlistsAsync()
     {
         var setlists = await _dbContext.Setlists
