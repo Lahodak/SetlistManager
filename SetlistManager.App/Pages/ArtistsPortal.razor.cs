@@ -44,6 +44,29 @@ public partial class ArtistsPortal
         };
     }
 
+    private async Task DeleteArtistAsync(ArtistModel artist)
+    {
+        bool? result = await DialogService.ShowMessageBox(
+            "Confirm Delete",
+            $"Are you sure you want to delete the artist '{artist.Nick}'?\nDeleting artist also deletes all of his songs",
+            yesText: "Delete", noText: "Cancel", options: new DialogOptions { CloseOnEscapeKey = true }
+        );
+
+        if (result == true)
+        {
+            var deleteResult = await ArtistService.TryDeleteArtistAsync(artist.Id);
+            if (deleteResult)
+            {
+                Snackbar.Add("Artist deleted successfully!", Severity.Success);
+                await _table.ReloadServerData();
+            }
+            else
+            {
+                Snackbar.Add("Failed to delete artist.", Severity.Error);
+            }
+        }
+    }
+
     private void OnSearch(string text)
     {
         searchString = text;

@@ -26,6 +26,20 @@ public class ApiService : IApiService
         }
     }
 
+    public async Task<bool> TryDeleteAsync(string endpoint)
+    {
+        using var httpClient = _httpClientFactory.CreateClient();
+        
+        await ConfigureHttpClientAsync(httpClient);
+        
+        var response = await httpClient.DeleteAsync(endpoint);
+        
+        if(response.IsSuccessStatusCode)
+            return true;
+
+        return false;
+    }
+
     public async Task<T?> GetAsync<T>(string endpoint)
     {
         using var httpClient = _httpClientFactory.CreateClient();

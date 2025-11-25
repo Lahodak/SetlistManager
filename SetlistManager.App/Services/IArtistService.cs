@@ -6,5 +6,6 @@ public interface IArtistService
 {
     Task<List<ArtistModel>?> GetAvailableArtistsAsync();
     Task<ArtistModel?> GetArtistByIdAsync(int id);
-    Task UploadArtistAsync(ArtistModel artist);
+    Task UploadArtistAsync(ArtistCreateModel createModel);
+    Task<bool> TryDeleteArtistAsync(int id);
 }

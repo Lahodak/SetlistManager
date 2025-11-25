@@ -21,25 +21,57 @@ public class ArtistService : IArtistService
             .Include(x => x.Songs)!
             .ThenInclude(x => x.Language)            
             .ToListAsync();
-        var artistModels = artists.Select(a => a.ToModel(true)).ToList();
+
+        var artistModels = artists
+            .Select(a => a.ToModel(true))
+            .ToList();
+        
         return artistModels;
     }
 
-    public async Task UploadArtistAsync(ArtistModel artistModel)
-    {            
-        await _dbContext.AddAsync(artistModel.ToEntity());
+    public async Task UploadArtistAsync(ArtistCreateModel createModel)
+    {
+        Artist artist = new()
+        {
+            Nick = createModel.Nick
+        };
+
+        await _dbContext.AddAsync(artist);
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task<ArtistModel> GetArtistModelByIdAsync(int id)
+    public async Task<ArtistModel> GetArtistByIdAsync(int id)
         => (await _dbContext.Artists
         .Include(x => x.Songs)!
         .ThenInclude(x => x.Language)
-        .FirstAsync(x => x.Id == id)).ToModel(true);
+        .FirstAsync(x => x.Id == id))
+        .ToModel(true);
 
-    public async Task<Artist> GetArtistByIdAsync(int id)
-        => await _dbContext.Artists
-        .Include(x => x.Songs)!
-        .ThenInclude(x => x.Language)
-        .FirstAsync(x => x.Id == id);
+    public async Task<bool> TryDeleteArtistAsync(int id)
+    {
+        var artist = await _dbContext.Artists.FirstOrDefaultAsync(x => x.Id == id);
+        
+        if (artist is null)
+            return false;
+        
+        _dbContext.Artists.Remove(artist);
+        
+        await _dbContext.SaveChangesAsync();
+        
+        return true;
+    }
+
+    public async Task<bool> TryUpdateArtistAsync(int id, ArtistUpdateModel updateModel)
+    {
+        var artist = await _dbContext.Artists.FirstOrDefaultAsync(x => x.Id == id);
+        
+        if (artist is null)
+            return false;
+        
+        artist.Nick = updateModel.Name;
+
+        await _dbContext.SaveChangesAsync();
+        
+        return true;
+    }
 }
