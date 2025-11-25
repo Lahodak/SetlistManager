@@ -40,22 +40,6 @@ public class SongService : ISongService
         return song.ToModel();
     }
 
-    public async Task<List<SongModel>?> GetSongByNameAsync(string name)
-    {
-        var songs = await _dbContext.Songs
-        .Include(x => x.Language)
-        .Include(x => x.Artist)
-        .Where(x => x.Name.Contains(name) || x.Artist.Nick.Contains(name))
-        .ToListAsync();
-
-        if (songs is null)
-            return null;
-
-        return songs
-            .Select(x => x.ToModel())
-            .ToList();
-    }
-
     public async Task UploadSongAsync(SongCreateModel songCreateModel, int userId)
     {
         Song song = new()
@@ -68,12 +52,47 @@ public class SongService : ISongService
             Tuning = songCreateModel.Tuning,
             BPM = songCreateModel.BPM,
             CreatedAt = DateTime.UtcNow,
-            UpdatedAt = null,
             UpdatedBy = userId,
             LanguageId = songCreateModel.LanguageId,
         };
 
         await _dbContext.Songs.AddAsync(song);
         await _dbContext.SaveChangesAsync();
+    }
+
+    public async Task<bool> TryUpdateSongAsync(int songId, SongUpdateModel updateModel, int userId)
+    {
+        var song = await _dbContext.Songs.FirstOrDefaultAsync(x => x.Id == songId);
+
+        if (song is null)
+            return false;
+
+        song.Name = updateModel.Name;
+        song.ArtistId = updateModel.ArtistId;
+        song.TabsURL = updateModel.TabsURL;
+        song.AudioURL = updateModel.AudioURL;
+        song.Key = updateModel.Key;
+        song.Tuning = updateModel.Tuning;
+        song.BPM = updateModel.BPM;
+        song.UpdatedBy = userId;
+        song.LanguageId = updateModel.LanguageId;
+        song.UpdatedAt = DateTime.UtcNow;
+
+        await _dbContext.SaveChangesAsync();
+        
+        return true;
+    }
+
+    public async Task<bool> TryDeleteSongAsync(int songId)
+    {
+        var song = await _dbContext.Songs.FirstOrDefaultAsync(x => x.Id == songId);
+        
+        if (song is null)
+            return false;
+        
+        _dbContext.Songs.Remove(song);        
+        await _dbContext.SaveChangesAsync();
+        
+        return true;
     }
 }

@@ -5,7 +5,7 @@ using SetlistManager.Common.Models;
 
 namespace SetlistManager.App.Pages.Dialogs;
 
-public partial class AddSongDialog
+public partial class CreateSongDialog
 {
     [CascadingParameter]
     public required IMudDialogInstance MudDialog { get; set; }
@@ -16,20 +16,18 @@ public partial class AddSongDialog
     [Inject]
     public required ILanguageService LanguageService { get; set; }
     [Inject]
-    public required IUserService UserService { get; set; }
-    [Inject]
     public required IArtistService ArtistService { get; set; }
 
-    private List<LanguageModel>? languages;
-    private List<ArtistModel>? artists;
+    private List<LanguageModel>? _languages;
+    private List<ArtistModel>? _artists;
     private SongModel? _song;
 
     protected override async Task OnInitializedAsync()
     {
-        languages = await LanguageService.GetAvailableLanguagesAsync();
-        artists = await ArtistService.GetAvailableArtistsAsync();
+        _languages = await LanguageService.GetAvailableLanguagesAsync();
+        _artists = await ArtistService.GetAvailableArtistsAsync();
 
-        if (artists is null || artists.Count == 0)
+        if (_artists is null || _artists.Count == 0)
         {
             Snackbar.Add("Add Artists First!", Severity.Warning);
         }
@@ -37,7 +35,7 @@ public partial class AddSongDialog
         _song = new SongModel
         {
             Name = string.Empty,
-            Artist = new(),
+            Artist = null!,
             Language = null!,
             TabsURL = string.Empty,
             AudioURL = string.Empty,
@@ -52,7 +50,7 @@ public partial class AddSongDialog
         if (_song is null)
             return;
 
-        if (artists is null || artists.Count == 0)
+        if (_artists is null || _artists.Count == 0)
         {
             Snackbar.Add("Add Artists First!", Severity.Error);
             return;

@@ -19,23 +19,14 @@ public class SongsController : BaseController
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<SongModel>>> GetSongs([FromQuery] string? name)
+    public async Task<ActionResult<List<SongModel>>> GetSongs()
     {
-        List<SongModel>? songs;
+        var result = await _songService.GetSongsAsync();
 
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            songs = await _songService.GetSongsAsync();
-        }
-        else
-        {
-            songs = await _songService.GetSongByNameAsync(name);
-        }
+        if (result is null)        
+            return NotFound();
 
-        if (songs is null)        
-            return NotFound();        
-
-        return Ok(songs);
+        return Ok(result);
     }
 
     [HttpPost]
@@ -51,11 +42,33 @@ public class SongsController : BaseController
     {
         var song = await _songService.GetSongByIdAsync(id);
 
-        if (song is null)
-        {
-            return NotFound();
-        }
+        if (song is null)        
+            return NotFound();        
 
         return Ok(song);
+    }
+
+    [HttpPut("{id}")]
+    public async Task<ActionResult> UpdateSong(int id, SongUpdateModel updateModel)
+    {
+        var userId = _userContext.GetCurrentUserId();
+
+        var success = await _songService.TryUpdateSongAsync(id, updateModel, userId!.Value);
+        
+        if (!success)        
+            return NotFound();        
+        
+        return NoContent();
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<ActionResult> DeleteSong(int id)
+    {
+        var success = await _songService.TryDeleteSongAsync(id);
+
+        if (!success)        
+            return NotFound();        
+        
+        return NoContent();
     }
 }

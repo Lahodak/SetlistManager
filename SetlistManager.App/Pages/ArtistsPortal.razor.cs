@@ -52,19 +52,20 @@ public partial class ArtistsPortal
             yesText: "Delete", noText: "Cancel", options: new DialogOptions { CloseOnEscapeKey = true }
         );
 
-        if (result == true)
+        if (result is not true)
+            return;
+
+        var deleteResult = await ArtistService.TryDeleteArtistAsync(artist.Id);
+        
+        if (deleteResult)
         {
-            var deleteResult = await ArtistService.TryDeleteArtistAsync(artist.Id);
-            if (deleteResult)
-            {
-                Snackbar.Add("Artist deleted successfully!", Severity.Success);
-                await _table.ReloadServerData();
-            }
-            else
-            {
-                Snackbar.Add("Failed to delete artist.", Severity.Error);
-            }
+            Snackbar.Add("Artist deleted successfully!", Severity.Success);
+            await _table.ReloadServerData();
         }
+        else
+        {
+            Snackbar.Add("Failed to delete artist.", Severity.Error);
+        }        
     }
 
     private async Task UpdateArtistAsync(ArtistModel artist)

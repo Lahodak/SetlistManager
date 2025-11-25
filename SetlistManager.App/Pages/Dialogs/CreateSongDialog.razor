@@ -1,0 +1,79 @@
+﻿<MudDialog>
+    <DialogContent>
+        <MudText Typo="Typo.h5">Add New Song</MudText>
+
+        @if (_song is not null)
+        {
+            <MudPaper Class="pa-4 mt-3" Elevation="2">
+                <MudGrid Spacing="2">
+                    <MudItem xs="12" sm="6">
+                        <MudTextField @bind-Value="_song.Name"
+                                      Label="Song Name"
+                                      Required="true"
+                                      Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudSelect @bind-Value="_song.Artist" Label="Artist" Variant="Variant.Outlined">
+                            @if (_artists is not null)
+                            {
+                                @foreach (var artist in _artists)
+                                {
+                                    <MudSelectItem Value="artist">@artist.Nick</MudSelectItem>
+                                }
+                            }
+                        </MudSelect>
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6">
+                        <MudTextField @bind-Value="_song.TabsURL"
+                                      Label="Tabs URL"
+                                      Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField @bind-Value="_song.AudioURL"
+                                      Label="Audio URL"
+                                      Variant="Variant.Outlined" />
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6">
+                        <MudTextField @bind-Value="_song.Tuning"
+                                      Label="Tuning"
+                                      Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField @bind-Value="_song.Key"
+                                      Label="Key"
+                                      Variant="Variant.Outlined" />
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6">
+                        <MudNumericField @bind-Value="_song.BPM"
+                                         Label="BPM"
+                                         Min="40" Max="300"
+                                         Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudSelect @bind-Value="_song.Language" Label="Language" Variant="Variant.Outlined">
+                            @if (_languages is not null)
+                            {
+                                @foreach (var language in _languages)
+                                {
+                                    <MudSelectItem Value="language">@language.Name</MudSelectItem>
+                                }
+                            }
+                        </MudSelect>
+                    </MudItem>
+                </MudGrid>
+            </MudPaper>
+        }
+        else
+        {
+            <MudProgressCircular Indeterminate="true" />
+        }
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="SaveSong" Disabled="_song is null">Save</MudButton>
+        <MudButton Variant="Variant.Text" OnClick="Cancel">Cancel</MudButton>
+    </DialogActions>
+</MudDialog>

@@ -7,8 +7,6 @@ namespace SetlistManager.App.Services.Implementations;
 public class SongService : ISongService
 {
     private const string _getSongbyIdSuffix = "/";
-    private const string _getSongbyNameSuffix = "?name=";
-    private const string _uploadSongCollectionSuffix = "/bulk";    
 
     private readonly IApiService _apiService;
     private readonly IOptions<SetlistManagerApiOptions> _apiOptions;
@@ -25,12 +23,11 @@ public class SongService : ISongService
     public async Task<SongModel?> GetSongByIdAsync(int id) 
         => await _apiService.GetAsync<SongModel>(_apiOptions.Value.SongsEndpoint + _getSongbyIdSuffix + id.ToString());
 
-    public async Task<SongModel?> GetSongByNameAsync(string name) 
-        => await _apiService.GetAsync<SongModel>(_apiOptions.Value.SongsEndpoint + _getSongbyNameSuffix + name);
-
-    public async Task UploadSongsAsync(List<SongModel> songsToUpload) 
-        => await _apiService.PostAsync(_apiOptions.Value.SongsEndpoint + _uploadSongCollectionSuffix, songsToUpload);
-
     public async Task UploadSongAsync(SongCreateModel songCreateModel) 
         => await _apiService.PostAsync(_apiOptions.Value.SongsEndpoint, songCreateModel);
+
+    public async Task<bool> TryUpdateSongAsync(int id, SongUpdateModel songModel)
+        => await _apiService.TryPutAsync(_apiOptions.Value.SongsEndpoint + _getSongbyIdSuffix + id.ToString(), songModel);
+    public async Task<bool> TryDeleteSongAsync(int id)
+        => await _apiService.TryDeleteAsync(_apiOptions.Value.SongsEndpoint + _getSongbyIdSuffix + id.ToString());
 }
