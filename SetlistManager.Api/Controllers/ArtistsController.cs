@@ -23,8 +23,10 @@ public class ArtistsController : BaseController
     [HttpPost]
     public async Task<ActionResult> UploadArtist(ArtistCreateModel createModel)
     {
-        await _artistService.UploadArtistAsync(createModel);
-        return Ok();
+        if (await _artistService.UploadArtistAsync(createModel))
+            return NoContent();
+
+        return BadRequest();
     }
 
     [HttpGet("{artistId}")]

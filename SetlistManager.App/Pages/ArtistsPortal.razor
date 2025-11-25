@@ -36,7 +36,11 @@
                     </MudLink>
                 </MudTd>
                 <MudTd DataLabel="Songs Count">@(context.Songs?.Count ?? 0)</MudTd>
-                <MudTd><MudIconButton OnClick="() => DeleteArtistAsync(context)" Icon="@Icons.Material.Filled.DeleteForever" Color="Color.Error"></MudIconButton></MudTd>
+                <MudTd>
+                    <MudIconButton OnClick="() => DeleteArtistAsync(context)" Icon="@Icons.Material.Filled.DeleteForever" Color="Color.Error"></MudIconButton>
+                    <MudIconButton OnClick="() => UpdateArtistAsync(context)" Icon="@Icons.Material.Filled.EditNote" Color="Color.Primary"></MudIconButton>
+                </MudTd>
+
             </RowTemplate>
 
             <NoRecordsContent>

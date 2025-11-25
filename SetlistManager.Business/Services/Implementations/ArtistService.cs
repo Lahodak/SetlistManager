@@ -29,8 +29,11 @@ public class ArtistService : IArtistService
         return artistModels;
     }
 
-    public async Task UploadArtistAsync(ArtistCreateModel createModel)
+    public async Task<bool> UploadArtistAsync(ArtistCreateModel createModel)
     {
+        if(await _dbContext.Artists.AnyAsync(x => x.Nick == createModel.Nick))            
+            return false;
+
         Artist artist = new()
         {
             Nick = createModel.Nick
@@ -38,6 +41,8 @@ public class ArtistService : IArtistService
 
         await _dbContext.AddAsync(artist);
         await _dbContext.SaveChangesAsync();
+        
+        return true;
     }
 
     public async Task<ArtistModel> GetArtistByIdAsync(int id)
@@ -68,7 +73,10 @@ public class ArtistService : IArtistService
         if (artist is null)
             return false;
         
-        artist.Nick = updateModel.Name;
+        if(await _dbContext.Artists.AnyAsync(x => x.Nick == updateModel.Nick && x.Id != id))
+            return false;
+
+        artist.Nick = updateModel.Nick;
 
         await _dbContext.SaveChangesAsync();
         

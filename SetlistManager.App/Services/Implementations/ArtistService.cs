@@ -26,4 +26,7 @@ public class ArtistService : IArtistService
 
     public async Task<bool> TryDeleteArtistAsync(int id)
         => await _apiService.TryDeleteAsync(_apiOptions.Value.ArtistsEndpoint + "/" + id.ToString());
+
+    public async Task<bool> TryUpdateArtistAsync(int id, ArtistUpdateModel updateModel)
+        => await _apiService.TryPutAsync(_apiOptions.Value.ArtistsEndpoint + "/" + id.ToString(), updateModel);
 }

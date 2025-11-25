@@ -48,7 +48,7 @@ public partial class ArtistsPortal
     {
         bool? result = await DialogService.ShowMessageBox(
             "Confirm Delete",
-            $"Are you sure you want to delete the artist '{artist.Nick}'?\nDeleting artist also deletes all of his songs",
+            $"Are you sure you want to delete the artist '{artist.Nick}' along with it's songs?",
             yesText: "Delete", noText: "Cancel", options: new DialogOptions { CloseOnEscapeKey = true }
         );
 
@@ -64,6 +64,19 @@ public partial class ArtistsPortal
             {
                 Snackbar.Add("Failed to delete artist.", Severity.Error);
             }
+        }
+    }
+
+    private async Task UpdateArtistAsync(ArtistModel artist)
+    {
+        var parameters = new DialogParameters { ["ArtistToEdit"] = artist };
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+        var dialog = await DialogService.ShowAsync<EditArtistDialog>("Edit Artist", parameters, options);
+        var result = await dialog.Result;
+        if (!result!.Canceled)
+        {
+            Snackbar.Add("Artist updated successfully!", Severity.Success);
+            await _table.ReloadServerData();
         }
     }
 

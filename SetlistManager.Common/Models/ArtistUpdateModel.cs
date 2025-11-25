@@ -2,5 +2,5 @@
 
 public class ArtistUpdateModel
 {
-    public string Name { get; set; } = default!;
+    public string Nick { get; set; } = default!;
 }

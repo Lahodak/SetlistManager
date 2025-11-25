@@ -8,4 +8,5 @@ public interface IArtistService
     Task<ArtistModel?> GetArtistByIdAsync(int id);
     Task UploadArtistAsync(ArtistCreateModel createModel);
     Task<bool> TryDeleteArtistAsync(int id);
+    Task<bool> TryUpdateArtistAsync(int id, ArtistUpdateModel updateModel);
 }
