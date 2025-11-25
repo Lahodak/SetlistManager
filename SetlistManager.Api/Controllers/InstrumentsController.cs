@@ -15,9 +15,7 @@ public class InstrumentsController : BaseController
 
     [HttpGet]
     public async Task<ActionResult<InstrumentModel>> GetAvailableInstruments()
-    {
-        List<InstrumentModel> instruments = await _instrumentsService.GetAvailableInstrumentsAsync();
-
-        return Ok(instruments);
+    {        
+        return Ok(await _instrumentsService.GetAvailableInstrumentsAsync());
     }
 }
