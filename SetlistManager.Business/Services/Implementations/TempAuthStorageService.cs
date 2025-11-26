@@ -4,7 +4,6 @@ namespace SetlistManager.Business.Services.Implementations;
 
 public class TempAuthStorageService : ITempAuthStorageService
 {
-
     private const int _tempAuthSecretLength = 24;
     private readonly AppDbContext _dbContext;
 

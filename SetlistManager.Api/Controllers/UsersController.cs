@@ -66,7 +66,7 @@ public class UsersController : BaseController
 
         var resultAccessTokenModel = await _geniusAuthService.ExchangeGeniusCode(grantResultModel.Code);
 
-        if (resultAccessTokenModel is null || resultAccessTokenModel.AccessToken is null )
+        if (resultAccessTokenModel is null || resultAccessTokenModel.AccessToken is null)
             return BadRequest();
 
         AddTokenModel tokenModel = new()
