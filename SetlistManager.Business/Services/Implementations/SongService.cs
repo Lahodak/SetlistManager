@@ -20,6 +20,7 @@ public class SongService : ISongService
         var songs = await _dbContext.Songs
         .Include(x => x.Language)
         .Include(x => x.Artist)
+        .AsNoTracking()
         .ToListAsync();
 
         return songs
@@ -32,6 +33,7 @@ public class SongService : ISongService
         var song = await _dbContext.Songs
         .Include(x => x.Language)
         .Include(x => x.Artist)
+        .AsNoTracking()
         .FirstOrDefaultAsync(x => x.Id == songId);
 
         if (song is null)
@@ -40,8 +42,11 @@ public class SongService : ISongService
         return song.ToModel();
     }
 
-    public async Task UploadSongAsync(SongCreateModel songCreateModel, int userId)
+    public async Task<bool> TrySaveSongAsync(SongCreateModel songCreateModel, int userId)
     {
+        if(await _dbContext.Songs.AnyAsync(x => x.Name == songCreateModel.Name && x.ArtistId == songCreateModel.ArtistId))
+            return false;
+
         Song song = new()
         {
             Name = songCreateModel.Name,
@@ -58,6 +63,8 @@ public class SongService : ISongService
 
         await _dbContext.Songs.AddAsync(song);
         await _dbContext.SaveChangesAsync();
+
+        return true;
     }
 
     public async Task<bool> TryUpdateSongAsync(int songId, SongUpdateModel updateModel, int userId)

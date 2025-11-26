@@ -30,11 +30,14 @@ public class SongsController : BaseController
     }
 
     [HttpPost]
-    public async Task AddSong(SongCreateModel createModel)
+    public async Task<ActionResult> AddSong(SongCreateModel createModel)
     {
         var userId = _userContext.GetCurrentUserId();
 
-        await _songService.UploadSongAsync(createModel, userId!.Value);
+        if(!await _songService.TrySaveSongAsync(createModel, userId!.Value))
+            return BadRequest("Song already exists");
+
+        return Created();
     }
 
     [HttpGet("{id}")]
