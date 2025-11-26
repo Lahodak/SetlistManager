@@ -92,7 +92,7 @@ public partial class ArtistsPortal
         var parameters = new DialogParameters();
         var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
 
-        var dialog = await DialogService.ShowAsync<CreateNewArtistDialog>("Create New Artist", parameters, options);
+        var dialog = await DialogService.ShowAsync<CreateArtistDialog>("Create New Artist", parameters, options);
         var result = await dialog.Result;
 
         if (!result!.Canceled)

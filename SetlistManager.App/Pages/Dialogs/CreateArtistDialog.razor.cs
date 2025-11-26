@@ -5,7 +5,7 @@ using SetlistManager.Common.Models;
 
 namespace SetlistManager.App.Pages.Dialogs;
 
-public partial class CreateNewArtistDialog
+public partial class CreateArtistDialog
 {
     [CascadingParameter]
     public required IMudDialogInstance MudDialog { get; set; }

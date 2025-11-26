@@ -73,7 +73,7 @@ public partial class SongsPortal
         var parameters = new DialogParameters { { "Song", song } };
         var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
 
-        var dialog = await DialogService.ShowAsync<UpdateSongDialog>("Update Song", parameters, options);
+        var dialog = await DialogService.ShowAsync<EditSongDialog>("Update Song", parameters, options);
         var result = await dialog.Result;
 
         if (!result!.Canceled)

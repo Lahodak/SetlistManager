@@ -108,7 +108,7 @@ public partial class SetlistsPortal
     private async Task OpenGenerateDialog()
     {
         var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
-        var dialog = await DialogService.ShowAsync<CreateNewSetlistDialog>("", options);
+        var dialog = await DialogService.ShowAsync<CreateSetlistDialog>("", options);
 
         var result = await dialog.Result;
         if (result is null || !result.Canceled)
