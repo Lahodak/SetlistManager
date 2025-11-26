@@ -99,11 +99,10 @@ public partial class SongsPortal
         if (!deleteResult)
         {
             Snackbar.Add("Failed to delete song.", Severity.Error);
+            return;
         }
-        else
-        {
-            Snackbar.Add("Song deleted successfully!", Severity.Success);
-            await table.ReloadServerData();
-        }
+        
+        Snackbar.Add("Song deleted successfully!", Severity.Success);
+        await table.ReloadServerData();        
     }
 }

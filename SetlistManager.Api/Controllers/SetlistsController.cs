@@ -46,6 +46,13 @@ public class SetlistsController : BaseController
 
         await _setlistService.EditSetlistAsync(setlist);
 
-        return Ok();    
+        return NoContent();    
+    }
+
+    [HttpDelete]
+    public async Task<ActionResult> DeleteSetlist(int id)
+    {
+        await _setlistService.TryDeleteSetlistAsync(id);
+        return NoContent();
     }
 }

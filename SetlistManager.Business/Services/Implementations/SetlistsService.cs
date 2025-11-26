@@ -72,7 +72,9 @@ public class SetlistsService : ISetlistsService
                     .ThenInclude(s => s.Artist)
             .ToListAsync();        
         
-        return setlists.Select(setlists => _orderMappingService.MapSongEntityToModelOrder(setlists).Result);
+        return setlists
+            .Select(setlists => _orderMappingService
+            .MapSongEntityToModelOrder(setlists).Result);
     }
 
     public async Task EditSetlistAsync(SetlistModel setlistModel)
@@ -88,12 +90,25 @@ public class SetlistsService : ISetlistsService
 
         setlistToBeEdited.Name = setlistModel.Name;
         setlistToBeEdited.UpdatedAt = DateTime.Now;
-        
-        foreach(var song in setlistToBeEdited.SongsSetlists)
-        {
-            song.Order = setlistModel.Songs.First(x => x.Id == song.SongId).Order;
-        }
+
+        setlistToBeEdited.SongsSetlists
+            .ToList()
+            .ForEach(s => s.Order = setlistModel.Songs.First(x => x.Id == s.SongId).Order);
 
         await _dbContext.SaveChangesAsync();
+    }
+
+    public async Task<bool> TryDeleteSetlistAsync(int id)
+    {
+        var setlistToBeDeleted = await _dbContext.Setlists
+            .FirstOrDefaultAsync(x => x.Id == id);
+
+        if (setlistToBeDeleted is null)
+            return false;
+        
+        _dbContext.Setlists.Remove(setlistToBeDeleted);
+        await _dbContext.SaveChangesAsync();
+        
+        return true;
     }
 }
