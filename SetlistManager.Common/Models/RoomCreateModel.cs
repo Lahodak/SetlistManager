@@ -2,7 +2,7 @@
 
 namespace SetlistManager.Common.Models;
 
-public class CreateRoomModel
+public class RoomCreateModel
 {
     [Required]
     public string Name { get; set; } = default!;

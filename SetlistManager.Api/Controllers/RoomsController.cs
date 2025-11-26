@@ -22,7 +22,7 @@ public class RoomsController : BaseController
     }
 
     [HttpPost]
-    public async Task<ActionResult<RoomModel>> CreateRoomAsync(CreateRoomModel roomCreateModel)
+    public async Task<ActionResult<RoomModel>> CreateRoomAsync(RoomCreateModel roomCreateModel)
     {
         var userId = (int)_currentUserContext.GetCurrentUserId()!;
         var roomModel = await _roomsService.CreateRoomAsync(roomCreateModel, userId);        

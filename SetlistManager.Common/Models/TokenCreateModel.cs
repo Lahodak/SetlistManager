@@ -1,6 +1,6 @@
 ﻿namespace SetlistManager.Common.Models;
 
-public class AddTokenModel
+public class TokenCreateModel
 {
     public ProviderEnum Provider { get; set; } = default!;
     public string AccessToken { get; set; } = default!;

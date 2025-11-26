@@ -48,7 +48,7 @@ public class RoomsService : IRoomsService
         return roomModel;
     }
 
-    public async Task<RoomModel> CreateRoomAsync(CreateRoomModel createRoomModel, int hostId)
+    public async Task<RoomModel> CreateRoomAsync(RoomCreateModel createRoomModel, int hostId)
     {
         Room room = new()
         {

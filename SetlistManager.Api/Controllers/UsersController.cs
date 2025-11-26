@@ -69,7 +69,7 @@ public class UsersController : BaseController
         if (resultAccessTokenModel is null || resultAccessTokenModel.AccessToken is null)
             return BadRequest();
 
-        AddTokenModel tokenModel = new()
+        TokenCreateModel tokenModel = new()
         {
             Provider = ProviderEnum.Genius,
             AccessToken = resultAccessTokenModel.AccessToken,

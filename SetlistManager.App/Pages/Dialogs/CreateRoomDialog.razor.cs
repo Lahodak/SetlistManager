@@ -18,7 +18,7 @@ public partial class CreateRoomDialog
     [Inject]
     public required ISnackbar Snackbar { get; set; }
 
-    private readonly CreateRoomModel _createRoomModel = new();
+    private readonly RoomCreateModel _createRoomModel = new();
     private List<SetlistModel>? _availableSetlists;
     private SetlistModel? _selectedSetlist;
     private string _searchString = string.Empty;
