@@ -12,12 +12,8 @@ public class SetlistConfig : IEntityTypeConfiguration<Setlist>
             .IsRequired();
         builder.Property(x => x.CreatorId)
             .IsRequired();
-        builder.Property(x => x.Creator)
-            .IsRequired();
-        builder.Property(x => x.SongsSetlists)
-            .IsRequired();
         builder.HasMany(r => r.Rooms)
             .WithOne(s => s.Setlist)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }

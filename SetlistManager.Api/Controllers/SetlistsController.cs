@@ -38,8 +38,8 @@ public class SetlistsController : BaseController
         return Ok(result);
     }
 
-    [HttpPut]
-    public async Task<ActionResult> EditSetlist(SetlistModel setlist)
+    [HttpPut("{id}")]
+    public async Task<ActionResult> EditSetlist(int id, [FromBody] SetlistModel setlist)
     {
         if(setlist.Songs is null)
             return BadRequest();
@@ -49,10 +49,12 @@ public class SetlistsController : BaseController
         return NoContent();    
     }
 
-    [HttpDelete]
+    [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteSetlist(int id)
     {
-        await _setlistService.TryDeleteSetlistAsync(id);
+        if(!await _setlistService.TryDeleteSetlistAsync(id))
+            return NotFound();
+
         return NoContent();
     }
 }

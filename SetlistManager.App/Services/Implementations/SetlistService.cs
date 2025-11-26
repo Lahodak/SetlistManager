@@ -27,7 +27,7 @@ public class SetlistService : ISetlistService
         => await _apiService.GetAsync<List<SetlistModel>>(_apiOptions.Value.SetlistsEndpoint);
 
     public async Task EditSetlist(SetlistModel setlistModel)
-        => await _apiService.PutAsync(_apiOptions.Value.SetlistsEndpoint, setlistModel);
+        => await _apiService.PutAsync(_apiOptions.Value.SetlistsEndpoint + _setlistByIdSuffix + setlistModel.Id, setlistModel);
 
     public async Task<bool> TryDeleteSetlistAsync(int id)
         => await _apiService.TryDeleteAsync(_apiOptions.Value.SetlistsEndpoint + _setlistByIdSuffix + id);
