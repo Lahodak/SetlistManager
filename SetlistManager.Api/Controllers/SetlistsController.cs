@@ -9,9 +9,9 @@ public class SetlistsController : BaseController
 {
     private readonly ISetlistsService _setlistService;
 
-    public SetlistsController(ISetlistsService setlistsDB)
+    public SetlistsController(ISetlistsService setlistService)
     {
-        _setlistService = setlistsDB;
+        _setlistService = setlistService;
     }
 
     [HttpGet]

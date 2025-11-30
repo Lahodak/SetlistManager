@@ -46,7 +46,7 @@ public class UsersController : BaseController
         return Ok(await _userService.GetCurrentUserAsync(userId.Value));
     }
 
-    [HttpGet("{id:int}/setlists")]
+    [HttpGet("{id}/setlists")]
     public async Task<ActionResult<List<SetlistModel>>> GetUserSetlists(int id)
     {
         return Ok(await _setlistsService.GetAllSetlistsOfUserAsync(id));
