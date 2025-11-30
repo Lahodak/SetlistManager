@@ -5,8 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using SetlistManager.Api.Extentions;
 using SetlistManager.Api.Hubs;
+using SetlistManager.Api.Middleware;
 using SetlistManager.Api.Options;
-using SetlistManager.Api.Services;
 using SetlistManager.Business.Extentions;
 using SetlistManager.Business.Options;
 using SetlistManager.Data;
@@ -19,10 +19,10 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddScoped<IJwtService, JwtService>();
-builder.Services.AddScoped<ICurrentUserContext, CurrentUserContext>();
-
 builder.Services.AddHttpClient();
+
+builder.Services.AddExceptionHandler<GlobalExceptionHandlingMiddleware>();
+builder.Services.AddProblemDetails();
 
 builder.Services.AddApiServices()
     .AddBusinessServices();
@@ -133,6 +133,8 @@ using (var scope = app.Services.CreateScope())
 app.UseAuthorization();
 
 app.UseResponseCompression();
+
+app.UseExceptionHandler();
 
 app.MapControllers();
 
