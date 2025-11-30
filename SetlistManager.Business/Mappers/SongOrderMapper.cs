@@ -1,8 +1,7 @@
 ﻿using SetlistManager.Common.Models;
 using SetlistManager.Data.Entities;
-using SetlistManager.Business.Mappers;
 
-namespace SetlistManager.Business.Services.Implementations;
+namespace SetlistManager.Business.Mappers;
 
 public static class SongOrderMapper
 {
