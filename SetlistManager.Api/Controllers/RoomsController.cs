@@ -32,7 +32,7 @@ public class RoomsController : BaseController
         return Ok(roomModel);
     }
 
-    [HttpGet("{roomId:in}")]
+    [HttpGet("{roomId:int}")]
     public async Task<ActionResult<RoomModel>> GetRoomByIdAsync(int roomId)
     {
         var roomModel = await _roomsService.GetRoomByIdAsync(roomId);
