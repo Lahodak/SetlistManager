@@ -1,9 +1,8 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using SetlistManager.Common.Models;
-using SetlistManager. Api.Services;
-using SetlistManager.Data.Entities;
+using SetlistManager.Api.Services;
 using SetlistManager.Business.Services;
+
 namespace SetlistManager. Api.Controllers;
 
 [Route("api/rooms")]

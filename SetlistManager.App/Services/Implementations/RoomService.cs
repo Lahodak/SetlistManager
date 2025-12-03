@@ -126,7 +126,6 @@ public class RoomService : IRoomService
         await ConfigureHttpClientAsync(httpClient);
 
         var response = await httpClient.GetAsync(_apiOptions.Value.RoomsEndpoint);
-        response.EnsureSuccessStatusCode();
         var jsonResponse = await response.Content.ReadAsStringAsync();
 
         if (string.IsNullOrWhiteSpace(jsonResponse))
@@ -136,7 +135,7 @@ public class RoomService : IRoomService
 
         try
         {
-            result = JsonConvert.DeserializeObject<List<RoomModel>>(jsonResponse);
+            result = JsonConvert.DeserializeObject<List<RoomModel>?>(jsonResponse);
         }
         catch
         {

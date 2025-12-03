@@ -1,7 +1,6 @@
 ﻿using SetlistManager.Common.Models;
 using Microsoft.EntityFrameworkCore;
 using SetlistManager.Data;
-using SetlistManager.Data.Entities;
 using SetlistManager.Business.Mappers;
 
 namespace SetlistManager.Business.Services.Implementations;

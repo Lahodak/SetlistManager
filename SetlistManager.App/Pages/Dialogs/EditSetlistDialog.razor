@@ -6,7 +6,7 @@
             @foreach (var song in _setlist.Songs)
             {
                 <MudListItem>
-                    <MudText>@song.Name (@song.Artist)</MudText>
+                    <MudText>@song.Name (@song.Artist.Nick)</MudText>
                     <MudSpacer />
                     <MudIconButton Icon="@Icons.Material.Filled.ArrowUpward" OnClick="() => MoveSongUp(song)" />
                     <MudIconButton Icon="@Icons.Material.Filled.ArrowDownward" OnClick="() => MoveSongDown(song)" />

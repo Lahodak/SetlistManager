@@ -15,14 +15,23 @@ public partial class RoomsPortal
     [Inject]
     public required NavigationManager NavigationManager { get; set; }
 
-    private MudTable<RoomModel> table = new();
+    private MudTable<RoomModel?> table = new();
     private string? searchString;
 
-    private async Task<TableData<RoomModel>> ServerReload(TableState state, CancellationToken token)
+    private async Task<TableData<RoomModel?>> ServerReload(TableState state, CancellationToken token)
     {
-        var allRooms = await RoomService.GetPublicActiveRoomsAsync() ?? [];
+        var allRooms = await RoomService.GetPublicActiveRoomsAsync();
 
         await Task.Delay(300, token);
+
+        if(allRooms is null)
+        {
+            return new TableData<RoomModel?>
+            {
+                TotalItems = 0,
+                Items = []
+            };
+        }
 
         var filtered = allRooms.Where(room =>
             string.IsNullOrWhiteSpace(searchString)
@@ -37,7 +46,7 @@ public partial class RoomsPortal
 
         var items = filtered.Skip(state.Page * state.PageSize).Take(state.PageSize).ToArray();
 
-        return new TableData<RoomModel>
+        return new TableData<RoomModel?>
         {
             TotalItems = filtered.Count(),
             Items = items
