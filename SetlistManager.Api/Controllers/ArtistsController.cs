@@ -21,15 +21,35 @@ public class ArtistsController : BaseController
     }
 
     [HttpPost]
-    public async Task<ActionResult> UploadArtist(ArtistModel artistModel)
+    public async Task<ActionResult> UploadArtist(ArtistCreateModel createModel)
     {
-        await _artistService.UploadArtistAsync(artistModel);
-        return Ok();
+        if (await _artistService.UploadArtistAsync(createModel))
+            return NoContent();
+
+        return BadRequest();
     }
 
-    [HttpGet("{artistId}")]
-    public async Task<ActionResult<ArtistModel>> GetArtistById(int artistId)
+    [HttpGet("{id}")]
+    public async Task<ActionResult<ArtistModel>> GetArtistById(int id)
+    {        
+        return Ok(await _artistService.GetArtistByIdAsync(id));
+    }
+    
+    [HttpDelete("{id}")]
+    public async Task<ActionResult> DeleteArtist(int id)
     {
-        return Ok(await _artistService.GetArtistModelByIdAsync(artistId));
+        if(await _artistService.TryDeleteArtistAsync(id))
+            return Ok();
+
+        return BadRequest();
+    }
+
+    [HttpPut("{id}")]
+    public async Task<ActionResult> UpdateArtist(int id, ArtistUpdateModel updateModel)
+    {
+        if (await _artistService.TryUpdateArtistAsync(id, updateModel))
+            return Ok();
+
+        return BadRequest();
     }
 }

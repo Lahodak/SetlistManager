@@ -18,7 +18,10 @@ public class RoomConfig : IEntityTypeConfiguration<Room>
             .IsRequired();
         builder.Property(x => x.HostId)
             .IsRequired();
-        builder.Property(x => x.Users)
-            .IsRequired();
+        builder.HasMany(x => x.Users)
+            .WithOne(x => x.Room)         
+            .HasForeignKey(x => x.RoomId)
+            .OnDelete(DeleteBehavior.SetNull);
+
     }
 }

@@ -5,6 +5,7 @@ namespace SetlistManager.App.Services.Implementations;
 
 public class ApiService : IApiService
 {
+    private const string _mediaType = "application/json";
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILocalStorageService _localStorage;
     private readonly ILogger<ApiService> _logger;
@@ -24,6 +25,47 @@ public class ApiService : IApiService
             httpClient.DefaultRequestHeaders.Authorization =
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
         }
+    }
+
+    public async Task<bool> TryDeleteAsync(string endpoint)
+    {
+        using var httpClient = _httpClientFactory.CreateClient();
+        
+        await ConfigureHttpClientAsync(httpClient);
+        
+        var response = await httpClient.DeleteAsync(endpoint);
+        
+        if(response.IsSuccessStatusCode)
+            return true;
+
+        return false;
+    }
+
+    public async Task<bool> TryPutAsync<T>(string endpoint, T data)
+    {
+        using var httpClient = _httpClientFactory.CreateClient();
+        await ConfigureHttpClientAsync(httpClient);
+        
+        string jsonData;
+        
+        try
+        {
+            jsonData = JsonConvert.SerializeObject(data);
+        }
+        catch (Exception ex)
+        {
+            _logger.Log(LogLevel.Error, ex, message: ex.Message);
+            return false;
+        }
+
+        var content = new StringContent(jsonData, System.Text.Encoding.UTF8, _mediaType);
+
+        var response = await httpClient.PutAsync(endpoint, content);
+        
+        if (response.IsSuccessStatusCode)
+            return true;
+        
+        return false;
     }
 
     public async Task<T?> GetAsync<T>(string endpoint)
@@ -70,7 +112,7 @@ public class ApiService : IApiService
             return default;
         }
 
-        var content = new StringContent(jsonData, System.Text.Encoding.UTF8, "application/json");
+        var content = new StringContent(jsonData, System.Text.Encoding.UTF8, _mediaType);
         var response = await httpClient.PostAsync(endpoint, content);
         response.EnsureSuccessStatusCode();
         var jsonResponse = await response.Content.ReadAsStringAsync();
@@ -109,7 +151,7 @@ public class ApiService : IApiService
             return default;
         }
 
-        var content = new StringContent(jsonData, System.Text.Encoding.UTF8, "application/json");
+        var content = new StringContent(jsonData, System.Text.Encoding.UTF8, _mediaType);
         var response = await httpClient.PostAsync(endpoint, content);
         response.EnsureSuccessStatusCode();
         var jsonResponse = await response.Content.ReadAsStringAsync();
@@ -148,7 +190,7 @@ public class ApiService : IApiService
             return default;
         }
 
-        var content = new StringContent(jsonData, System.Text.Encoding.UTF8, "application/json");
+        var content = new StringContent(jsonData, System.Text.Encoding.UTF8, _mediaType);
         var response = await httpClient.PutAsync(endpoint, content);
 
         response.EnsureSuccessStatusCode();

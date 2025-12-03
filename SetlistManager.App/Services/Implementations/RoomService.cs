@@ -82,7 +82,7 @@ public class RoomService : IRoomService
         }
     }
 
-    public async Task<RoomModel?> CreateRoomAsync(CreateRoomModel createRoomModel)
+    public async Task<RoomModel?> CreateRoomAsync(RoomCreateModel createRoomModel)
     {
         using var httpClient = _httpClientFactory.CreateClient();
         await ConfigureHttpClientAsync(httpClient);

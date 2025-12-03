@@ -12,43 +12,41 @@ public class RoomsService : IRoomsService
     private const string roomCodeAvailableCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     private const int roomCodeLength = 6;
     private readonly AppDbContext _dbContext;
-    private readonly IOrderMappingService _orderMappingService;
 
-    public RoomsService(AppDbContext dbContext, IOrderMappingService orderMappingService)
+    public RoomsService(AppDbContext dbContext)
     {
         _dbContext = dbContext;
-        _orderMappingService = orderMappingService;
     }
 
     public async Task<RoomModel?> GetRoomByIdAsync(int roomId)
     {
         var room = await _dbContext.Rooms
-            .Include(x => x.Setlist)
-                .ThenInclude(x => x!.SongsSetlists)
-                .ThenInclude(x => x.Song)
-                .ThenInclude(x => x.Language)
-            .Include(x => x.Setlist)
-                .ThenInclude(x => x!.SongsSetlists)
-                .ThenInclude(x => x.Song)
-                .ThenInclude(x => x.Artist)
-            .Include(x => x.Users)
-                .ThenInclude(x => x.Instrument)
-            .FirstOrDefaultAsync(x => x.Id == roomId);
+        .Include(x => x.Setlist)
+            .ThenInclude(x => x!.SongsSetlists)
+            .ThenInclude(x => x.Song)
+            .ThenInclude(x => x.Language)
+        .Include(x => x.Setlist)
+            .ThenInclude(x => x!.SongsSetlists)
+            .ThenInclude(x => x.Song)
+            .ThenInclude(x => x.Artist)
+        .Include(x => x.Users)
+            .ThenInclude(x => x.Instrument)
+        .FirstOrDefaultAsync(x => x.Id == roomId);
 
-        if(room is null)
+        if (room is null)
             return null;
 
-        var roomModel = room.ToModel();
+        var model = room.ToModel();
 
-        if (room.Setlist is null)
-            return roomModel;
+        if (room.Setlist is null || model.Setlist is null)
+            return model;
 
-        roomModel.Setlist = await _orderMappingService.MapSongEntityToModelOrder(room.Setlist);
+        model.Setlist = room.Setlist.MapSongEntityToModelWithOrder();
 
-        return roomModel;
+        return model;
     }
 
-    public async Task<RoomModel> CreateRoomAsync(CreateRoomModel createRoomModel, int hostId)
+    public async Task<RoomModel> CreateRoomAsync(RoomCreateModel createRoomModel, int hostId)
     {
         Room room = new()
         {
@@ -70,7 +68,6 @@ public class RoomsService : IRoomsService
         }
 
         room.Code = code.ToString();
-
         await _dbContext.Rooms.AddAsync(room);
         await _dbContext.SaveChangesAsync();
 
@@ -95,10 +92,10 @@ public class RoomsService : IRoomsService
 
         var roomModel = createdRoom.ToModel();
 
-        if (createdRoom.Setlist is null)
+        if (createdRoom.Setlist is null || roomModel.Setlist is null)
             return roomModel;
 
-        roomModel.Setlist = await _orderMappingService.MapSongEntityToModelOrder(createdRoom.Setlist);
+        roomModel.Setlist = createdRoom.Setlist.MapSongEntityToModelWithOrder();
 
         return roomModel;
     }
@@ -123,14 +120,15 @@ public class RoomsService : IRoomsService
 
         room.Users.Add(user);
 
+        await _dbContext.SaveChangesAsync();
+
         var roomModel = room.ToModel();
 
-        if (room.Setlist is null)
+        if (room.Setlist is null || roomModel.Setlist is null)
             return roomModel;
 
-        roomModel.Setlist = await _orderMappingService.MapSongEntityToModelOrder(room.Setlist);
+        roomModel.Setlist = room.Setlist.MapSongEntityToModelWithOrder();
 
-        await _dbContext.SaveChangesAsync();
         return roomModel;
     }
 
@@ -197,10 +195,10 @@ public class RoomsService : IRoomsService
         
         var model = room.ToModel();
 
-        if (room.Setlist is null)
+        if (room.Setlist is null || model.Setlist is null)
             return model;
 
-        model.Setlist = await _orderMappingService.MapSongEntityToModelOrder(room.Setlist);
+        model.Setlist = room.Setlist.MapSongEntityToModelWithOrder();
 
         return model;
     }

@@ -44,7 +44,7 @@ public class RoomHub : Hub
 
     public async Task<RoomModel?> JoinRoomAsync(JoinRoomModel joinRoomModel)
     {
-        if (Context.User is null || Context.User.Identity is null || !Context.User.Identity.IsAuthenticated)
+        if (Context.User is null || Context.User.Identity is null || Context.User.Identity.IsAuthenticated)
         {
             return null;
         }

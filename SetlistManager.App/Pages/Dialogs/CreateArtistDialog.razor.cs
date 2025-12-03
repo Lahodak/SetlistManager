@@ -5,21 +5,21 @@ using SetlistManager.Common.Models;
 
 namespace SetlistManager.App.Pages.Dialogs;
 
-public partial class CreateNewArtistDialog
+public partial class CreateArtistDialog
 {
     [CascadingParameter]
     public required IMudDialogInstance MudDialog { get; set; }
     [Inject]
     public required IArtistService ArtistService { get; set; }
 
-    private readonly ArtistModel _artistModel = new();
+    private readonly ArtistCreateModel _artistCreateModel = new();
 
     private async Task Save()
     {
-        if (_artistModel.Nick == string.Empty)
+        if (_artistCreateModel.Nick == string.Empty)
             return;
-        await ArtistService.UploadArtistAsync(_artistModel);
-        MudDialog.Close(DialogResult.Ok(_artistModel));
+        await ArtistService.UploadArtistAsync(_artistCreateModel);
+        MudDialog.Close(DialogResult.Ok(_artistCreateModel));
     }
 
     private void Cancel() => MudDialog.Cancel();

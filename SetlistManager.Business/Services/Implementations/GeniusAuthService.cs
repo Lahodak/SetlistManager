@@ -10,15 +10,13 @@ public class GeniusAuthService : IGeniusAuthService
 {
     private const string _authorizeEndpointSuffix = "/oauth/authorize";
     private const string _codeExchangeEndpointSuffix = "/oauth/token";
-    private readonly string _geniusApiBaseUrl;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ITempAuthStorageService _tempAuthStorageService;
     private readonly IOptions<GeniusOptions> _geniusOptions;
 
     public GeniusAuthService(IOptions<GeniusOptions> geniusOptions, IHttpClientFactory httpClientFactory, ITempAuthStorageService tempAuthStorageService)
     {
-        _geniusOptions = geniusOptions;
-        _geniusApiBaseUrl = _geniusOptions.Value.ApiBaseUrl;
+        _geniusOptions = geniusOptions;         
         _httpClientFactory = httpClientFactory;
         _tempAuthStorageService = tempAuthStorageService;
     }
@@ -34,7 +32,7 @@ public class GeniusAuthService : IGeniusAuthService
             State = await _tempAuthStorageService.CreateNewTempAuthSecret(userId)
         };
 
-        UriBuilder uri = new(_geniusApiBaseUrl + _authorizeEndpointSuffix)
+        UriBuilder uri = new(_geniusOptions.Value.ApiBaseUrl + _authorizeEndpointSuffix)
         {
             Query = new QueryBuilder
             {
@@ -58,13 +56,11 @@ public class GeniusAuthService : IGeniusAuthService
             Code = code,
             RedirectUri = _geniusOptions.Value.GetGrantAccessTokenRequest.RedirectUri
         };
-        UriBuilder uri = new(_geniusApiBaseUrl + _codeExchangeEndpointSuffix);
+        UriBuilder uri = new(_geniusOptions.Value.ApiBaseUrl + _codeExchangeEndpointSuffix);
 
         var client = _httpClientFactory.CreateClient();
 
-        string jsonData;
-
-        jsonData = JsonConvert.SerializeObject(data);
+        string jsonData = JsonConvert.SerializeObject(data);
 
         var content = new StringContent(jsonData, System.Text.Encoding.UTF8, "application/json");
 
@@ -79,7 +75,7 @@ public class GeniusAuthService : IGeniusAuthService
         }
         catch (Exception)
         {
-            return default;
+            return null;
         }
 
         return resultModel;

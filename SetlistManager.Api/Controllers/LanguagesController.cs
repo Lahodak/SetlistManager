@@ -15,6 +15,8 @@ public class LanguagesController : BaseController
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<LanguageModel>>> GetAvailableLanguages() 
-        => Ok(await _languageService.GetAvailableLanguagesAsync());
+    public async Task<ActionResult<IEnumerable<LanguageModel>>> GetAvailableLanguages()
+    {
+        return Ok(await _languageService.GetAvailableLanguagesAsync());
+    }
 }

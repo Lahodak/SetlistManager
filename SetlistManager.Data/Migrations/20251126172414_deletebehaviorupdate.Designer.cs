@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SetlistManager.Data;
 
@@ -11,9 +12,11 @@ using SetlistManager.Data;
 namespace SetlistManager.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251126172414_deletebehaviorupdate")]
+    partial class deletebehaviorupdate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -584,8 +587,7 @@ namespace SetlistManager.Data.Migrations
                 {
                     b.HasOne("SetlistManager.Data.Entities.Setlist", "Setlist")
                         .WithMany("Rooms")
-                        .HasForeignKey("SetlistId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .HasForeignKey("SetlistId");
 
                     b.Navigation("Setlist");
                 });
@@ -666,8 +668,7 @@ namespace SetlistManager.Data.Migrations
 
                     b.HasOne("SetlistManager.Data.Entities.Room", "Room")
                         .WithMany("Users")
-                        .HasForeignKey("RoomId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .HasForeignKey("RoomId");
 
                     b.Navigation("Instrument");
 

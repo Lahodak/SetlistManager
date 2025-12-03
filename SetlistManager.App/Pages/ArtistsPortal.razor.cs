@@ -44,6 +44,43 @@ public partial class ArtistsPortal
         };
     }
 
+    private async Task DeleteArtistAsync(ArtistModel artist)
+    {
+        bool? result = await DialogService.ShowMessageBox(
+            "Confirm Delete",
+            $"Are you sure you want to delete the artist '{artist.Nick}' along with it's songs?",
+            yesText: "Delete", noText: "Cancel", options: new DialogOptions { CloseOnEscapeKey = true }
+        );
+
+        if (result is not true)
+            return;
+
+        var deleteResult = await ArtistService.TryDeleteArtistAsync(artist.Id);
+        
+        if (deleteResult)
+        {
+            Snackbar.Add("Artist deleted successfully!", Severity.Success);
+            await _table.ReloadServerData();
+        }
+        else
+        {
+            Snackbar.Add("Failed to delete artist.", Severity.Error);
+        }        
+    }
+
+    private async Task UpdateArtistAsync(ArtistModel artist)
+    {
+        var parameters = new DialogParameters { ["ArtistToEdit"] = artist };
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+        var dialog = await DialogService.ShowAsync<EditArtistDialog>("Edit Artist", parameters, options);
+        var result = await dialog.Result;
+        if (!result!.Canceled)
+        {
+            Snackbar.Add("Artist updated successfully!", Severity.Success);
+            await _table.ReloadServerData();
+        }
+    }
+
     private void OnSearch(string text)
     {
         searchString = text;
@@ -55,7 +92,7 @@ public partial class ArtistsPortal
         var parameters = new DialogParameters();
         var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
 
-        var dialog = await DialogService.ShowAsync<CreateNewArtistDialog>("Create New Artist", parameters, options);
+        var dialog = await DialogService.ShowAsync<CreateArtistDialog>("Create New Artist", parameters, options);
         var result = await dialog.Result;
 
         if (!result!.Canceled)

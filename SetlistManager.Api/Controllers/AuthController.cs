@@ -1,12 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using SetlistManager. Api.Services;
+using SetlistManager.Api.Services;
 using SetlistManager.Business.Services;
 using SetlistManager.Common.Models;
 using SetlistManager.Data.Entities;
 
-namespace SetlistManager. Api.Controllers;
+namespace SetlistManager.Api.Controllers;
 
 [Route("api/auth")]
 
@@ -15,62 +15,26 @@ public class AuthController : BaseController
     private readonly SignInManager<User> _signInManager;
     private readonly IJwtService _jwtService;
     private readonly UserManager<User> _userManager;
-    private readonly IMailService _mailService;
+    private readonly IAuthService _authService;
 
-    public AuthController(UserManager<User> userManager, IJwtService jwtService, SignInManager<User> signInManager, IMailService mailService)
+    public AuthController(UserManager<User> userManager, IJwtService jwtService, SignInManager<User> signInManager, IAuthService authService)
     {
         _userManager = userManager;
         _jwtService = jwtService;
         _signInManager = signInManager;
-        _mailService = mailService;
+        _authService = authService;
     }
 
     [AllowAnonymous]
     [HttpPost]
     public async Task<ActionResult> Register(RegisterRequestModel model)
     {
-        var existingUser = await _userManager.FindByEmailAsync(model.Email);
+        var result = await _authService.RegisterAsync(model);
 
-        if (existingUser != null)
+        if(!result.Success)
         {
-            return BadRequest(new RegisterResultModel
-            {
-                Success = false,
-                Message = "User with this email already exists."
-            });
+            return BadRequest(result);
         }
-
-        var existingUserByName = await _userManager.FindByNameAsync(model.UserName);
-        if (existingUserByName != null)
-        {
-            return BadRequest(new RegisterResultModel
-            {
-                Success = false,
-                Message = "Username is already taken."
-            });
-        }
-
-        var user = new User
-        {
-            UserName = model.UserName,
-            Email = model.Email
-        };
-
-        var result = await _userManager.CreateAsync(user, model.Password);
-
-        if (!result.Succeeded)
-        {
-            return BadRequest(new RegisterResultModel
-            {
-                Success = false,
-                Message = string.Join(", ", result.Errors.Select(e => e.Description))
-            });
-        }
-
-        var createdUser = await _userManager.FindByEmailAsync(user.Email);
-
-        var confirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(createdUser!);
-        await _mailService.SendVerificationEmailAsync(user.Email, confirmationToken);
 
         return NoContent();
     }
@@ -110,49 +74,35 @@ public class AuthController : BaseController
     [HttpPost("verify")]
     public async Task<ActionResult<bool>> VerifyEmail(VerifyModel verifyModel)
     {
-        var user = await _userManager.FindByEmailAsync(verifyModel.Email);
+        var result = await _authService.VerifyEmailAsync(verifyModel);
 
-        if (user is null)
-            return Unauthorized(false);
+        if(!result)
+            return BadRequest(false);
 
-        var x = await _userManager.ConfirmEmailAsync(user, verifyModel.Token);
-
-        if (x.Succeeded)
-            return Ok(true);
-
-        return BadRequest(false);
+        return Ok(true);
     }
 
     [AllowAnonymous]
     [HttpPost("reset-password")]
     public async Task<ActionResult> ResetPassword(ResetPasswordModel resetModel)
     {
-        var user = await _userManager.FindByEmailAsync(resetModel.Email);
+        var result = await _authService.TryResetPasswordAsync(resetModel);
 
-        if (user is null)
-            return Unauthorized();
+        if (!result)
+            return BadRequest();
 
-        var x = await _userManager.ResetPasswordAsync(user, resetModel.Token, resetModel.NewPassword);
-
-        if (x.Succeeded)
-            return Ok();
-
-        return BadRequest();
+        return NoContent();
     }
 
     [AllowAnonymous]
     [HttpPost("request-password-reset")]
     public async Task<ActionResult> RequestPasswordReset(PasswordResetRequestModel resetRequestModel)
     {
-        var user = await _userManager.FindByEmailAsync(resetRequestModel.Email);
+        var result = await _authService.RequestPasswordResetAsync(resetRequestModel);
 
-        if(user is null)
-            return Unauthorized();
+        if(!result)
+            return BadRequest();
 
-        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-
-        await _mailService.SendPasswordResetEmailAsync(resetRequestModel.Email, token);
-
-        return Ok();
+        return NoContent();
     }
 }

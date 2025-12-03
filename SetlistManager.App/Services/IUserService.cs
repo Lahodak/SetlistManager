@@ -4,7 +4,7 @@ namespace SetlistManager.App.Services;
 
 public interface IUserService
 {
-    Task AddNewProviderToken(AddTokenModel tokenModel);
+    Task AddNewProviderToken(TokenCreateModel tokenModel);
     Task<UserModel?> GetUserAsync();
     Task<List<SetlistModel>?> GetAllUserSetlists();
     Task RegisterAsync(RegisterRequestModel model);

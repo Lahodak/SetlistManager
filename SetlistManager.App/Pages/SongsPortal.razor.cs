@@ -58,7 +58,7 @@ public partial class SongsPortal
         var parameters = new DialogParameters();
         var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
 
-        var dialog = await DialogService.ShowAsync<AddSongDialog>("Add New Song", parameters, options);
+        var dialog = await DialogService.ShowAsync<CreateSongDialog>("Create New Song", parameters, options);
         var result = await dialog.Result;
 
         if (!result!.Canceled)
@@ -66,5 +66,43 @@ public partial class SongsPortal
             Snackbar.Add("Song added successfully!", Severity.Success);
             await table.ReloadServerData();
         }
+    }
+
+    private async Task OpenEditSongDialog(SongModel song)
+    {
+        var parameters = new DialogParameters { { "Song", song } };
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+
+        var dialog = await DialogService.ShowAsync<EditSongDialog>("Update Song", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result!.Canceled)
+        {
+            Snackbar.Add("Song updated successfully!", Severity.Success);
+            await table.ReloadServerData();
+        }
+    }
+
+    private async Task DeleteSongAsync(SongModel song)
+    {
+        bool? result = await DialogService.ShowMessageBox(
+            "Confirm Delete",
+            $"Are you sure you want to delete the song '{song.Name}'?",
+            yesText: "Delete", noText: "Cancel", options: new DialogOptions { CloseOnEscapeKey = true }
+        );
+
+        if (result is not true)
+            return;
+
+        bool deleteResult = await SongService.TryDeleteSongAsync(song.Id);
+
+        if (!deleteResult)
+        {
+            Snackbar.Add("Failed to delete song.", Severity.Error);
+            return;
+        }
+        
+        Snackbar.Add("Song deleted successfully!", Severity.Success);
+        await table.ReloadServerData();        
     }
 }

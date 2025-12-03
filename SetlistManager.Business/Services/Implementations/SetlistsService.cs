@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SetlistManager.Business.Mappers;
 using SetlistManager.Common.Models;
 using SetlistManager.Data;
 using SetlistManager.Data.Entities;
@@ -7,12 +8,10 @@ namespace SetlistManager.Business.Services.Implementations;
 public class SetlistsService : ISetlistsService
 {
     private readonly AppDbContext _dbContext;
-    private readonly IOrderMappingService _orderMappingService;
 
-    public SetlistsService(AppDbContext dbContext, IOrderMappingService orderMappingService)
+    public SetlistsService(AppDbContext dbContext)
     {
         _dbContext = dbContext;
-        _orderMappingService = orderMappingService;
     }
 
     public async Task<SetlistModel?> GetSetlistByIdAsync(int id)
@@ -29,50 +28,21 @@ public class SetlistsService : ISetlistsService
         if (setlist is null)
             return null;
 
-        return await _orderMappingService.MapSongEntityToModelOrder(setlist);
-    }
-
-    public async Task<SetlistModel?> GetSetlistByNameAsync(string name)
-    {
-        var setlist = await _dbContext.Setlists
-            .Include(s => s.SongsSetlists)
-                .ThenInclude(s => s.Song)
-                    .ThenInclude(l => l.Language)
-            .Include(s => s.SongsSetlists)
-                .ThenInclude(s => s.Song)
-                    .ThenInclude(s => s.Artist)
-                    .FirstOrDefaultAsync(x => x.Name.Contains(name));
-
-        if(setlist is null) 
-            return null;
-
-        return await _orderMappingService.MapSongEntityToModelOrder(setlist);
+        return setlist.MapSongEntityToModelWithOrder();
     }
 
     public async Task SaveSetlistAsync(SetlistModel setlistModel)
     {
-        var songs = new List<Song>();
-        foreach (var x in setlistModel.Songs)
-        {
-            var song = await _dbContext.Songs.FirstOrDefaultAsync(y => y.Id == x.Id);
-            if (song != null)
-                songs.Add(song);
-        }
-
         var setlistToCreate = new Setlist
         {
             Name = setlistModel.Name,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
-            Creator = await _dbContext.Users.FirstAsync(x => x.Id == setlistModel.CreatorId),
-            CreatorId = setlistModel.CreatorId,
-            SongsSetlists = []
+            CreatorId = setlistModel.CreatorId
         };
 
-        await _dbContext.Setlists.AddAsync(_orderMappingService.MapSongModelToEntity(setlistModel, setlistToCreate));
+        await _dbContext.Setlists.AddAsync(setlistModel.MapSongModelToEntity(setlistToCreate));
         await _dbContext.SaveChangesAsync();
-
-        return;
     }
 
     public async Task<IEnumerable<SetlistModel>?> GetAllSetlistsOfUserAsync(int userId)
@@ -87,8 +57,9 @@ public class SetlistsService : ISetlistsService
             .Where(x => x.Id == userId)
             .ToListAsync();
 
-        return setlists.Select(setlists => _orderMappingService.MapSongEntityToModelOrder(setlists).Result);
+        return setlists.Select(setlists => setlists.MapSongEntityToModelWithOrder());
     }
+
     public async Task<IEnumerable<SetlistModel>?> GetAllSetlistsAsync()
     {
         var setlists = await _dbContext.Setlists
@@ -100,7 +71,9 @@ public class SetlistsService : ISetlistsService
                     .ThenInclude(s => s.Artist)
             .ToListAsync();        
         
-        return setlists.Select(setlists => _orderMappingService.MapSongEntityToModelOrder(setlists).Result);
+        return setlists
+            .Select(setlists => setlists
+            .MapSongEntityToModelWithOrder());
     }
 
     public async Task EditSetlistAsync(SetlistModel setlistModel)
@@ -116,12 +89,26 @@ public class SetlistsService : ISetlistsService
 
         setlistToBeEdited.Name = setlistModel.Name;
         setlistToBeEdited.UpdatedAt = DateTime.Now;
-        
-        foreach(var song in setlistToBeEdited.SongsSetlists)
+
+        foreach (var song in setlistToBeEdited.SongsSetlists)
         {
             song.Order = setlistModel.Songs.First(x => x.Id == song.SongId).Order;
         }
 
         await _dbContext.SaveChangesAsync();
+    }
+
+    public async Task<bool> TryDeleteSetlistAsync(int id)
+    {
+        var setlistToBeDeleted = await _dbContext.Setlists
+            .FirstOrDefaultAsync(x => x.Id == id);
+
+        if (setlistToBeDeleted is null)
+            return false;
+        
+        _dbContext.Setlists.Remove(setlistToBeDeleted);
+        await _dbContext.SaveChangesAsync();
+        
+        return true;
     }
 }

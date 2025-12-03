@@ -46,7 +46,7 @@ public class UsersController : BaseController
         return Ok(await _userService.GetCurrentUserAsync(userId.Value));
     }
 
-    [HttpGet("{id:int}/setlists")]
+    [HttpGet("{id}/setlists")]
     public async Task<ActionResult<List<SetlistModel>>> GetUserSetlists(int id)
     {
         return Ok(await _setlistsService.GetAllSetlistsOfUserAsync(id));
@@ -66,10 +66,10 @@ public class UsersController : BaseController
 
         var resultAccessTokenModel = await _geniusAuthService.ExchangeGeniusCode(grantResultModel.Code);
 
-        if (resultAccessTokenModel is null || resultAccessTokenModel.AccessToken is null )
+        if (resultAccessTokenModel is null || resultAccessTokenModel.AccessToken is null)
             return BadRequest();
 
-        AddTokenModel tokenModel = new()
+        TokenCreateModel tokenModel = new()
         {
             Provider = ProviderEnum.Genius,
             AccessToken = resultAccessTokenModel.AccessToken,

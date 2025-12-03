@@ -19,12 +19,4 @@ public class LanguageService : ILanguageService
         .ToListAsync())
         .Select(x => x.ToModel())
         .ToList();
-
-    public async Task<Language> GetLanguageByIdAsync(int id) 
-        => await _dbContext.Languages
-        .FirstAsync(x => x.Id == id);
-
-    public async Task<Language> GetLanguageByNameAsync(string name)
-    => await _dbContext.Languages
-        .FirstAsync(x => x.Name.Contains(name));
 }

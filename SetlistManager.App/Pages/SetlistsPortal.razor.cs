@@ -81,15 +81,34 @@ public partial class SetlistsPortal
         }
     }
 
-    private async Task DeleteSetlist(int id)
+    private async Task DeleteSetlist(SetlistModel model)
     {
+        bool? result = await DialogService.ShowMessageBox(
+            "Confirm Delete",
+            $"Are you sure you want to delete the setlist '{model.Name}'?",
+            yesText: "Delete", noText: "Cancel", options: new DialogOptions { CloseOnEscapeKey = true }
+        );
+
+        if (result is not true)
+            return;
+
+        var success = await SetlistService.TryDeleteSetlistAsync(model.Id);
+
+        if (!success)
+        {
+            Snackbar.Add("Failed deleting setlist", Severity.Error);
+            return;
+        }
+
+        Snackbar.Add("Setlist deleted successfully!", Severity.Success);
+
         await table.ReloadServerData();
     }
 
     private async Task OpenGenerateDialog()
     {
         var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
-        var dialog = await DialogService.ShowAsync<CreateNewSetlistDialog>("", options);
+        var dialog = await DialogService.ShowAsync<CreateSetlistDialog>("", options);
 
         var result = await dialog.Result;
         if (result is null || !result.Canceled)

@@ -10,27 +10,29 @@ namespace SetlistManager. Api.Controllers;
 
 public class RoomsController : BaseController
 {
-    private readonly UserManager<User> _userManager;
     private readonly IRoomsService _roomsService;
-    private readonly ICurrentUserContext _currentUserContext;
+    private readonly ICurrentUserContext _userContext;
 
-    public RoomsController(UserManager<User> userManager, IRoomsService roomsService, ICurrentUserContext currentUserContext)
+    public RoomsController(IRoomsService roomsService, ICurrentUserContext userContext)
     {
-        _userManager = userManager;
         _roomsService = roomsService;
-        _currentUserContext = currentUserContext;
+        _userContext = userContext;
     }
 
     [HttpPost]
-    public async Task<ActionResult<RoomModel>> CreateRoomAsync(CreateRoomModel roomCreateModel)
+    public async Task<ActionResult<RoomModel>> CreateRoomAsync(RoomCreateModel roomCreateModel)
     {
-        var userId = (int)_currentUserContext.GetCurrentUserId()!;
-        var roomModel = await _roomsService.CreateRoomAsync(roomCreateModel, userId);        
+        var userId = _userContext.GetCurrentUserId();
+
+        if (userId is null)
+            return Unauthorized();
+
+        var roomModel = await _roomsService.CreateRoomAsync(roomCreateModel, userId.Value);        
 
         return Ok(roomModel);
     }
 
-    [HttpGet("{roomId:int}")]
+    [HttpGet("{roomId:in}")]
     public async Task<ActionResult<RoomModel>> GetRoomByIdAsync(int roomId)
     {
         var roomModel = await _roomsService.GetRoomByIdAsync(roomId);
@@ -56,6 +58,10 @@ public class RoomsController : BaseController
     public async Task<ActionResult<List<RoomModel>>> GetAllActiveRoomsAsync()
     {
         var rooms = await _roomsService.GetPublicActiveRoomsAsync();
+
+        if(rooms.Count == 0)
+            return NotFound("No active rooms found");
+
         return Ok(rooms);
     }
 }

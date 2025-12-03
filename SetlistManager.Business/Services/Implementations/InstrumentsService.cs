@@ -3,19 +3,19 @@ using SetlistManager.Common.Models;
 using SetlistManager.Business.Mappers;
 using SetlistManager.Data;
 
-namespace SetlistManager.Business.Services;
+namespace SetlistManager.Business.Services.Implementations;
 
 public class InstrumentsService : IInstrumentsService
 {
-    private readonly AppDbContext _appDbContext;
+    private readonly AppDbContext _dbContext;
     public InstrumentsService(AppDbContext appDbContext)
     {
-        _appDbContext = appDbContext;
+        _dbContext = appDbContext;
     }
 
     public async Task<List<InstrumentModel>> GetAvailableInstrumentsAsync()
     {
-        var instuments = await _appDbContext.Instruments.ToListAsync();
+        var instuments = await _dbContext.Instruments.ToListAsync();
 
         return instuments
             .Select(x => x.ToModel())

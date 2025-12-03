@@ -27,6 +27,7 @@
             <HeaderContent>
                 <MudTh><MudTableSortLabel SortLabel="title_field" T="SongModel">Title</MudTableSortLabel></MudTh>
                 <MudTh><MudTableSortLabel SortLabel="artist_field" T="SongModel">Artist</MudTableSortLabel></MudTh>
+				<MudTh>Actions</MudTh>
             </HeaderContent>
 
             <RowTemplate>
@@ -37,6 +38,10 @@
                     </MudLink>
                 </MudTd>
                 <MudTd DataLabel="Artist">@context.Artist!.Nick</MudTd>
+                <MudTd DataLabel="Actions">
+                    <MudIconButton OnClick="() => OpenEditSongDialog(context)" Icon="@Icons.Material.Filled.EditNote" Color="Color.Primary" Size="Size.Small"></MudIconButton>
+                    <MudIconButton OnClick="() => DeleteSongAsync(context)" Icon="@Icons.Material.Filled.DeleteForever" Color="Color.Error"></MudIconButton>
+				</MudTd>
             </RowTemplate>
 
             <NoRecordsContent>
