@@ -15,17 +15,30 @@ public class SongService : ISongService
         _dbContext = dbContext;
     }
 
-    public async Task<List<SongModel>?> GetSongsAsync()
+    public async Task<PagedResponse<SongModel>> GetSongsAsync(PagedRequest request)
     {
-        var songs = await _dbContext.Songs
-        .Include(x => x.Language)
-        .Include(x => x.Artist)
-        .AsNoTracking()
-        .ToListAsync();
+        var query = _dbContext.Songs
+        .Where(x => x.Name.Contains(request.Query ?? string.Empty) || x.Artist.Nick.Contains(request.Query ?? string.Empty));
+        
+        var totalCount = await query.CountAsync();
 
-        return songs
-            .Select(x => x.ToModel())
-            .ToList();
+        var songs = await query
+            .Include(x => x.Language)
+            .Include(x => x.Artist)
+            .Skip(request.PageIndex * request.PageSize)
+            .Take(request.PageSize)
+            .AsNoTracking()
+            .ToListAsync();
+
+        PagedResponse<SongModel> response = new()
+        {
+            TotalCount = totalCount,
+            Items = songs
+                .Select(x => x.ToModel())
+                .ToList()
+        };
+
+        return response;
     }
 
     public async Task<SongModel?> GetSongByIdAsync(int songId)

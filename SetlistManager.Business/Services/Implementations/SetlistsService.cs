@@ -60,20 +60,35 @@ public class SetlistsService : ISetlistsService
         return setlists.Select(setlists => setlists.MapSongEntityToModelWithOrder());
     }
 
-    public async Task<IEnumerable<SetlistModel>?> GetAllSetlistsAsync()
+    public async Task<PagedResponse<SetlistModel>> GetAllSetlistsAsync(PagedRequest request)
     {
-        var setlists = await _dbContext.Setlists
+        var query = _dbContext.Setlists
+            .Where(s => string.IsNullOrEmpty(request.Query) || s.Name.Contains(request.Query));
+
+        var totalCount = await query.CountAsync();
+
+        var setlists = await query
             .Include(s => s.SongsSetlists)
                 .ThenInclude(s => s.Song)
                     .ThenInclude(l => l.Language)
             .Include(s => s.SongsSetlists)
                 .ThenInclude(s => s.Song)
                     .ThenInclude(s => s.Artist)
-            .ToListAsync();        
-        
-        return setlists
-            .Select(setlists => setlists
-            .MapSongEntityToModelWithOrder());
+            .Skip(request.PageIndex * request.PageSize)
+            .Take(request.PageSize)
+            .AsNoTracking()
+            .ToListAsync();
+
+        PagedResponse<SetlistModel> response = new()
+        {
+            TotalCount = totalCount,
+            Items = setlists
+                .Select(setlists => setlists
+                .MapSongEntityToModelWithOrder())
+                .ToList()
+        };
+
+        return response;
     }
 
     public async Task EditSetlistAsync(SetlistModel setlistModel)

@@ -4,7 +4,7 @@ namespace SetlistManager.Business.Services;
 
 public interface IArtistService
 {
-    Task<List<ArtistModel>> GetAllArtistsAsync();
+    Task<PagedResponse<ArtistModel>> GetAllArtistsAsync(PagedRequest request);
     Task<bool> UploadArtistAsync(ArtistCreateModel createModel);
     Task<ArtistModel> GetArtistByIdAsync(int id);
     Task<bool> TryDeleteArtistAsync(int id);

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.Extensions.Options;
 using SetlistManager.App.Options;
 using SetlistManager.Common.Models;
 
@@ -17,8 +18,20 @@ public class SongService : ISongService
         _apiService = apiService;
     }
 
-    public async Task<List<SongModel>?> GetAllSongsAsync() 
-        => await _apiService.GetAsync<List<SongModel>>(_apiOptions.Value.SongsEndpoint);
+    public async Task<PagedResponse<SongModel>?> GetAllSongsAsync(PagedRequest request)
+    {
+        UriBuilder uri = new(_apiOptions.Value.SongsEndpoint)
+        {
+            Query = new QueryBuilder
+            {
+                { "PageSize", request.PageSize.ToString() },
+                { "PageIndex", request.PageIndex.ToString() },
+                { "Query", request.Query ?? string.Empty }
+            }.ToString()
+        };
+
+        return await _apiService.GetAsync<PagedResponse<SongModel>>(uri.ToString());
+    }
 
     public async Task<SongModel?> GetSongByIdAsync(int id) 
         => await _apiService.GetAsync<SongModel>(_apiOptions.Value.SongsEndpoint + _getSongbyIdSuffix + id.ToString());
