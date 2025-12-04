@@ -52,7 +52,7 @@ public class RoomsService : IRoomsService
         {
             Name = createRoomModel.Name,
             HostId = hostId,
-            SetlistId = createRoomModel.SetlistModel!.Id,
+            SetlistId = createRoomModel.SetlistModel?.Id,
             IsPublic = createRoomModel.IsPublic,
             UpdatedBy = hostId,
             CreatedAt = DateTime.UtcNow,
@@ -155,11 +155,12 @@ public class RoomsService : IRoomsService
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task<List<RoomModel>> GetPublicActiveRoomsAsync()
+    public async Task<PagedResponse<RoomModel>> GetPublicActiveRoomsAsync(PagedRequest request)
     {
         var rooms = await _dbContext.Rooms            
             .Where(x => x.IsPublic)
             .Where(x => x.IsActive)
+            .Where(x => x.Name.Contains(request.Query ?? string.Empty))
             .Include(x => x.Setlist)
                 .ThenInclude(x => x!.SongsSetlists)
                 .ThenInclude(x => x.Song)
@@ -167,12 +168,20 @@ public class RoomsService : IRoomsService
             .Include(x => x.Setlist)
                 .ThenInclude(x => x!.SongsSetlists)
                 .ThenInclude(x => x.Song)
-                .ThenInclude(x => x.Artist)            
+                .ThenInclude(x => x.Artist)
             .Include(x => x.Users)
                 .ThenInclude(x => x.Instrument)
+            .Skip(request.PageIndex)
+            .Take(request.PageSize)
             .ToListAsync();
+        
+        PagedResponse<RoomModel> response = new()
+        {
+            Items = rooms.Select(x => x.ToModel()).ToList(),
+            TotalCount = rooms.Count
+        };
 
-        return rooms.Select(x => x.ToModel()).ToList();
+        return response;
     }
 
     public async Task<RoomModel?> GetRoomByCodeAsync(string roomCode)

@@ -14,17 +14,22 @@ public partial class RoomsPortal
     public required IRoomService RoomService { get; set; }
     [Inject]
     public required NavigationManager NavigationManager { get; set; }
+    private PagedRequest pageStatus = new();
 
     private MudTable<RoomModel?> table = new();
     private string? searchString;    
 
     private async Task<TableData<RoomModel?>> ServerReload(TableState state, CancellationToken token)
-    {
-        var allRooms = await RoomService.GetPublicActiveRoomsAsync();
+    {        
+        await Task.Delay(500, token);
 
-        await Task.Delay(300, token);
+        pageStatus.PageIndex = state.Page;
+        pageStatus.PageSize = state.PageSize;
+        pageStatus.Query = searchString;        
 
-        if(allRooms is null)
+        var response = await RoomService.GetPublicActiveRoomsAsync(pageStatus);
+
+        if(response?.Items is null)
         {
             return new TableData<RoomModel?>
             {
@@ -33,10 +38,7 @@ public partial class RoomsPortal
             };
         }
 
-        var filtered = allRooms.Where(room =>
-            string.IsNullOrWhiteSpace(searchString)
-            || room.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase)
-        );
+        IEnumerable<RoomModel> filtered = response.Items;
 
         filtered = state.SortLabel switch
         {
@@ -44,12 +46,10 @@ public partial class RoomsPortal
             _ => filtered
         };
 
-        var items = filtered.Skip(state.Page * state.PageSize).Take(state.PageSize).ToArray();
-
         return new TableData<RoomModel?>
         {
-            TotalItems = filtered.Count(),
-            Items = items
+            TotalItems = response.TotalCount,
+            Items = filtered
         };
     }
 

@@ -1,6 +1,8 @@
 ﻿using Blazored.LocalStorage;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Options;
+using MudBlazor.Extensions;
 using Newtonsoft.Json;
 using SetlistManager.App.Options;
 using SetlistManager.Common.Models;
@@ -119,23 +121,32 @@ public class RoomService : IRoomService
         return result;
     }
 
-    public async Task<List<RoomModel>?> GetPublicActiveRoomsAsync()
+    public async Task<PagedResponse<RoomModel>?> GetPublicActiveRoomsAsync(PagedRequest request)
     {
-
         using var httpClient = _httpClientFactory.CreateClient();
         await ConfigureHttpClientAsync(httpClient);
 
-        var response = await httpClient.GetAsync(_apiOptions.Value.RoomsEndpoint);
+        UriBuilder uri = new(_apiOptions.Value.RoomsEndpoint)
+        {
+            Query = new QueryBuilder
+            {
+                { "PageSize", request.PageSize.ToString() },
+                { "PageIndex", request.PageIndex.ToString() },
+                { "Query", request.Query ?? string.Empty }
+            }.ToString()
+        };
+
+        var response = await httpClient.GetAsync(uri.ToString());
         var jsonResponse = await response.Content.ReadAsStringAsync();
 
         if (string.IsNullOrWhiteSpace(jsonResponse))
             return default;
 
-        List<RoomModel>? result;
+        PagedResponse<RoomModel>? result;
 
         try
         {
-            result = JsonConvert.DeserializeObject<List<RoomModel>?>(jsonResponse);
+            result = JsonConvert.DeserializeObject<PagedResponse<RoomModel>?>(jsonResponse);
         }
         catch
         {

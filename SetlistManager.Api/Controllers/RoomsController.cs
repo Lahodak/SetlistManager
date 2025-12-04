@@ -54,11 +54,11 @@ public class RoomsController : BaseController
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<RoomModel>>> GetAllActiveRoomsAsync()
+    public async Task<ActionResult<PagedResponse<RoomModel>>> GetPublicActiveRoomsAsync([FromQuery] PagedRequest request)
     {
-        var rooms = await _roomsService.GetPublicActiveRoomsAsync();
+        var rooms = await _roomsService.GetPublicActiveRoomsAsync(request);
 
-        if(rooms.Count == 0)
+        if(rooms.Items is null)
             return NotFound("No active rooms found");
 
         return Ok(rooms);
