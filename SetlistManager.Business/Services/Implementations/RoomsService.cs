@@ -171,7 +171,7 @@ public class RoomsService : IRoomsService
                 .ThenInclude(x => x.Artist)
             .Include(x => x.Users)
                 .ThenInclude(x => x.Instrument)
-            .Skip(request.PageIndex)
+            .Skip(request.PageIndex * request.PageSize)
             .Take(request.PageSize)
             .ToListAsync();
         

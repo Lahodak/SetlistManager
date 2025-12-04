@@ -16,20 +16,23 @@ public partial class SongsPortal
     public required ISongService SongService { get; set; }
 
     private MudTable<SongModel> table = new();
+    private PagedRequest pageState = new();
     private string? searchString;
 
     private async Task<TableData<SongModel>?> ServerReload(TableState state, CancellationToken token)
     {
-        var allSongs = await SongService.GetAllSongsAsync();
         await Task.Delay(300, token);
 
-        if (allSongs is null)
+        pageState.Query = searchString;
+        pageState.PageIndex = state.Page;
+        pageState.PageSize = state.PageSize;
+
+        var response = await SongService.GetAllSongsAsync(pageState);
+
+        if (response?.Items is null)
             return null;
 
-        var filtered = allSongs.Where(song =>
-            string.IsNullOrWhiteSpace(searchString)
-            || song.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase)
-        );
+        IEnumerable<SongModel>? filtered = response.Items;
 
         filtered = state.SortLabel switch
         {
@@ -38,12 +41,10 @@ public partial class SongsPortal
             _ => filtered
         };
 
-        var items = filtered.Skip(state.Page * state.PageSize).Take(state.PageSize).ToArray();
-
         return new TableData<SongModel>
         {
-            TotalItems = filtered.Count(),
-            Items = items
+            TotalItems = response.Items.Count,
+            Items = filtered
         };
     }
 
