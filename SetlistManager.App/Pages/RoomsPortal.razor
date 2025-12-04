@@ -42,11 +42,11 @@
             </HeaderContent>
 
             <RowTemplate>
-                <MudTd DataLabel="Name">@context.Name</MudTd>
-                <MudTd DataLabel="Public">@context.IsPublic</MudTd>
+                <MudTd DataLabel="Name">@context?.Name</MudTd>
+                <MudTd DataLabel="Public">@context?.IsPublic</MudTd>
                 <MudTd>
                     <MudButton Variant="Variant.Outlined" Color="Color.Primary" Size="Size.Small"
-                               OnClick="() => JoinSelectedRoom(context)">
+                               OnClick="() => JoinSelectedRoom(context!)">
                         Join
                     </MudButton>
                 </MudTd>

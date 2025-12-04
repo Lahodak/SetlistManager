@@ -16,7 +16,7 @@ public partial class RoomsPortal
     public required NavigationManager NavigationManager { get; set; }
 
     private MudTable<RoomModel?> table = new();
-    private string? searchString;
+    private string? searchString;    
 
     private async Task<TableData<RoomModel?>> ServerReload(TableState state, CancellationToken token)
     {
@@ -80,5 +80,5 @@ public partial class RoomsPortal
     private void JoinSelectedRoom(RoomModel room)
     {
         NavigationManager.NavigateTo($"/room/{room.Code}");
-    }
+    }    
 }
