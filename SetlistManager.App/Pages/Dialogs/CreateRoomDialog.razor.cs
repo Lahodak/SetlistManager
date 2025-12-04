@@ -26,7 +26,8 @@ public partial class CreateRoomDialog
 
     protected override async Task OnInitializedAsync()
     {
-        _availableSetlists = await SetlistService.GetAllSetlistsAsync();
+        _availableSetlists = (await SetlistService.GetAllSetlistsAsync(new() { PageSize = int.MaxValue }))?.Items;
+
         if (_availableSetlists is null)
         {
             Snackbar.Add("Couldn't find any available Setlists", Severity.Error);

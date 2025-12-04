@@ -6,7 +6,7 @@ public interface ISetlistService
 {
     Task PushSetlist(SetlistModel setlistModel);
     Task<SetlistModel?> GetSetlistById(int id);
-    Task<List<SetlistModel>?> GetAllSetlistsAsync();
+    Task<PagedResponse<SetlistModel>?> GetAllSetlistsAsync(PagedRequest request);
     Task EditSetlist(SetlistModel setlistModel);
     Task<bool> TryDeleteSetlistAsync(int id);
 }

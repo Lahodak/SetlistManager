@@ -16,27 +16,28 @@ public partial class SetlistsPortal
     public required ISnackbar Snackbar { get; set; }
 
     private MudTable<SetlistModel> table = new();
+    private PagedRequest pageStatus = new();
     private string? searchString;
 
     private async Task<TableData<SetlistModel>?> ServerReload(TableState state, CancellationToken token)
     {
-        var allSetlists = await SetlistService.GetAllSetlistsAsync();
         await Task.Delay(300, token);
+        pageStatus.Query = searchString;
+        pageStatus.PageIndex = state.Page;
+        pageStatus.PageSize = state.PageSize;
 
-        if (allSetlists is null)
+        var response = await SetlistService.GetAllSetlistsAsync(pageStatus);
+
+        if (response?.Items is null)
         {
             return new TableData<SetlistModel>
             {
                 TotalItems = 0,
                 Items = []
             };
-        }
-        ;
+        }        
 
-        var filtered = allSetlists.Where(setlist =>
-            string.IsNullOrWhiteSpace(searchString)
-            || setlist.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase)
-        );
+        var filtered = response.Items.AsQueryable();
 
         filtered = state.SortLabel switch
         {
@@ -44,12 +45,11 @@ public partial class SetlistsPortal
             _ => filtered
         };
 
-        var items = filtered.Skip(state.Page * state.PageSize).Take(state.PageSize).ToArray();
 
         return new TableData<SetlistModel>
         {
-            TotalItems = filtered.Count(),
-            Items = items
+            TotalItems = response.TotalCount,
+            Items = filtered
         };
     }
 
