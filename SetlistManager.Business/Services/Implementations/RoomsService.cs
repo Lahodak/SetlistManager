@@ -157,10 +157,14 @@ public class RoomsService : IRoomsService
 
     public async Task<PagedResponse<RoomModel>> GetPublicActiveRoomsAsync(PagedRequest request)
     {
-        var rooms = await _dbContext.Rooms            
+        var query = _dbContext.Rooms
             .Where(x => x.IsPublic)
             .Where(x => x.IsActive)
-            .Where(x => x.Name.Contains(request.Query ?? string.Empty))
+            .Where(x => x.Name.Contains(request.Query ?? string.Empty));
+
+        var totalCount = await query.CountAsync();
+
+        var rooms = await query
             .Include(x => x.Setlist)
                 .ThenInclude(x => x!.SongsSetlists)
                 .ThenInclude(x => x.Song)
@@ -173,12 +177,15 @@ public class RoomsService : IRoomsService
                 .ThenInclude(x => x.Instrument)
             .Skip(request.PageIndex * request.PageSize)
             .Take(request.PageSize)
+            .AsNoTracking()
             .ToListAsync();
-        
+
         PagedResponse<RoomModel> response = new()
         {
-            Items = rooms.Select(x => x.ToModel()).ToList(),
-            TotalCount = rooms.Count
+            TotalCount = totalCount,
+            Items = rooms
+                .Select(x => x.ToModel())
+                .ToList()
         };
 
         return response;

@@ -26,7 +26,7 @@ public partial class EditSongDialog
     protected override async Task OnInitializedAsync()
     {
         _languages = await LanguageService.GetAvailableLanguagesAsync();
-        _artists = await ArtistService.GetAvailableArtistsAsync();
+        _artists = (await ArtistService.GetAvailableArtistsAsync(new() { PageSize = int.MaxValue }))?.Items;
 
         if (_artists is null || _artists.Count == 0)
         {

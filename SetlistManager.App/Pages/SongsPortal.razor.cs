@@ -43,7 +43,7 @@ public partial class SongsPortal
 
         return new TableData<SongModel>
         {
-            TotalItems = response.Items.Count,
+            TotalItems = response.TotalCount,
             Items = filtered
         };
     }

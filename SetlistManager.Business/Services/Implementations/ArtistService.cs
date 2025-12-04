@@ -15,18 +15,30 @@ public class ArtistService : IArtistService
         _dbContext = dbContext;
     }
 
-    public async Task<List<ArtistModel>> GetAllArtistsAsync()
+    public async Task<PagedResponse<ArtistModel>> GetAllArtistsAsync(PagedRequest request)
     {
-        var artists = await _dbContext.Artists
-            .Include(x => x.Songs)!
-            .ThenInclude(x => x.Language)            
-            .ToListAsync();
+        var query = _dbContext.Artists
+        .Where(x => x.Nick.Contains(request.Query ?? string.Empty));
 
-        var artistModels = artists
-            .Select(a => a.ToModel(true))
-            .ToList();
+        var totalCount = await query.CountAsync();
+
+        var artists = await query
+           .Include(x => x.Songs)!
+           .ThenInclude(x => x.Language)
+           .AsNoTracking()
+           .Skip(request.PageIndex * request.PageSize)
+           .Take(request.PageSize)
+           .ToListAsync();
+
+        PagedResponse<ArtistModel> response = new()
+        {
+            TotalCount = totalCount,
+            Items = artists
+                .Select(a => a.ToModel(true))
+                .ToList()
+        };
         
-        return artistModels;
+        return response;
     }
 
     public async Task<bool> UploadArtistAsync(ArtistCreateModel createModel)
