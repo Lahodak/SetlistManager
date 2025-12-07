@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Azure.Core;
+using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.Extensions.Options;
 using SetlistManager.App.Options;
 using SetlistManager.Common.Models;
 
@@ -15,8 +17,20 @@ public class ArtistService : IArtistService
         _apiService = apiService;
     }
 
-    public async Task<List<ArtistModel>?> GetAvailableArtistsAsync() 
-        => await _apiService.GetAsync<List<ArtistModel>>(_apiOptions.Value.ArtistsEndpoint);
+    public async Task<PagedResponse<ArtistModel>?> GetAvailableArtistsAsync(PagedRequest request)
+    {
+        UriBuilder uri = new(_apiOptions.Value.ArtistsEndpoint)
+        {
+            Query = new QueryBuilder
+            {
+                { "PageSize", request.PageSize.ToString() },
+                { "PageIndex", request.PageIndex.ToString() },
+                { "Query", request.Query ?? string.Empty }
+            }.ToString()
+        };
+
+        return await _apiService.GetAsync<PagedResponse<ArtistModel>?>(uri.ToString());
+    }
 
     public async Task<ArtistModel?> GetArtistByIdAsync(int id) 
         => await _apiService.GetAsync<ArtistModel>(_apiOptions.Value.ArtistsEndpoint + "/" + id.ToString());

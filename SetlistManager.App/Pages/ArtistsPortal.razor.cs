@@ -16,31 +16,40 @@ public partial class ArtistsPortal
     public required IArtistService ArtistService { get; set; }
 
     private MudTable<ArtistModel> _table = new();
+    private PagedRequest pageStatus = new();
     private string? searchString;
 
     private async Task<TableData<ArtistModel>> ServerReload(TableState state, CancellationToken token)
     {
-        var allArtists = await ArtistService.GetAvailableArtistsAsync();
         await Task.Delay(300, token);
+        pageStatus.PageIndex = state.Page;
+        pageStatus.PageSize = state.PageSize;
+        pageStatus.Query = searchString;
 
-        var filtered = allArtists!.Where(artist =>
-            string.IsNullOrWhiteSpace(searchString)
-            || artist.Nick.Contains(searchString, StringComparison.OrdinalIgnoreCase)
-        );
+        var result = await ArtistService.GetAvailableArtistsAsync(pageStatus);
+
+        if(result?.Items is null)
+        {
+            return new TableData<ArtistModel>
+            {
+                TotalItems = 0,
+                Items = []
+            };
+        }
+
+        var filtered = result.Items.AsQueryable();
 
         filtered = state.SortLabel switch
         {
             "nick_field" => filtered.OrderByDirection(state.SortDirection, a => a.Nick),
-            "songs_field" => filtered.OrderByDirection(state.SortDirection, a => a.Songs?.Count ?? 0),
+            "songs_field" => filtered.OrderByDirection(state.SortDirection, a => a.Songs != null ? a.Songs.Count : 0),
             _ => filtered
         };
 
-        var items = filtered.Skip(state.Page * state.PageSize).Take(state.PageSize).ToArray();
-
         return new TableData<ArtistModel>
         {
-            TotalItems = filtered.Count(),
-            Items = items
+            TotalItems = result.TotalCount,
+            Items = filtered
         };
     }
 

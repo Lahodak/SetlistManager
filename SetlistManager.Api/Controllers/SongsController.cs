@@ -19,9 +19,9 @@ public class SongsController : BaseController
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<SongModel>>> GetSongs()
+    public async Task<ActionResult<PagedResponse<SongModel>>> GetSongs([FromQuery] PagedRequest request)
     {
-        var result = await _songService.GetSongsAsync();
+        var result = await _songService.GetSongsAsync(request);
 
         if (result is null)        
             return NotFound();

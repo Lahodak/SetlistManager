@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.Extensions.Options;
 using SetlistManager.App.Options;
 using SetlistManager.Common.Models;
 
@@ -23,8 +24,21 @@ public class SetlistService : ISetlistService
     public async Task<SetlistModel?> GetSetlistById(int id) 
         => await _apiService.GetAsync<SetlistModel>(_apiOptions.Value.SetlistsEndpoint + _setlistByIdSuffix + id);
 
-    public async Task<List<SetlistModel>?> GetAllSetlistsAsync() 
-        => await _apiService.GetAsync<List<SetlistModel>>(_apiOptions.Value.SetlistsEndpoint);
+    public async Task<PagedResponse<SetlistModel>?> GetAllSetlistsAsync(PagedRequest request)
+    {
+        UriBuilder uri = new(_apiOptions.Value.SetlistsEndpoint)
+        {
+            Query = new QueryBuilder
+            {
+                { "PageSize", request.PageSize.ToString() },
+                { "PageIndex", request.PageIndex.ToString() },
+                { "Query", request.Query ?? string.Empty }
+            }.ToString()
+        };
+
+
+        return await _apiService.GetAsync<PagedResponse<SetlistModel>?>(uri.ToString());
+    }
 
     public async Task EditSetlist(SetlistModel setlistModel)
         => await _apiService.PutAsync(_apiOptions.Value.SetlistsEndpoint + _setlistByIdSuffix + setlistModel.Id, setlistModel);

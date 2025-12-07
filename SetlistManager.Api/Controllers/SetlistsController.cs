@@ -15,9 +15,9 @@ public class SetlistsController : BaseController
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<SetlistModel>>> GetSetlists()
+    public async Task<ActionResult<PagedResponse<SetlistModel>>> GetAllSetlists([FromQuery] PagedRequest request)
     {
-        return Ok(await _setlistService.GetAllSetlistsAsync());
+        return Ok(await _setlistService.GetAllSetlistsAsync(request));
     }
 
     [HttpPost]
