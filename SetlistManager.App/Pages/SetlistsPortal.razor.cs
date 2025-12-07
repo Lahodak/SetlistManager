@@ -70,7 +70,7 @@ public partial class SetlistsPortal
         }
 
         var parameters = new DialogParameters { ["Setlist"] = existing };
-        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Large, FullWidth = true };
+        var options = new DialogOptions { CloseButton = true };
         var dialog = await DialogService.ShowAsync<EditSetlistDialog>($"Edit Setlist", parameters, options);
 
         var result = await dialog.Result;
@@ -107,7 +107,7 @@ public partial class SetlistsPortal
 
     private async Task OpenGenerateDialog()
     {
-        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+        var options = new DialogOptions { CloseButton = true };
         var dialog = await DialogService.ShowAsync<CreateSetlistDialog>("", options);
 
         var result = await dialog.Result;

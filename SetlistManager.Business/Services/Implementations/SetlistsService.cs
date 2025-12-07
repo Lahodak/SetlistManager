@@ -90,9 +90,41 @@ public class SetlistsService : ISetlistsService
         setlistToBeEdited.Name = setlistModel.Name;
         setlistToBeEdited.UpdatedAt = DateTime.Now;
 
-        foreach (var song in setlistToBeEdited.SongsSetlists)
+        var existingSongIds = setlistToBeEdited.SongsSetlists
+            .Select(s => s.SongId)
+            .ToList();
+
+        var newSongIds = setlistModel.Songs
+            .Select(s => s.Id)
+            .ToList();
+
+        var songsToRemove = setlistToBeEdited.SongsSetlists
+            .Where(s => !newSongIds.Contains(s.SongId))
+            .ToList();
+
+        _dbContext.SongsSetlists.RemoveRange(songsToRemove);
+
+        var songsToAdd = newSongIds
+            .Where(id => !existingSongIds.Contains(id))
+            .ToList();
+
+        foreach (var songId in songsToAdd)
         {
-            song.Order = setlistModel.Songs.First(x => x.Id == song.SongId).Order;
+            var order = setlistModel.Songs
+                .First(x => x.Id == songId).Order;
+            
+            _dbContext.SongsSetlists.Add(new()
+            {
+                SetlistId = setlistToBeEdited.Id,
+                SongId = songId,
+                Order = order
+            });
+        }
+
+        foreach (var song in setlistToBeEdited.SongsSetlists.Where(s => newSongIds.Contains(s.SongId)))
+        {
+            song.Order = setlistModel.Songs
+                .First(x => x.Id == song.SongId).Order;
         }
 
         await _dbContext.SaveChangesAsync();

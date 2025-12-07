@@ -1,50 +1,136 @@
 ﻿<MudDialog>
     <DialogContent>
-        <MudText Typo="Typo.h5">Generate New Setlist</MudText>
-        <MudPaper Class="pa-4 mt-3" Elevation="2">
-            <MudGrid>
-                <MudItem>
-                    <MudNumericField @bind-Value="_length"
-                                     Min="1" Max="@_maxNumber"
-                                     Label="Number of Songs"
-                                     Variant="Variant.Outlined"
-                                     /> 
-                </MudItem>
-                <MudItem>
-                    <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Generate" >
-                        Generate
-                    </MudButton>
+        <MudText Typo="Typo.h5">Create New Setlist</MudText>
 
-                </MudItem>
-            </MudGrid>
+        <MudPaper Class="pa-4 mt-3" Elevation="2">
+            <MudText Typo="Typo.h6" Class="mb-3">Select Creation Mode</MudText>
+            <MudRadioGroup T="CreationMode" Value="_creationMode" ValueChanged="OnCreationModeChanged">
+                <MudRadio Value="CreationMode.Generate" Color="Color.Primary">
+                    Generate Random Setlist
+                </MudRadio>
+                <MudRadio Value="CreationMode.Manual" Color="Color.Primary">
+                    Manually Create Setlist
+                </MudRadio>
+            </MudRadioGroup>
         </MudPaper>
+
+        @if (_creationMode == CreationMode.Generate)
+        {
+            <MudPaper Class="pa-4 mt-3" Elevation="2">
+                <MudText Typo="Typo.h6" Class="mb-3">Random Generation</MudText>
+                <MudGrid>
+                    <MudItem xs="12" sm="6">
+                        <MudNumericField @bind-Value="_length"
+                                         Min="1" Max="@_maxNumber"
+                                         Label="Total Number of Songs"
+                                         Variant="Variant.Outlined"
+                                         HelperText="@GetGenerationHelperText()" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6" Style="display: flex; align-items: center;">
+                        <MudButton Color="Color.Primary"
+                                   Variant="Variant.Filled"
+                                   OnClick="Generate"
+                                   FullWidth="true">
+                            Generate Setlist
+                        </MudButton>
+                    </MudItem>
+                </MudGrid>
+            </MudPaper>
+
+            <MudPaper Class="pa-4 mt-3" Elevation="2">
+                <MudText Typo="Typo.h6">Add Specific Songs (Optional)</MudText>
+                <MudText Typo="Typo.body2" Class="mb-3">These songs will be included in your setlist, and random songs will fill the remaining slots.</MudText>
+
+                <MudAutocomplete T="SongModel"
+                                 Label="Search and Add Song"
+                                 Variant="Variant.Outlined"
+                                 SearchFunc="Search"
+                                 ToStringFunc="@(s => s == null ? null : $"{s.Name} | {s.Artist.Nick}")"
+                                 ValueChanged="OnSongSelected"
+                                 Clearable="true"
+                                 ResetValueOnEmptyText="true"
+                                 Disabled="@(_allSongs?.Count == 0)" />
+            </MudPaper>
+        }
+
+        @if (_creationMode == CreationMode.Manual)
+        {
+            <MudPaper Class="pa-4 mt-3" Elevation="2">
+                <MudText Typo="Typo.h6">Build Your Setlist</MudText>
+                <MudText Typo="Typo.body2" Class="mb-3">Search and add songs one by one to create your custom setlist.</MudText>
+
+                <MudAutocomplete T="SongModel"
+                                 Label="Search and Add Song"
+                                 Variant="Variant.Outlined"
+                                 SearchFunc="Search"
+                                 ToStringFunc="@(s => s == null ? null : $"{s.Name} | {s.Artist.Nick}")"
+                                 ValueChanged="OnSongSelected"
+                                 Clearable="true"
+                                 ResetValueOnEmptyText="true"
+                                 Disabled="@(_allSongs?.Count == 0)" />
+
+                @if (_shuffeledSongCollection.Count > 0)
+                {
+                    <MudButton Color="Color.Primary"
+                               Variant="Variant.Filled"
+                               OnClick="FinalizeManualSetlist"
+                               Class="mt-3"
+                               FullWidth="true">
+                        Finalize Setlist with @_shuffeledSongCollection.Count Songs
+                    </MudButton>
+                }
+            </MudPaper>
+        }
 
         @if (_showSaveSetlistUI)
         {
             <MudPaper Class="pa-4 mt-3" Elevation="2">
-                <MudText Typo="Typo.body1">Setlist Name:</MudText>
-                <MudGrid>
-                    <MudItem>
-                        <MudTextField @bind-Value="_toBeSavedSetlistName" Style="width: 200px; height: 50px;" />
-                    </MudItem>
-                </MudGrid>
+                <MudText Typo="Typo.h6" Class="mb-2">Setlist Name</MudText>
+                <MudTextField @bind-Value="_toBeSavedSetlistName"
+                              Label="Enter setlist name"
+                              Variant="Variant.Outlined"
+                              FullWidth="true" />
             </MudPaper>
         }
 
         @if (_shuffeledSongCollection.Count != 0 && _showSetlistContentUI)
         {
             <MudPaper Class="pa-4 mt-4" Elevation="2">
-                <MudList T="string">
-                    @foreach (var song in _shuffeledSongCollection)
+                <MudText Typo="Typo.h6" Class="mb-3">Setlist Preview (@_shuffeledSongCollection.Count songs)</MudText>
+                <MudList T="SongModel">
+                    @for (int i = 0; i < _shuffeledSongCollection.Count; i++)
                     {
-                        <MudListItem>
-                            <MudIconButton Icon="@Icons.Material.Filled.RestartAlt" Variant="Variant.Outlined" Class="pa-2 ml-2" OnClick="() => RegenerateSong(song.Id)"/>
-                                
+                        var song = _shuffeledSongCollection[i];
+                        var index = i;
+                        <MudListItem Style="display: flex; align-items: center; gap: 10px;">
+                            <span style="color: #666; min-width: 30px;">@(index + 1).</span>
+
                             <MudLink Href="@($"songdetail/{song.Id}")"
-                                     Style="color: black; text-decoration: none; font-size: medium;">
-                                @song.Name | @song.Artist
+                                     Style="color: black; text-decoration: none; font-size: medium; flex-grow: 1;">
+                                @song.Name | @song.Artist.Nick
                             </MudLink>
 
+                            @if (_manuallyAddedSongs.Any(s => s.Id == song.Id))
+                            {
+                                <MudChip Size="Size.Small" Color="Color.Info" Variant="Variant.Text">Manual</MudChip>
+                            }
+
+                            <div style="display: flex; gap: 5px;">
+                                @if (_creationMode == CreationMode.Generate && !_manuallyAddedSongs.Any(s => s.Id == song.Id))
+                                {
+                                    <MudIconButton Icon="@Icons.Material.Filled.RestartAlt"
+                                                   Size="Size.Small"
+                                                   Color="Color.Default"
+                                                   OnClick="() => RegenerateSong(song.Id)"
+                                                   Title="Regenerate this song" />
+                                }
+
+                                <MudIconButton Icon="@Icons.Material.Filled.Close"
+                                               Size="Size.Small"
+                                               Color="Color.Error"
+                                               OnClick="@(() => RemoveSongFromSetlist(song))"
+                                               aria-label="Remove Song" />
+                            </div>
                         </MudListItem>
                     }
                 </MudList>
@@ -54,10 +140,10 @@
     </DialogContent>
 
     <DialogActions>
-
         @if (_showSaveSetlistUI)
         {
-            <MudButton Class="pa-2 ml-2" Variant="Variant.Outlined" Style="height: 50px;"
+            <MudButton Color="Color.Primary"
+                       Variant="Variant.Filled"
                        OnClick="() => Save()">
                 Save Setlist
             </MudButton>

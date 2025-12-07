@@ -17,7 +17,7 @@ public class SetlistService : ISetlistService
         _apiService = apiService;
     }
 
-    public async Task PushSetlist(SetlistModel setlistModel) 
+    public async Task SaveSetlistAsync(SetlistModel setlistModel) 
         => await _apiService.PostAsync(_apiOptions.Value.SetlistsEndpoint, setlistModel);
 
     public async Task<SetlistModel?> GetSetlistById(int id) 

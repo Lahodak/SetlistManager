@@ -9,29 +9,95 @@ public partial class EditSetlistDialog
 {
     [CascadingParameter]
     public required IMudDialogInstance MudDialog { get; set; }
+
     [Parameter]
     public SetlistModel Setlist { get; set; } = new();
+
     [Inject]
     public required ISetlistService SetlistService { get; set; }
+
     [Inject]
-    public required IDialogService dialogService { get; set; }
+    public required ISongService SongService { get; set; }
+
+    [Inject]
+    public required ISnackbar Snackbar { get; set; }
 
     private SetlistModel _setlist = new();
+    private List<SongModel>? _allSongs = [];
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
+        _allSongs = await SongService.GetAllSongsAsync();
+
         _setlist = new SetlistModel
         {
             Id = Setlist.Id,
             Name = Setlist.Name,
+            CreatorId = Setlist.CreatorId,
             Songs = new List<SongModel>(Setlist.Songs)
         };
+
+        for (int i = 0; i < _setlist.Songs.Count; i++)
+        {
+            _setlist.Songs[i].Order = i + 1;
+        }
+    }
+
+    private Task<IEnumerable<SongModel>> Search(string value, CancellationToken token)
+    {
+        if (_allSongs is null)
+            return Task.FromResult<IEnumerable<SongModel>>(new List<SongModel>());
+
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            var availableSongs = _allSongs
+                .Where(s => !_setlist.Songs.Any(ss => ss.Id == s.Id))
+                .ToList();
+            return Task.FromResult<IEnumerable<SongModel>>(availableSongs);
+        }
+
+        var searchResults = _allSongs
+            .Where(s => (s.Name?.Contains(value, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                       (s.Artist?.Nick.Contains(value, StringComparison.OrdinalIgnoreCase) ?? false))
+            .Where(s => !_setlist.Songs.Any(ss => ss.Id == s.Id))
+            .ToList();
+
+        return Task.FromResult<IEnumerable<SongModel>>(searchResults);
+    }
+
+    private void OnSongSelected(SongModel selectedSong)
+    {
+        if (selectedSong == null) return;
+
+        if (_setlist.Songs.Any(s => s.Id == selectedSong.Id))
+        {
+            Snackbar.Add("Song already in setlist", Severity.Info);
+            return;
+        }
+
+        selectedSong.Order = _setlist.Songs.Count + 1;
+        _setlist.Songs.Add(selectedSong);
+        StateHasChanged();
     }
 
     private async Task Save()
     {
-        if (Setlist is null)
+        if (string.IsNullOrWhiteSpace(_setlist.Name))
+        {
+            Snackbar.Add("Please enter a setlist name", Severity.Warning);
             return;
+        }
+
+        if (_setlist.Name.Length < 4)
+        {
+            Snackbar.Add("Setlist name has to be 4 characters or longer", Severity.Warning);
+            return;
+        }
+
+        for (int i = 0; i < _setlist.Songs.Count; i++)
+        {
+            _setlist.Songs[i].Order = i + 1;
+        }
 
         await SetlistService.EditSetlist(_setlist);
         MudDialog.Close(DialogResult.Ok(_setlist));
@@ -39,35 +105,45 @@ public partial class EditSetlistDialog
 
     private void Cancel() => MudDialog.Cancel();
 
-    private void RemoveSong(SongModel song) => _setlist.Songs.Remove(song);
+    private void RemoveSong(SongModel song)
+    {
+        _setlist.Songs.Remove(song);
+
+        for (int i = 0; i < _setlist.Songs.Count; i++)
+        {
+            _setlist.Songs[i].Order = i + 1;
+        }
+
+        StateHasChanged();
+    }
 
     private void MoveSongUp(SongModel song)
     {
-        var songUp = _setlist.Songs.FirstOrDefault(s => s.Order == song.Order - 1) ?? song;
-
-        if (songUp.Order == song.Order)
-            return;
-
-        song.Order = songUp.Order;
-        songUp.Order = song.Order + 1;
-
         int index = _setlist.Songs.IndexOf(song);
-        if (index > 0)
-            (_setlist.Songs[index - 1], _setlist.Songs[index]) = (_setlist.Songs[index], _setlist.Songs[index - 1]);
+        if (index <= 0) return;
+
+        (_setlist.Songs[index - 1], _setlist.Songs[index]) = (_setlist.Songs[index], _setlist.Songs[index - 1]);
+
+        for (int i = 0; i < _setlist.Songs.Count; i++)
+        {
+            _setlist.Songs[i].Order = i + 1;
+        }
+
+        StateHasChanged();
     }
 
     private void MoveSongDown(SongModel song)
     {
-        var songDown = _setlist.Songs.FirstOrDefault(s => s.Order == song.Order + 1) ?? song;
-
-        if (songDown.Order == song.Order)
-            return;
-
-        song.Order = songDown.Order;
-        songDown.Order = song.Order - 1;
-
         int index = _setlist.Songs.IndexOf(song);
-        if (index < _setlist.Songs.Count - 1)
-            (_setlist.Songs[index + 1], _setlist.Songs[index]) = (_setlist.Songs[index], _setlist.Songs[index + 1]);
+        if (index >= _setlist.Songs.Count - 1) return;
+
+        (_setlist.Songs[index + 1], _setlist.Songs[index]) = (_setlist.Songs[index], _setlist.Songs[index + 1]);
+
+        for (int i = 0; i < _setlist.Songs.Count; i++)
+        {
+            _setlist.Songs[i].Order = i + 1;
+        }
+
+        StateHasChanged();
     }
 }
