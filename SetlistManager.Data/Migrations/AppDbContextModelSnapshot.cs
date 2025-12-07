@@ -139,7 +139,7 @@ namespace SetlistManager.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Artists");
+                    b.ToTable("Artists", (string)null);
                 });
 
             modelBuilder.Entity("SetlistManager.Data.Entities.Instrument", b =>
@@ -156,7 +156,7 @@ namespace SetlistManager.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Instruments");
+                    b.ToTable("Instruments", (string)null);
                 });
 
             modelBuilder.Entity("SetlistManager.Data.Entities.Language", b =>
@@ -177,7 +177,7 @@ namespace SetlistManager.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Languages");
+                    b.ToTable("Languages", (string)null);
                 });
 
             modelBuilder.Entity("SetlistManager.Data.Entities.Provider", b =>
@@ -194,7 +194,7 @@ namespace SetlistManager.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Providers");
+                    b.ToTable("Providers", (string)null);
                 });
 
             modelBuilder.Entity("SetlistManager.Data.Entities.Role", b =>
@@ -271,7 +271,7 @@ namespace SetlistManager.Data.Migrations
 
                     b.HasIndex("SetlistId");
 
-                    b.ToTable("Rooms");
+                    b.ToTable("Rooms", (string)null);
                 });
 
             modelBuilder.Entity("SetlistManager.Data.Entities.Setlist", b =>
@@ -299,7 +299,7 @@ namespace SetlistManager.Data.Migrations
 
                     b.HasIndex("CreatorId");
 
-                    b.ToTable("Setlists");
+                    b.ToTable("Setlists", (string)null);
                 });
 
             modelBuilder.Entity("SetlistManager.Data.Entities.Song", b =>
@@ -354,7 +354,7 @@ namespace SetlistManager.Data.Migrations
 
                     b.HasIndex("LanguageId");
 
-                    b.ToTable("Songs");
+                    b.ToTable("Songs", (string)null);
                 });
 
             modelBuilder.Entity("SetlistManager.Data.Entities.SongsSetlists", b =>
@@ -380,7 +380,7 @@ namespace SetlistManager.Data.Migrations
 
                     b.HasIndex("SongId");
 
-                    b.ToTable("SongsSetlists");
+                    b.ToTable("SongsSetlists", (string)null);
                 });
 
             modelBuilder.Entity("SetlistManager.Data.Entities.TempAuthStorage", b =>
@@ -403,7 +403,7 @@ namespace SetlistManager.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("TempAuthStorage");
+                    b.ToTable("TempAuthStorage", (string)null);
                 });
 
             modelBuilder.Entity("SetlistManager.Data.Entities.Token", b =>
@@ -439,7 +439,7 @@ namespace SetlistManager.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Tokens");
+                    b.ToTable("Tokens", (string)null);
                 });
 
             modelBuilder.Entity("SetlistManager.Data.Entities.User", b =>
