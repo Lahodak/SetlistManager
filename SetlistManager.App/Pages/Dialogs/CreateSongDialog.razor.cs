@@ -25,7 +25,7 @@ public partial class CreateSongDialog
     protected override async Task OnInitializedAsync()
     {
         _languages = await LanguageService.GetAvailableLanguagesAsync();
-        _artists = (await ArtistService.GetAvailableArtistsAsync(new() { PageSize = int.MaxValue}))?.Items;
+        _artists = (await ArtistService.GetAvailableArtistsAsync(new() { PageSize = int.MaxValue }))?.Items;
 
         if (_artists is null || _artists.Count == 0)
         {
@@ -43,6 +43,52 @@ public partial class CreateSongDialog
             Key = string.Empty,
             BPM = 120
         };
+    }
+
+    private Task<IEnumerable<ArtistModel>> SearchArtists(string value, CancellationToken token)
+    {
+        if (_artists is null)
+            return Task.FromResult<IEnumerable<ArtistModel>>(new List<ArtistModel>());
+
+        if (string.IsNullOrWhiteSpace(value))
+            return Task.FromResult<IEnumerable<ArtistModel>>(_artists);
+
+        var searchResults = _artists
+            .Where(a => a.Nick.Contains(value, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        return Task.FromResult<IEnumerable<ArtistModel>>(searchResults);
+    }
+
+    private Task<IEnumerable<LanguageModel>> SearchLanguages(string value, CancellationToken token)
+    {
+        if (_languages is null)
+            return Task.FromResult<IEnumerable<LanguageModel>>(new List<LanguageModel>());
+
+        if (string.IsNullOrWhiteSpace(value))
+            return Task.FromResult<IEnumerable<LanguageModel>>(_languages);
+
+        var searchResults = _languages
+            .Where(l => l.Name.Contains(value, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        return Task.FromResult<IEnumerable<LanguageModel>>(searchResults);
+    }
+
+    private void OnArtistSelected(ArtistModel selectedArtist)
+    {
+        if (_song is not null)
+        {
+            _song.Artist = selectedArtist;
+        }
+    }
+
+    private void OnLanguageSelected(LanguageModel selectedLanguage)
+    {
+        if (_song is not null)
+        {
+            _song.Language = selectedLanguage;
+        }
     }
 
     private async Task SaveSong()
@@ -87,8 +133,8 @@ public partial class CreateSongDialog
             Tuning = _song.Tuning,
             BPM = _song.BPM
         };
-        await SongService.UploadSongAsync(songCreateModel);
 
+        await SongService.UploadSongAsync(songCreateModel);
         Snackbar.Add("Song added successfully!", Severity.Success);
         MudDialog.Close(DialogResult.Ok(_song));
     }

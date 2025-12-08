@@ -27,14 +27,16 @@ public partial class EditSetlistDialog
 
     protected override async Task OnInitializedAsync()
     {
-        _allSongs = await SongService.GetAllSongsAsync();
+        var result = await SongService.GetAllSongsAsync(new() { PageSize = int.MaxValue });
+
+        _allSongs = result?.Items;
 
         _setlist = new SetlistModel
         {
             Id = Setlist.Id,
             Name = Setlist.Name,
             CreatorId = Setlist.CreatorId,
-            Songs = new List<SongModel>(Setlist.Songs)
+            Songs = Setlist.Songs
         };
 
         for (int i = 0; i < _setlist.Songs.Count; i++)

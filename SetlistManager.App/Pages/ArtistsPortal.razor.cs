@@ -80,7 +80,7 @@ public partial class ArtistsPortal
     private async Task UpdateArtistAsync(ArtistModel artist)
     {
         var parameters = new DialogParameters { ["ArtistToEdit"] = artist };
-        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+        var options = new DialogOptions { CloseOnEscapeKey = true };
         var dialog = await DialogService.ShowAsync<EditArtistDialog>("Edit Artist", parameters, options);
         var result = await dialog.Result;
         if (!result!.Canceled)
@@ -99,7 +99,7 @@ public partial class ArtistsPortal
     private async Task OpenCreateArtistDialog()
     {
         var parameters = new DialogParameters();
-        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+        var options = new DialogOptions { CloseOnEscapeKey = true };
 
         var dialog = await DialogService.ShowAsync<CreateArtistDialog>("Create New Artist", parameters, options);
         var result = await dialog.Result;

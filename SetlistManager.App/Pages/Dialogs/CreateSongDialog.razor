@@ -1,7 +1,5 @@
 ﻿<MudDialog>
     <DialogContent>
-        <MudText Typo="Typo.h5">Add New Song</MudText>
-
         @if (_song is not null)
         {
             <MudPaper Class="pa-4 mt-3" Elevation="2">
@@ -13,17 +11,17 @@
                                       Variant="Variant.Outlined" />
                     </MudItem>
                     <MudItem xs="12" sm="6">
-                        <MudSelect @bind-Value="_song.Artist" Label="Artist" Variant="Variant.Outlined">
-                            @if (_artists is not null)
-                            {
-                                @foreach (var artist in _artists)
-                                {
-                                    <MudSelectItem Value="artist">@artist.Nick</MudSelectItem>
-                                }
-                            }
-                        </MudSelect>
+                        <MudAutocomplete T="ArtistModel"
+                                         Label="Artist"
+                                         Variant="Variant.Outlined"
+                                         SearchFunc="SearchArtists"
+                                         ToStringFunc="@(a => a == null ? null : a.Nick)"
+                                         ValueChanged="OnArtistSelected"
+                                         Value="_song.Artist"
+                                         Clearable="true"
+                                         ResetValueOnEmptyText="true"
+                                         Required="true" />
                     </MudItem>
-
                     <MudItem xs="12" sm="6">
                         <MudTextField @bind-Value="_song.TabsURL"
                                       Label="Tabs URL"
@@ -34,7 +32,6 @@
                                       Label="Audio URL"
                                       Variant="Variant.Outlined" />
                     </MudItem>
-
                     <MudItem xs="12" sm="6">
                         <MudTextField @bind-Value="_song.Tuning"
                                       Label="Tuning"
@@ -45,7 +42,6 @@
                                       Label="Key"
                                       Variant="Variant.Outlined" />
                     </MudItem>
-
                     <MudItem xs="12" sm="6">
                         <MudNumericField @bind-Value="_song.BPM"
                                          Label="BPM"
@@ -53,15 +49,16 @@
                                          Variant="Variant.Outlined" />
                     </MudItem>
                     <MudItem xs="12" sm="6">
-                        <MudSelect @bind-Value="_song.Language" Label="Language" Variant="Variant.Outlined">
-                            @if (_languages is not null)
-                            {
-                                @foreach (var language in _languages)
-                                {
-                                    <MudSelectItem Value="language">@language.Name</MudSelectItem>
-                                }
-                            }
-                        </MudSelect>
+                        <MudAutocomplete T="LanguageModel"
+                                         Label="Language"
+                                         Variant="Variant.Outlined"
+                                         SearchFunc="SearchLanguages"
+                                         ToStringFunc="@(l => l == null ? null : l.Name)"
+                                         ValueChanged="OnLanguageSelected"
+                                         Value="_song.Language"
+                                         Clearable="true"
+                                         ResetValueOnEmptyText="true"
+                                         Required="true" />
                     </MudItem>
                 </MudGrid>
             </MudPaper>
@@ -71,7 +68,6 @@
             <MudProgressCircular Indeterminate="true" />
         }
     </DialogContent>
-
     <DialogActions>
         <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="SaveSong" Disabled="_song is null">Save</MudButton>
         <MudButton Variant="Variant.Text" OnClick="Cancel">Cancel</MudButton>

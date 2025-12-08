@@ -1,11 +1,9 @@
 ﻿<MudDialog>
     <DialogContent>
-        <MudText Typo="Typo.h5">Edit Artist:</MudText>
-
         <MudPaper Class="pa-4 mt-3" Elevation="2">
             <MudGrid>
                 <MudItem>
-                    <MudTextField @bind-Value="_artistUpdateModel!.Nick" Style="width: 200px; height: 50px;" />
+                    <MudTextField @bind-Value="_artistUpdateModel!.Nick" Style="width: 200px; height: 50px;" HelperText="Nick" Required="true"/>
                 </MudItem>
             </MudGrid>
         </MudPaper>

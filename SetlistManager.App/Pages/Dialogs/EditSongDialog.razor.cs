@@ -34,6 +34,46 @@ public partial class EditSongDialog
         }
     }
 
+    private Task<IEnumerable<ArtistModel>> SearchArtists(string value, CancellationToken token)
+    {
+        if (_artists is null)
+            return Task.FromResult<IEnumerable<ArtistModel>>(new List<ArtistModel>());
+
+        if (string.IsNullOrWhiteSpace(value))
+            return Task.FromResult<IEnumerable<ArtistModel>>(_artists);
+
+        var searchResults = _artists
+            .Where(a => a.Nick.Contains(value, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        return Task.FromResult<IEnumerable<ArtistModel>>(searchResults);
+    }
+
+    private Task<IEnumerable<LanguageModel>> SearchLanguages(string value, CancellationToken token)
+    {
+        if (_languages is null)
+            return Task.FromResult<IEnumerable<LanguageModel>>(new List<LanguageModel>());
+
+        if (string.IsNullOrWhiteSpace(value))
+            return Task.FromResult<IEnumerable<LanguageModel>>(_languages);
+
+        var searchResults = _languages
+            .Where(l => l.Name.Contains(value, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        return Task.FromResult<IEnumerable<LanguageModel>>(searchResults);
+    }
+
+    private void OnArtistSelected(ArtistModel selectedArtist)
+    {
+        Song.Artist = selectedArtist;
+    }
+
+    private void OnLanguageSelected(LanguageModel selectedLanguage)
+    {
+        Song.Language = selectedLanguage;
+    }
+
     public async Task SaveAsync()
     {
         if (string.IsNullOrWhiteSpace(Song.Name))
@@ -58,7 +98,7 @@ public partial class EditSongDialog
         {
             Name = Song.Name,
             ArtistId = Song.Artist.Id,
-            LanguageId = Song.LanguageId,
+            LanguageId = Song.Language.Id,
             TabsURL = Song.TabsURL,
             AudioURL = Song.AudioURL,
             Tuning = Song.Tuning,
