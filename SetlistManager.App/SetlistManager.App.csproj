@@ -12,7 +12,6 @@
     <None Include="..\.dockerignore" Link=".dockerignore">
       <DependentUpon>$(DockerDefaultDockerfile)</DependentUpon>
     </None>
-	<Content Include="wwwroot\appsettings.json" CopyToPublishDirectory="Always" />
   </ItemGroup>
 
   <ItemGroup>
