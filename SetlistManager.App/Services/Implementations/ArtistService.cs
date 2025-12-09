@@ -1,5 +1,4 @@
-﻿using Azure.Core;
-using Microsoft.AspNetCore.Http.Extensions;
+﻿using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Options;
 using SetlistManager.App.Options;
 using SetlistManager.Common.Models;

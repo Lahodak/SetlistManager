@@ -24,10 +24,10 @@
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="10.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.0" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.0" />
     <PackageReference Include="MudBlazor" Version="8.15.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.15.0" />
     <ServiceWorker Include="wwwroot\service-worker.js" PublishedContent="wwwroot\service-worker.published.js" />
   </ItemGroup>
 
