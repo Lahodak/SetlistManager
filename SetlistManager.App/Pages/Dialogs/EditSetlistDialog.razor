@@ -48,20 +48,20 @@
                                                Color="Color.Default"
                                                OnClick="() => MoveSongUp(song)"
                                                Disabled="@(index == 0)"
-                                               Title="Move up" />
+                                               title="Move up" />
 
                                 <MudIconButton Icon="@Icons.Material.Filled.ArrowDownward"
                                                Size="Size.Small"
                                                Color="Color.Default"
                                                OnClick="() => MoveSongDown(song)"
                                                Disabled="@(index == _setlist.Songs.Count - 1)"
-                                               Title="Move down" />
+                                               title="Move down" />
 
                                 <MudIconButton Icon="@Icons.Material.Filled.Close"
                                                Size="Size.Small"
                                                Color="Color.Error"
                                                OnClick="() => RemoveSong(song)"
-                                               Title="Remove song" />
+                                               title="Remove song" />
                             </div>
                         </MudListItem>
                     }
