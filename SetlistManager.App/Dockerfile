@@ -33,7 +33,7 @@ WORKDIR /usr/share/nginx/html
 COPY --from=publish /app/publish/wwwroot .
 
 # Copy nginx configuration
-COPY --chown=nobody:nobody SetlistManager.App/nginx.conf /etc/nginx/nginx.conf
+COPY SetlistManager.App/nginx.conf /etc/nginx/nginx.conf
 
 # Expose port 8080 (Google Cloud Run default)
 EXPOSE 8080
