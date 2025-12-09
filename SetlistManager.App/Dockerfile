@@ -1,43 +1,42 @@
-# Stage 1: Build - Uses .NET SDK to build and publish the application
+# Build stage
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
-# --- Step 1: Copy .csproj files for dependency restoration ---
-# NOTE: The paths are relative to the Solution Root (where you run the build command from).
-COPY SetlistManager.App/SetlistManager.App.csproj SetlistManager.App/
-COPY SetlistManager.Common/SetlistManager.Common.csproj SetlistManager.Common/
-# Restore the main application's dependencies
-RUN dotnet restore "SetlistManager.App/SetlistManager.App.csproj"
+# Copy all project files for dependency resolution
+COPY SetlistManager.App/*.csproj ./SetlistManager.App/
+COPY SetlistManager.Common/*.csproj ./SetlistManager.Common/
+COPY SetlistManager.Business/*.csproj ./SetlistManager.Business/
+COPY SetlistManager.Resources/*.csproj ./SetlistManager.Resources/
 
-# --- Step 2: Copy all source code and build ---
-# Copy the entire solution source (assuming you run 'docker build' from the solution root)
-COPY . .
-# Change directory to the app project
+# Restore dependencies
+RUN dotnet restore "./SetlistManager.App/SetlistManager.App.csproj"
+
+# Copy entire source
+COPY SetlistManager.App/. ./SetlistManager.App/
+COPY SetlistManager.Common/. ./SetlistManager.Common/
+COPY SetlistManager.Business/. ./SetlistManager.Business/
+COPY SetlistManager.Resources/. ./SetlistManager.Resources/
+
+# Build
 WORKDIR "/src/SetlistManager.App"
-
-# Build the application
 RUN dotnet build "SetlistManager.App.csproj" -c Release -o /app/build
 
-# Stage 2: Publish - Publishes the built application
+# Publish stage
 FROM build AS publish
-# Change directory to the app project
-WORKDIR "/src/SetlistManager.App"
-# Publish the application (output to /app/publish)
 RUN dotnet publish "SetlistManager.App.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
-# Stage 3: Final - Uses Nginx to serve the static Blazor WebAssembly files
+# Runtime stage - use nginx to serve static files
 FROM nginx:alpine AS final
-# Set the working directory for Nginx to serve files from
 WORKDIR /usr/share/nginx/html
 
-# Copy the published Blazor WASM files
+# Copy published Blazor app
 COPY --from=publish /app/publish/wwwroot .
 
-# Copy the nginx configuration file (relative to where the docker build command is executed, i.e., Solution Root)
-COPY SetlistManager.App/nginx.conf /etc/nginx/nginx.conf
+# Copy nginx configuration
+COPY nginx.conf /etc/nginx/nginx.conf
 
-# Expose the port Nginx will listen on
+# Expose port 8080 (Google Cloud Run default)
 EXPOSE 8080
 
-# Command to start Nginx in the foreground
+# Start nginx
 CMD ["nginx", "-g", "daemon off;"]
