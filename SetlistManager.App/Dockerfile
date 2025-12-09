@@ -39,5 +39,4 @@ COPY --chown=nobody:nobody SetlistManager.App/nginx.conf /etc/nginx/nginx.conf
 EXPOSE 8080
 
 # Start nginx as unprivileged user
-USER nobody
 CMD ["nginx", "-g", "daemon off;"]
