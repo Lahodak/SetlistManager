@@ -2,10 +2,10 @@
 using SetlistManager.Common.Models;
 using Newtonsoft.Json;
 using SetlistManager.Common.Genius.Models.Search;
-using SetlistManager.Common.Genius.Models.Songs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using SetlistManager.App.Options;
+using SetlistManager.App.Models;
 
 namespace SetlistManager.App.Services.Implementations;
 
@@ -27,6 +27,7 @@ public class GeniusService : IGeniusService
         _httpClientFactory = factory;
         _userService = userService;
     }
+
     public async Task<string> AuthorizeAsync()
     {
         var response = await _apiService.GetAsync<UrlResponseModel>(_apiOptions.Value.TokensEndpoint);
@@ -37,7 +38,7 @@ public class GeniusService : IGeniusService
         return response.Url;
     }
 
-    public async Task<string?> FetchSongLyricsAsync(SongModel song)
+    public async Task<GeniusEmbedModel?> FetchSongLyricsAsync(SongModel song)
     {
         var client = _httpClientFactory.CreateClient();
         var token = (await _userService.GetUserAsync())?.Tokens?.FirstOrDefault(x => x.Provider == ProviderEnum.Genius.ToString());
@@ -70,31 +71,14 @@ public class GeniusService : IGeniusService
         if (responseModel is null || responseModel.Meta.Status != StatusCodes.Status200OK || responseModel.Response.Hits.Count == 0)
             return null;
 
-        UriBuilder uriSongs = new(_geniusOptions.Value.BaseApiUrl + responseModel.Response.Hits[0].Result.ApiPath)
+        var result = responseModel.Response.Hits[0].Result;
+
+        return new GeniusEmbedModel
         {
-            Query = new QueryBuilder
-            {
-                { "access_token", token.AccessToken },
-                { "text_format", _geniusOptions.Value.TextFormat }
-            }.ToString()
+            SongId = result.Id.ToString(),
+            Title = result.Title,
+            Artist = result.PrimaryArtistNames,
+            Url = result.Url
         };
-
-        GetSongResponseModel? songResponseModel;
-        var songResponse = await client.GetAsync(uriSongs.ToString());
-        string responseContent = await songResponse.Content.ReadAsStringAsync();
-
-        try
-        {
-            songResponseModel = JsonConvert.DeserializeObject<GetSongResponseModel>(responseContent);
-        }
-        catch (Exception)
-        {
-            return null;
-        }
-
-        if (songResponseModel is null || songResponseModel.Meta.Status != StatusCodes.Status200OK)
-            return null;
-
-        return songResponseModel.Response.Song.EmbedContent;
     }
 }

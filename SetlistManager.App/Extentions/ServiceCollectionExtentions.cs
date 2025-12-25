@@ -14,7 +14,7 @@ public static class ServiceCollectionExtentions
         services.AddScoped<ILanguageService, LanguageService>();
         services.AddScoped<IInstrumentService, InstrumentService>();
         services.AddScoped<IArtistService, ArtistService>();
-        services.AddSingleton<IRoomService, RoomService>();
+        services.AddScoped<IRoomService, RoomService>();
         services.AddScoped<IGeniusService, GeniusService>();
         return services;
     }
