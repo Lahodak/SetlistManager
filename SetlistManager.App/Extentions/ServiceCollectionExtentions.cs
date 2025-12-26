@@ -16,6 +16,7 @@ public static class ServiceCollectionExtentions
         services.AddScoped<IArtistService, ArtistService>();
         services.AddScoped<IRoomService, RoomService>();
         services.AddScoped<IGeniusService, GeniusService>();
+        services.AddScoped<IQRService, QRService>();
         return services;
     }
 }

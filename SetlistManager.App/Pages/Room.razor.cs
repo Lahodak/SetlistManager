@@ -181,6 +181,25 @@ public partial class Room : IAsyncDisposable
         await DialogService.ShowAsync<ShowSetlistContentDialog>("Setlist Content", parameters, options);
     }
 
+    private async Task OpenQrCodeDialog()
+    {
+        var roomUrl = NavigationManager.Uri;
+
+        var parameters = new DialogParameters
+        {
+            { "RoomUrl", roomUrl }
+        };
+
+        var options = new DialogOptions
+        {
+            CloseOnEscapeKey = true,
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true
+        };
+
+        await DialogService.ShowAsync<QrCodeDialog>("Room Access", parameters, options);
+    }
+
     public async ValueTask DisposeAsync()
     {
         RoomService.RoomUpdated -= OnRoomUpdated;

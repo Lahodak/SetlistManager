@@ -15,6 +15,12 @@
                        Size="Size.Large"
                        OnClick="ToggleFullscreen"
                        title="@(_isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen")" />
+        <MudIconButton Icon="@Icons.Material.Filled.QrCode"
+                       Color="Color.Inherit"
+                       Edge="Edge.End"
+                       Size="Size.Large"
+                       OnClick="OpenQrCodeDialog"
+                       title="Show QR Code" />
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.End" Size="Size.Large" />
     </MudAppBar>
 
