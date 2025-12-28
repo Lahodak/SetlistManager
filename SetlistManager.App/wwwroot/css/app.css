@@ -12,6 +12,11 @@ html, body {
 }
 
 body {
+    background-color: var(--mud-palette-background);
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+body {
     padding-bottom: env(safe-area-inset-bottom);
 }
 
