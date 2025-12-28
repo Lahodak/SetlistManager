@@ -11,6 +11,10 @@ html, body {
     width: 100%;
 }
 
+body {
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
 h1:focus {
     outline: none;
 }
