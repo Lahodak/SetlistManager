@@ -56,6 +56,12 @@
                     <MudAlert Severity="Severity.Info" Class="mt-3">No songs in this setlist yet.</MudAlert>
                 }
             </MudPaper>
+
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" 
+                       Href="@($"/setlists/{SetlistId}/print")"
+                       StartIcon="@Icons.Material.Filled.Print">
+                Print Setlist
+            </MudButton>
         }
         else
         {
