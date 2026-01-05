@@ -37,9 +37,9 @@ public class UsersController : BaseController
 
     [HttpGet]
     public async Task<ActionResult<UserModel>> GetUser()
-    {        
+    {
         var userId = _currentUserContext.GetCurrentUserId();
-        
+
         if (userId is null)
             return Unauthorized();
 
@@ -58,10 +58,10 @@ public class UsersController : BaseController
     {
         if (grantResultModel is null)
             return BadRequest();
-        
-        var user = await _userService.GetUserByTempSalt(grantResultModel.State);       
 
-        if(user is null)
+        var user = await _userService.GetUserByTempSalt(grantResultModel.State);
+
+        if (user is null)
             return NotFound("User not found");
 
         var resultAccessTokenModel = await _geniusAuthService.ExchangeGeniusCode(grantResultModel.Code);
@@ -79,5 +79,57 @@ public class UsersController : BaseController
         await _userService.AddUserTokenAsync(user.Id, tokenModel);
 
         return Redirect(_appOptions.Value.UserPortalUrl);
+    }
+
+    [HttpPost("{id}/friendships")]
+    public async Task<ActionResult> InitiateFriendship(int id, [FromBody] FriendshipRequestModel requestModel)
+    {
+        var currentUserId = _currentUserContext.GetCurrentUserId();
+        
+        if (currentUserId is null)
+            return Unauthorized();
+        
+        //await _userService.InitiateFriendshipAsync(currentUserId.Value, id);
+        
+        return Created();
+    }
+
+    [HttpDelete("{id}/friendships")]
+    public async Task<ActionResult> RemoveFriendship(int id)
+    {
+        var currentUserId = _currentUserContext.GetCurrentUserId();
+        
+        if (currentUserId is null)
+            return Unauthorized();
+        
+        //await _userService.RemoveFriendshipAsync(currentUserId.Value, id);
+        
+        return NoContent();
+    }
+
+    [HttpGet("{id}/friendships")]
+    public async Task<ActionResult> GetUserFriends(int id)
+    {
+        var currentUserId = _currentUserContext.GetCurrentUserId();
+        
+        if (currentUserId is null)
+            return Unauthorized();
+        
+        //var isFriend = await _userService.CheckFriendshipAsync(currentUserId.Value, id);
+                
+        return Ok();
+    }
+
+    [HttpPut("{id}/friendships")]
+    public async Task<ActionResult> AcceptFriendship(int id)
+    {
+        var currentUserId = _currentUserContext.GetCurrentUserId();
+        
+        if (currentUserId is null)
+            return Unauthorized();
+        
+        //await _userService.AcceptFriendshipAsync(currentUserId.Value, id);
+        
+        return NoContent();
     }
 }
