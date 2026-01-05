@@ -12,4 +12,6 @@ public class User : IdentityUser<int>
     public int? InstrumentId { get; set; }
     public virtual Instrument? Instrument { get; set; }
     public virtual List<Token>? Tokens { get; set; } = [];
+    public virtual List<Friendship> InitiatedFriendships { get; set; } = [];
+    public virtual List<Friendship> ReceivedFriendships { get; set; } = [];
 }

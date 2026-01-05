@@ -16,6 +16,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
     public DbSet<Provider> Providers { get; set; }
     public DbSet<Token> Tokens { get; set; }
     public DbSet<TempAuthStorage> TempAuthStorage { get; set; }
+    public DbSet<Friendship> Friendships { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
