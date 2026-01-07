@@ -1,10 +1,11 @@
 ﻿using Blazored.LocalStorage;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 using SetlistManager.App.Options;
 using SetlistManager.Common.Models;
 using System.IdentityModel.Tokens.Jwt;
-using System.Text;
+using System.Net.Http.Json;
+using System.Security.Claims;
 
 namespace SetlistManager.App.Services.Implementations;
 public class UserService : IUserService
@@ -15,25 +16,25 @@ public class UserService : IUserService
     private const string _verifyEmailSuffix = "/verify";
     private const string _resetPasswordSuffix = "/reset-password";
     private const string _resetPasswordRequestSuffix = "/request-password-reset";
+    private const string _friendshipsSuffix = "/friendships";
+    private const string _tokensEndpointSuffix = "/tokens";
 
     private readonly IHttpClientFactory _httpClientFactory; 
     private readonly ILocalStorageService _localStorage;
     private readonly IApiService _apiService;
-    private readonly ILogger<UserService> _logger;
     private readonly IOptions<SetlistManagerApiOptions> _apiOptions;
 
     public UserService(IHttpClientFactory httpClientFactory, ILocalStorageService localStorageService, IApiService apiService, 
-        ILogger<UserService> logger, IOptions<SetlistManagerApiOptions> apiOptions)
+        IOptions<SetlistManagerApiOptions> apiOptions)
     {
         _apiOptions = apiOptions;
-        _logger = logger;
         _httpClientFactory = httpClientFactory;
         _localStorage = localStorageService;
         _apiService = apiService;
     }
 
     public async Task AddNewProviderToken(TokenCreateModel tokenModel) 
-        => await _apiService.PutAsync(_apiOptions.Value.UsersEndpoint + "/tokens", tokenModel);
+        => await _apiService.PutAsync(_apiOptions.Value.UsersEndpoint + _tokensEndpointSuffix, tokenModel);
 
     public async Task<UserModel?> GetUserAsync() 
         => await _apiService.GetAsync<UserModel>(_apiOptions.Value.UsersEndpoint);
@@ -45,7 +46,7 @@ public class UserService : IUserService
         if(user is null)
             return null;
 
-        return await _apiService.GetAsync<List<SetlistModel>?>(_apiOptions.Value.UsersEndpoint + "/" + user.Id.ToString() + _getUserSetlistsSuffix);
+        return await _apiService.GetAsync<List<SetlistModel>?>($"{_apiOptions.Value.UsersEndpoint}/{user.Id}{_getUserSetlistsSuffix}");
     }
 
     public async Task RegisterAsync(RegisterRequestModel model) 
@@ -73,7 +74,6 @@ public class UserService : IUserService
             return false;
 
         var jwt = handler.ReadJwtToken(token);
-
         var exp = jwt.ValidTo;
 
         if (exp < DateTime.UtcNow)
@@ -88,43 +88,16 @@ public class UserService : IUserService
     public async Task LogInAsync(LoginRequestModel model)
     {
         var client = _httpClientFactory.CreateClient();
-        string user;
 
-        try
-        {
-            user = JsonConvert.SerializeObject(model);
-        }
-        catch (Exception ex)
-        {
-            _logger.Log(LogLevel.Error, ex, message: ex.Message);
-            return;
-        }
-
-        var content = new StringContent(user, Encoding.UTF8, "application/json");
-        HttpResponseMessage message = await client.PostAsync(_apiOptions.Value.AuthEndpoint + _loginUserSuffix, content);
+        var message = await client.PostAsJsonAsync($"{_apiOptions.Value.AuthEndpoint}{_loginUserSuffix}", model);
 
         if (!message.IsSuccessStatusCode)
             return;
         
-        string json = await message.Content.ReadAsStringAsync();
+        var loginResult = await message.Content.ReadFromJsonAsync<LoginResultModel>();
 
-        if (json is null)
-            return;
-        
-        LoginResultModel? loginResult;
-
-        try
-        {
-            loginResult = JsonConvert.DeserializeObject<LoginResultModel>(json);
-            
-            if (loginResult!.Token is null  || loginResult is null)
-                return;
-        }
-        catch (Exception ex)
-        {
-            _logger.Log(LogLevel.Error, ex, message: ex.Message);
-            return;
-        }
+        if (loginResult?.Token is null)
+            return;     
 
         await _localStorage.SetItemAsync(_tokenKey, loginResult.Token);
     }
@@ -166,5 +139,51 @@ public class UserService : IUserService
         await _apiService.PostAsync(_apiOptions.Value.AuthEndpoint + _resetPasswordSuffix, resetModel);
         
         return true;
-    }   
+    }
+
+    public async Task<int?> GetCurrentUserIdAsync()
+    {
+        var token = await _localStorage.GetItemAsync<string>(_tokenKey);
+        if (string.IsNullOrWhiteSpace(token))
+            return null;
+
+        var handler = new JwtSecurityTokenHandler();
+        if (!handler.CanReadToken(token))
+            return null;
+
+        var jwt = handler.ReadJwtToken(token);
+
+        var userIdClaim = jwt.Claims
+            .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier
+                              || c.Type == "sub");
+
+        return int.TryParse(userIdClaim?.Value, out var userId)
+            ? userId
+            : null;
+    }
+
+    public async Task<PagedResponse<FriendModel>?> GetUserFriendshipByIdAsync(int userId, PagedRequest request)
+    {
+        UriBuilder uri = new($"{_apiOptions.Value.UsersEndpoint}/{userId}{_friendshipsSuffix}")
+        {
+            Query = new QueryBuilder
+            {
+                { "PageSize", request.PageSize.ToString() },
+                { "PageIndex", request.PageIndex.ToString() },
+                { "Query", request.Query ?? string.Empty }
+            }.ToString()
+        };
+
+        var result = await _apiService.GetAsync<PagedResponse<FriendModel>>(uri.ToString());
+
+        if (result is null)
+            return null;
+
+        return result;
+    }
+
+    public async Task HandleFriendshipRequestAsync(int initiatorId, FriendshipRequestModel friendshipRequest)
+    {
+        await _apiService.PostAsync($"{_apiOptions.Value.UsersEndpoint}/{initiatorId}{_friendshipsSuffix}", friendshipRequest);
+    }
 }

@@ -93,46 +93,36 @@ public class UsersController : BaseController
     [HttpPost("{id}/friendships")]
     public async Task<ActionResult> InitiateFriendship(int id, [FromBody] FriendshipRequestModel requestModel)
     {
-        //await _userService.InitiateFriendshipAsync(currentUserId.Value, id);
+        await _userService.HandleFriendshipRequestAsync(id, requestModel);
         
-        return Created();
+        return NoContent();
     }
 
     [HttpDelete("{id}/friendships/{friendshipId}")]
     public async Task<ActionResult> RemoveFriendship(int id, int friendshipId)
     {
-        var currentUserId = _currentUserContext.GetCurrentUserId();
-        
-        if (currentUserId is null)
-            return Unauthorized();
-        
-        //await _userService.RemoveFriendshipAsync(currentUserId.Value, id);
+        await _userService.RemoveFriendshipAsync(id, friendshipId);
         
         return NoContent();
     }
 
     [HttpGet("{id}/friendships")]
-    public async Task<ActionResult> GetUserFriends(int id)
+    public async Task<ActionResult<PagedResponse<FriendModel>>> GetUserFriends(int id, PagedRequest pagedRequest)
     {
         var currentUserId = _currentUserContext.GetCurrentUserId();
         
         if (currentUserId is null)
             return Unauthorized();
         
-        //var isFriend = await _userService.CheckFriendshipAsync(currentUserId.Value, id);
+        var result = await _userService.GetUserFriendsAsync(id, pagedRequest);
                 
-        return Ok();
+        return Ok(result);
     }
 
     [HttpPut("{id}/friendships/{friendshipId}")]
     public async Task<ActionResult> AcceptFriendship(int id, int friendshipId)
-    {
-        var currentUserId = _currentUserContext.GetCurrentUserId();
-        
-        if (currentUserId is null)
-            return Unauthorized();
-        
-        //await _userService.AcceptFriendshipAsync(currentUserId.Value, id);
+    {        
+        await _userService.AcceptFriendshipAsync(id, friendshipId);
         
         return NoContent();
     }
