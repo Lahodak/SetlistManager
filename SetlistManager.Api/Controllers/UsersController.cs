@@ -32,11 +32,17 @@ public class UsersController : BaseController
     public async Task<ActionResult> UpdateUser(UserModel model)
     {
         await _userService.UpdateUserAsync(model);
-        return Ok();
+        return NoContent();
     }
 
     [HttpGet]
-    public async Task<ActionResult<UserModel>> GetUser()
+    public async Task<ActionResult<PagedResponse<UserModel>>> GetUsers(PagedRequest pagedRequest)
+    {
+        return Ok(await _userService.GetUsersAsync(pagedRequest));
+    }
+
+    [HttpGet("{id}")]
+    public async Task<ActionResult<UserModel>> GetUserById(int id)
     {
         var userId = _currentUserContext.GetCurrentUserId();
 
@@ -87,11 +93,6 @@ public class UsersController : BaseController
     [HttpPost("{id}/friendships")]
     public async Task<ActionResult> InitiateFriendship(int id, [FromBody] FriendshipRequestModel requestModel)
     {
-        var currentUserId = _currentUserContext.GetCurrentUserId();
-        
-        if (currentUserId is null)
-            return Unauthorized();
-        
         //await _userService.InitiateFriendshipAsync(currentUserId.Value, id);
         
         return Created();

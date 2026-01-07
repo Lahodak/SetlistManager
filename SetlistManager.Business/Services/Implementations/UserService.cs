@@ -214,7 +214,8 @@ public class UserService : IUserService
             {
                 Id = friendUser.Id,
                 Username = friendUser.UserName!,
-                State = f.State
+                State = f.State,
+                FriendshipId = f.Id
             };
         }).ToList();
 
