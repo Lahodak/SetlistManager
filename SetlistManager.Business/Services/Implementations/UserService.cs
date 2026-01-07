@@ -30,7 +30,9 @@ public class UserService : IUserService
 
         if (model.Instrument is not null)
         {
-            var instrument = await _dbContext.Instruments.FirstOrDefaultAsync(i => i.Name == model.Instrument.Name);
+            var instrument = await _dbContext.Instruments.
+                FirstOrDefaultAsync(i => i.Name == model.Instrument.Name);
+            
             if (instrument != null)
             {
                 user.Instrument = instrument;
@@ -45,7 +47,32 @@ public class UserService : IUserService
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task<UserModel> GetCurrentUserAsync(int userId)
+    public async Task<PagedResponse<UserModel>> GetUsersAsync(PagedRequest request)
+    {
+        var query = _dbContext.Users
+            .Where(u => string.IsNullOrEmpty(request.Query) ||
+                u.UserName!.Contains(request.Query) ||
+                u.Email!.Contains(request.Query));
+        
+        var totalCount = await query.CountAsync();
+        
+        var users = await query
+            .Skip(request.PageIndex * request.PageSize)
+            .Take(request.PageSize)
+            .ToListAsync();
+        
+        PagedResponse<UserModel> pagedResponse = new()
+        {
+            Items = users
+                .Select(u => u.ToModel())
+                .ToList(),
+            TotalCount = totalCount
+        };
+
+        return pagedResponse;
+    }
+
+    public async Task<UserModel?> GetCurrentUserAsync(int userId)
     {
         User? user = await _dbContext.Users
             .Include(u => u.Instrument)
@@ -55,7 +82,10 @@ public class UserService : IUserService
                 .ThenInclude(f => f.User2)
             .Include(u => u.ReceivedFriendships)
                 .ThenInclude(f => f.User1)
-            .FirstAsync(u => u.Id == userId);
+            .FirstOrDefaultAsync(x => x.Id == userId);
+
+        if (user is null)
+            return null;
 
         return user.ToModel();
     }
@@ -66,21 +96,28 @@ public class UserService : IUserService
             .Include(u => u.Instrument)
             .Include(u => u.Tokens)!
                 .ThenInclude(t => t.Provider)
-            .FirstAsync(u => u.Id == userId);
+            .FirstOrDefaultAsync(u => u.Id == userId);
     }
 
-    public async Task AddUserTokenAsync(int userId, TokenCreateModel tokenModel)
+    public async Task<bool> TryAddUserTokenAsync(int userId, TokenCreateModel tokenModel)
     {
+        var provider = await _dbContext.Providers
+            .FirstOrDefaultAsync(p => p.Name == tokenModel.Provider.ToString());
+
+        if (provider is null)
+            return false;
+
         await _dbContext.Tokens.AddAsync(new Token
         {
             UserId = userId,
-            Provider = await _dbContext.Providers
-            .FirstAsync(x => x.Name == tokenModel.Provider.ToString()),
+            Provider = provider,
             AccessToken = tokenModel.AccessToken,
             CreatedAt = DateTime.UtcNow
         });
 
         await _dbContext.SaveChangesAsync();
+
+        return true;
     }
 
     public async Task<User?> GetUserByTempSalt(string salt)
@@ -99,22 +136,19 @@ public class UserService : IUserService
     }
 
     public async Task HandleFriendshipRequestAsync(int initiatorId, FriendshipRequestModel friendshipRequest)
-    {
-        if(await _dbContext.Friendships.AnyAsync(f => 
-            ((f.User1Id == initiatorId && f.User2Id == friendshipRequest.RecieverId) ||
-            (f.User1Id == friendshipRequest.RecieverId && f.User2Id == initiatorId)) &&
-            f.State == FriendshipState.Pending))
-        {
-            var friendship = await _dbContext.Friendships.FirstAsync(f =>
+    {        
+        var friendship = await _dbContext.Friendships.FirstOrDefaultAsync(f =>
                 (f.User1Id == initiatorId && f.User2Id == friendshipRequest.RecieverId) ||
                 (f.User1Id == friendshipRequest.RecieverId && f.User2Id == initiatorId));
 
-            friendship.State = FriendshipState.Accepted;
-
+        if(friendship is not null)
+        {
+            friendship.State = FriendshipState.Accepted;            
             await _dbContext.SaveChangesAsync();
+            
             return;
         }
-        
+
         Friendship newFriendship = new()
         {
             User1Id = initiatorId,

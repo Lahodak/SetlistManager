@@ -76,7 +76,10 @@ public class UsersController : BaseController
             RefreshToken = null
         };
 
-        await _userService.AddUserTokenAsync(user.Id, tokenModel);
+        var result = await _userService.TryAddUserTokenAsync(user.Id, tokenModel);
+        
+        if(!result)
+            return BadRequest("Could not add token to user, provider not found");
 
         return Redirect(_appOptions.Value.UserPortalUrl);
     }

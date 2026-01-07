@@ -100,7 +100,10 @@ public class SetlistsService : ISetlistsService
             .Include(s => s.SongsSetlists)
                 .ThenInclude(s => s.Song)
                     .ThenInclude(s => s.Artist)
-            .FirstAsync(x => x.Id == setlistModel.Id);
+            .FirstOrDefaultAsync(x => x.Id == setlistModel.Id);
+
+        if (setlistToBeEdited is null)
+            return;
 
         setlistToBeEdited.Name = setlistModel.Name;
         setlistToBeEdited.UpdatedAt = DateTime.Now;
