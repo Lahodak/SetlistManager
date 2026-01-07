@@ -12,7 +12,7 @@ public class UserService : IUserService
 {
     private const string _loginUserSuffix = "/login";
     private const string _tokenKey = "authToken";
-    private const string _getUserSetlistsSuffix = "/Setlists";
+    private const string _getUserSetlistsSuffix = "/setlists";
     private const string _verifyEmailSuffix = "/verify";
     private const string _resetPasswordSuffix = "/reset-password";
     private const string _resetPasswordRequestSuffix = "/request-password-reset";
@@ -36,14 +36,21 @@ public class UserService : IUserService
     public async Task AddNewProviderToken(TokenCreateModel tokenModel) 
         => await _apiService.PutAsync(_apiOptions.Value.UsersEndpoint + _tokensEndpointSuffix, tokenModel);
 
-    public async Task<UserModel?> GetUserAsync() 
-        => await _apiService.GetAsync<UserModel>(_apiOptions.Value.UsersEndpoint);
+    public async Task<UserModel?> GetUserAsync()
+    {
+        var userId = await GetCurrentUserIdAsync();
+        
+        if (userId is null)
+            return null;
+
+        return await _apiService.GetAsync<UserModel?>($"{_apiOptions.Value.UsersEndpoint}/{userId}");
+    }
 
     public async Task<List<SetlistModel>?> GetAllUserSetlists()
     {
         UserModel? user = await GetUserAsync();
         
-        if(user is null)
+        if (user is null)
             return null;
 
         return await _apiService.GetAsync<List<SetlistModel>?>($"{_apiOptions.Value.UsersEndpoint}/{user.Id}{_getUserSetlistsSuffix}");
@@ -52,20 +59,15 @@ public class UserService : IUserService
     public async Task RegisterAsync(RegisterRequestModel model) 
         => await _apiService.PostAsync(_apiOptions.Value.AuthEndpoint, model);
 
-    public async Task LogOutAsync()
-    {
-        await _localStorage.RemoveItemAsync(_tokenKey);
-    }   
+    public async Task LogOutAsync() 
+        => await _localStorage.RemoveItemAsync(_tokenKey);
 
-    public async Task<string?> GetUserToken()
-    {
-        return await _localStorage.GetItemAsync<string>(_tokenKey);
-    }
+    public async Task<string?> GetUserToken() 
+        => await _localStorage.GetItemAsync<string>(_tokenKey);
 
     public async Task<bool> IsUserLoggedInAsync()
     {
         var token = await _localStorage.GetItemAsync<string>(_tokenKey);
-
         if (string.IsNullOrWhiteSpace(token))
             return false;
 
@@ -82,8 +84,16 @@ public class UserService : IUserService
         return true;
     }
 
-    public async Task UpdateUser(UserModel user) 
-        => await _apiService.PutAsync(_apiOptions.Value.UsersEndpoint, user);
+    public async Task<bool> TryUpdateUser(UserModel user)
+    {
+        var userId = await GetCurrentUserIdAsync();
+
+        if (userId is null)
+            return false;
+
+        await _apiService.PutAsync($"{_apiOptions.Value.UsersEndpoint}/{userId}", user);
+        return true;
+    }
 
     public async Task LogInAsync(LoginRequestModel model)
     {
@@ -110,7 +120,7 @@ public class UserService : IUserService
             Token = token
         };
 
-        await _apiService.PostAsync(_apiOptions.Value.AuthEndpoint + _verifyEmailSuffix, verifyModel);
+        await _apiService.PostAsync($"{_apiOptions.Value.AuthEndpoint}{_verifyEmailSuffix}", verifyModel);
         
         return true;                
     }
@@ -122,7 +132,7 @@ public class UserService : IUserService
             Email = email
         };
 
-        await _apiService.PostAsync(_apiOptions.Value.AuthEndpoint + _resetPasswordRequestSuffix, model);
+        await _apiService.PostAsync($"{_apiOptions.Value.AuthEndpoint}{_resetPasswordRequestSuffix}", model);
 
         return true;
     }
@@ -136,7 +146,7 @@ public class UserService : IUserService
             Token = token
         };
 
-        await _apiService.PostAsync(_apiOptions.Value.AuthEndpoint + _resetPasswordSuffix, resetModel);
+        await _apiService.PostAsync($"{_apiOptions.Value.AuthEndpoint}{_resetPasswordSuffix}", resetModel);
         
         return true;
     }
@@ -155,7 +165,7 @@ public class UserService : IUserService
 
         var userIdClaim = jwt.Claims
             .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier
-                              || c.Type == "sub");
+                              || c.Type == "nameid");
 
         return int.TryParse(userIdClaim?.Value, out var userId)
             ? userId
@@ -182,8 +192,13 @@ public class UserService : IUserService
         return result;
     }
 
-    public async Task HandleFriendshipRequestAsync(int initiatorId, FriendshipRequestModel friendshipRequest)
+    public async Task HandleFriendshipRequestAsync(FriendshipRequestModel friendshipRequest)
     {
+        var initiatorId = await GetCurrentUserIdAsync();
+
+        if (initiatorId is null)
+            return;
+
         await _apiService.PostAsync($"{_apiOptions.Value.UsersEndpoint}/{initiatorId}{_friendshipsSuffix}", friendshipRequest);
     }
 }
