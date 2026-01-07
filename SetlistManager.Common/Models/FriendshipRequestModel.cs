@@ -2,6 +2,5 @@
 
 public class FriendshipRequestModel
 {
-    public int User1Id { get; set; }
-    public int User2Id { get; set; }
+    public int RecieverId { get; set; }
 }

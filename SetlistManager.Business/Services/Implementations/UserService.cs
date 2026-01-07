@@ -51,7 +51,12 @@ public class UserService : IUserService
             .Include(u => u.Instrument)
             .Include(u => u.Tokens)!
                 .ThenInclude(t => t.Provider)
+            .Include(u => u.InitiatedFriendships)
+                .ThenInclude(f => f.User2)
+            .Include(u => u.ReceivedFriendships)
+                .ThenInclude(f => f.User1)
             .FirstAsync(u => u.Id == userId);
+
         return user.ToModel();
     }
 
@@ -91,5 +96,100 @@ public class UserService : IUserService
             .Include(u => u.Tokens)!
                 .ThenInclude(t => t.Provider)
             .FirstOrDefaultAsync(u => u.Id == tempAuth.UserId);
+    }
+
+    public async Task HandleFriendshipRequestAsync(int initiatorId, FriendshipRequestModel friendshipRequest)
+    {
+        if(await _dbContext.Friendships.AnyAsync(f => 
+            ((f.User1Id == initiatorId && f.User2Id == friendshipRequest.RecieverId) ||
+            (f.User1Id == friendshipRequest.RecieverId && f.User2Id == initiatorId)) &&
+            f.State == FriendshipState.Pending))
+        {
+            var friendship = await _dbContext.Friendships.FirstAsync(f =>
+                (f.User1Id == initiatorId && f.User2Id == friendshipRequest.RecieverId) ||
+                (f.User1Id == friendshipRequest.RecieverId && f.User2Id == initiatorId));
+
+            friendship.State = FriendshipState.Accepted;
+
+            await _dbContext.SaveChangesAsync();
+            return;
+        }
+        
+        Friendship newFriendship = new()
+        {
+            User1Id = initiatorId,
+            User2Id = friendshipRequest.RecieverId,
+            State = FriendshipState.Pending
+        };
+
+        await _dbContext.Friendships.AddAsync(newFriendship);
+        await _dbContext.SaveChangesAsync();
+    }
+
+    public async Task AcceptFriendshipAsync(int currentUserId, int friendshipId)
+    {
+        var friendship = await _dbContext.Friendships
+            .FirstOrDefaultAsync(f => f.Id == friendshipId &&
+                (f.User1Id == currentUserId || f.User2Id == currentUserId) &&
+                f.State == FriendshipState.Pending);
+
+        if (friendship is null)
+            return;
+
+        friendship.State = FriendshipState.Accepted;
+        await _dbContext.SaveChangesAsync();
+    }
+
+    public async Task RemoveFriendshipAsync(int currentUserId, int friendshipId)
+    {
+        var friendship = await _dbContext.Friendships
+            .FirstOrDefaultAsync(f => f.Id == friendshipId &&
+                (f.User1Id == currentUserId || f.User2Id == currentUserId));
+        
+        if (friendship is null)
+            return;
+
+        _dbContext.Friendships.Remove(friendship);
+        await _dbContext.SaveChangesAsync();
+    }
+
+    public async Task<PagedResponse<FriendModel>?> GetUserFriendsAsync(int userId, PagedRequest request)
+    {
+        var query = _dbContext.Friendships
+            .Include(f => f.User1)
+            .Include(f => f.User2)
+            .Where(f => (f.User1Id == userId || f.User2Id == userId) &&
+                (string.IsNullOrEmpty(request.Query) ||
+                f.User1.UserName!.Contains(request.Query) ||
+                f.User2.UserName!.Contains(request.Query)));
+
+        var totalCount = await query.CountAsync();
+
+        var friendships = await query
+            .Skip(request.PageIndex * request.PageSize)
+            .Take(request.PageSize)
+            .ToListAsync();
+
+        if (friendships is null || friendships.Count == 0)
+            return null;
+
+        List<FriendModel> friends = friendships.Select(f =>
+        {
+            var friendUser = f.User1Id == userId ? f.User2 : f.User1;
+            return new FriendModel
+            {
+                Id = friendUser.Id,
+                Username = friendUser.UserName!,
+                State = f.State
+            };
+        }).ToList();
+
+        PagedResponse<FriendModel> pagedResponse = new()
+        {
+            Items = friends,
+            TotalCount = totalCount
+        };
+
+        return pagedResponse;
     }
 }

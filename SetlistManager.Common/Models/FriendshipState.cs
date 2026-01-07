@@ -1,4 +1,4 @@
-﻿namespace SetlistManager.Data.Entities;
+﻿namespace SetlistManager.Common.Models;
 
 public enum FriendshipState
 {

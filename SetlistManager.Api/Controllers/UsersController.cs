@@ -94,8 +94,8 @@ public class UsersController : BaseController
         return Created();
     }
 
-    [HttpDelete("{id}/friendships")]
-    public async Task<ActionResult> RemoveFriendship(int id)
+    [HttpDelete("{id}/friendships/{friendshipId}")]
+    public async Task<ActionResult> RemoveFriendship(int id, int friendshipId)
     {
         var currentUserId = _currentUserContext.GetCurrentUserId();
         
@@ -120,8 +120,8 @@ public class UsersController : BaseController
         return Ok();
     }
 
-    [HttpPut("{id}/friendships")]
-    public async Task<ActionResult> AcceptFriendship(int id)
+    [HttpPut("{id}/friendships/{friendshipId}")]
+    public async Task<ActionResult> AcceptFriendship(int id, int friendshipId)
     {
         var currentUserId = _currentUserContext.GetCurrentUserId();
         

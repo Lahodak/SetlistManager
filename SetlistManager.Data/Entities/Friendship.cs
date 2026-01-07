@@ -1,4 +1,6 @@
-﻿namespace SetlistManager.Data.Entities;
+﻿using SetlistManager.Common.Models;
+
+namespace SetlistManager.Data.Entities;
 
 public class Friendship : Base 
 {

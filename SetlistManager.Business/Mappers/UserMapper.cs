@@ -7,7 +7,6 @@ public static class UserMapper
 {
     public static UserModel ToModel(this User user)
     {
-
         List<TokenModel>? tokens = null;
 
         if (user.Tokens is not null)

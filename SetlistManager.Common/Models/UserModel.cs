@@ -6,6 +6,6 @@ public class UserModel
     public string Username { get; set; } = default!;
     public string Email { get; set; } = default!;
     public InstrumentModel? Instrument { get; set; } = default!;
-
     public List<TokenModel>? Tokens { get; set; }
+    public List<FriendModel>? Friends { get; set; }
 }
