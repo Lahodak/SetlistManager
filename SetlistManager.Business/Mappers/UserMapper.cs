@@ -41,4 +41,14 @@ public static class UserMapper
             InstrumentId = model.Instrument?.Id
         };
     }
+
+    public static UserViewModel ToViewModel(this User user)
+    {
+        return new UserViewModel
+        {
+            Id = user.Id,
+            UserName = user.UserName!,
+            Email = user.Email!
+        };
+    }
 }

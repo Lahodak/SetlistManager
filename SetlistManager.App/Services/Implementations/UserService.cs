@@ -172,8 +172,13 @@ public class UserService : IUserService
             : null;
     }
 
-    public async Task<PagedResponse<FriendModel>?> GetUserFriendshipByIdAsync(int userId, PagedRequest request)
+    public async Task<PagedResponse<FriendModel>?> GetUserFriendshipsAsync(PagedRequest request)
     {
+        var userId = await GetCurrentUserIdAsync();
+
+        if (userId is null)
+            return null;
+
         UriBuilder uri = new($"{_apiOptions.Value.UsersEndpoint}/{userId}{_friendshipsSuffix}")
         {
             Query = new QueryBuilder
@@ -184,12 +189,7 @@ public class UserService : IUserService
             }.ToString()
         };
 
-        var result = await _apiService.GetAsync<PagedResponse<FriendModel>>(uri.ToString());
-
-        if (result is null)
-            return null;
-
-        return result;
+        return await _apiService.GetAsync<PagedResponse<FriendModel>>(uri.ToString());
     }
 
     public async Task HandleFriendshipRequestAsync(FriendshipRequestModel friendshipRequest)
@@ -220,5 +220,20 @@ public class UserService : IUserService
             return false;
 
         return await _apiService.TryPutAsync($"{_apiOptions.Value.UsersEndpoint}/{initiatorId}{_friendshipsSuffix}/{friendshipId}", "");
+    }
+
+    public async Task<PagedResponse<UserViewModel>?> GetPagedUsersAsync(PagedRequest request)
+    {
+        UriBuilder uri = new($"{_apiOptions.Value.UsersEndpoint}")
+        {
+            Query = new QueryBuilder
+            {
+                { "PageSize", request.PageSize.ToString() },
+                { "PageIndex", request.PageIndex.ToString() },
+                { "Query", request.Query ?? string.Empty }
+            }.ToString()
+        };
+        
+        return await _apiService.GetAsync<PagedResponse<UserViewModel>>(uri.ToString());
     }
 }

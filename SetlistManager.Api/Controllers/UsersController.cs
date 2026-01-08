@@ -36,7 +36,7 @@ public class UsersController : BaseController
     }
 
     [HttpGet]
-    public async Task<ActionResult<PagedResponse<UserModel>>> GetUsers(PagedRequest pagedRequest)
+    public async Task<ActionResult<PagedResponse<UserViewModel>>> GetUsers([FromQuery] PagedRequest pagedRequest)
     {
         return Ok(await _userService.GetUsersAsync(pagedRequest));
     }
@@ -107,7 +107,7 @@ public class UsersController : BaseController
     }
 
     [HttpGet("{id}/friendships")]
-    public async Task<ActionResult<PagedResponse<FriendModel>>> GetUserFriends(int id, PagedRequest pagedRequest)
+    public async Task<ActionResult<PagedResponse<FriendModel>>> GetUserFriends(int id, [FromQuery] PagedRequest pagedRequest)
     {
         var currentUserId = _currentUserContext.GetCurrentUserId();
         

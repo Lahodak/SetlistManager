@@ -1,0 +1,57 @@
+﻿@using SetlistManager.Common.Models
+
+<MudDialog>
+    <DialogContent>
+        <MudText Typo="Typo.h6" Class="mb-4">Add a New Friend</MudText>
+        
+        <MudTextField @bind-Value="_searchQuery" 
+                      Label="Search users" 
+                      Variant="Variant.Outlined"
+                      Adornment="Adornment.End"
+                      AdornmentIcon="@Icons.Material.Filled.Search"
+                      OnAdornmentClick="SearchUsers"
+                      OnKeyUp="OnSearchKeyUp"
+                      Class="mb-4" />
+
+        @if (_isSearching)
+        {
+            <MudProgressLinear Indeterminate="true" Class="mb-2" />
+        }
+
+        @if (_searchResults is not null && _searchResults.Any())
+        {
+            <MudList T="UserViewModel" Clickable="true">
+                @foreach (var user in _searchResults)
+                {
+                    <MudListItem>
+                        <div class="d-flex justify-space-between align-center">
+                            <div>
+                                <MudText Typo="Typo.body1">@user.UserName</MudText>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">@user.Email</MudText>
+                            </div>
+                            <MudButton Variant="Variant.Filled" 
+                                       Color="Color.Primary" 
+                                       Size="Size.Small"
+                                       OnClick="() => SendFriendRequest(user)"
+                                       Disabled="_sentRequests.Contains(user.Id)">
+                                @(_sentRequests.Contains(user.Id) ? "Request Sent" : "Add Friend")
+                            </MudButton>
+                        </div>
+                    </MudListItem>
+                    <MudDivider />
+                }
+            </MudList>
+        }
+        else if (!string.IsNullOrWhiteSpace(_searchQuery) && !_isSearching && _hasSearched)
+        {
+            <MudAlert Severity="Severity.Info">No users found matching your search.</MudAlert>
+        }
+        else if (!_hasSearched)
+        {
+            <MudAlert Severity="Severity.Normal">Search for users to send friend requests.</MudAlert>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Close</MudButton>
+    </DialogActions>
+</MudDialog>

@@ -47,7 +47,7 @@ public class UserService : IUserService
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task<PagedResponse<UserModel>> GetUsersAsync(PagedRequest request)
+    public async Task<PagedResponse<UserViewModel>> GetUsersAsync(PagedRequest request)
     {
         var query = _dbContext.Users
             .Where(u => string.IsNullOrEmpty(request.Query) ||
@@ -61,10 +61,10 @@ public class UserService : IUserService
             .Take(request.PageSize)
             .ToListAsync();
         
-        PagedResponse<UserModel> pagedResponse = new()
+        PagedResponse<UserViewModel> pagedResponse = new()
         {
             Items = users
-                .Select(u => u.ToModel())
+                .Select(u => u.ToViewModel())
                 .ToList(),
             TotalCount = totalCount
         };
