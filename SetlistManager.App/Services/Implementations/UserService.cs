@@ -201,4 +201,24 @@ public class UserService : IUserService
 
         await _apiService.PostAsync($"{_apiOptions.Value.UsersEndpoint}/{initiatorId}{_friendshipsSuffix}", friendshipRequest);
     }
+
+    public async Task<bool> TryRemoveFriendshipAsync(int friendshipId)
+    {
+        var initiatorId = await GetCurrentUserIdAsync();
+        
+        if (initiatorId is null)
+            return false;
+        
+        return await _apiService.TryDeleteAsync($"{_apiOptions.Value.UsersEndpoint}/{initiatorId}{_friendshipsSuffix}/{friendshipId}");
+    }
+
+    public async Task<bool> TryAcceptFriendshipAsync(int friendshipId)
+    {
+        var initiatorId = await GetCurrentUserIdAsync();
+        
+        if (initiatorId is null)
+            return false;
+
+        return await _apiService.TryPutAsync($"{_apiOptions.Value.UsersEndpoint}/{initiatorId}{_friendshipsSuffix}/{friendshipId}", "");
+    }
 }
