@@ -18,6 +18,12 @@ public partial class FriendshipsPortal
     private MudTable<FriendModel> _table = new();
     private PagedRequest pageStatus = new();
     private string? searchString;
+    private int _currentUserId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _currentUserId = (await UserService.GetCurrentUserIdAsync()).Value; 
+    }
 
     private async Task<TableData<FriendModel>> ServerReload(TableState state, CancellationToken token)
     {

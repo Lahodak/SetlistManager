@@ -34,7 +34,7 @@
                     </MudChip>
                 </MudTd>
                 <MudTd>
-                    @if (context.State == FriendshipState.Pending)
+                    @if (context.State == FriendshipState.Pending && context.InitiatedById != _currentUserId)
                     {
                         <MudIconButton OnClick="() => AcceptFriendshipAsync(context)" 
                                        Icon="@Icons.Material.Filled.Check" 

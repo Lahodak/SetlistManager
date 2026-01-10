@@ -143,12 +143,14 @@ public class UserService : IUserService
 
         if (friendship is not null)
         {
-            friendship.State = FriendshipState.Accepted;            
-            await _dbContext.SaveChangesAsync();
-            
+            if (initiatorId != friendship.InitiatorId)
+            {
+                friendship.State = FriendshipState.Accepted;
+                await _dbContext.SaveChangesAsync();
+            }
             return;
         }
-
+        
         Friendship newFriendship = new()
         {
             InitiatorId = initiatorId,
@@ -215,7 +217,8 @@ public class UserService : IUserService
                 Id = friendUser.Id,
                 Username = friendUser.UserName!,
                 State = f.State,
-                FriendshipId = f.Id
+                FriendshipId = f.Id,
+                InitiatedById = f.InitiatorId
             };
         }).ToList();
 
