@@ -4,9 +4,9 @@ namespace SetlistManager.Data.Entities;
 
 public class Friendship : Base 
 {
-    public int User1Id { get; set; }
-    public virtual User User1 { get; set; } = default!;
-    public int User2Id { get; set; }
-    public virtual User User2 { get; set; } = default!;
+    public int InitiatorId { get; set; }
+    public virtual User Initiator { get; set; } = default!;
+    public int RecieverId { get; set; }
+    public virtual User Reciever { get; set; } = default!;
     public FriendshipState State { get; set; } = FriendshipState.Pending;
 }

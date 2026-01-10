@@ -79,9 +79,9 @@ public class UserService : IUserService
             .Include(u => u.Tokens)!
                 .ThenInclude(t => t.Provider)
             .Include(u => u.InitiatedFriendships)
-                .ThenInclude(f => f.User2)
+                .ThenInclude(f => f.Reciever)
             .Include(u => u.ReceivedFriendships)
-                .ThenInclude(f => f.User1)
+                .ThenInclude(f => f.Initiator)
             .FirstOrDefaultAsync(x => x.Id == userId);
 
         if (user is null)
@@ -138,10 +138,10 @@ public class UserService : IUserService
     public async Task HandleFriendshipRequestAsync(int initiatorId, FriendshipRequestModel friendshipRequest)
     {        
         var friendship = await _dbContext.Friendships.FirstOrDefaultAsync(f =>
-                (f.User1Id == initiatorId && f.User2Id == friendshipRequest.RecieverId) ||
-                (f.User1Id == friendshipRequest.RecieverId && f.User2Id == initiatorId));
+                (f.InitiatorId == initiatorId && f.RecieverId == friendshipRequest.RecieverId) ||
+                (f.InitiatorId == friendshipRequest.RecieverId && f.RecieverId == initiatorId));
 
-        if(friendship is not null)
+        if (friendship is not null)
         {
             friendship.State = FriendshipState.Accepted;            
             await _dbContext.SaveChangesAsync();
@@ -151,8 +151,8 @@ public class UserService : IUserService
 
         Friendship newFriendship = new()
         {
-            User1Id = initiatorId,
-            User2Id = friendshipRequest.RecieverId,
+            InitiatorId = initiatorId,
+            RecieverId = friendshipRequest.RecieverId,
             State = FriendshipState.Pending
         };
 
@@ -164,7 +164,7 @@ public class UserService : IUserService
     {
         var friendship = await _dbContext.Friendships
             .FirstOrDefaultAsync(f => f.Id == friendshipId &&
-                (f.User1Id == currentUserId || f.User2Id == currentUserId) &&
+                (f.InitiatorId == currentUserId || f.RecieverId == currentUserId) &&
                 f.State == FriendshipState.Pending);
 
         if (friendship is null)
@@ -178,7 +178,7 @@ public class UserService : IUserService
     {
         var friendship = await _dbContext.Friendships
             .FirstOrDefaultAsync(f => f.Id == friendshipId &&
-                (f.User1Id == currentUserId || f.User2Id == currentUserId));
+                (f.InitiatorId == currentUserId || f.RecieverId == currentUserId));
         
         if (friendship is null)
             return;
@@ -190,12 +190,12 @@ public class UserService : IUserService
     public async Task<PagedResponse<FriendModel>?> GetUserFriendsAsync(int userId, PagedRequest request)
     {
         var query = _dbContext.Friendships
-            .Include(f => f.User1)
-            .Include(f => f.User2)
-            .Where(f => (f.User1Id == userId || f.User2Id == userId) &&
+            .Include(f => f.Initiator)
+            .Include(f => f.Reciever)
+            .Where(f => (f.InitiatorId == userId || f.RecieverId == userId) &&
                 (string.IsNullOrEmpty(request.Query) ||
-                f.User1.UserName!.Contains(request.Query) ||
-                f.User2.UserName!.Contains(request.Query)));
+                f.Initiator.UserName!.Contains(request.Query) ||
+                f.Reciever.UserName!.Contains(request.Query)));
 
         var totalCount = await query.CountAsync();
 
@@ -209,7 +209,7 @@ public class UserService : IUserService
 
         List<FriendModel> friends = friendships.Select(f =>
         {
-            var friendUser = f.User1Id == userId ? f.User2 : f.User1;
+            var friendUser = f.InitiatorId == userId ? f.Reciever : f.Initiator;
             return new FriendModel
             {
                 Id = friendUser.Id,

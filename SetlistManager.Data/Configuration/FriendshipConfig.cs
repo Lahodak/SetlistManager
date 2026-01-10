@@ -10,14 +10,14 @@ public class FriendshipConfig : IEntityTypeConfiguration<Friendship>
     {
         builder.HasKey(x => x.Id);
 
-        builder.HasOne(f => f.User1)
+        builder.HasOne(f => f.Initiator)
             .WithMany(u => u.InitiatedFriendships)
-            .HasForeignKey(f => f.User1Id)
+            .HasForeignKey(f => f.InitiatorId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasOne(f => f.User2)
+        builder.HasOne(f => f.Reciever)
             .WithMany(u => u.ReceivedFriendships)
-            .HasForeignKey(f => f.User2Id)
+            .HasForeignKey(f => f.RecieverId)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }
