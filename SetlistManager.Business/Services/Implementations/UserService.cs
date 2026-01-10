@@ -30,7 +30,9 @@ public class UserService : IUserService
 
         if (model.Instrument is not null)
         {
-            var instrument = await _dbContext.Instruments.FirstOrDefaultAsync(i => i.Name == model.Instrument.Name);
+            var instrument = await _dbContext.Instruments.
+                FirstOrDefaultAsync(i => i.Name == model.Instrument.Name);
+            
             if (instrument != null)
             {
                 user.Instrument = instrument;
@@ -45,13 +47,46 @@ public class UserService : IUserService
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task<UserModel> GetCurrentUserAsync(int userId)
+    public async Task<PagedResponse<UserViewModel>> GetUsersAsync(PagedRequest request)
+    {
+        var query = _dbContext.Users
+            .Where(u => string.IsNullOrEmpty(request.Query) ||
+                u.UserName!.Contains(request.Query) ||
+                u.Email!.Contains(request.Query));
+        
+        var totalCount = await query.CountAsync();
+        
+        var users = await query
+            .Skip(request.PageIndex * request.PageSize)
+            .Take(request.PageSize)
+            .ToListAsync();
+        
+        PagedResponse<UserViewModel> pagedResponse = new()
+        {
+            Items = users
+                .Select(u => u.ToViewModel())
+                .ToList(),
+            TotalCount = totalCount
+        };
+
+        return pagedResponse;
+    }
+
+    public async Task<UserModel?> GetCurrentUserAsync(int userId)
     {
         User? user = await _dbContext.Users
             .Include(u => u.Instrument)
             .Include(u => u.Tokens)!
                 .ThenInclude(t => t.Provider)
-            .FirstAsync(u => u.Id == userId);
+            .Include(u => u.InitiatedFriendships)
+                .ThenInclude(f => f.Reciever)
+            .Include(u => u.ReceivedFriendships)
+                .ThenInclude(f => f.Initiator)
+            .FirstOrDefaultAsync(x => x.Id == userId);
+
+        if (user is null)
+            return null;
+
         return user.ToModel();
     }
 
@@ -61,21 +96,28 @@ public class UserService : IUserService
             .Include(u => u.Instrument)
             .Include(u => u.Tokens)!
                 .ThenInclude(t => t.Provider)
-            .FirstAsync(u => u.Id == userId);
+            .FirstOrDefaultAsync(u => u.Id == userId);
     }
 
-    public async Task AddUserTokenAsync(int userId, TokenCreateModel tokenModel)
+    public async Task<bool> TryAddUserTokenAsync(int userId, TokenCreateModel tokenModel)
     {
+        var provider = await _dbContext.Providers
+            .FirstOrDefaultAsync(p => p.Name == tokenModel.Provider.ToString());
+
+        if (provider is null)
+            return false;
+
         await _dbContext.Tokens.AddAsync(new Token
         {
             UserId = userId,
-            Provider = await _dbContext.Providers
-            .FirstAsync(x => x.Name == tokenModel.Provider.ToString()),
+            Provider = provider,
             AccessToken = tokenModel.AccessToken,
             CreatedAt = DateTime.UtcNow
         });
 
         await _dbContext.SaveChangesAsync();
+
+        return true;
     }
 
     public async Task<User?> GetUserByTempSalt(string salt)
@@ -91,5 +133,101 @@ public class UserService : IUserService
             .Include(u => u.Tokens)!
                 .ThenInclude(t => t.Provider)
             .FirstOrDefaultAsync(u => u.Id == tempAuth.UserId);
+    }
+
+    public async Task HandleFriendshipRequestAsync(int initiatorId, FriendshipRequestModel friendshipRequest)
+    {        
+        var friendship = await _dbContext.Friendships.FirstOrDefaultAsync(f =>
+                (f.InitiatorId == initiatorId && f.RecieverId == friendshipRequest.RecieverId) ||
+                (f.InitiatorId == friendshipRequest.RecieverId && f.RecieverId == initiatorId));
+
+        if (friendship is not null)
+        {
+            if (initiatorId != friendship.InitiatorId)
+            {
+                friendship.State = FriendshipState.Accepted;
+                await _dbContext.SaveChangesAsync();
+            }
+            return;
+        }
+        
+        Friendship newFriendship = new()
+        {
+            InitiatorId = initiatorId,
+            RecieverId = friendshipRequest.RecieverId,
+            State = FriendshipState.Pending
+        };
+
+        await _dbContext.Friendships.AddAsync(newFriendship);
+        await _dbContext.SaveChangesAsync();
+    }
+
+    public async Task AcceptFriendshipAsync(int currentUserId, int friendshipId)
+    {
+        var friendship = await _dbContext.Friendships
+            .FirstOrDefaultAsync(f => f.Id == friendshipId &&
+                (f.InitiatorId == currentUserId || f.RecieverId == currentUserId) &&
+                f.State == FriendshipState.Pending);
+
+        if (friendship is null)
+            return;
+
+        friendship.State = FriendshipState.Accepted;
+        await _dbContext.SaveChangesAsync();
+    }
+
+    public async Task RemoveFriendshipAsync(int currentUserId, int friendshipId)
+    {
+        var friendship = await _dbContext.Friendships
+            .FirstOrDefaultAsync(f => f.Id == friendshipId &&
+                (f.InitiatorId == currentUserId || f.RecieverId == currentUserId));
+        
+        if (friendship is null)
+            return;
+
+        _dbContext.Friendships.Remove(friendship);
+        await _dbContext.SaveChangesAsync();
+    }
+
+    public async Task<PagedResponse<FriendModel>?> GetUserFriendsAsync(int userId, PagedRequest request)
+    {
+        var query = _dbContext.Friendships
+            .Include(f => f.Initiator)
+            .Include(f => f.Reciever)
+            .Where(f => (f.InitiatorId == userId || f.RecieverId == userId) &&
+                (string.IsNullOrEmpty(request.Query) ||
+                f.Initiator.UserName!.Contains(request.Query) ||
+                f.Reciever.UserName!.Contains(request.Query)));
+
+        var totalCount = await query.CountAsync();
+
+        var friendships = await query
+            .Skip(request.PageIndex * request.PageSize)
+            .Take(request.PageSize)
+            .ToListAsync();
+
+        if (friendships is null || friendships.Count == 0)
+            return null;
+
+        List<FriendModel> friends = friendships.Select(f =>
+        {
+            var friendUser = f.InitiatorId == userId ? f.Reciever : f.Initiator;
+            return new FriendModel
+            {
+                Id = friendUser.Id,
+                Username = friendUser.UserName!,
+                State = f.State,
+                FriendshipId = f.Id,
+                InitiatedById = f.InitiatorId
+            };
+        }).ToList();
+
+        PagedResponse<FriendModel> pagedResponse = new()
+        {
+            Items = friends,
+            TotalCount = totalCount
+        };
+
+        return pagedResponse;
     }
 }

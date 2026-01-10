@@ -32,7 +32,7 @@ public partial class UserPortal
     {
         if (_userModel is not null)
         {
-            await UserService.UpdateUser(_userModel);
+            await UserService.TryUpdateUser(_userModel);
             NavigationManager.Refresh(true);
         }
     }

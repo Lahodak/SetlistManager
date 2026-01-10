@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SetlistManager.Data;
 
@@ -11,9 +12,11 @@ using SetlistManager.Data;
 namespace SetlistManager.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260105204344_AddedFriendships")]
+    partial class AddedFriendships
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -150,20 +153,20 @@ namespace SetlistManager.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("InitiatorId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("RecieverId")
-                        .HasColumnType("int");
-
                     b.Property<int>("State")
+                        .HasColumnType("int");
+
+                    b.Property<int>("User1Id")
+                        .HasColumnType("int");
+
+                    b.Property<int>("User2Id")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("InitiatorId");
+                    b.HasIndex("User1Id");
 
-                    b.HasIndex("RecieverId");
+                    b.HasIndex("User2Id");
 
                     b.ToTable("Friendships");
                 });
@@ -608,21 +611,21 @@ namespace SetlistManager.Data.Migrations
 
             modelBuilder.Entity("SetlistManager.Data.Entities.Friendship", b =>
                 {
-                    b.HasOne("SetlistManager.Data.Entities.User", "Initiator")
+                    b.HasOne("SetlistManager.Data.Entities.User", "User1")
                         .WithMany("InitiatedFriendships")
-                        .HasForeignKey("InitiatorId")
+                        .HasForeignKey("User1Id")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("SetlistManager.Data.Entities.User", "Reciever")
+                    b.HasOne("SetlistManager.Data.Entities.User", "User2")
                         .WithMany("ReceivedFriendships")
-                        .HasForeignKey("RecieverId")
+                        .HasForeignKey("User2Id")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Initiator");
+                    b.Navigation("User1");
 
-                    b.Navigation("Reciever");
+                    b.Navigation("User2");
                 });
 
             modelBuilder.Entity("SetlistManager.Data.Entities.Room", b =>

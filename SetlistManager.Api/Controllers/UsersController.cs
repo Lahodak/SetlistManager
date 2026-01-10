@@ -32,14 +32,20 @@ public class UsersController : BaseController
     public async Task<ActionResult> UpdateUser(UserModel model)
     {
         await _userService.UpdateUserAsync(model);
-        return Ok();
+        return NoContent();
     }
 
     [HttpGet]
-    public async Task<ActionResult<UserModel>> GetUser()
-    {        
+    public async Task<ActionResult<PagedResponse<UserViewModel>>> GetUsers([FromQuery] PagedRequest pagedRequest)
+    {
+        return Ok(await _userService.GetUsersAsync(pagedRequest));
+    }
+
+    [HttpGet("{id}")]
+    public async Task<ActionResult<UserModel>> GetUserById(int id)
+    {
         var userId = _currentUserContext.GetCurrentUserId();
-        
+
         if (userId is null)
             return Unauthorized();
 
@@ -58,10 +64,10 @@ public class UsersController : BaseController
     {
         if (grantResultModel is null)
             return BadRequest();
-        
-        var user = await _userService.GetUserByTempSalt(grantResultModel.State);       
 
-        if(user is null)
+        var user = await _userService.GetUserByTempSalt(grantResultModel.State);
+
+        if (user is null)
             return NotFound("User not found");
 
         var resultAccessTokenModel = await _geniusAuthService.ExchangeGeniusCode(grantResultModel.Code);
@@ -76,8 +82,48 @@ public class UsersController : BaseController
             RefreshToken = null
         };
 
-        await _userService.AddUserTokenAsync(user.Id, tokenModel);
+        var result = await _userService.TryAddUserTokenAsync(user.Id, tokenModel);
+        
+        if(!result)
+            return BadRequest("Could not add token to user, provider not found");
 
         return Redirect(_appOptions.Value.UserPortalUrl);
+    }
+
+    [HttpPost("{id}/friendships")]
+    public async Task<ActionResult> InitiateFriendship(int id, [FromBody] FriendshipRequestModel requestModel)
+    {
+        await _userService.HandleFriendshipRequestAsync(id, requestModel);
+        
+        return NoContent();
+    }
+
+    [HttpDelete("{id}/friendships/{friendshipId}")]
+    public async Task<ActionResult> RemoveFriendship(int id, int friendshipId)
+    {
+        await _userService.RemoveFriendshipAsync(id, friendshipId);
+        
+        return NoContent();
+    }
+
+    [HttpGet("{id}/friendships")]
+    public async Task<ActionResult<PagedResponse<FriendModel>>> GetUserFriends(int id, [FromQuery] PagedRequest pagedRequest)
+    {
+        var currentUserId = _currentUserContext.GetCurrentUserId();
+        
+        if (currentUserId is null)
+            return Unauthorized();
+        
+        var result = await _userService.GetUserFriendsAsync(id, pagedRequest);
+                
+        return Ok(result);
+    }
+
+    [HttpPut("{id}/friendships/{friendshipId}")]
+    public async Task<ActionResult> AcceptFriendship(int id, int friendshipId)
+    {        
+        await _userService.AcceptFriendshipAsync(id, friendshipId);
+        
+        return NoContent();
     }
 }

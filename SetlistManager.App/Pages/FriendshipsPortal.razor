@@ -1,0 +1,66 @@
+﻿@page "/FriendshipsPortal"
+<PageTitle>Friendships Portal</PageTitle>
+
+<MudContainer Class="mt-5">
+    <MudPaper Class="pa-4 mt-3" Elevation="2">
+        <MudText Typo="Typo.h3" Class="ml-2">My Friendships</MudText>
+        <MudTable ServerData="ServerReload" Hover="true" @ref="_table">
+            <ToolBarContent>
+                <MudText Typo="Typo.h6">Friends List</MudText>
+                <MudSpacer />
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           OnClick="OpenAddFriendDialog"
+                           StartIcon="@Icons.Material.Filled.PersonAdd">
+                    Add Friend
+                </MudButton>
+                <MudTextField T="string" ValueChanged="@(s => OnSearch(s))" Placeholder="Search friends"
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.Search"
+                              IconSize="Size.Medium" Class="mt-0 ml-4">
+                </MudTextField>
+            </ToolBarContent>
+            <HeaderContent>
+                <MudTh><MudTableSortLabel SortLabel="username_field" T="FriendModel">Username</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortLabel="state_field" T="FriendModel">Status</MudTableSortLabel></MudTh>
+                <MudTh>Actions</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Username">@context.Username</MudTd>
+                <MudTd DataLabel="Status">
+                    <MudChip T="FriendshipState" Color="@(context.State == FriendshipState.Accepted ? Color.Success : Color.Warning)" 
+                             Size="Size.Small">
+                        @context.State
+                    </MudChip>
+                </MudTd>
+                <MudTd>
+                    @if (context.State == FriendshipState.Pending && context.InitiatedById != _currentUserId)
+                    {
+                        <MudIconButton OnClick="() => AcceptFriendshipAsync(context)" 
+                                       Icon="@Icons.Material.Filled.Check" 
+                                       Variant="Variant.Outlined" 
+                                       Size="Size.Small" 
+                                       Color="Color.Success"
+                                       title="Accept" />
+                    }
+                    <MudIconButton OnClick="() => RemoveFriendshipAsync(context)" 
+                                   Icon="@Icons.Material.Filled.PersonRemove" 
+                                   Variant="Variant.Outlined" 
+                                   Size="Size.Small" 
+                                   Color="Color.Error" 
+                                   Class="ml-2"
+                                   title="Remove" />
+                </MudTd>
+            </RowTemplate>
+            <NoRecordsContent>
+                <MudText>No matching friends found</MudText>
+            </NoRecordsContent>
+            <LoadingContent>
+                <MudText>Loading...</MudText>
+            </LoadingContent>
+            <PagerContent>
+                <MudTablePager />
+            </PagerContent>
+        </MudTable>
+    </MudPaper>
+</MudContainer>

@@ -7,7 +7,6 @@ public static class UserMapper
 {
     public static UserModel ToModel(this User user)
     {
-
         List<TokenModel>? tokens = null;
 
         if (user.Tokens is not null)
@@ -40,6 +39,16 @@ public static class UserMapper
             Email = model.Email,
             IsActive = true,
             InstrumentId = model.Instrument?.Id
+        };
+    }
+
+    public static UserViewModel ToViewModel(this User user)
+    {
+        return new UserViewModel
+        {
+            Id = user.Id,
+            UserName = user.UserName!,
+            Email = user.Email!
         };
     }
 }
