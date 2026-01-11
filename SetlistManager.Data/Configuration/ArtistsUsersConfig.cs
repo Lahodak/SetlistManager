@@ -18,6 +18,6 @@ public class ArtistsUsersConfig : IEntityTypeConfiguration<ArtistsUsers>
         builder.HasOne(au => au.User)
             .WithMany(u => u.ArtistsUsers)
             .HasForeignKey(au => au.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

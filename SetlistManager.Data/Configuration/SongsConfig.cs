@@ -41,7 +41,7 @@ public class SongsConfig : IEntityTypeConfiguration<Song>
         builder.HasOne(s => s.Artist)
             .WithMany(a => a.Songs)
             .HasForeignKey(s => s.ArtistId)
-            .OnDelete(DeleteBehavior.SetNull);
+            .OnDelete(DeleteBehavior.Restrict);
         
         builder.HasOne(s => s.Owner)
             .WithMany(u => u.Songs)

@@ -1,8 +1,7 @@
 ﻿namespace SetlistManager.Data.Entities;
 
-public class ArtistsUsers
+public class ArtistsUsers : Base
 {
-    public int Id { get; set; }
     public int ArtistId { get; set; }
     public virtual Artist Artist { get; set; } = default!;
     public int UserId { get; set; }

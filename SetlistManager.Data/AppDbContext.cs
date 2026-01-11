@@ -10,9 +10,12 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
     public DbSet<Language> Languages { get; set; }
     public DbSet<Room> Rooms { get; set; }
     public DbSet<Setlist> Setlists { get; set; }
+    public DbSet<SetlistsUsers> SetlistsUsers { get; set; }
     public DbSet<Song> Songs { get; set; }
     public DbSet<SongsSetlists> SongsSetlists { get; set; }
+    public DbSet<SongsUsers> SongsUsers { get; set; }
     public DbSet<Artist> Artists { get; set; }
+    public DbSet<ArtistsUsers> ArtistsUsers { get; set; }
     public DbSet<Provider> Providers { get; set; }
     public DbSet<Token> Tokens { get; set; }
     public DbSet<TempAuthStorage> TempAuthStorage { get; set; }
