@@ -17,12 +17,17 @@ public class SetlistConfig : IEntityTypeConfiguration<Setlist>
         builder.Property(x => x.Name)
             .IsRequired();
 
-        builder.Property(x => x.CreatorId)
+        builder.Property(x => x.OwnerId)
             .IsRequired();
 
         builder.HasMany(r => r.Rooms)
             .WithOne(s => s.Setlist)
             .HasForeignKey(r => r.SetlistId)
             .OnDelete(DeleteBehavior.SetNull);
+
+        builder.HasOne(o => o.Owner)
+            .WithMany(u => u.Setlists)
+            .HasForeignKey(s => s.OwnerId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

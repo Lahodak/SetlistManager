@@ -70,7 +70,7 @@ public class SongService : ISongService
             Tuning = songCreateModel.Tuning,
             BPM = songCreateModel.BPM,
             CreatedAt = DateTime.UtcNow,
-            UpdatedBy = userId,
+            OwnerId = userId,
             LanguageId = songCreateModel.LanguageId,
         };
 
@@ -94,7 +94,7 @@ public class SongService : ISongService
         song.Key = updateModel.Key;
         song.Tuning = updateModel.Tuning;
         song.BPM = updateModel.BPM;
-        song.UpdatedBy = userId;
+        song.OwnerId = userId;
         song.LanguageId = updateModel.LanguageId;
         song.UpdatedAt = DateTime.UtcNow;
 

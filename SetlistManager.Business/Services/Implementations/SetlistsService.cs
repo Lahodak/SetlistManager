@@ -38,7 +38,7 @@ public class SetlistsService : ISetlistsService
             Name = setlistModel.Name,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
-            CreatorId = setlistModel.CreatorId
+            OwnerId = setlistModel.CreatorId
         };
 
         await _dbContext.Setlists.AddAsync(setlistModel.MapSongModelToEntity(setlistToCreate));
