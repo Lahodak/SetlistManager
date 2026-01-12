@@ -17,6 +17,6 @@ public class Song : Base
     public virtual User Owner { get; set; } = default!;
     public int LanguageId { get; set; }
     public virtual Language Language { get; set; } = default!;
-    public virtual List<SongsUsers>? SongsUsers { get; set; } = [];
-    public virtual List<SongsSetlists>? SongsSetlists { get; set; } = [];
+    public virtual List<SongsUsers> SongsUsers { get; set; } = [];
+    public virtual List<SongsSetlists> SongsSetlists { get; set; } = [];
 }
