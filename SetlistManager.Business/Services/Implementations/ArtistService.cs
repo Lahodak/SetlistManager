@@ -23,7 +23,7 @@ public class ArtistService : IArtistService
         var totalCount = await query.CountAsync();
 
         var artists = await query
-           .Include(x => x.Songs)!
+           .Include(x => x.Songs)
            .ThenInclude(x => x.Language)
            .AsNoTracking()
            .Skip(request.PageIndex * request.PageSize)
@@ -44,7 +44,8 @@ public class ArtistService : IArtistService
     public async Task<PagedResponse<ArtistModel>> GetUserArtistLibrary(PagedRequest request, int userId)
     {
         var query = _dbContext.Artists
-            .Where(x => x.Nick.Contains(request.Query ?? string.Empty) && (x.OwnerId == userId || x.ArtistsUsers!.Any(x => x.UserId == userId)));
+            .Where(x => x.Nick.Contains(request.Query ?? string.Empty) 
+            && (x.OwnerId == userId || x.ArtistsUsers!.Any(x => x.UserId == userId)));
 
         var totalCount = await query.CountAsync();
 
@@ -78,17 +79,17 @@ public class ArtistService : IArtistService
             Nick = createModel.Nick
         };
 
-        await _dbContext.AddAsync(artist);
+        _dbContext.Add(artist);
         await _dbContext.SaveChangesAsync();
         
         return true;
     }
 
-    public async Task<ArtistModel> GetArtistByIdAsync(int id)
+    public async Task<ArtistModel?> GetArtistByIdAsync(int id)
         => (await _dbContext.Artists
         .Include(x => x.Songs)!
         .ThenInclude(x => x.Language)
-        .FirstAsync(x => x.Id == id))
+        .FirstOrDefaultAsync(x => x.Id == id))?
         .ToModel(true);
 
     public async Task<bool> TryDeleteArtistAsync(int id)
@@ -98,8 +99,7 @@ public class ArtistService : IArtistService
         if (artist is null)
             return false;
         
-        _dbContext.Artists.Remove(artist);
-        
+        _dbContext.Artists.Remove(artist);        
         await _dbContext.SaveChangesAsync();
         
         return true;

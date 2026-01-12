@@ -255,7 +255,7 @@ public partial class CreateSetlistDialog
         }
 
         _setlist.Name = _toBeSavedSetlistName;            
-        _setlist.CreatorId = _user.Id;
+        _setlist.OwnerId = _user.Id;
         _setlist.Songs = _shuffeledSongCollection;
 
         if (_setlist is null) return;

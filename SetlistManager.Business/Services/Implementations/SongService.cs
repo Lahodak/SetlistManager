@@ -132,7 +132,7 @@ public class SongService : ISongService
             IsPublic = isArtistPublic
         };
 
-        await _dbContext.Songs.AddAsync(song);
+        _dbContext.Songs.Add(song);
         await _dbContext.SaveChangesAsync();
 
         return true;

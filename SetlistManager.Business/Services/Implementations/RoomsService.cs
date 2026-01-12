@@ -41,13 +41,26 @@ public class RoomsService : IRoomsService
         if (room.Setlist is null || model.Setlist is null)
             return model;
 
-        model.Setlist = room.Setlist.MapSongEntityToModelWithOrder();
+        model.Setlist = room.Setlist.ToModel();
 
         return model;
     }
 
     public async Task<RoomModel> CreateRoomAsync(RoomCreateModel createRoomModel, int hostId)
-    {
+    {                       
+        StringBuilder code = new(roomCodeLength);
+
+        do
+        {
+            code.Clear();
+            for (int i = 0; i < roomCodeLength; i++)
+            {
+                int index = Random.Shared.Next(roomCodeAvailableCharacters.Length - 1);
+                code.Append(roomCodeAvailableCharacters[index]);
+            }
+        } 
+        while (await _dbContext.Rooms.AnyAsync(x => x.Code == code.ToString()));
+
         Room room = new()
         {
             Name = createRoomModel.Name,
@@ -56,19 +69,11 @@ public class RoomsService : IRoomsService
             IsPublic = createRoomModel.IsPublic,
             UpdatedBy = hostId,
             CreatedAt = DateTime.UtcNow,
-            IsActive = true
+            IsActive = true,
+            Code = code.ToString()
         };
-                
-        StringBuilder code = new(roomCodeLength);
         
-        for (int i = 0; i < roomCodeLength; i++)
-        {
-            int index = Random.Shared.Next(roomCodeAvailableCharacters.Length - 1);
-            code.Append(roomCodeAvailableCharacters[index]);
-        }
-
-        room.Code = code.ToString();
-        await _dbContext.Rooms.AddAsync(room);
+        _dbContext.Rooms.Add(room);
         await _dbContext.SaveChangesAsync();
 
         var createdRoom = await _dbContext.Rooms
@@ -95,7 +100,7 @@ public class RoomsService : IRoomsService
         if (createdRoom.Setlist is null || roomModel.Setlist is null)
             return roomModel;
 
-        roomModel.Setlist = createdRoom.Setlist.MapSongEntityToModelWithOrder();
+        roomModel.Setlist = createdRoom.Setlist.ToModel();
 
         return roomModel;
     }
@@ -127,7 +132,7 @@ public class RoomsService : IRoomsService
         if (room.Setlist is null || roomModel.Setlist is null)
             return roomModel;
 
-        roomModel.Setlist = room.Setlist.MapSongEntityToModelWithOrder();
+        roomModel.Setlist = room.Setlist.ToModel();
 
         return roomModel;
     }
@@ -214,7 +219,7 @@ public class RoomsService : IRoomsService
         if (room.Setlist is null || model.Setlist is null)
             return model;
 
-        model.Setlist = room.Setlist.MapSongEntityToModelWithOrder();
+        model.Setlist = room.Setlist.ToModel();
 
         return model;
     }

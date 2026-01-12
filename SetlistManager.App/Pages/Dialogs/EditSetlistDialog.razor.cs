@@ -35,7 +35,7 @@ public partial class EditSetlistDialog
         {
             Id = Setlist.Id,
             Name = Setlist.Name,
-            CreatorId = Setlist.CreatorId,
+            OwnerId = Setlist.OwnerId,
             Songs = Setlist.Songs
         };
 
