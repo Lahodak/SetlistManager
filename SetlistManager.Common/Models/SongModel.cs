@@ -11,7 +11,7 @@ public class SongModel
     public int BPM { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
-    public int UpdatedBy { get; set; }
+    public int OwnerId { get; set; }
     public LanguageModel Language { get; set; } = new();
     public int LanguageId { get; set; }
     public int Order { get; set; }

@@ -18,7 +18,7 @@ public class ArtistService : IArtistService
     public async Task<PagedResponse<ArtistModel>> GetAllArtistsAsync(PagedRequest request)
     {
         var query = _dbContext.Artists
-        .Where(x => x.Nick.Contains(request.Query ?? string.Empty));
+            .Where(x => x.Nick.Contains(request.Query ?? string.Empty) && x.IsPublic);
 
         var totalCount = await query.CountAsync();
 
@@ -38,6 +38,33 @@ public class ArtistService : IArtistService
                 .ToList()
         };
         
+        return response;
+    }
+
+    public async Task<PagedResponse<ArtistModel>> GetUserArtistLibrary(PagedRequest request, int userId)
+    {
+        var query = _dbContext.Artists
+            .Where(x => x.Nick.Contains(request.Query ?? string.Empty) && (x.OwnerId == userId || x.ArtistsUsers!.Any(x => x.UserId == userId)));
+
+        var totalCount = await query.CountAsync();
+
+        var artists = await query
+           .Include(x => x.Songs)!
+           .ThenInclude(x => x.Language)
+           .Include(x => x.OwnerId)
+           .AsNoTracking()
+           .Skip(request.PageIndex * request.PageSize)
+           .Take(request.PageSize)
+           .ToListAsync();
+
+        PagedResponse<ArtistModel> response = new()
+        {
+            TotalCount = totalCount,
+            Items = artists
+                .Select(a => a.ToModel(true))
+                .ToList()
+        };
+
         return response;
     }
 

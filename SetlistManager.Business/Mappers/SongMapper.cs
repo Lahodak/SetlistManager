@@ -21,7 +21,7 @@ public static class SongMapper
             BPM = entity.BPM,
             CreatedAt = entity.CreatedAt,
             UpdatedAt = entity.UpdatedAt,
-            UpdatedBy = entity.OwnerId
+            OwnerId = entity.OwnerId
         };
         return model;
     }
