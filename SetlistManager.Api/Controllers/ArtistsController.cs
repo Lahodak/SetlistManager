@@ -17,7 +17,7 @@ public class ArtistsController : BaseController
     [HttpGet]
     public async Task<ActionResult<PagedResponse<ArtistModel>>> GetAllArtists([FromQuery] PagedRequest request)
     {
-        return Ok(await _artistService.GetAllArtistsAsync(request));
+        return Ok(await _artistService.GetPublicArtistsAsync(request));
     }
 
     [HttpPost]
@@ -32,7 +32,7 @@ public class ArtistsController : BaseController
     [HttpGet("{id}")]
     public async Task<ActionResult<ArtistModel>> GetArtistById(int id)
     {        
-        return Ok(await _artistService.GetArtistByIdAsync(id));
+        return Ok(await _artistService.GetPublicArtistByIdAsync(id));
     }
     
     [HttpDelete("{id}")]

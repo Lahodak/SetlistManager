@@ -21,7 +21,7 @@ public class SongsController : BaseController
     [HttpGet]
     public async Task<ActionResult<PagedResponse<SongModel>>> GetSongs([FromQuery] PagedRequest request)
     {
-        var result = await _songService.GetSongsAsync(request);
+        var result = await _songService.GetPublicSongsAsync(request);
 
         if (result is null)        
             return NotFound();
@@ -43,7 +43,7 @@ public class SongsController : BaseController
     [HttpGet("{id}")]
     public async Task<ActionResult<SongModel>> GetSongById(int id)
     {
-        var song = await _songService.GetSongByIdAsync(id);
+        var song = await _songService.GetPublicByIdAsync(id);
 
         if (song is null)        
             return NotFound();        

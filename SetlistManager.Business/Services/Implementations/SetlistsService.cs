@@ -29,9 +29,11 @@ public class SetlistsService : ISetlistsService
             .ToModel();
     }
 
-    public async Task SaveSetlistAsync(SetlistModel setlistModel)
+    public async Task<bool> TrySaveSetlistAsync(SetlistModel setlistModel, int creatorId)
     {
-        var setlistToCreate = new Setlist
+        // Check for existing setlist with the same name for the same owner or shared with the same owner
+
+        Setlist setlistToCreate = new()
         {
             Name = setlistModel.Name,
             CreatedAt = DateTime.UtcNow,
@@ -41,9 +43,10 @@ public class SetlistsService : ISetlistsService
 
         _dbContext.Setlists.Add(setlistModel.MapSongModelToEntity(setlistToCreate));
         await _dbContext.SaveChangesAsync();
+        return true;
     }
 
-    public async Task<PagedResponse<SetlistModel>?> GetAllSetlistsOfUserAsync(int userId, PagedRequest request)
+    public async Task<PagedResponse<SetlistModel>?> GetUserSetlistsLibraryAsync(int userId, PagedRequest request)
     {
         var query = _dbContext.Setlists
             .Where(s => 

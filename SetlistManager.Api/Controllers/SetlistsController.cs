@@ -23,7 +23,7 @@ public class SetlistsController : BaseController
     [HttpPost]
     public async Task<ActionResult> SaveSetlist(SetlistModel setlistModel)
     {
-        await _setlistService.SaveSetlistAsync(setlistModel);
+        await _setlistService.TrySaveSetlistAsync(setlistModel);
         return Created();
     }
 

@@ -15,16 +15,11 @@ public class SongService : ISongService
         _dbContext = dbContext;
     }
 
-    public async Task<PagedResponse<SongModel>> GetSongsAsync(PagedRequest request)
+    public async Task<PagedResponse<SongModel>> GetPublicSongsAsync(PagedRequest request)
     {
         var query = _dbContext.Songs
         .Where(x => 
-        (x.Name.Contains(request.Query ?? string.Empty) 
-        || 
-        x.Artist.Nick.Contains(request.Query ?? string.Empty))
-        &&
-        x.IsPublic
-        );
+        (x.Name.Contains(request.Query ?? string.Empty) || x.Artist.Nick.Contains(request.Query ?? string.Empty)) && x.IsPublic);
         
         var totalCount = await query.CountAsync();
 
@@ -84,14 +79,14 @@ public class SongService : ISongService
         return response;
     }
 
-    public async Task<SongModel?> GetSongByIdAsync(int songId)
+    public async Task<SongModel?> GetPublicByIdAsync(int id)
     {
         var song = await _dbContext.Songs
         .Include(x => x.Language)
         .Include(x => x.Artist)
         .Include(x => x.Owner)
         .AsNoTracking()
-        .FirstOrDefaultAsync(x => x.Id == songId);
+        .FirstOrDefaultAsync(x => x.Id == id);
 
         if (song is null)
             return null;
@@ -140,6 +135,10 @@ public class SongService : ISongService
 
     public async Task<bool> TryUpdateSongAsync(int songId, SongUpdateModel updateModel, int userId)
     {
+        if (await _dbContext.Songs.AnyAsync(x => (x.Name == updateModel.Name) && (x.ArtistId == updateModel.ArtistId)
+        && ((x.OwnerId == userId) || x.SongsUsers.Any(x => x.Song.ArtistId == updateModel.ArtistId && x.UserId == userId))))
+            return false;
+        
         var song = await _dbContext.Songs.FirstOrDefaultAsync(x => x.Id == songId);
 
         if (song is null || song.OwnerId != userId)
