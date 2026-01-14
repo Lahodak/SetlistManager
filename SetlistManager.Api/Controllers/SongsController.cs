@@ -21,16 +21,31 @@ public class SongsController : BaseController
     [HttpGet]
     public async Task<ActionResult<PagedResponse<SongModel>>> GetSongs([FromQuery] PagedRequest request)
     {
-        var result = await _songService.GetPublicSongsAsync(request);
+        var userId = _userContext.GetCurrentUserId();
 
-        if (result is null)        
+        var result = await _songService.GetSongsAsync(request, userId!.Value);
+
+        if (result is null)
+            return NotFound();
+
+        return Ok(result);
+    }
+
+    [HttpGet("{id}")]
+    public async Task<ActionResult<SongModel>> GetSongById(int id)
+    {
+        var userId = _userContext.GetCurrentUserId();
+
+        var result = await _songService.GetSongByIdAsync(id, userId!.Value);
+
+        if (result is null)
             return NotFound();
 
         return Ok(result);
     }
 
     [HttpPost]
-    public async Task<ActionResult> AddSong(SongCreateModel createModel)
+    public async Task<ActionResult> CreateSong(SongCreateModel createModel)
     {
         var userId = _userContext.GetCurrentUserId();
 
@@ -40,15 +55,30 @@ public class SongsController : BaseController
         return Created();
     }
 
-    [HttpGet("{id}")]
-    public async Task<ActionResult<SongModel>> GetSongById(int id)
+    [HttpPost("{id}/public")]
+    public async Task<ActionResult> TryMakeSongPublic(int songId)
     {
-        var song = await _songService.GetPublicSongByIdAsync(id);
+        var userId = _userContext.GetCurrentUserId();
 
-        if (song is null)        
-            return NotFound();        
+        var result = await _songService.TryMakeSongPublicAsync(songId, userId!.Value);
+        
+        if (!result)
+            return BadRequest("Song is already in user's library");
 
-        return Ok(song);
+        return NoContent();
+    }
+
+    [HttpPost("{id}/songsusers/{userId}")]
+    public async Task<ActionResult> AddSongToUserLibrary(int id, int userId)
+    {
+        var currentUserId = _userContext.GetCurrentUserId();
+        
+        var result = await _songService.TryGiveAccessToUserAsync(id, userId, currentUserId!.Value);
+        
+        if (!result)        
+            return BadRequest("Song is already in user's library");        
+        
+        return Created();
     }
 
     [HttpPut("{id}")]
@@ -56,9 +86,9 @@ public class SongsController : BaseController
     {
         var userId = _userContext.GetCurrentUserId();
 
-        var success = await _songService.TryUpdateSongAsync(id, updateModel, userId!.Value);
+        var result = await _songService.TryUpdateSongAsync(id, updateModel, userId!.Value);
         
-        if (!success)        
+        if (!result)        
             return NotFound();        
         
         return NoContent();
@@ -67,9 +97,11 @@ public class SongsController : BaseController
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteSong(int id)
     {
-        var success = await _songService.TryDeleteSongAsync(id);
+        var userId = _userContext.GetCurrentUserId();
 
-        if (!success)        
+        var result = await _songService.TryDeleteSongAsync(id, userId!.Value);
+
+        if (!result)        
             return NotFound();        
         
         return NoContent();

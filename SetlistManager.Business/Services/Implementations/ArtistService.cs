@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SetlistManager.Business.Mappers;
+using SetlistManager.Common.Genius.Models.Songs;
 using SetlistManager.Common.Models;
 using SetlistManager.Data;
 using SetlistManager.Data.Entities;
@@ -15,10 +16,15 @@ public class ArtistService : IArtistService
         _dbContext = dbContext;
     }
 
-    public async Task<PagedResponse<ArtistModel>> GetPublicArtistsAsync(PagedRequest request)
+    public async Task<PagedResponse<ArtistModel>> GetArtistsAsync(PagedRequest request, int userId)
     {
+        var searchQuery = request.Query ?? string.Empty;
         var query = _dbContext.Artists
-            .Where(x => x.Nick.Contains(request.Query ?? string.Empty) && x.IsPublic);
+            .Where(x => x.Nick.Contains(searchQuery));
+
+        query = request.ContentType == ContentType.Private
+            ? query.Where(x => x.OwnerId == userId || x.ArtistsUsers.Any(su => su.UserId == userId))
+            : query.Where(x => x.IsPublic);
 
         var totalCount = await query.CountAsync();
 
@@ -28,45 +34,33 @@ public class ArtistService : IArtistService
            .AsNoTracking()
            .Skip(request.PageIndex * request.PageSize)
            .Take(request.PageSize)
+           .AsNoTracking()
            .ToListAsync();
 
-        PagedResponse<ArtistModel> response = new()
+        return new PagedResponse<ArtistModel>
         {
             TotalCount = totalCount,
             Items = artists
                 .Select(a => a.ToModel(true))
                 .ToList()
         };
-        
-        return response;
     }
 
-    public async Task<PagedResponse<ArtistModel>> GetUserArtistLibraryAsync(PagedRequest request, int userId)
+    public async Task<ArtistModel?> GetArtistByIdAsync(int artistId, int userId, ContentType contentType)
     {
-        var query = _dbContext.Artists
-            .Where(x => x.Nick.Contains(request.Query ?? string.Empty) 
-            && (x.OwnerId == userId || x.ArtistsUsers!.Any(x => x.UserId == userId)));
+        var artist = await _dbContext.Artists
+            .Where(x => x.Id == artistId)
+            .Where(x => contentType == ContentType.Public
+                ? x.IsPublic
+                : x.OwnerId == userId || x.ArtistsUsers.Any(su => su.UserId == userId))
+            .Include(x => x.Songs
+                .Where(x => contentType == ContentType.Public
+                    ? x.IsPublic
+                    : x.SongsUsers.Any(s => s.UserId == userId) || x.OwnerId == userId))
+            .ThenInclude(x => x.Language)
+            .FirstOrDefaultAsync();
 
-        var totalCount = await query.CountAsync();
-
-        var artists = await query
-           .Include(x => x.Songs)!
-           .ThenInclude(x => x.Language)
-           .Include(x => x.OwnerId)
-           .AsNoTracking()
-           .Skip(request.PageIndex * request.PageSize)
-           .Take(request.PageSize)
-           .ToListAsync();
-
-        PagedResponse<ArtistModel> response = new()
-        {
-            TotalCount = totalCount,
-            Items = artists
-                .Select(a => a.ToModel(true))
-                .ToList()
-        };
-
-        return response;
+        return artist?.ToModel(true);
     }
 
     public async Task<bool> TryCreateArtistAsync(ArtistCreateModel createModel, int creatorId)
@@ -88,25 +82,6 @@ public class ArtistService : IArtistService
         return true;
     }
 
-    public async Task<ArtistModel?> GetUserArtistById(int artistId, int userId)
-    {
-        return (await _dbContext.Artists
-            .Include(x => x.Songs
-                .Where(x => x.SongsUsers.Any(x => x.UserId == userId) || x.OwnerId == userId))
-            .ThenInclude(x => x.Language)
-            .FirstOrDefaultAsync(x => x.Id == artistId
-                && (x.OwnerId == userId || x.ArtistsUsers
-                .Any(x => x.UserId == userId))))?
-            .ToModel(true);
-    }
-
-    public async Task<ArtistModel?> GetPublicArtistByIdAsync(int id)
-        => (await _dbContext.Artists
-        .Include(x => x.Songs.Where(x => x.IsPublic))
-        .ThenInclude(x => x.Language)
-        .FirstOrDefaultAsync(x => x.Id == id))?
-        .ToModel(true);
-
     public async Task<bool> TryDeleteArtistAsync(int artistId, int userId)
     {
         var artist = await _dbContext.Artists
@@ -123,27 +98,23 @@ public class ArtistService : IArtistService
         return true;
     }
 
-    public async Task<bool> TryUpdateArtistAsync(int id, ArtistUpdateModel updateModel)
+    public async Task<bool> TryUpdateArtistAsync(int id, ArtistUpdateModel updateModel, int currentUserId)
     {
-        var artist = await _dbContext.Artists.FirstOrDefaultAsync(x => x.Id == id);
+        var artist = await _dbContext.Artists.FirstOrDefaultAsync(x => x.Id == id && x.OwnerId == currentUserId);
         
-        if (artist is null)
-            return false;
-        
-        if(await _dbContext.Artists.AnyAsync(x => x.Nick == updateModel.Nick && x.Id != id))
+        if (artist is null || await _dbContext.Artists.AnyAsync(x => x.Nick == updateModel.Nick && x.Id != id))
             return false;
 
         artist.Nick = updateModel.Nick;
 
-        await _dbContext.SaveChangesAsync();
-        
+        await _dbContext.SaveChangesAsync();        
         return true;
     }
 
-    public async Task<bool> TryMakeArtistPublicAsync(int artistId)
+    public async Task<bool> TryMakeArtistPublicAsync(int artistId, int currentUserId)
     {
         var artist = await _dbContext.Artists
-            .FirstOrDefaultAsync(x => x.Id == artistId);
+            .FirstOrDefaultAsync(x => x.Id == artistId && x.OwnerId == currentUserId);
 
         if (artist is null)
             return false;
@@ -154,14 +125,15 @@ public class ArtistService : IArtistService
         return true;
     }
 
-    public async Task<bool> TryGiveAccessToUserAsync(int artistId, int targetId)
+    public async Task<bool> TryGiveAccessToUserAsync(int artistId, int targetId, int currentUserId)
     {
         var artist = await _dbContext.Artists
-            .Include(x => x.ArtistsUsers)
+            .Include(x => x.ArtistsUsers.Where(x => x.UserId == targetId))
             .FirstOrDefaultAsync(x => x.Id == artistId);
 
-        if (artist is null || artist.ArtistsUsers.Any(x => x.UserId == targetId))
-            return false;        
+        if (artist is null || artist.ArtistsUsers.Count != 0 || (currentUserId != artist.OwnerId && targetId != currentUserId))
+            return false;
+        //ok
 
         ArtistsUsers artistsUsers = new()
         {
