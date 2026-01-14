@@ -104,13 +104,13 @@ public class UsersController : BaseController
     }
 
     [HttpGet("{id}/setlists")]
-    public async Task<ActionResult<PagedResponse<SetlistModel>>> GetUserSetlists(int id, [FromBody] PagedRequest request)
+    public async Task<ActionResult<PagedResponse<SetlistModel>>> GetUserSetlists(int id, [FromQuery] PagedRequest request)
     {
         return Ok(await _setlistsService.GetUserSetlistsLibraryAsync(id, request));
     }
 
     [HttpGet("{id}/artists")]
-    public async Task<ActionResult<PagedResponse<ArtistModel>>> GetUserArtists(int id, [FromBody] PagedRequest request)
+    public async Task<ActionResult<PagedResponse<ArtistModel>>> GetUserArtists(int id, [FromQuery] PagedRequest request)
     {
         return Ok(await _artistService.GetUserArtistLibraryAsync(request, id));
     }
@@ -205,12 +205,12 @@ public class UsersController : BaseController
     }
 
     [HttpGet("{id}/songs")]
-    public async Task<ActionResult<PagedResponse<SongModel>>> GetUserSongsLibrary(int id, [FromBody] PagedRequest request)
+    public async Task<ActionResult<PagedResponse<SongModel>>> GetUserSongsLibrary(int id, [FromQuery] PagedRequest request)
     {
         return Ok(await _songService.GetSongLibraryByUserId(id, request));
     }
 
-    [HttpGet("{id}/songs{songId}")]
+    [HttpGet("{id}/songs/{songId}")]
     public async Task<ActionResult<SongModel>> GetUserSongDetail(int id, int songId)
     {
         return Ok(await _songService.GetUserSongById(id, songId));
