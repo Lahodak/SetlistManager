@@ -14,7 +14,7 @@ public class SetlistsService : ISetlistsService
         _dbContext = dbContext;
     }
 
-    public async Task<SetlistModel?> GetSetlistByIdAsync(int id)
+    public async Task<SetlistModel?> GetSetlistByIdAsync(int id, int userId)
     {
         var setlist = await _dbContext.Setlists
             .Include(s => s.SongsSetlists)
@@ -23,7 +23,8 @@ public class SetlistsService : ISetlistsService
             .Include(s => s.SongsSetlists)
                 .ThenInclude(s => s.Song)
                     .ThenInclude(s => s.Language)
-            .FirstOrDefaultAsync(x => x.Id == id);   
+            .FirstOrDefaultAsync(x => x.Id == id && (x.OwnerId == userId) 
+                            || x.SetlistsUsers.Any(x => x.UserId == userId));   
 
         return setlist?
             .ToModel();

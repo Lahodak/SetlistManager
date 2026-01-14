@@ -34,7 +34,7 @@ public class SongsController : BaseController
     {
         var userId = _userContext.GetCurrentUserId();
 
-        if(!await _songService.TrySaveSongAsync(createModel, userId!.Value))
+        if(!await _songService.TryCreateSongAsync(createModel, userId!.Value))
             return BadRequest("Song already exists");
 
         return Created();

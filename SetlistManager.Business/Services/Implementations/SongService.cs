@@ -113,7 +113,7 @@ public class SongService : ISongService
         return song.ToModel();
     }
 
-    public async Task<bool> TrySaveSongAsync(SongCreateModel songCreateModel, int userId)
+    public async Task<bool> TryCreateSongAsync(SongCreateModel songCreateModel, int userId)
     {
         if (await _dbContext.Songs
         .AnyAsync(x =>

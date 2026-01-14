@@ -1,4 +1,4 @@
-﻿namespace SetlistManager. Api.Options;
+﻿namespace SetlistManager.Api.Options;
 
 public class JwtOptions
 {

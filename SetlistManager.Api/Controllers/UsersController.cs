@@ -7,7 +7,7 @@ using SetlistManager.Business.Services;
 using SetlistManager.Common.Genius.Models;
 using SetlistManager.Common.Models;
 
-namespace SetlistManager. Api.Controllers;
+namespace SetlistManager.Api.Controllers;
 
 [Route("api/users")]
 public class UsersController : BaseController
@@ -67,17 +67,6 @@ public class UsersController : BaseController
         return Created();
     }
 
-    //[HttpPost("{targetId}/setlistsusers/{setlistId}")]
-    //public async Task<ActionResult> GiveSetlistAccessToUser(int targetId, int setlistId)
-    //{
-    //    var result = await _setlistsService.TryGiveAccessToSetlistAsync(setlistId, targetId);
-
-    //    if (!result)
-    //        return BadRequest();
-
-    //    return Created();
-    //}
-
     [HttpPut("{id}/setlists/{setlistId}")]
     public async Task<ActionResult> UpdateUserSetlist(int id, int setlistId, [FromBody] SetlistModel updateModel)
     {
@@ -95,7 +84,7 @@ public class UsersController : BaseController
     [HttpGet("{id}/setlists/{setlistId}")]
     public async Task<ActionResult<SetlistModel>> GetUserSetlistById(int id, int setlistId)
     {
-        var setlist =  await _setlistsService.GetSetlistByIdAsync(setlistId);
+        var setlist =  await _setlistsService.GetSetlistByIdAsync(setlistId, id);
 
         if (setlist is null)
             return NotFound("Setlist not found");
@@ -159,7 +148,7 @@ public class UsersController : BaseController
         return NoContent();
     }
 
-    [HttpPost("{id}/artists/{artistId}/make-public")]
+    [HttpPost("{id}/artists/{artistId}/public")]
     public async Task<ActionResult> TryMakeArtistPublic(int id, int artistId)
     {
         var result = await _artistService.TryMakeArtistPublicAsync(artistId);
@@ -169,8 +158,6 @@ public class UsersController : BaseController
 
         return NoContent();
     }
-
-    //[HttpPost("{targetId}/artists")]
 
     [AllowAnonymous]
     [HttpGet("tokens")]
@@ -214,6 +201,50 @@ public class UsersController : BaseController
     public async Task<ActionResult<SongModel>> GetUserSongDetail(int id, int songId)
     {
         return Ok(await _songService.GetUserSongById(id, songId));
+    }
+
+    [HttpPost("{id}/songs")]
+    public async Task<ActionResult> CreateUserSong(int id, [FromBody] SongCreateModel createModel)
+    {
+        var result = await _songService.TryCreateSongAsync(createModel, id);
+
+        if (!result)
+            return BadRequest();
+
+        return Created();
+    }
+
+    [HttpPut("{id}/songs/{songId}")]
+    public async Task<ActionResult> TryUpdateUserSong(int id, int songId, [FromBody] SongUpdateModel updateModel)
+    {
+        var result = await _songService.TryUpdateSongAsync(songId, updateModel, id);
+        
+        if (!result)
+            return BadRequest();
+        
+        return NoContent();
+    }
+
+    [HttpDelete("{id}/songs/{songId}")]
+    public async Task<ActionResult> TryDeleteUserSong(int id, int songId)
+    {
+        var result = await _songService.TryDeleteSongAsync(songId);
+        
+        if (!result)
+            return BadRequest();
+        
+        return NoContent();
+    }
+
+    [HttpPost("{id}/songs/{songId}/public")]
+    public async Task<ActionResult> TryMakeSongPublic(int id, int songId)
+    {
+        var result = await _songService.TryMakeSongPublicAsync(songId);
+
+        if (!result)
+            return BadRequest();
+
+        return NoContent();
     }
 
     [HttpPost("{id}/friendships")]

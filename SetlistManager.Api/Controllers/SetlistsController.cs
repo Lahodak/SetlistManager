@@ -2,7 +2,8 @@
 using SetlistManager.Common.Models;
 using SetlistManager.Business.Services;
 
-namespace SetlistManager. Api.Controllers;
+namespace SetlistManager.Api.Controllers;
+
 [Route("api/setlists")]
 
 public class SetlistsController : BaseController
@@ -12,30 +13,6 @@ public class SetlistsController : BaseController
     public SetlistsController(ISetlistsService setlistService)
     {
         _setlistService = setlistService;
-    }
-
-    [HttpGet]
-    public async Task<ActionResult<PagedResponse<SetlistModel>>> GetAllSetlists([FromQuery] PagedRequest request)
-    {
-        return Ok(await _setlistService.GetAllSetlistsAsync(request));
-    }
-
-    [HttpPost]
-    public async Task<ActionResult> SaveSetlist(SetlistModel setlistModel)
-    {
-        await _setlistService.TrySaveSetlistAsync(setlistModel);
-        return Created();
-    }
-
-    [HttpGet("{id}")]
-    public async Task<ActionResult<SetlistModel>> GetSetlistById(int id)
-    {
-        var result = await _setlistService.GetSetlistByIdAsync(id);
-
-        if (result is null)
-            return NotFound();
-
-        return Ok(result);
     }
 
     [HttpPut("{id}")]

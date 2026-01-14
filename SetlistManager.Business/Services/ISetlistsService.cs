@@ -4,7 +4,7 @@ namespace SetlistManager.Business.Services;
 
 public interface ISetlistsService
 {
-    Task<SetlistModel?> GetSetlistByIdAsync(int id);
+    Task<SetlistModel?> GetSetlistByIdAsync(int id, int userId);
     Task EditSetlistAsync(SetlistModel setlistModel);
     Task<PagedResponse<SetlistModel>?> GetUserSetlistsLibraryAsync(int userId, PagedRequest request);
     Task<bool> TryCreateSetlistAsync(SetlistModel setlistModel, int creatorId);
