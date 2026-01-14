@@ -43,7 +43,7 @@ public class SongsController : BaseController
     [HttpGet("{id}")]
     public async Task<ActionResult<SongModel>> GetSongById(int id)
     {
-        var song = await _songService.GetPublicByIdAsync(id);
+        var song = await _songService.GetPublicSongByIdAsync(id);
 
         if (song is null)        
             return NotFound();        

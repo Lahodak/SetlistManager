@@ -29,10 +29,42 @@ public class SetlistsService : ISetlistsService
             .ToModel();
     }
 
-    public async Task<bool> TrySaveSetlistAsync(SetlistModel setlistModel, int creatorId)
+    public async Task<bool> TryGiveAccessToSetlistAsync(int setlistId, int targetId)
     {
-        // Check for existing setlist with the same name for the same owner or shared with the same owner
+        var setlist = await _dbContext.Setlists
+            .Include(s => s.SetlistsUsers)
+            .FirstOrDefaultAsync(s => s.Id == setlistId);
 
+        if(setlist is null)
+            return false;
+
+        var user = await _dbContext.Users
+            .FirstOrDefaultAsync(u => u.Id == targetId);
+
+        if(user is null)
+            return false;
+
+        if(setlist.SetlistsUsers.Any(su => su.UserId == targetId))
+            return false;
+
+        setlist.SetlistsUsers.Add(new()
+        {
+            UserId = targetId,
+            SetlistId = setlistId
+
+        });
+
+        await _dbContext.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> TryCreateSetlistAsync(SetlistModel setlistModel, int creatorId)
+    {
+        if(await _dbContext.Setlists
+            .AnyAsync(s => s.Name == setlistModel.Name 
+            && (s.OwnerId == creatorId || s.SetlistsUsers.Any(x => x.UserId == creatorId))))        
+            return false;
+        
         Setlist setlistToCreate = new()
         {
             Name = setlistModel.Name,
@@ -78,7 +110,7 @@ public class SetlistsService : ISetlistsService
         };
 
         return response;
-    }    
+    }
 
     public async Task EditSetlistAsync(SetlistModel setlistModel)
     {

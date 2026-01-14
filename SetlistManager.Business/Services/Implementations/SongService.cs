@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.SqlServer.Query.Internal;
 using SetlistManager.Business.Mappers;
 using SetlistManager.Common.Models;
 using SetlistManager.Data;
@@ -43,6 +44,24 @@ public class SongService : ISongService
         return response;
     }
 
+    public async Task<bool> TryGiveAccessToUserAsync(int songId, int targetId)
+    {
+        if (await _dbContext.SongsUsers
+        .AnyAsync(x => x.SongId == songId && x.UserId == targetId))
+            return false;
+
+        SongsUsers songsUsers = new()
+        {
+            SongId = songId,
+            UserId = targetId
+        };
+        
+        _dbContext.SongsUsers.Add(songsUsers);
+        await _dbContext.SaveChangesAsync();
+        
+        return true;
+    }
+
     public async Task<PagedResponse<SongModel>> GetSongLibraryByUserId(int userId, PagedRequest request)
     {
         var search = request.Query;
@@ -79,7 +98,7 @@ public class SongService : ISongService
         return response;
     }
 
-    public async Task<SongModel?> GetPublicByIdAsync(int id)
+    public async Task<SongModel?> GetPublicSongByIdAsync(int id)
     {
         var song = await _dbContext.Songs
         .Include(x => x.Language)
@@ -145,7 +164,7 @@ public class SongService : ISongService
             return false;
 
         if(song.IsPublic)
-            //ToDo: Přidat platform adminovi do requestů
+            return false;
 
         song.Name = updateModel.Name;
         song.ArtistId = updateModel.ArtistId;
@@ -157,8 +176,7 @@ public class SongService : ISongService
         song.LanguageId = updateModel.LanguageId;
         song.UpdatedAt = DateTime.UtcNow;
 
-        await _dbContext.SaveChangesAsync();
-        
+        await _dbContext.SaveChangesAsync();        
         return true;
     }
 
@@ -172,6 +190,34 @@ public class SongService : ISongService
         _dbContext.Songs.Remove(song);        
         await _dbContext.SaveChangesAsync();
         
+        return true;
+    }
+
+    public async Task<SongModel?> GetUserSongById(int userId, int songId)
+    {
+        var song = await _dbContext.Songs
+            .Include(x => x.Language)
+            .Include(x => x.Artist)
+            .Include(x => x.Owner)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == songId && (x.OwnerId == userId || x.SongsUsers!.Any(su => su.UserId == userId)));
+
+        return song?.ToModel();
+    }
+
+    public async Task<bool> TryMakeSongPublicAsync(int songId)
+    {
+        var song = await _dbContext.Songs
+            .Include(x => x.Artist)
+            .FirstOrDefaultAsync(x => x.Id == songId);
+        
+        if (song is null)
+            return false;
+
+        song.IsPublic = true;
+        song.Artist.IsPublic = true;
+
+        await _dbContext.SaveChangesAsync();
         return true;
     }
 }

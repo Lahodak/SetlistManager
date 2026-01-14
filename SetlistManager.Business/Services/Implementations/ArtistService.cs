@@ -41,7 +41,7 @@ public class ArtistService : IArtistService
         return response;
     }
 
-    public async Task<PagedResponse<ArtistModel>> GetUserArtistLibrary(PagedRequest request, int userId)
+    public async Task<PagedResponse<ArtistModel>> GetUserArtistLibraryAsync(PagedRequest request, int userId)
     {
         var query = _dbContext.Artists
             .Where(x => x.Nick.Contains(request.Query ?? string.Empty) 
@@ -91,13 +91,12 @@ public class ArtistService : IArtistService
     public async Task<ArtistModel?> GetUserArtistById(int artistId, int userId)
     {
         return (await _dbContext.Artists
-            .Where(x => x.Id == artistId 
-                && (x.OwnerId == userId || x.ArtistsUsers!
-                .Any(x => x.UserId == userId)))
             .Include(x => x.Songs
                 .Where(x => x.SongsUsers.Any(x => x.UserId == userId) || x.OwnerId == userId))
             .ThenInclude(x => x.Language)
-            .FirstOrDefaultAsync())?
+            .FirstOrDefaultAsync(x => x.Id == artistId
+                && (x.OwnerId == userId || x.ArtistsUsers
+                .Any(x => x.UserId == userId))))?
             .ToModel(true);
     }
 
@@ -108,13 +107,16 @@ public class ArtistService : IArtistService
         .FirstOrDefaultAsync(x => x.Id == id))?
         .ToModel(true);
 
-    public async Task<bool> TryDeleteArtistAsync(int id)
+    public async Task<bool> TryDeleteArtistAsync(int artistId, int userId)
     {
-        var artist = await _dbContext.Artists.FirstOrDefaultAsync(x => x.Id == id);
+        var artist = await _dbContext.Artists
+            .Include(x => x.Owner)
+            .Include(x => x.Songs)
+            .FirstOrDefaultAsync(x => x.Id == artistId);
         
-        if (artist is null)
-            return false;
-        
+        if (artist is null || artist.OwnerId != userId || artist.Songs.Any(x => x.IsPublic) || artist.IsPublic)
+            return false;       
+
         _dbContext.Artists.Remove(artist);        
         await _dbContext.SaveChangesAsync();
         
@@ -133,6 +135,41 @@ public class ArtistService : IArtistService
 
         artist.Nick = updateModel.Nick;
 
+        await _dbContext.SaveChangesAsync();
+        
+        return true;
+    }
+
+    public async Task<bool> TryMakeArtistPublicAsync(int artistId)
+    {
+        var artist = await _dbContext.Artists
+            .FirstOrDefaultAsync(x => x.Id == artistId);
+
+        if (artist is null)
+            return false;
+
+        artist.IsPublic = true;
+
+        await _dbContext.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> TryGiveAccessToUserAsync(int artistId, int targetId)
+    {
+        var artist = await _dbContext.Artists
+            .Include(x => x.ArtistsUsers)
+            .FirstOrDefaultAsync(x => x.Id == artistId);
+
+        if (artist is null || artist.ArtistsUsers.Any(x => x.UserId == targetId))
+            return false;        
+
+        ArtistsUsers artistsUsers = new()
+        {
+            ArtistId = artistId,
+            UserId = targetId
+        };
+
+        _dbContext.ArtistsUsers.Add(artistsUsers);
         await _dbContext.SaveChangesAsync();
         
         return true;
