@@ -70,16 +70,7 @@ public class SetlistsService : ISetlistsService
             .Include(s => s.SetlistsUsers)
             .FirstOrDefaultAsync(s => s.Id == setlistId && s.OwnerId == currentUserId);
 
-        if(setlist is null)
-            return false;
-
-        var user = await _dbContext.Users
-            .FirstOrDefaultAsync(u => u.Id == targetId);
-
-        if(user is null)
-            return false;
-
-        if(setlist.SetlistsUsers.Any(su => su.UserId == targetId))
+        if (setlist is null || setlist.SetlistsUsers.Count != 0 || (currentUserId != setlist.OwnerId && targetId != currentUserId))
             return false;
 
         setlist.SetlistsUsers.Add(new()

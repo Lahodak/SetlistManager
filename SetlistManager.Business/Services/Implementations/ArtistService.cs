@@ -133,7 +133,6 @@ public class ArtistService : IArtistService
 
         if (artist is null || artist.ArtistsUsers.Count != 0 || (currentUserId != artist.OwnerId && targetId != currentUserId))
             return false;
-        //ok
 
         ArtistsUsers artistsUsers = new()
         {

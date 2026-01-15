@@ -49,17 +49,30 @@ public class SongService : ISongService
     {
         var song = await _dbContext.Songs
             .Include(x => x.SongsUsers)
+            .Include(x => x.Artist)
+                .ThenInclude(x => x.ArtistsUsers.Where(x => x.UserId == targetId))
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == songId);
-        
-        if (song is null || (song.SongsUsers.Any(x => x.SongId == songId && x.UserId == targetId) && (currentUserId != song.OwnerId || targetId != currentUserId)))
+
+        if (song is null || song.SongsUsers.Count != 0 || (currentUserId != song.OwnerId && targetId != currentUserId))
             return false;
-        
+
         SongsUsers songsUsers = new()
         {
             SongId = songId,
             UserId = targetId
         };
+
+        if(song.Artist.ArtistsUsers.Count == 0 || song.Artist.OwnerId == targetId)
+        {
+            ArtistsUsers artistsUsers = new()
+            {
+                ArtistId = song.ArtistId,
+                UserId = targetId
+            };
+
+            _dbContext.ArtistsUsers.Add(artistsUsers);
+        }
         
         _dbContext.SongsUsers.Add(songsUsers);
         await _dbContext.SaveChangesAsync();

@@ -87,7 +87,7 @@ public class ArtistsController : BaseController
     {
         var currentUserId = _userContext.GetCurrentUserId();
 
-        if (await _artistService.TryGiveAccessToUserAsync(id, userId, currentUserId))
+        if (await _artistService.TryGiveAccessToUserAsync(id, userId, currentUserId!.Value))
             return NoContent();
         
         return BadRequest();
