@@ -36,11 +36,17 @@
                     </MudLink>
                 </MudTd>
                 <MudTd DataLabel="Songs Count">@(context.Songs?.Count ?? 0)</MudTd>
-                <MudTd>
-                    <MudIconButton OnClick="() => UpdateArtistAsync(context)" Icon="@Icons.Material.Filled.Edit" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Primary"/>
-                    <MudIconButton OnClick="() => DeleteArtistAsync(context)" Icon="@Icons.Material.Filled.DeleteForever" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Error" Class="ml-2" />
+                <MudTd DataLabel="Actions">
+                    @if(context.OwnerId == _userId)
+                    {                        
+                        <MudIconButton Icon="@Icons.Material.Filled.PersonAddAlt1" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Secondary" Class="ml-2" />
+                        if (!context.IsPublic)
+                        {
+                            <MudIconButton OnClick="() => DeleteArtistAsync(context)" Icon="@Icons.Material.Filled.DeleteForever" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Error" Class="ml-2" />
+                            <MudIconButton OnClick="() => UpdateArtistAsync(context)" Icon="@Icons.Material.Filled.Edit" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Primary" />
+                        }
+                    }
                 </MudTd>
-
             </RowTemplate>
 
             <NoRecordsContent>

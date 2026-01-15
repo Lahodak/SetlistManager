@@ -11,7 +11,7 @@ public static class SetlistMapper
         {
             Id = setlist.Id,
             Name = setlist.Name,            
-            OwnerId = setlist.OwnerId,
+            OwnerId = setlist.OwnerId,            
             Songs = setlist.SongsSetlists?
                         .Select(ss => 
                         {

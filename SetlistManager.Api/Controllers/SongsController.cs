@@ -45,7 +45,7 @@ public class SongsController : BaseController
     }
 
     [HttpPost]
-    public async Task<ActionResult> CreateSong(SongCreateModel createModel)
+    public async Task<ActionResult> CreateSong([FromBody] SongCreateModel createModel)
     {
         var userId = _userContext.GetCurrentUserId();
 
@@ -82,7 +82,7 @@ public class SongsController : BaseController
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult> UpdateSong(int id, SongUpdateModel updateModel)
+    public async Task<ActionResult> UpdateSong(int id, [FromBody] SongUpdateModel updateModel)
     {
         var userId = _userContext.GetCurrentUserId();
 

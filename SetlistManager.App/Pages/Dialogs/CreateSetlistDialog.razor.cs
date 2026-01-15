@@ -38,7 +38,7 @@ public partial class CreateSetlistDialog
 
     protected override async Task OnInitializedAsync()
     {
-        _allSongs = (await SongService.GetAllSongsAsync(new() { PageSize = int.MaxValue}))?.Items;
+        _allSongs = (await SongService.GetAllSongsAsync(new() { PageSize = int.MaxValue, ContentType = ContentType.Private }))?.Items;
         _user = await UserService.GetUserAsync();
 
         if (_user is null)

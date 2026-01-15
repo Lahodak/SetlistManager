@@ -36,12 +36,19 @@
                 </MudTd>
 
                 <MudTd DataLabel="Songs">@context.Songs.Count</MudTd>
-                <MudTd>
-                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Primary"
-                               OnClick="() => EditSetlist(context.Id)"/>
+                <MudTd DataLabel="Actions">
 
-                    <MudIconButton Icon="@Icons.Material.Filled.DeleteForever" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Error" Class="ml-2"
-                               OnClick="() => DeleteSetlist(context)"/>
+                    @if(context.OwnerId == _userId)
+                    {
+                        <MudIconButton Icon="@Icons.Material.Filled.PersonAddAlt1" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Secondary" Class="ml-2" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Primary"
+                                       OnClick="() => EditSetlist(context.Id)" />
+
+
+                        <MudIconButton Icon="@Icons.Material.Filled.DeleteForever" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Error" Class="ml-2"
+                                       OnClick="() => DeleteSetlist(context)" />
+                    }
+
                 </MudTd>
             </RowTemplate>
 

@@ -14,10 +14,18 @@ public partial class SongsPortal
     public required ISnackbar Snackbar { get; set; }
     [Inject]
     public required ISongService SongService { get; set; }
+    [Inject]
+    public required IUserService UserService { get; set; }
 
     private MudTable<SongModel> table = new();
-    private PagedRequest pageState = new();
+    private PagedRequest pageState = new() { ContentType = ContentType.Private };
     private string? searchString;
+    private int _userId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _userId = (await UserService.GetCurrentUserIdAsync()).Value;
+    }
 
     private async Task<TableData<SongModel>?> ServerReload(TableState state, CancellationToken token)
     {

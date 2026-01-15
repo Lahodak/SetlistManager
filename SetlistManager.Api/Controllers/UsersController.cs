@@ -35,7 +35,7 @@ public class UsersController : BaseController
     [HttpGet("{id}")]
     public async Task<ActionResult<UserModel>> GetUserById(int id)
     {
-        if (IsAuthorized(id))
+        if (!IsAuthorized(id))
             return Unauthorized();
 
         return Ok(await _userService.GetCurrentUserAsync(id));
@@ -83,7 +83,7 @@ public class UsersController : BaseController
     [HttpPost("{id}/friendships")]
     public async Task<ActionResult> InitiateFriendship(int id, [FromBody] FriendshipRequestModel requestModel)
     {
-        if (IsAuthorized(id))
+        if (!IsAuthorized(id))
             return Unauthorized();
 
         await _userService.HandleFriendshipRequestAsync(id, requestModel);
@@ -94,7 +94,7 @@ public class UsersController : BaseController
     [HttpDelete("{id}/friendships/{friendshipId}")]
     public async Task<ActionResult> RemoveFriendship(int id, int friendshipId)
     {
-        if (IsAuthorized(id))
+        if (!IsAuthorized(id))
             return Unauthorized();
 
         await _userService.RemoveFriendshipAsync(id, friendshipId);
@@ -105,7 +105,7 @@ public class UsersController : BaseController
     [HttpGet("{id}/friendships")]
     public async Task<ActionResult<PagedResponse<FriendModel>>> GetUserFriends(int id, [FromQuery] PagedRequest pagedRequest)
     {        
-        if (IsAuthorized(id))
+        if (!IsAuthorized(id))
             return Unauthorized();
         
         var result = await _userService.GetUserFriendsAsync(id, pagedRequest);
@@ -116,7 +116,7 @@ public class UsersController : BaseController
     [HttpPut("{id}/friendships/{friendshipId}")]
     public async Task<ActionResult> AcceptFriendship(int id, int friendshipId)
     {
-        if (IsAuthorized(id))
+        if (!IsAuthorized(id))
             return Unauthorized();
 
         await _userService.AcceptFriendshipAsync(id, friendshipId);
