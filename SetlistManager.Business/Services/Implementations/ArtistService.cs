@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SetlistManager.Business.Mappers;
-using SetlistManager.Common.Genius.Models.Songs;
 using SetlistManager.Common.Models;
 using SetlistManager.Data;
 using SetlistManager.Data.Entities;

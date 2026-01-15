@@ -56,11 +56,11 @@ public class SongsController : BaseController
     }
 
     [HttpPost("{id}/public")]
-    public async Task<ActionResult> TryMakeSongPublic(int songId)
+    public async Task<ActionResult> TryMakeSongPublic(int id)
     {
         var userId = _userContext.GetCurrentUserId();
 
-        var result = await _songService.TryMakeSongPublicAsync(songId, userId!.Value);
+        var result = await _songService.TryMakeSongPublicAsync(id, userId!.Value);
         
         if (!result)
             return BadRequest("Song is already in user's library");

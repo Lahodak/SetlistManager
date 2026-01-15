@@ -7,8 +7,6 @@ namespace SetlistManager.App.Services.Implementations;
 
 public class SongService : ISongService
 {
-    private const string _getSongbyIdSuffix = "/";
-
     private readonly IApiService _apiService;
     private readonly IOptions<SetlistManagerApiOptions> _apiOptions;
 
@@ -26,21 +24,28 @@ public class SongService : ISongService
             {
                 { "PageSize", request.PageSize.ToString() },
                 { "PageIndex", request.PageIndex.ToString() },
-                { "Query", request.Query ?? string.Empty }
+                { "Query", request.Query ?? string.Empty },
+                { "ContentType", request.ContentType.ToString() }
             }.ToString()
         };
 
         return await _apiService.GetAsync<PagedResponse<SongModel>>(uri.ToString());
     }
 
-    public async Task<SongModel?> GetSongByIdAsync(int id) 
-        => await _apiService.GetAsync<SongModel>(_apiOptions.Value.SongsEndpoint + _getSongbyIdSuffix + id.ToString());
+    public async Task<SongModel?> GetSongByIdAsync(int id)
+        => await _apiService.GetAsync<SongModel>($"{_apiOptions.Value.SongsEndpoint}/{id}");
 
     public async Task UploadSongAsync(SongCreateModel songCreateModel) 
         => await _apiService.PostAsync(_apiOptions.Value.SongsEndpoint, songCreateModel);
 
     public async Task<bool> TryUpdateSongAsync(int id, SongUpdateModel songModel)
-        => await _apiService.TryPutAsync(_apiOptions.Value.SongsEndpoint + _getSongbyIdSuffix + id.ToString(), songModel);
+        => await _apiService.TryPutAsync($"{_apiOptions.Value.SongsEndpoint}/{id}", songModel);
     public async Task<bool> TryDeleteSongAsync(int id)
-        => await _apiService.TryDeleteAsync(_apiOptions.Value.SongsEndpoint + _getSongbyIdSuffix + id.ToString());
+        => await _apiService.TryDeleteAsync($"{_apiOptions.Value.SongsEndpoint}/{id}");
+
+    public async Task<bool> TryMakeSongPublicAsync(int id)
+        => await _apiService.PostAsync($"{_apiOptions.Value.SongsEndpoint}/{id}/public", true);
+
+    public async Task<bool> TryGiveAccessToUser(int id, int targetId)
+        => await _apiService.PostAsync($"{_apiOptions.Value.SongsEndpoint}/{id}/songsusers/{targetId}", true);
 }
