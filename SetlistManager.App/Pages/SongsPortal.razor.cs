@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
+using SetlistManager.App.Models;
 using SetlistManager.App.Pages.Dialogs;
 using SetlistManager.App.Services;
 using SetlistManager.Common.Models;
@@ -113,5 +114,23 @@ public partial class SongsPortal
         
         Snackbar.Add("Song deleted successfully!", Severity.Success);
         await table.ReloadServerData();        
+    }
+
+    public async Task AddAccessToUserAsync(int id)
+    {
+        var parameters = new DialogParameters
+        {
+            { "ContentType", ShareContentType.Song },
+            { "ContentId", id }
+        };
+
+        var options = new DialogOptions
+        {
+            CloseOnEscapeKey = true,
+            MaxWidth = MaxWidth.Medium,
+            FullWidth = true
+        };
+
+        await DialogService.ShowAsync<ShareContentDialog>("Share Song", parameters, options);
     }
 }

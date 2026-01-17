@@ -7,29 +7,24 @@
 <MudContainer Class="mt-5">
     <MudPaper Class="pa-4 mt-3" Elevation="2">
         <MudText Typo="Typo.h3" Class="ml-2">All Songs</MudText>
-
         <MudTable ServerData="ServerReload" Hover="true" @ref="table">
             <ToolBarContent>
                 <MudText Typo="Typo.h6">Song Library</MudText>
                 <MudSpacer />
-
                 <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OpenAddSongDialog" StartIcon="@Icons.Material.Filled.Add">
                     Add Song
                 </MudButton>
-
                 <MudTextField T="string" ValueChanged="@(s => OnSearch(s))" Placeholder="Search songs"
                               Adornment="Adornment.Start"
                               AdornmentIcon="@Icons.Material.Filled.Search"
                               IconSize="Size.Medium" Class="mt-0 ml-4">
                 </MudTextField>
             </ToolBarContent>
-
             <HeaderContent>
                 <MudTh><MudTableSortLabel SortLabel="title_field" T="SongModel">Title</MudTableSortLabel></MudTh>
                 <MudTh><MudTableSortLabel SortLabel="artist_field" T="SongModel">Artist</MudTableSortLabel></MudTh>
-				<MudTh>Actions</MudTh>
+                <MudTh>Actions</MudTh>
             </HeaderContent>
-
             <RowTemplate>
                 <MudTd DataLabel="Title">
                     <MudLink Href="@($"songdetail/{context.Id}")"
@@ -39,26 +34,41 @@
                 </MudTd>
                 <MudTd DataLabel="Artist">@context.Artist!.Nick</MudTd>
                 <MudTd DataLabel="Actions">
-                    @if(context.OwnerId == _userId)
+                    @if (context.OwnerId == _userId)
                     {
-                        <MudIconButton Icon="@Icons.Material.Filled.PersonAddAlt1" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Secondary" Class="ml-2" />
-                        if(!context.IsPublic)
+                        <MudIconButton OnClick="@(() => AddAccessToUserAsync(context.Id))"
+                                       Icon="@Icons.Material.Filled.PersonAddAlt1"
+                                       Variant="Variant.Outlined"
+                                       Size="Size.Small"
+                                       Color="Color.Secondary"
+                                       Class="ml-2"
+                                       Title="Share song" />
+                        if (!context.IsPublic)
                         {
-                            <MudIconButton OnClick="() => OpenEditSongDialog(context)" Icon="@Icons.Material.Filled.Edit" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Primary" Class="ml-2" />
-                            <MudIconButton OnClick="() => DeleteSongAsync(context)" Icon="@Icons.Material.Filled.DeleteForever" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Error" Class="ml-2" />
+                            <MudIconButton OnClick="() => OpenEditSongDialog(context)"
+                                           Icon="@Icons.Material.Filled.Edit"
+                                           Variant="Variant.Outlined"
+                                           Size="Size.Small"
+                                           Color="Color.Primary"
+                                           Class="ml-2"
+                                           Title="Edit song" />
+                            <MudIconButton OnClick="() => DeleteSongAsync(context)"
+                                           Icon="@Icons.Material.Filled.DeleteForever"
+                                           Variant="Variant.Outlined"
+                                           Size="Size.Small"
+                                           Color="Color.Error"
+                                           Class="ml-2"
+                                           Title="Delete song" />
                         }
-                    }                    
-				</MudTd>
+                    }
+                </MudTd>
             </RowTemplate>
-
             <NoRecordsContent>
                 <MudText>No matching records found</MudText>
             </NoRecordsContent>
-
             <LoadingContent>
                 <MudText>Loading...</MudText>
             </LoadingContent>
-
             <PagerContent>
                 <MudTablePager />
             </PagerContent>
