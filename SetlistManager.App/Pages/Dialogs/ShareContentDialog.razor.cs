@@ -94,7 +94,7 @@ public partial class ShareContentDialog
         {
             bool success = ContentType switch
             {
-                ShareContentType.Song => await SongService.TryGiveAccessToUser(ContentId, friend.Id),
+                ShareContentType.Song => await SongService.TryGiveAccessToUserAsync(ContentId, friend.Id),
                 ShareContentType.Artist => await ArtistService.TryGiveAccessToUserAsync(ContentId, friend.Id),
                 ShareContentType.Setlist => await SetlistService.TryGiveAccessToSetlistAsync(ContentId, friend.Id),
                 _ => false

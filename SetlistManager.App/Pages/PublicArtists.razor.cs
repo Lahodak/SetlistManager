@@ -5,16 +5,18 @@ using SetlistManager.Common.Models;
 
 namespace SetlistManager.App.Pages;
 
-public partial class PublicSongs
+public partial class PublicArtists
 {
     [Inject]
-    public required ISongService SongService { get; set; }
+    public required IArtistService ArtistService { get; set; }
+
     [Inject]
     public required IUserService UserService { get; set; }
+
     [Inject]
     public required ISnackbar Snackbar { get; set; }
 
-    private MudTable<SongModel> table = new();
+    private MudTable<ArtistModel> table = new();
     private PagedRequest pageState = new()
     {
         ContentType = ContentType.Public
@@ -22,30 +24,30 @@ public partial class PublicSongs
     private string? searchString;
     private int _userId;
     private bool _loading = true;
-    private HashSet<int> _userSongIds = [];
+    private HashSet<int> _userArtistIds = [];
 
     protected override async Task OnInitializedAsync()
     {
         _userId = (await UserService.GetCurrentUserIdAsync()).Value;
-        await LoadUserSongs();
+        await LoadUserArtists();
     }
 
-    private async Task LoadUserSongs()
+    private async Task LoadUserArtists()
     {
-        var userSongsRequest = new PagedRequest
+        var userArtistsRequest = new PagedRequest
         {
             ContentType = ContentType.Private,
             PageSize = int.MaxValue
         };
 
-        var userSongs = await SongService.GetAllSongsAsync(userSongsRequest);
-        if (userSongs?.Items != null)
+        var userArtists = await ArtistService.GetAvailableArtistsAsync(userArtistsRequest);
+        if (userArtists?.Items != null)
         {
-            _userSongIds = userSongs.Items.Select(s => s.Id).ToHashSet();
+            _userArtistIds = userArtists.Items.Select(a => a.Id).ToHashSet();
         }
     }
 
-    private async Task<TableData<SongModel>?> ServerReload(TableState state, CancellationToken token)
+    private async Task<TableData<ArtistModel>?> ServerReload(TableState state, CancellationToken token)
     {
         _loading = true;
         await Task.Delay(300, token);
@@ -54,23 +56,22 @@ public partial class PublicSongs
         pageState.PageIndex = state.Page;
         pageState.PageSize = state.PageSize;
 
-        var response = await SongService.GetAllSongsAsync(pageState);
-
+        var response = await ArtistService.GetAvailableArtistsAsync(pageState);
         _loading = false;
 
         if (response?.Items is null)
             return null;
 
-        IEnumerable<SongModel>? filtered = response.Items;
+        IEnumerable<ArtistModel>? filtered = response.Items;
 
         filtered = state.SortLabel switch
         {
-            "title_field" => filtered.OrderByDirection(state.SortDirection, s => s.Name),
-            "artist_field" => filtered.OrderByDirection(state.SortDirection, s => s.Artist),
+            "nick_field" => filtered.OrderByDirection(state.SortDirection, a => a.Nick),
+            "songs_field" => filtered.OrderByDirection(state.SortDirection, a => a.Songs?.Count ?? 0),
             _ => filtered
         };
 
-        return new TableData<SongModel>
+        return new TableData<ArtistModel>
         {
             TotalItems = response.TotalCount,
             Items = filtered
@@ -83,18 +84,17 @@ public partial class PublicSongs
         table.ReloadServerData();
     }
 
-    private async Task AddToLibrary(SongModel song)
+    private async Task AddToLibrary(ArtistModel artist)
     {
-        var result = await SongService.TryGiveAccessToUserAsync(_userId, song.Id);
-
-        if(result)
+        var result = await ArtistService.TryGiveAccessToUserAsync(artist.Id, _userId);
+        if (result)
         {
-            Snackbar.Add($"'{song.Name}' added to your library.", Severity.Success);
-            _userSongIds.Add(song.Id);
+            Snackbar.Add($"'{artist.Nick}' added to your library.", Severity.Success);
+            _userArtistIds.Add(artist.Id);
         }
         else
         {
-            Snackbar.Add($"Failed to add '{song.Name}' to your library.", Severity.Error);
+            Snackbar.Add($"Failed to add '{artist.Nick}' to your library.", Severity.Error);
         }
     }
 }

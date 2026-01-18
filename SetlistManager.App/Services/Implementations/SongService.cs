@@ -46,6 +46,6 @@ public class SongService : ISongService
     public async Task<bool> TryMakeSongPublicAsync(int id)
         => await _apiService.PostAsync($"{_apiOptions.Value.SongsEndpoint}/{id}/public", true);
 
-    public async Task<bool> TryGiveAccessToUser(int id, int targetId)
-        => await _apiService.PostAsync($"{_apiOptions.Value.SongsEndpoint}/{id}/songsusers/{targetId}", true);
+    public async Task<bool> TryGiveAccessToUserAsync(int songId, int targetId)
+        => await _apiService.PostAsync($"{_apiOptions.Value.SongsEndpoint}/{songId}/songsusers/{targetId}", true);
 }

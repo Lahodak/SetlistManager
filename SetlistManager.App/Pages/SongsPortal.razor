@@ -6,7 +6,9 @@
 
 <MudContainer Class="mt-5">
     <MudPaper Class="pa-4 mt-3" Elevation="2">
-        <MudText Typo="Typo.h3" Class="ml-2">All Songs</MudText>
+        <MudText Typo="Typo.h3" Class="ml-2">Your Songs Library</MudText>
+        <MudButton StartIcon="@Icons.Material.Filled.Public" Href="/PublicSongs" Color="Color.Primary"> Go to public songs</MudButton>
+
         <MudTable ServerData="ServerReload" Hover="true" @ref="table">
             <ToolBarContent>
                 <MudText Typo="Typo.h6">Song Library</MudText>

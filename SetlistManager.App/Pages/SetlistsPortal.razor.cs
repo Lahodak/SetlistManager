@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
+using SetlistManager.App.Models;
 using SetlistManager.App.Pages.Dialogs;
 using SetlistManager.App.Services;
 using SetlistManager.Common.Models;
@@ -124,5 +125,23 @@ public partial class SetlistsPortal
         {
             await table.ReloadServerData();
         }
+    }
+
+    public async Task AddAccessToUserAsync(int id)
+    {
+        var parameters = new DialogParameters
+        {
+            { "ContentType", ShareContentType.Setlist },
+            { "ContentId", id }
+        };
+
+        var options = new DialogOptions
+        {
+            CloseOnEscapeKey = true,
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true
+        };
+
+        await DialogService.ShowAsync<ShareContentDialog>("Share Setlist", parameters, options);
     }
 }

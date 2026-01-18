@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
+using SetlistManager.App.Models;
 using SetlistManager.App.Pages.Dialogs;
 using SetlistManager.App.Services;
 using SetlistManager.Common.Models;
@@ -117,5 +118,23 @@ public partial class ArtistsPortal
             Snackbar.Add("Artist created successfully!", Severity.Success);
             await _table.ReloadServerData();
         }
+    }
+
+    public async Task AddAccessToUserAsync(int id)
+    {
+        var parameters = new DialogParameters
+        {
+            { "ContentType", ShareContentType.Artist },
+            { "ContentId", id }
+        };
+
+        var options = new DialogOptions
+        {
+            CloseOnEscapeKey = true,
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true
+        };
+
+        await DialogService.ShowAsync<ShareContentDialog>("Share Artist", parameters, options);
     }
 }

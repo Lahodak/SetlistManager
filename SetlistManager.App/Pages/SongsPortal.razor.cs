@@ -127,7 +127,7 @@ public partial class SongsPortal
         var options = new DialogOptions
         {
             CloseOnEscapeKey = true,
-            MaxWidth = MaxWidth.Medium,
+            MaxWidth = MaxWidth.Small,
             FullWidth = true
         };
 

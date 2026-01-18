@@ -10,5 +10,5 @@ public interface ISongService
     Task<bool> TryUpdateSongAsync(int id, SongUpdateModel songModel); 
     Task<bool> TryDeleteSongAsync(int id);
     Task<bool> TryMakeSongPublicAsync(int id);
-    Task<bool> TryGiveAccessToUser(int id, int targetId);
+    Task<bool> TryGiveAccessToUserAsync(int songId, int targetId);
 }
