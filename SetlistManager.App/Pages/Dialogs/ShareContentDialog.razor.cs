@@ -96,7 +96,7 @@ public partial class ShareContentDialog
             {
                 ShareContentType.Song => await SongService.TryGiveAccessToUserAsync(ContentId, friend.Id),
                 ShareContentType.Artist => await ArtistService.TryGiveAccessToUserAsync(ContentId, friend.Id),
-                ShareContentType.Setlist => await SetlistService.TryGiveAccessToSetlistAsync(ContentId, friend.Id),
+                ShareContentType.Setlist => await SetlistService.TryGiveAccessToUserAsync(ContentId, friend.Id),
                 _ => false
             };
 

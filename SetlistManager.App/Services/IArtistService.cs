@@ -11,4 +11,5 @@ public interface IArtistService
     Task<bool> TryUpdateArtistAsync(int id, ArtistUpdateModel updateModel);
     Task<bool> TryMakeArtistPublicAsync(int id);
     Task<bool> TryGiveAccessToUserAsync(int artistId, int targetId);
+    Task RemoveAccessFromUserAsync(int artistId, int targetId);
 }

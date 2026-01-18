@@ -48,4 +48,7 @@ public class SongService : ISongService
 
     public async Task<bool> TryGiveAccessToUserAsync(int songId, int targetId)
         => await _apiService.PostAsync($"{_apiOptions.Value.SongsEndpoint}/{songId}/songsusers/{targetId}", true);
+
+    public async Task RemoveAccessFromUserAsync(int songId, int targetId)
+        => await _apiService.TryDeleteAsync($"{_apiOptions.Value.SongsEndpoint}/{songId}/songsusers/{targetId}");
 }

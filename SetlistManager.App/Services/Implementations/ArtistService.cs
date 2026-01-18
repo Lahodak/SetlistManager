@@ -49,4 +49,7 @@ public class ArtistService : IArtistService
 
     public async Task<bool> TryMakeArtistPublicAsync(int id)
         => await _apiService.PostAsync($"{_apiOptions.Value.ArtistsEndpoint}/{id}/public", true);
+
+    public async Task RemoveAccessFromUserAsync(int artistId, int targetId)
+        => await _apiService.TryDeleteAsync($"{_apiOptions.Value.ArtistsEndpoint}/{artistId}/artistsusers/{targetId}");
 }
