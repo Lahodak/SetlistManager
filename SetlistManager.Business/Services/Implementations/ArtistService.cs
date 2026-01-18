@@ -144,4 +144,19 @@ public class ArtistService : IArtistService
         
         return true;
     }
+
+    public async Task RemoveAccessFromUserAsync(int artistId, int targetId, int currentUserId)
+    {
+        var artistUser = await _dbContext.ArtistsUsers
+            .Include(x => x.Artist)
+            .Include(x => x.User)
+                .ThenInclude(x => x.Songs.Where(x => x.ArtistId == artistId))
+            .FirstOrDefaultAsync(x => x.Id == artistId && x.UserId == targetId);
+        
+        if (artistUser is null || (currentUserId != artistUser.Artist.OwnerId && targetId != currentUserId) || artistUser.User.Songs.Count != 0)
+            return;
+
+        _dbContext.ArtistsUsers.Remove(artistUser);
+        await _dbContext.SaveChangesAsync();
+    }
 }

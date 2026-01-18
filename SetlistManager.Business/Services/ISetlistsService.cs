@@ -10,4 +10,5 @@ public interface ISetlistsService
     Task<bool> TryCreateSetlistAsync(SetlistModel setlistModel, int creatorId);
     Task<bool> TryDeleteSetlistAsync(int setlistId, int currentUserId);
     Task<bool> TryGiveAccessToSetlistAsync(int setlistId, int targetId, int currentUserId);
+    Task RemoveAccessFromUserAsync(int setlistId, int userId, int currentUserId);
 }

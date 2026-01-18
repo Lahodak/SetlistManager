@@ -92,4 +92,14 @@ public class ArtistsController : BaseController
         
         return BadRequest();
     }
+
+    [HttpDelete("{id}/artistsusers/{userId}")]
+    public async Task<ActionResult> RemoveAccessFromUser(int id, int userId)
+    {
+        var currentUserId = _userContext.GetCurrentUserId();
+
+        await _artistService.RemoveAccessFromUserAsync(id, userId, currentUserId!.Value);
+
+        return NoContent();
+    }
 }

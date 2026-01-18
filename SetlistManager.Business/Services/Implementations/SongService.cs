@@ -184,4 +184,20 @@ public class SongService : ISongService
         await _dbContext.SaveChangesAsync();
         return true;
     }
+
+    public async Task RemoveAccessFromUserAsync(int songId, int userId, int currentUserId)
+    {
+        var songUser = await _dbContext.SongsUsers
+            .Include(x => x.Song)
+                .ThenInclude(x => x.Artist)
+                    .ThenInclude(x => x.ArtistsUsers.Where(x => x.UserId == userId))
+            .Include(x => x.User)
+            .FirstOrDefaultAsync(x => x.SongId == songId && x.UserId == userId);
+
+        if (songUser is null || (songUser.Song.OwnerId != currentUserId && userId != currentUserId))
+            return;
+
+        _dbContext.SongsUsers.Remove(songUser);
+        await _dbContext.SaveChangesAsync();
+    }
 }

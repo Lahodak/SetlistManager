@@ -81,6 +81,14 @@ public class SongsController : BaseController
         return Created();
     }
 
+    [HttpDelete("{id}/songsusers/{userId}")]
+    public async Task<ActionResult> RemoveSongFromUserLibrary(int id, int userId)
+    {
+        var currentUserId = _userContext.GetCurrentUserId();        
+        await _songService.RemoveAccessFromUserAsync(id, userId, currentUserId!.Value);        
+        return NoContent();
+    }
+
     [HttpPut("{id}")]
     public async Task<ActionResult> UpdateSong(int id, [FromBody] SongUpdateModel updateModel)
     {

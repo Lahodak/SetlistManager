@@ -90,4 +90,14 @@ public class SetlistsController : BaseController
 
         return Created();
     }
+
+    [HttpDelete("{id}/setlistsusers/{userId}")]
+    public async Task<ActionResult> TryRemoveAccessFromUser(int id, int userId)
+    {
+        var currentUserId = _userContext.GetCurrentUserId();
+        
+        await _setlistService.RemoveAccessFromUserAsync(id, userId, currentUserId!.Value);
+
+        return NoContent();
+    }
 }

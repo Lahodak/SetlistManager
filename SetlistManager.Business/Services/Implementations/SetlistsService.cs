@@ -170,4 +170,17 @@ public class SetlistsService : ISetlistsService
         
         return true;
     }
+
+    public async Task RemoveAccessFromUserAsync(int setlistId, int userId, int currentUserId)
+    {
+        var setlistUser = await _dbContext.SetlistsUsers
+            .Include(su => su.Setlist)
+            .FirstOrDefaultAsync(su => su.SetlistId == setlistId && su.UserId == userId);
+
+        if (setlistUser is null || (setlistUser.Setlist.OwnerId != currentUserId && userId != currentUserId))
+            return;
+
+        _dbContext.SetlistsUsers.Remove(setlistUser);
+        await _dbContext.SaveChangesAsync();
+    }
 }
