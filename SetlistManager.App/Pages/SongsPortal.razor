@@ -63,6 +63,10 @@
                                            Title="Delete song" />
                         }
                     }
+                    else
+                    {
+                        <MudIconButton OnClick="() => RemoveSongFromUserLibraryAsync(context)" Icon="@Icons.Material.Filled.PersonRemoveAlt1" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Error" Class="ml-2" />
+                    }
                 </MudTd>
             </RowTemplate>
             <NoRecordsContent>

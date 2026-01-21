@@ -116,6 +116,21 @@ public partial class SongsPortal
         await table.ReloadServerData();        
     }
 
+    private async Task RemoveSongFromUserLibraryAsync(SongModel song)
+    {
+        bool? result = await DialogService.ShowMessageBox(
+            "Confirm Removal",
+            $"Are you sure you want to remove the song '{song.Name}' from your Library?",
+            yesText: "Remove", noText: "Cancel", options: new DialogOptions { CloseOnEscapeKey = true }
+        );
+
+        if (result is not true)
+            return;
+
+        await SongService.RemoveAccessFromUserAsync(song.Id, _userId);
+        await table.ReloadServerData();
+    }
+
     public async Task AddAccessToUserAsync(int id)
     {
         var parameters = new DialogParameters

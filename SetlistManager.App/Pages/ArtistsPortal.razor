@@ -45,7 +45,11 @@
                         {
                             <MudIconButton OnClick="() => DeleteArtistAsync(context)" Icon="@Icons.Material.Filled.DeleteForever" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Error" Class="ml-2" />
                             <MudIconButton OnClick="() => UpdateArtistAsync(context)" Icon="@Icons.Material.Filled.Edit" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Primary" />
-                        }
+                        }                        
+                    }
+                    else
+                    {
+					    <MudIconButton OnClick="() => RemoveArtistFromLibraryAsync(context)" Icon="@Icons.Material.Filled.PersonRemoveAlt1" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Error" Class="ml-2" />
                     }
                 </MudTd>
             </RowTemplate>

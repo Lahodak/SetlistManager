@@ -83,7 +83,28 @@ public partial class ArtistsPortal
         else
         {
             Snackbar.Add("Failed to delete artist.", Severity.Error);
-        }        
+        }
+    }
+
+    private async Task RemoveArtistFromLibraryAsync(ArtistModel artist)
+    {
+        if(artist.Songs?.Count > 0 )
+        {
+            Snackbar.Add("You must remove all songs of this artist from your library before removing the artist.", Severity.Warning);
+            return;
+        }
+
+        bool? result = await DialogService.ShowMessageBox(
+            "Confirm Removal",
+            $"Are you sure you want to remove the artist '{artist.Nick}' from your library?",
+            yesText: "Remove", noText: "Cancel", options: new DialogOptions { CloseOnEscapeKey = true }
+        );
+        
+        if (result is not true)
+            return;
+
+        await ArtistService.RemoveAccessFromUserAsync(artist.Id, _userId);
+        await _table.ReloadServerData();
     }
 
     private async Task UpdateArtistAsync(ArtistModel artist)

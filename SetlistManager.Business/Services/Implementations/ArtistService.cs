@@ -28,7 +28,7 @@ public class ArtistService : IArtistService
         var totalCount = await query.CountAsync();
 
         var artists = await query
-           .Include(x => x.Songs)
+           .Include(x => x.Songs.Where(x => x.OwnerId == userId || x.SongsUsers.Any(su => su.UserId == userId)))
            .ThenInclude(x => x.Language)
            .AsNoTracking()
            .Skip(request.PageIndex * request.PageSize)
@@ -151,7 +151,7 @@ public class ArtistService : IArtistService
             .Include(x => x.Artist)
             .Include(x => x.User)
                 .ThenInclude(x => x.Songs.Where(x => x.ArtistId == artistId))
-            .FirstOrDefaultAsync(x => x.Id == artistId && x.UserId == targetId);
+            .FirstOrDefaultAsync(x => x.ArtistId == artistId && x.UserId == targetId);
         
         if (artistUser is null || (currentUserId != artistUser.Artist.OwnerId && targetId != currentUserId) || artistUser.User.Songs.Count != 0)
             return;

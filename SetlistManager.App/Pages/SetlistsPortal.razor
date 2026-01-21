@@ -48,6 +48,10 @@
                         <MudIconButton Icon="@Icons.Material.Filled.DeleteForever" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Error" Class="ml-2"
                                        OnClick="() => DeleteSetlist(context)" />
                     }
+                    else
+                    {                                        
+                        <MudIconButton OnClick="() => RemoveSetlistFromUserLibrary(context)" Icon="@Icons.Material.Filled.PersonRemoveAlt1" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Error" Class="ml-2" />                        
+                    }
 
                 </MudTd>
             </RowTemplate>

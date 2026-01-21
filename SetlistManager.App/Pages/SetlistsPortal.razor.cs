@@ -4,6 +4,7 @@ using SetlistManager.App.Models;
 using SetlistManager.App.Pages.Dialogs;
 using SetlistManager.App.Services;
 using SetlistManager.Common.Models;
+using System.Reflection;
 
 namespace SetlistManager.App.Pages;
 
@@ -112,6 +113,21 @@ public partial class SetlistsPortal
 
         Snackbar.Add("Setlist deleted successfully!", Severity.Success);
 
+        await table.ReloadServerData();
+    }
+
+    private async Task RemoveSetlistFromUserLibrary(SetlistModel model)
+    {
+        bool? result = await DialogService.ShowMessageBox(
+            "Confirm Removal",
+            $"Are you sure you want to reomve the setlist '{model.Name}' from your Library?",
+            yesText: "Remove", noText: "Cancel", options: new DialogOptions { CloseOnEscapeKey = true }
+        );
+
+        if (result is not true)
+            return;
+
+        await SetlistService.RemoveAccessFromUserAsync(model.Id, _userId);
         await table.ReloadServerData();
     }
 
