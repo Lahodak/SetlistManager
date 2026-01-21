@@ -19,5 +19,7 @@ public class SongsUsersConfig : IEntityTypeConfiguration<SongsUsers>
             .WithMany(u => u.SongsUsers)
             .HasForeignKey(su => su.UserId)
             .OnDelete(DeleteBehavior.ClientCascade);
+    
+        builder.Property(x => x.CreatedAt);
     }
 }

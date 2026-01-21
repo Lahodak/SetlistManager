@@ -12,4 +12,7 @@ public interface ISongService
     Task<bool> TryGiveAccessToUserAsync(int songId, int targetId, int currentUserId);
     Task RemoveAccessFromUserAsync(int songId, int userId, int currentUserId);
     Task<bool> TryMakeSongPublicAsync(int songId, int userId);
+    Task<PagedResponse<SongUsageStatModel>> GetMostUsedSongsAsync(StatsPagedRequest request);
+    Task<PagedResponse<SongUsageStatModel>> GetMostAddedToLibraryAsync(PagedRequest request);
+    Task<PagedResponse<LatestSongStatModel>> GetLatestPublicSongsAsync(PagedRequest request);
 }
