@@ -48,6 +48,14 @@ public partial class ShareContentDialog
         };
 
         _userFriendships = await UserService.GetUserFriendshipsAsync(request);
+        _userFriendships = await UserService.GetUserFriendshipsAsync(request);
+        
+        if (_userFriendships?.Items is not null)
+        {
+            _userFriendships.Items = _userFriendships.Items
+                .Where(f => f.State == FriendshipState.Accepted)
+                .ToList();
+        }    
     }
 
     private async Task LoadContentName()
