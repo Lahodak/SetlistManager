@@ -1,0 +1,64 @@
+﻿@page "/PublicSongs"
+@using SetlistManager.App.Services
+@using SetlistManager.Common.Models
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-4">
+    <MudText Typo="Typo.h4" GutterBottom="true">Public Songs</MudText>
+    <MudText Typo="Typo.body1" Class="mb-4">Browse and add songs from the community library</MudText>
+
+    <MudTable @ref="table"
+              ServerData="ServerReload"
+              Hover="true"
+              Breakpoint="Breakpoint.Sm"
+              Loading="@_loading"
+              LoadingProgressColor="Color.Info">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Song Library</MudText>
+            <MudSpacer />
+            <MudTextField @bind-Value="searchString"
+                          Placeholder="Search songs..."
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Search"
+                          IconSize="Size.Medium"
+                          Class="mt-0"
+                          Immediate="true"
+                          DebounceInterval="300"
+                          OnDebounceIntervalElapsed="OnSearch" />
+        </ToolBarContent>
+        <HeaderContent>
+            <MudTh><MudTableSortLabel SortLabel="title_field" T="SongModel">Title</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortLabel="artist_field" T="SongModel">Artist</MudTableSortLabel></MudTh>
+            <MudTh>Actions</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Title">@context.Name</MudTd>
+            <MudTd DataLabel="Artist">@context.Artist!.Nick</MudTd>
+            <MudTd DataLabel="Actions">
+                @if (_userSongIds.Contains(context.Id))
+                {
+                    <MudIconButton Icon="@Icons.Material.Filled.LibraryAddCheck"
+                                   Color="Color.Success"
+                                   Size="Size.Small"
+                                   Title="Already in your library" />
+                }
+                else
+                {
+                    <MudIconButton Icon="@Icons.Material.Filled.LibraryAdd"
+                                   Color="Color.Primary"
+                                   Size="Size.Small"
+                                   OnClick="@(() => AddToLibrary(context))"
+                                   Title="Add to your library" />
+                }
+            </MudTd>
+        </RowTemplate>
+        <NoRecordsContent>
+            <MudText>No matching records found</MudText>
+        </NoRecordsContent>
+        <LoadingContent>
+            <MudText>Loading...</MudText>
+        </LoadingContent>
+        <PagerContent>
+            <MudTablePager />
+        </PagerContent>
+    </MudTable>
+</MudContainer>

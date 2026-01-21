@@ -24,7 +24,8 @@ public class ArtistService : IArtistService
             {
                 { "PageSize", request.PageSize.ToString() },
                 { "PageIndex", request.PageIndex.ToString() },
-                { "Query", request.Query ?? string.Empty }
+                { "Query", request.Query ?? string.Empty },
+                { "ContentType", request.ContentType.ToString() }
             }.ToString()
         };
 
@@ -32,14 +33,23 @@ public class ArtistService : IArtistService
     }
 
     public async Task<ArtistModel?> GetArtistByIdAsync(int id) 
-        => await _apiService.GetAsync<ArtistModel>(_apiOptions.Value.ArtistsEndpoint + "/" + id.ToString());
+        => await _apiService.GetAsync<ArtistModel>($"{_apiOptions.Value.ArtistsEndpoint}/{id}" );
 
     public async Task UploadArtistAsync(ArtistCreateModel createModel)
         => await _apiService.PostAsync(_apiOptions.Value.ArtistsEndpoint, createModel);
 
     public async Task<bool> TryDeleteArtistAsync(int id)
-        => await _apiService.TryDeleteAsync(_apiOptions.Value.ArtistsEndpoint + "/" + id.ToString());
+        => await _apiService.TryDeleteAsync($"{_apiOptions.Value.ArtistsEndpoint}/{id}");
 
     public async Task<bool> TryUpdateArtistAsync(int id, ArtistUpdateModel updateModel)
-        => await _apiService.TryPutAsync(_apiOptions.Value.ArtistsEndpoint + "/" + id.ToString(), updateModel);
+        => await _apiService.TryPutAsync($"{_apiOptions.Value.ArtistsEndpoint}/{id}", updateModel);
+
+    public async Task<bool> TryGiveAccessToUserAsync(int artistId, int targetId)
+        => await _apiService.PostAsync($"{_apiOptions.Value.ArtistsEndpoint}/{artistId}/artistsusers/{targetId}", true);
+
+    public async Task<bool> TryMakeArtistPublicAsync(int id)
+        => await _apiService.PostAsync($"{_apiOptions.Value.ArtistsEndpoint}/{id}/public", true);
+
+    public async Task RemoveAccessFromUserAsync(int artistId, int targetId)
+        => await _apiService.TryDeleteAsync($"{_apiOptions.Value.ArtistsEndpoint}/{artistId}/artistsusers/{targetId}");
 }

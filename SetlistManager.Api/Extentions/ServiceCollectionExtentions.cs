@@ -1,6 +1,6 @@
 ﻿using SetlistManager.Api.Services;
 
-namespace SetlistManager. Api.Extentions;
+namespace SetlistManager.Api.Extentions;
 
 public static class ServiceCollectionExtentions
 {

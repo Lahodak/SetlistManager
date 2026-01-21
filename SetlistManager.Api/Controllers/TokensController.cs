@@ -3,7 +3,6 @@ using SetlistManager.Api.Services;
 using SetlistManager.Business.Services;
 using SetlistManager.Common.Models;
 
-
 namespace SetlistManager.Api.Controllers;
 
 [Route("api/tokens")]

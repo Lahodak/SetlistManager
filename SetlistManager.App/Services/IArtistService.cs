@@ -9,4 +9,7 @@ public interface IArtistService
     Task UploadArtistAsync(ArtistCreateModel createModel);
     Task<bool> TryDeleteArtistAsync(int id);
     Task<bool> TryUpdateArtistAsync(int id, ArtistUpdateModel updateModel);
+    Task<bool> TryMakeArtistPublicAsync(int id);
+    Task<bool> TryGiveAccessToUserAsync(int artistId, int targetId);
+    Task RemoveAccessFromUserAsync(int artistId, int targetId);
 }

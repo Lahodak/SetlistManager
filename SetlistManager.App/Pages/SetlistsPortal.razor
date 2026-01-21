@@ -4,7 +4,7 @@
 
 <MudContainer Class="mt-5">
     <MudPaper Class="pa-4 mt-3" Elevation="2">
-        <MudText Typo="Typo.h3" Class="ml-2">Your Setlists</MudText>
+        <MudText Typo="Typo.h3" Class="ml-2">Your Setlists Library</MudText>
 
         <MudTable ServerData="ServerReload" Hover="true" @ref="table">
             <ToolBarContent>
@@ -36,12 +36,23 @@
                 </MudTd>
 
                 <MudTd DataLabel="Songs">@context.Songs.Count</MudTd>
-                <MudTd>
-                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Primary"
-                               OnClick="() => EditSetlist(context.Id)"/>
+                <MudTd DataLabel="Actions">
 
-                    <MudIconButton Icon="@Icons.Material.Filled.DeleteForever" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Error" Class="ml-2"
-                               OnClick="() => DeleteSetlist(context)"/>
+                    @if(context.OwnerId == _userId)
+                    {
+                        <MudIconButton OnClick="() => AddAccessToUserAsync(context.Id)" Icon="@Icons.Material.Filled.PersonAddAlt1" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Secondary" Class="ml-2" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Primary"
+                                       OnClick="() => EditSetlist(context.Id)" />
+
+
+                        <MudIconButton Icon="@Icons.Material.Filled.DeleteForever" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Error" Class="ml-2"
+                                       OnClick="() => DeleteSetlist(context)" />
+                    }
+                    else
+                    {                                        
+                        <MudIconButton OnClick="() => RemoveSetlistFromUserLibrary(context)" Icon="@Icons.Material.Filled.PersonRemoveAlt1" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Error" Class="ml-2" />                        
+                    }
+
                 </MudTd>
             </RowTemplate>
 

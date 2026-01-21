@@ -67,7 +67,7 @@ public partial class CreateFriendshipDialog
     }
 
     private async Task SendFriendRequest(UserViewModel user)
-    {        
+    {
         var friendshipRequest = new FriendshipRequestModel
         {
             RecieverId = user.Id

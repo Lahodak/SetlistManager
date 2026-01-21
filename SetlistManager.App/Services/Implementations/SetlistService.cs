@@ -7,11 +7,8 @@ namespace SetlistManager.App.Services.Implementations;
 
 public class SetlistService : ISetlistService
 {
-    private const string _setlistByIdSuffix = "/";
-
     private readonly IApiService _apiService;
     private readonly IOptions<SetlistManagerApiOptions> _apiOptions;
-
     public SetlistService(IApiService apiService, IOptions<SetlistManagerApiOptions> apiOptions)
     {
         _apiOptions = apiOptions;
@@ -22,7 +19,7 @@ public class SetlistService : ISetlistService
         => await _apiService.PostAsync(_apiOptions.Value.SetlistsEndpoint, setlistModel);
 
     public async Task<SetlistModel?> GetSetlistById(int id) 
-        => await _apiService.GetAsync<SetlistModel>(_apiOptions.Value.SetlistsEndpoint + _setlistByIdSuffix + id);
+        => await _apiService.GetAsync<SetlistModel>($"{_apiOptions.Value.SetlistsEndpoint}/{id}");
 
     public async Task<PagedResponse<SetlistModel>?> GetAllSetlistsAsync(PagedRequest request)
     {
@@ -32,17 +29,23 @@ public class SetlistService : ISetlistService
             {
                 { "PageSize", request.PageSize.ToString() },
                 { "PageIndex", request.PageIndex.ToString() },
-                { "Query", request.Query ?? string.Empty }
+                { "Query", request.Query ?? string.Empty },
+                { "ContentType", request.ContentType.ToString()}
             }.ToString()
         };
-
 
         return await _apiService.GetAsync<PagedResponse<SetlistModel>?>(uri.ToString());
     }
 
     public async Task EditSetlist(SetlistModel setlistModel)
-        => await _apiService.PutAsync(_apiOptions.Value.SetlistsEndpoint + _setlistByIdSuffix + setlistModel.Id, setlistModel);
+        => await _apiService.PutAsync($"{_apiOptions.Value.SetlistsEndpoint}/{setlistModel.Id}", setlistModel);
 
     public async Task<bool> TryDeleteSetlistAsync(int id)
-        => await _apiService.TryDeleteAsync(_apiOptions.Value.SetlistsEndpoint + _setlistByIdSuffix + id);
+        => await _apiService.TryDeleteAsync($"{_apiOptions.Value.SetlistsEndpoint}/{id}");
+
+    public async Task<bool> TryGiveAccessToUserAsync(int setlistId, int targetId)
+        => await _apiService.PostAsync($"{_apiOptions.Value.SetlistsEndpoint}/{setlistId}/setlistsusers/{targetId}", true);
+
+    public async Task RemoveAccessFromUserAsync(int setlistId, int targetId)
+        => await _apiService.TryDeleteAsync($"{_apiOptions.Value.SetlistsEndpoint}/{setlistId}/setlistsusers/{targetId}");
 }

@@ -9,4 +9,6 @@ public interface ISetlistService
     Task<PagedResponse<SetlistModel>?> GetAllSetlistsAsync(PagedRequest request);
     Task EditSetlist(SetlistModel setlistModel);
     Task<bool> TryDeleteSetlistAsync(int id);
+    Task<bool> TryGiveAccessToUserAsync(int setlistId, int targetId);
+    Task RemoveAccessFromUserAsync(int setlistId, int targetId);
 }

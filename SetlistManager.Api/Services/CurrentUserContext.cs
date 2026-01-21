@@ -1,6 +1,6 @@
 ﻿using System.Security.Claims;
 
-namespace SetlistManager. Api.Services;
+namespace SetlistManager.Api.Services;
 
 public class CurrentUserContext : ICurrentUserContext
 {

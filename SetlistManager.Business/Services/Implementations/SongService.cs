@@ -15,50 +15,100 @@ public class SongService : ISongService
         _dbContext = dbContext;
     }
 
-    public async Task<PagedResponse<SongModel>> GetSongsAsync(PagedRequest request)
+    public async Task<PagedResponse<SongModel>> GetSongsAsync(PagedRequest request, int userId)
     {
+        var searchQuery = request.Query ?? string.Empty;
         var query = _dbContext.Songs
-        .Where(x => x.Name.Contains(request.Query ?? string.Empty) || x.Artist.Nick.Contains(request.Query ?? string.Empty));
-        
+            .Where(x => x.Name.Contains(searchQuery) || x.Artist.Nick.Contains(searchQuery));
+
+        query = request.ContentType == ContentType.Private
+            ? query.Where(x => x.OwnerId == userId || x.SongsUsers.Any(su => su.UserId == userId))
+            : query.Where(x => x.IsPublic);
+
         var totalCount = await query.CountAsync();
 
         var songs = await query
             .Include(x => x.Language)
             .Include(x => x.Artist)
+            .Include(x => x.Owner)
             .Skip(request.PageIndex * request.PageSize)
             .Take(request.PageSize)
             .AsNoTracking()
             .ToListAsync();
 
-        PagedResponse<SongModel> response = new()
+        return new PagedResponse<SongModel>
         {
             TotalCount = totalCount,
             Items = songs
                 .Select(x => x.ToModel())
                 .ToList()
         };
-
-        return response;
     }
 
-    public async Task<SongModel?> GetSongByIdAsync(int songId)
+    public async Task<bool> TryGiveAccessToUserAsync(int songId, int targetId, int currentUserId)
+    {
+        var song = await _dbContext.Songs
+            .Include(x => x.SongsUsers)
+            .Include(x => x.Artist)
+                .ThenInclude(x => x.ArtistsUsers.Where(x => x.UserId == targetId))
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == songId);
+
+        if (song is null || song.SongsUsers.Count != 0 || (currentUserId != song.OwnerId && targetId != currentUserId))
+            return false;
+
+        SongsUsers songsUsers = new()
+        {
+            SongId = songId,
+            UserId = targetId
+        };
+
+        if(song.Artist.ArtistsUsers.Count == 0 || song.Artist.OwnerId == targetId)
+        {
+            ArtistsUsers artistsUsers = new()
+            {
+                ArtistId = song.ArtistId,
+                UserId = targetId
+            };
+
+            _dbContext.ArtistsUsers.Add(artistsUsers);
+        }
+        
+        _dbContext.SongsUsers.Add(songsUsers);
+        await _dbContext.SaveChangesAsync();
+        
+        return true;
+    }
+
+    public async Task<SongModel?> GetSongByIdAsync(int songId, int userId)
     {
         var song = await _dbContext.Songs
         .Include(x => x.Language)
         .Include(x => x.Artist)
+        .Include(x => x.Owner)
+        .Include(x => x.SongsUsers)
         .AsNoTracking()
-        .FirstOrDefaultAsync(x => x.Id == songId);
+        .FirstOrDefaultAsync(x => x.Id == songId);               
 
-        if (song is null)
+        if (song is null || (!song.IsPublic && !(song.OwnerId == userId || song.SongsUsers.Any(x => x.UserId == userId))))
             return null;
-
+        
         return song.ToModel();
     }
 
-    public async Task<bool> TrySaveSongAsync(SongCreateModel songCreateModel, int userId)
+    public async Task<bool> TryCreateSongAsync(SongCreateModel songCreateModel, int userId)
     {
-        if(await _dbContext.Songs.AnyAsync(x => x.Name == songCreateModel.Name && x.ArtistId == songCreateModel.ArtistId))
+        if (await _dbContext.Songs
+        .AnyAsync(x => x.Name == songCreateModel.Name 
+            && x.ArtistId == songCreateModel.ArtistId
+            && (x.OwnerId == userId 
+            || x.SongsUsers!.Any(su => su.UserId == userId))))
             return false;
+
+        bool isArtistPublic = false;
+
+        if ((await _dbContext.Artists.FirstOrDefaultAsync(x => x.Id == songCreateModel.ArtistId))!.IsPublic)
+            isArtistPublic = true;
 
         Song song = new()
         {
@@ -68,13 +118,14 @@ public class SongService : ISongService
             AudioURL = songCreateModel.AudioURL,
             Key = songCreateModel.Key,
             Tuning = songCreateModel.Tuning,
-            BPM = songCreateModel.BPM,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedBy = userId,
+            BPM = songCreateModel.BPM!.Value,
+            CreatedAt = DateTime.UtcNow,            
+            OwnerId = userId,
             LanguageId = songCreateModel.LanguageId,
+            IsPublic = isArtistPublic
         };
 
-        await _dbContext.Songs.AddAsync(song);
+        _dbContext.Songs.Add(song);
         await _dbContext.SaveChangesAsync();
 
         return true;
@@ -82,9 +133,13 @@ public class SongService : ISongService
 
     public async Task<bool> TryUpdateSongAsync(int songId, SongUpdateModel updateModel, int userId)
     {
-        var song = await _dbContext.Songs.FirstOrDefaultAsync(x => x.Id == songId);
+        if (await _dbContext.Songs.AnyAsync(x => (x.Name == updateModel.Name) && (x.ArtistId == updateModel.ArtistId)
+        && ((x.OwnerId == userId) || x.SongsUsers.Any(x => x.Song.ArtistId == updateModel.ArtistId && x.UserId == userId))))
+            return false;
+        
+        var song = await _dbContext.Songs.FirstOrDefaultAsync(x => x.Id == songId && x.OwnerId == userId);
 
-        if (song is null)
+        if (song is null || song.OwnerId != userId || song.IsPublic)
             return false;
 
         song.Name = updateModel.Name;
@@ -94,18 +149,16 @@ public class SongService : ISongService
         song.Key = updateModel.Key;
         song.Tuning = updateModel.Tuning;
         song.BPM = updateModel.BPM;
-        song.UpdatedBy = userId;
         song.LanguageId = updateModel.LanguageId;
         song.UpdatedAt = DateTime.UtcNow;
 
-        await _dbContext.SaveChangesAsync();
-        
+        await _dbContext.SaveChangesAsync();        
         return true;
     }
 
-    public async Task<bool> TryDeleteSongAsync(int songId)
+    public async Task<bool> TryDeleteSongAsync(int songId, int userId)
     {
-        var song = await _dbContext.Songs.FirstOrDefaultAsync(x => x.Id == songId);
+        var song = await _dbContext.Songs.FirstOrDefaultAsync(x => x.Id == songId && x.OwnerId == userId);
         
         if (song is null)
             return false;
@@ -114,5 +167,37 @@ public class SongService : ISongService
         await _dbContext.SaveChangesAsync();
         
         return true;
+    }
+
+    public async Task<bool> TryMakeSongPublicAsync(int songId, int userId)
+    {
+        var song = await _dbContext.Songs
+            .Include(x => x.Artist)
+            .FirstOrDefaultAsync(x => x.Id == songId && x.OwnerId == userId);       
+
+        if (song is null)
+            return false;
+
+        song.IsPublic = true;
+        song.Artist.IsPublic = true;
+
+        await _dbContext.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task RemoveAccessFromUserAsync(int songId, int userId, int currentUserId)
+    {
+        var songUser = await _dbContext.SongsUsers
+            .Include(x => x.Song)
+                .ThenInclude(x => x.Artist)
+                    .ThenInclude(x => x.ArtistsUsers.Where(x => x.UserId == userId))
+            .Include(x => x.User)
+            .FirstOrDefaultAsync(x => x.SongId == songId && x.UserId == userId);
+
+        if (songUser is null || (songUser.Song.OwnerId != currentUserId && userId != currentUserId))
+            return;
+
+        _dbContext.SongsUsers.Remove(songUser);
+        await _dbContext.SaveChangesAsync();
     }
 }

@@ -5,6 +5,7 @@ using SetlistManager.Data;
 using SetlistManager.Data.Entities;
 
 namespace SetlistManager.Business.Services.Implementations;
+
 public class SetlistsService : ISetlistsService
 {
     private readonly AppDbContext _dbContext;
@@ -14,7 +15,7 @@ public class SetlistsService : ISetlistsService
         _dbContext = dbContext;
     }
 
-    public async Task<SetlistModel?> GetSetlistByIdAsync(int id)
+    public async Task<SetlistModel?> GetSetlistByIdAsync(int setlistId, int userId)
     {
         var setlist = await _dbContext.Setlists
             .Include(s => s.SongsSetlists)
@@ -23,30 +24,21 @@ public class SetlistsService : ISetlistsService
             .Include(s => s.SongsSetlists)
                 .ThenInclude(s => s.Song)
                     .ThenInclude(s => s.Language)
-            .FirstOrDefaultAsync(x => x.Id == id);
+            .FirstOrDefaultAsync(x => x.Id == setlistId 
+                && (x.OwnerId == userId) || x.SetlistsUsers.Any(x => x.UserId == userId));   
 
-        if (setlist is null)
-            return null;
-
-        return setlist.MapSongEntityToModelWithOrder();
+        return setlist?.ToModel();
     }
 
-    public async Task SaveSetlistAsync(SetlistModel setlistModel)
+    public async Task<PagedResponse<SetlistModel>?> GetSetlistsAsync(int userId, PagedRequest request)
     {
-        var setlistToCreate = new Setlist
-        {
-            Name = setlistModel.Name,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow,
-            CreatorId = setlistModel.CreatorId
-        };
+        var query = _dbContext.Setlists
+            .Where(s =>
+            (string.IsNullOrEmpty(request.Query) || s.Name.Contains(request.Query))
+            && (s.SetlistsUsers.Any(x => x.UserId == userId) || s.OwnerId == userId));
 
-        await _dbContext.Setlists.AddAsync(setlistModel.MapSongModelToEntity(setlistToCreate));
-        await _dbContext.SaveChangesAsync();
-    }
+        var totalCount = await query.CountAsync();
 
-    public async Task<IEnumerable<SetlistModel>?> GetAllSetlistsOfUserAsync(int userId)
-    {
         var setlists = await _dbContext.Setlists
             .Include(s => s.SongsSetlists)
                 .ThenInclude(s => s.Song)
@@ -54,26 +46,7 @@ public class SetlistsService : ISetlistsService
             .Include(s => s.SongsSetlists)
                 .ThenInclude(s => s.Song)
                     .ThenInclude(s => s.Artist)
-            .Where(x => x.Id == userId)
-            .ToListAsync();
-
-        return setlists.Select(setlists => setlists.MapSongEntityToModelWithOrder());
-    }
-
-    public async Task<PagedResponse<SetlistModel>> GetAllSetlistsAsync(PagedRequest request)
-    {
-        var query = _dbContext.Setlists
-            .Where(s => string.IsNullOrEmpty(request.Query) || s.Name.Contains(request.Query));
-
-        var totalCount = await query.CountAsync();
-
-        var setlists = await query
-            .Include(s => s.SongsSetlists)
-                .ThenInclude(s => s.Song)
-                    .ThenInclude(l => l.Language)
-            .Include(s => s.SongsSetlists)
-                .ThenInclude(s => s.Song)
-                    .ThenInclude(s => s.Artist)
+            .Include(x => x.Owner)
             .Skip(request.PageIndex * request.PageSize)
             .Take(request.PageSize)
             .AsNoTracking()
@@ -84,14 +57,53 @@ public class SetlistsService : ISetlistsService
             TotalCount = totalCount,
             Items = setlists
                 .Select(setlists => setlists
-                .MapSongEntityToModelWithOrder())
+                .ToModel())
                 .ToList()
         };
 
         return response;
     }
 
-    public async Task EditSetlistAsync(SetlistModel setlistModel)
+    public async Task<bool> TryGiveAccessToSetlistAsync(int setlistId, int targetId, int currentUserId)
+    {
+        var setlist = await _dbContext.Setlists
+            .Include(s => s.SetlistsUsers)
+            .FirstOrDefaultAsync(s => s.Id == setlistId && s.OwnerId == currentUserId);
+
+        if (setlist is null || setlist.SetlistsUsers.Count != 0 || (currentUserId != setlist.OwnerId && targetId != currentUserId))
+            return false;
+
+        setlist.SetlistsUsers.Add(new()
+        {
+            UserId = targetId,
+            SetlistId = setlistId
+        });
+
+        await _dbContext.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> TryCreateSetlistAsync(SetlistModel setlistModel, int creatorId)
+    {
+        if(await _dbContext.Setlists
+            .AnyAsync(s => s.Name == setlistModel.Name 
+            && (s.OwnerId == creatorId || s.SetlistsUsers.Any(x => x.UserId == creatorId))))        
+            return false;
+        
+        Setlist setlistToCreate = new()
+        {
+            Name = setlistModel.Name,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
+            OwnerId = setlistModel.OwnerId
+        };
+
+        _dbContext.Setlists.Add(setlistModel.MapSongModelToEntity(setlistToCreate));
+        await _dbContext.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task EditSetlistAsync(SetlistModel setlistModel, int currentUserId)
     {
         var setlistToBeEdited = await _dbContext.Setlists
             .Include(x => x.SongsSetlists)
@@ -100,7 +112,7 @@ public class SetlistsService : ISetlistsService
             .Include(s => s.SongsSetlists)
                 .ThenInclude(s => s.Song)
                     .ThenInclude(s => s.Artist)
-            .FirstOrDefaultAsync(x => x.Id == setlistModel.Id);
+            .FirstOrDefaultAsync(x => x.Id == setlistModel.Id && x.OwnerId == currentUserId);
 
         if (setlistToBeEdited is null)
             return;
@@ -126,16 +138,13 @@ public class SetlistsService : ISetlistsService
             .Where(id => !existingSongIds.Contains(id))
             .ToList();
 
-        foreach (var songId in songsToAdd)
+        foreach (var song in setlistModel.Songs.Where(s => songsToAdd.Contains(s.Id)))
         {
-            var order = setlistModel.Songs
-                .First(x => x.Id == songId).Order;
-            
             _dbContext.SongsSetlists.Add(new()
             {
                 SetlistId = setlistToBeEdited.Id,
-                SongId = songId,
-                Order = order
+                SongId = song.Id,
+                Order = song.Order
             });
         }
 
@@ -148,10 +157,10 @@ public class SetlistsService : ISetlistsService
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task<bool> TryDeleteSetlistAsync(int id)
+    public async Task<bool> TryDeleteSetlistAsync(int setlistId, int currentUserId)
     {
         var setlistToBeDeleted = await _dbContext.Setlists
-            .FirstOrDefaultAsync(x => x.Id == id);
+            .FirstOrDefaultAsync(x => x.Id == setlistId && x.OwnerId == currentUserId);
 
         if (setlistToBeDeleted is null)
             return false;
@@ -160,5 +169,18 @@ public class SetlistsService : ISetlistsService
         await _dbContext.SaveChangesAsync();
         
         return true;
+    }
+
+    public async Task RemoveAccessFromUserAsync(int setlistId, int userId, int currentUserId)
+    {
+        var setlistUser = await _dbContext.SetlistsUsers
+            .Include(su => su.Setlist)
+            .FirstOrDefaultAsync(su => su.SetlistId == setlistId && su.UserId == userId);
+
+        if (setlistUser is null || (setlistUser.Setlist.OwnerId != currentUserId && userId != currentUserId))
+            return;
+
+        _dbContext.SetlistsUsers.Remove(setlistUser);
+        await _dbContext.SaveChangesAsync();
     }
 }

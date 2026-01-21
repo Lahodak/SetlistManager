@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
+using SetlistManager.App.Models;
 using SetlistManager.App.Pages.Dialogs;
 using SetlistManager.App.Services;
 using SetlistManager.Common.Models;
@@ -14,10 +15,18 @@ public partial class ArtistsPortal
     public required ISnackbar Snackbar { get; set; }
     [Inject]
     public required IArtistService ArtistService { get; set; }
+    [Inject]
+    public required IUserService UserService { get; set; }
 
     private MudTable<ArtistModel> _table = new();
-    private PagedRequest pageStatus = new();
+    private PagedRequest pageStatus = new() { ContentType = ContentType.Private };
     private string? searchString;
+    private int _userId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _userId = (await UserService.GetCurrentUserIdAsync()).Value;
+    }
 
     private async Task<TableData<ArtistModel>> ServerReload(TableState state, CancellationToken token)
     {
@@ -74,7 +83,28 @@ public partial class ArtistsPortal
         else
         {
             Snackbar.Add("Failed to delete artist.", Severity.Error);
-        }        
+        }
+    }
+
+    private async Task RemoveArtistFromLibraryAsync(ArtistModel artist)
+    {
+        if(artist.Songs?.Count > 0 )
+        {
+            Snackbar.Add("You must remove all songs of this artist from your library before removing the artist.", Severity.Warning);
+            return;
+        }
+
+        bool? result = await DialogService.ShowMessageBox(
+            "Confirm Removal",
+            $"Are you sure you want to remove the artist '{artist.Nick}' from your library?",
+            yesText: "Remove", noText: "Cancel", options: new DialogOptions { CloseOnEscapeKey = true }
+        );
+        
+        if (result is not true)
+            return;
+
+        await ArtistService.RemoveAccessFromUserAsync(artist.Id, _userId);
+        await _table.ReloadServerData();
     }
 
     private async Task UpdateArtistAsync(ArtistModel artist)
@@ -109,5 +139,23 @@ public partial class ArtistsPortal
             Snackbar.Add("Artist created successfully!", Severity.Success);
             await _table.ReloadServerData();
         }
+    }
+
+    public async Task AddAccessToUserAsync(int id)
+    {
+        var parameters = new DialogParameters
+        {
+            { "ContentType", ShareContentType.Artist },
+            { "ContentId", id }
+        };
+
+        var options = new DialogOptions
+        {
+            CloseOnEscapeKey = true,
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true
+        };
+
+        await DialogService.ShowAsync<ShareContentDialog>("Share Artist", parameters, options);
     }
 }

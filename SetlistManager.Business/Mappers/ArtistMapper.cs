@@ -11,6 +11,8 @@ public static class ArtistMapper
         {
             Id = artist.Id,
             Nick = artist.Nick,
+            IsPublic = artist.IsPublic,
+            OwnerId = artist.OwnerId,
             Songs = includeSongs
                 ? artist.Songs?.Select(s => s.ToModel(false)).ToList()
                 : null

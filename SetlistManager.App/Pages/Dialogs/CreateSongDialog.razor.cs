@@ -25,7 +25,7 @@ public partial class CreateSongDialog
     protected override async Task OnInitializedAsync()
     {
         _languages = await LanguageService.GetAvailableLanguagesAsync();
-        _artists = (await ArtistService.GetAvailableArtistsAsync(new() { PageSize = int.MaxValue }))?.Items;
+        _artists = (await ArtistService.GetAvailableArtistsAsync(new() { PageSize = int.MaxValue, ContentType = ContentType.Private }))?.Items;
 
         if (_artists is null || _artists.Count == 0)
         {
@@ -41,7 +41,8 @@ public partial class CreateSongDialog
             AudioURL = string.Empty,
             Tuning = string.Empty,
             Key = string.Empty,
-            BPM = 120
+            BPM = 120,
+            IsPublic = false
         };
     }
 
@@ -131,7 +132,8 @@ public partial class CreateSongDialog
             AudioURL = _song.AudioURL,
             Key = _song.Key,
             Tuning = _song.Tuning,
-            BPM = _song.BPM
+            BPM = _song.BPM,
+            IsPublic = _song.IsPublic
         };
 
         await SongService.UploadSongAsync(songCreateModel);

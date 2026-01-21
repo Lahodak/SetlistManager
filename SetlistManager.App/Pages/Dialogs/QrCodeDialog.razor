@@ -41,34 +41,3 @@
         <MudButton Variant="Variant.Text" OnClick="Close">Close</MudButton>
     </DialogActions>
 </MudDialog>
-
-@code {
-    [CascadingParameter]
-    IMudDialogInstance MudDialog { get; set; } = null!;
-    [Parameter]
-    public string RoomUrl { get; set; } = string.Empty;
-    [Inject]
-    public required IQRService QRService { get; set; }
-
-    private string _qrCodeImageSrc = string.Empty;
-
-    protected override void OnInitialized()
-    {
-        try
-        {
-            if (!string.IsNullOrWhiteSpace(RoomUrl))
-            {
-                _qrCodeImageSrc = QRService.GenerateQrCode(RoomUrl);
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error generating QR code: {ex.Message}");
-        }
-    }
-
-    private void Close()
-    {
-        MudDialog.Close();
-    }
-}

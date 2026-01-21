@@ -133,13 +133,45 @@ namespace SetlistManager.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("IsPublic")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Nick")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("OwnerId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("OwnerId");
+
                     b.ToTable("Artists");
+                });
+
+            modelBuilder.Entity("SetlistManager.Data.Entities.ArtistsUsers", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ArtistId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ArtistId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ArtistsUsers");
                 });
 
             modelBuilder.Entity("SetlistManager.Data.Entities.Friendship", b =>
@@ -311,21 +343,44 @@ namespace SetlistManager.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("CreatorId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("OwnerId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CreatorId");
+                    b.HasIndex("OwnerId");
 
                     b.ToTable("Setlists");
+                });
+
+            modelBuilder.Entity("SetlistManager.Data.Entities.SetlistsUsers", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("SetlistId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SetlistId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("SetlistsUsers");
                 });
 
             modelBuilder.Entity("SetlistManager.Data.Entities.Song", b =>
@@ -341,7 +396,8 @@ namespace SetlistManager.Data.Migrations
 
                     b.Property<string>("AudioURL")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(512)
+                        .HasColumnType("nvarchar(512)");
 
                     b.Property<int>("BPM")
                         .HasColumnType("int");
@@ -349,9 +405,13 @@ namespace SetlistManager.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("IsPublic")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Key")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.Property<int>("LanguageId")
                         .HasColumnType("int");
@@ -360,25 +420,29 @@ namespace SetlistManager.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("OwnerId")
+                        .HasColumnType("int");
+
                     b.Property<string>("TabsURL")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(512)
+                        .HasColumnType("nvarchar(512)");
 
                     b.Property<string>("Tuning")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
-
-                    b.Property<int>("UpdatedBy")
-                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ArtistId");
 
                     b.HasIndex("LanguageId");
+
+                    b.HasIndex("OwnerId");
 
                     b.ToTable("Songs");
                 });
@@ -407,6 +471,29 @@ namespace SetlistManager.Data.Migrations
                     b.HasIndex("SongId");
 
                     b.ToTable("SongsSetlists");
+                });
+
+            modelBuilder.Entity("SetlistManager.Data.Entities.SongsUsers", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("SongId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SongId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("SongsUsers");
                 });
 
             modelBuilder.Entity("SetlistManager.Data.Entities.TempAuthStorage", b =>
@@ -606,6 +693,36 @@ namespace SetlistManager.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("SetlistManager.Data.Entities.Artist", b =>
+                {
+                    b.HasOne("SetlistManager.Data.Entities.User", "Owner")
+                        .WithMany("Artists")
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Owner");
+                });
+
+            modelBuilder.Entity("SetlistManager.Data.Entities.ArtistsUsers", b =>
+                {
+                    b.HasOne("SetlistManager.Data.Entities.Artist", "Artist")
+                        .WithMany("ArtistsUsers")
+                        .HasForeignKey("ArtistId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SetlistManager.Data.Entities.User", "User")
+                        .WithMany("ArtistsUsers")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Artist");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("SetlistManager.Data.Entities.Friendship", b =>
                 {
                     b.HasOne("SetlistManager.Data.Entities.User", "Initiator")
@@ -637,13 +754,32 @@ namespace SetlistManager.Data.Migrations
 
             modelBuilder.Entity("SetlistManager.Data.Entities.Setlist", b =>
                 {
-                    b.HasOne("SetlistManager.Data.Entities.User", "Creator")
-                        .WithMany()
-                        .HasForeignKey("CreatorId")
+                    b.HasOne("SetlistManager.Data.Entities.User", "Owner")
+                        .WithMany("Setlists")
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Owner");
+                });
+
+            modelBuilder.Entity("SetlistManager.Data.Entities.SetlistsUsers", b =>
+                {
+                    b.HasOne("SetlistManager.Data.Entities.Setlist", "Setlist")
+                        .WithMany("SetlistsUsers")
+                        .HasForeignKey("SetlistId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Creator");
+                    b.HasOne("SetlistManager.Data.Entities.User", "User")
+                        .WithMany("SetlistsUsers")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.ClientCascade)
+                        .IsRequired();
+
+                    b.Navigation("Setlist");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("SetlistManager.Data.Entities.Song", b =>
@@ -651,18 +787,26 @@ namespace SetlistManager.Data.Migrations
                     b.HasOne("SetlistManager.Data.Entities.Artist", "Artist")
                         .WithMany("Songs")
                         .HasForeignKey("ArtistId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("SetlistManager.Data.Entities.Language", "Language")
                         .WithMany("Songs")
                         .HasForeignKey("LanguageId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("SetlistManager.Data.Entities.User", "Owner")
+                        .WithMany("Songs")
+                        .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Artist");
 
                     b.Navigation("Language");
+
+                    b.Navigation("Owner");
                 });
 
             modelBuilder.Entity("SetlistManager.Data.Entities.SongsSetlists", b =>
@@ -682,6 +826,25 @@ namespace SetlistManager.Data.Migrations
                     b.Navigation("Setlist");
 
                     b.Navigation("Song");
+                });
+
+            modelBuilder.Entity("SetlistManager.Data.Entities.SongsUsers", b =>
+                {
+                    b.HasOne("SetlistManager.Data.Entities.Song", "Song")
+                        .WithMany("SongsUsers")
+                        .HasForeignKey("SongId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SetlistManager.Data.Entities.User", "User")
+                        .WithMany("SongsUsers")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.ClientCascade)
+                        .IsRequired();
+
+                    b.Navigation("Song");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("SetlistManager.Data.Entities.Token", b =>
@@ -721,6 +884,8 @@ namespace SetlistManager.Data.Migrations
 
             modelBuilder.Entity("SetlistManager.Data.Entities.Artist", b =>
                 {
+                    b.Navigation("ArtistsUsers");
+
                     b.Navigation("Songs");
                 });
 
@@ -748,19 +913,35 @@ namespace SetlistManager.Data.Migrations
                 {
                     b.Navigation("Rooms");
 
+                    b.Navigation("SetlistsUsers");
+
                     b.Navigation("SongsSetlists");
                 });
 
             modelBuilder.Entity("SetlistManager.Data.Entities.Song", b =>
                 {
                     b.Navigation("SongsSetlists");
+
+                    b.Navigation("SongsUsers");
                 });
 
             modelBuilder.Entity("SetlistManager.Data.Entities.User", b =>
                 {
+                    b.Navigation("Artists");
+
+                    b.Navigation("ArtistsUsers");
+
                     b.Navigation("InitiatedFriendships");
 
                     b.Navigation("ReceivedFriendships");
+
+                    b.Navigation("Setlists");
+
+                    b.Navigation("SetlistsUsers");
+
+                    b.Navigation("Songs");
+
+                    b.Navigation("SongsUsers");
 
                     b.Navigation("Tokens");
                 });

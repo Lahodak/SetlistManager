@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
+using SetlistManager.App.Models;
 using SetlistManager.App.Pages.Dialogs;
 using SetlistManager.App.Services;
 using SetlistManager.Common.Models;
@@ -14,10 +15,18 @@ public partial class SongsPortal
     public required ISnackbar Snackbar { get; set; }
     [Inject]
     public required ISongService SongService { get; set; }
+    [Inject]
+    public required IUserService UserService { get; set; }
 
     private MudTable<SongModel> table = new();
-    private PagedRequest pageState = new();
+    private PagedRequest pageState = new() { ContentType = ContentType.Private };
     private string? searchString;
+    private int _userId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _userId = (await UserService.GetCurrentUserIdAsync()).Value;
+    }
 
     private async Task<TableData<SongModel>?> ServerReload(TableState state, CancellationToken token)
     {
@@ -105,5 +114,38 @@ public partial class SongsPortal
         
         Snackbar.Add("Song deleted successfully!", Severity.Success);
         await table.ReloadServerData();        
+    }
+
+    private async Task RemoveSongFromUserLibraryAsync(SongModel song)
+    {
+        bool? result = await DialogService.ShowMessageBox(
+            "Confirm Removal",
+            $"Are you sure you want to remove the song '{song.Name}' from your Library?",
+            yesText: "Remove", noText: "Cancel", options: new DialogOptions { CloseOnEscapeKey = true }
+        );
+
+        if (result is not true)
+            return;
+
+        await SongService.RemoveAccessFromUserAsync(song.Id, _userId);
+        await table.ReloadServerData();
+    }
+
+    public async Task AddAccessToUserAsync(int id)
+    {
+        var parameters = new DialogParameters
+        {
+            { "ContentType", ShareContentType.Song },
+            { "ContentId", id }
+        };
+
+        var options = new DialogOptions
+        {
+            CloseOnEscapeKey = true,
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true
+        };
+
+        await DialogService.ShowAsync<ShareContentDialog>("Share Song", parameters, options);
     }
 }

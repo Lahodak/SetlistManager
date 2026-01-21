@@ -15,8 +15,10 @@ public partial class SongDetail
     public required IGeniusService GeniusService { get; set; }
     [Inject]
     public required IJSRuntime JSRuntime { get; set; }
+    
     private SongModel? _song;
     private GeniusEmbedModel? _lyricsData;
+    
     protected override async Task OnInitializedAsync()
     {
         _song = await SongService.GetSongByIdAsync(SongId);
@@ -24,6 +26,7 @@ public partial class SongDetail
         if (_song is not null)
             _lyricsData = await GeniusService.FetchSongLyricsAsync(_song);
     }
+    
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (_lyricsData is not null)

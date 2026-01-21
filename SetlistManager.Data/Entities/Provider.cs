@@ -3,5 +3,5 @@
 public class Provider : Base
 {
     public string Name { get; set; } = default!;
-    public virtual List<Token>? Tokens { get; set; } = [];
+    public virtual List<Token> Tokens { get; set; } = [];
 }

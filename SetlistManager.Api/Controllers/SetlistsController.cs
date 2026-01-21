@@ -1,36 +1,39 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using SetlistManager.Common.Models;
+using SetlistManager.Api.Services;
 using SetlistManager.Business.Services;
+using SetlistManager.Common.Models;
 
-namespace SetlistManager. Api.Controllers;
+namespace SetlistManager.Api.Controllers;
+
 [Route("api/setlists")]
 
 public class SetlistsController : BaseController
 {
     private readonly ISetlistsService _setlistService;
-
-    public SetlistsController(ISetlistsService setlistService)
+    private readonly ICurrentUserContext _userContext;
+    
+    public SetlistsController(ISetlistsService setlistService, ICurrentUserContext userContext)
     {
         _setlistService = setlistService;
+        _userContext = userContext;
     }
 
     [HttpGet]
-    public async Task<ActionResult<PagedResponse<SetlistModel>>> GetAllSetlists([FromQuery] PagedRequest request)
+    public async Task<ActionResult<List<SetlistModel>>> GetSetlists([FromQuery] PagedRequest request)
     {
-        return Ok(await _setlistService.GetAllSetlistsAsync(request));
-    }
+        var userId = _userContext.GetCurrentUserId();
 
-    [HttpPost]
-    public async Task<ActionResult> SaveSetlist(SetlistModel setlistModel)
-    {
-        await _setlistService.SaveSetlistAsync(setlistModel);
-        return Created();
+        var result = await _setlistService.GetSetlistsAsync(userId!.Value, request);
+
+        return Ok(result);
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<SetlistModel>> GetSetlistById(int id)
+    public async Task<ActionResult<SetlistModel>> GetSetlist(int id)
     {
-        var result = await _setlistService.GetSetlistByIdAsync(id);
+        var userId = _userContext.GetCurrentUserId();
+
+        var result = await _setlistService.GetSetlistByIdAsync(id, userId!.Value);
 
         if (result is null)
             return NotFound();
@@ -38,22 +41,62 @@ public class SetlistsController : BaseController
         return Ok(result);
     }
 
-    [HttpPut("{id}")]
-    public async Task<ActionResult> EditSetlist(int id, [FromBody] SetlistModel setlist)
+    [HttpPost]
+    public async Task<ActionResult<SetlistModel>> CreateSetlist([FromBody] SetlistModel setlist)
     {
-        if(setlist.Songs is null)
+        var userId = _userContext.GetCurrentUserId();        
+
+        var result = await _setlistService.TryCreateSetlistAsync(setlist, userId!.Value);
+        
+        if(!result)
             return BadRequest();
 
-        await _setlistService.EditSetlistAsync(setlist);
+        return Created();
+    }
+
+    [HttpPut("{id}")]
+    public async Task<ActionResult> TryEditSetlist(int id, [FromBody] SetlistModel setlist)
+    {
+        var currentUserId = _userContext.GetCurrentUserId();
+
+        if (setlist.Songs is null)
+            return BadRequest();
+
+        await _setlistService.EditSetlistAsync(setlist, currentUserId!.Value);
 
         return NoContent();    
     }
 
     [HttpDelete("{id}")]
-    public async Task<ActionResult> DeleteSetlist(int id)
+    public async Task<ActionResult> TryDeleteSetlist(int id)
     {
-        if(!await _setlistService.TryDeleteSetlistAsync(id))
+        var currentUserId = _userContext.GetCurrentUserId();
+
+        if (!await _setlistService.TryDeleteSetlistAsync(id, currentUserId!.Value))
             return NotFound();
+
+        return NoContent();
+    }
+
+    [HttpPost("{id}/setlistsusers/{userId}")]
+    public async Task<ActionResult> TryGiveAccessToSetlist(int id, int userId)
+    {
+        var currentUserId = _userContext.GetCurrentUserId();
+
+        var result = await _setlistService.TryGiveAccessToSetlistAsync(id, userId, currentUserId!.Value);
+
+        if (!result)
+            return NotFound();
+
+        return Created();
+    }
+
+    [HttpDelete("{id}/setlistsusers/{userId}")]
+    public async Task<ActionResult> TryRemoveAccessFromUser(int id, int userId)
+    {
+        var currentUserId = _userContext.GetCurrentUserId();
+        
+        await _setlistService.RemoveAccessFromUserAsync(id, userId, currentUserId!.Value);
 
         return NoContent();
     }

@@ -3,7 +3,7 @@ using SetlistManager.Common.Models;
 using SetlistManager.Api.Services;
 using SetlistManager.Business.Services;
 
-namespace SetlistManager. Api.Controllers;
+namespace SetlistManager.Api.Controllers;
 
 [Route("api/rooms")]
 
