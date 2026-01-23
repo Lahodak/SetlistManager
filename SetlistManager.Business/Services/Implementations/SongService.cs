@@ -200,4 +200,101 @@ public class SongService : ISongService
         _dbContext.SongsUsers.Remove(songUser);
         await _dbContext.SaveChangesAsync();
     }
+
+    public async Task<PagedResponse<SongUsageStatModel>> GetMostUsedSongsAsync(StatsPagedRequest request)
+    {
+        var from = request.Range switch
+        {
+            StatsRange.Day => DateTime.UtcNow.AddDays(-1),
+            StatsRange.Week => DateTime.UtcNow.AddDays(-7),
+            StatsRange.Month => DateTime.UtcNow.AddMonths(-1),
+            _ => DateTime.UtcNow.AddDays(-7)
+        };
+
+        var baseQuery = _dbContext.SongsSetlists
+            .Where(ss => ss.CreatedAt >= from && ss.Song.IsPublic);
+
+        var totalCount = await baseQuery
+            .Select(ss => ss.SongId)
+            .Distinct()
+            .CountAsync();
+
+        var items = await baseQuery
+            .GroupBy(ss => new { ss.SongId, ss.Song.Name })
+            .Select(g => new SongUsageStatModel
+            {
+                SongId = g.Key.SongId,
+                Name = g.Key.Name,
+                UsageCount = g.Count()
+            })
+            .OrderByDescending(x => x.UsageCount)
+            .Skip(request.PageIndex * request.PageSize)
+            .Take(request.PageSize)
+            .AsNoTracking()
+            .ToListAsync();
+
+        return new PagedResponse<SongUsageStatModel>
+        {
+            TotalCount = totalCount,
+            Items = items
+        };
+    }
+
+    public async Task<PagedResponse<SongUsageStatModel>> GetMostAddedToLibraryAsync(PagedRequest request)
+    {
+        var baseQuery = _dbContext.SongsUsers.Where(x => x.Song.IsPublic);
+
+        var totalCount = await baseQuery
+            .Select(su => su.SongId)            
+            .Distinct()
+            .CountAsync();
+
+        var items = await baseQuery
+            .GroupBy(su => new { su.SongId, su.Song.Name })
+            .Select(g => new SongUsageStatModel
+            {
+                SongId = g.Key.SongId,
+                Name = g.Key.Name,
+                UsageCount = g.Count()
+            })
+            .OrderByDescending(x => x.UsageCount)
+            .Skip(request.PageIndex * request.PageSize)
+            .Take(request.PageSize)
+            .AsNoTracking()
+            .ToListAsync();
+
+        return new PagedResponse<SongUsageStatModel>
+        {
+            TotalCount = totalCount,
+            Items = items
+        };
+    }
+
+    public async Task<PagedResponse<LatestSongStatModel>> GetLatestPublicSongsAsync(PagedRequest request)
+    {
+        var query = _dbContext.Songs
+            .Where(s => s.IsPublic);
+
+        var totalCount = await query.CountAsync();
+
+        var items = await query
+            .OrderByDescending(s => s.CreatedAt)
+            .Skip(request.PageIndex * request.PageSize)
+            .Take(request.PageSize)
+            .Select(s => new LatestSongStatModel
+            {
+                SongId = s.Id,
+                Name = s.Name,
+                CreatedAt = s.CreatedAt,
+                ArtistNick = s.Artist.Nick
+            })
+            .AsNoTracking()
+            .ToListAsync();
+
+        return new PagedResponse<LatestSongStatModel>
+        {
+            TotalCount = totalCount,
+            Items = items
+        };
+    }
 }

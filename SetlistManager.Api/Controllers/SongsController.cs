@@ -114,4 +114,22 @@ public class SongsController : BaseController
         
         return NoContent();
     }
+
+    [HttpGet("most-used")]
+    public async Task<ActionResult<PagedResponse<SongUsageStatModel>>> MostUsed([FromQuery] StatsPagedRequest request)
+    {
+        return Ok(await _songService.GetMostUsedSongsAsync(request));
+    }
+
+    [HttpGet("most-added")]
+    public async Task<ActionResult<PagedResponse<SongUsageStatModel>>> MostAdded([FromQuery] PagedRequest request)
+    {
+        return Ok(await _songService.GetMostAddedToLibraryAsync(request));
+    }
+
+    [HttpGet("latest-public")]
+    public async Task<ActionResult<PagedResponse<LatestSongStatModel>>> LatestPublic([FromQuery] PagedRequest request)
+    {
+        return Ok(await _songService.GetLatestPublicSongsAsync(request));
+    }
 }

@@ -1,15 +1,76 @@
 ﻿@page "/Home"
 
 <PageTitle>Home</PageTitle>
-
-<MudContainer Class="mt-5">
-    <MudPaper Class="pa-4 mt-3" Elevation="2">
-        <MudText Typo="Typo.h3" Class="ml-2">Welcome to Setlist Manager!</MudText>
-
-        <MudGrid Class="mt-4">
-            <MudItem>
-
-            </MudItem>
-        </MudGrid>
-    </MudPaper>    
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-6">
+    <MudText Typo="Typo.h4" Class="mb-4">
+        Dashboard
+    </MudText>
+    <MudGrid Spacing="3">
+        <MudItem xs="12" md="6">
+            <MudPaper Class="pa-4">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                    <MudText Typo="Typo.h6">Most used songs</MudText>
+                    <MudSelect T="StatsRange" Dense="true"
+                               Value="@_selectedRange"
+                               ValueChanged="OnRangeChanged">
+                        <MudSelectItem Value="StatsRange.Day">Day</MudSelectItem>
+                        <MudSelectItem Value="StatsRange.Week">Week</MudSelectItem>
+                        <MudSelectItem Value="StatsRange.Month">Month</MudSelectItem>
+                    </MudSelect>
+                </MudStack>
+                @if (_mostUsedLabels.Any())
+                {
+                    <MudChart ChartType="ChartType.Bar"
+                              ChartSeries="@_mostUsedSeries"
+                              XAxisLabels="@_mostUsedLabels.ToArray()"
+                              Width="100%"
+                              Height="250px"/>
+                }
+                else
+                {
+                    <MudText Typo="Typo.body2" Class="mt-4">No data available</MudText>
+                }
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="12" md="6">
+            <MudPaper Class="pa-4">
+                <MudText Typo="Typo.h6">Most added to library</MudText>
+                @if (_mostAddedLabels.Any())
+                {
+                    <MudChart ChartType="ChartType.Bar"
+                              ChartSeries="@_mostAddedSeries"
+                              XAxisLabels="@_mostAddedLabels.ToArray()"
+                              Width="100%"
+                              Height="250px"/>
+                }
+                else
+                {
+                    <MudText Typo="Typo.body2" Class="mt-4">No data available</MudText>
+                }
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="12">
+            <MudPaper Class="pa-4">
+                <MudText Typo="Typo.h6" Class="mb-2">
+                    Latest public songs
+                </MudText>
+                <MudList Dense="true" T="LatestSongStatModel">
+                    @if (_latestSongs is not null)
+                    {
+                        @foreach (var song in _latestSongs)
+                        {
+                            <MudListItem>
+                                <MudText>
+                                    <b>@song.Name</b> – @song.ArtistNick
+                                </MudText>
+                                <MudText Typo="Typo.caption">
+                                    @song.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy")
+                                </MudText>
+                            </MudListItem>
+                        }
+                    }
+                </MudList>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
 </MudContainer>

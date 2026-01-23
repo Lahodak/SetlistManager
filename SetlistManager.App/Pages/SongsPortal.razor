@@ -47,6 +47,13 @@
                                        Title="Share song" />
                         if (!context.IsPublic)
                         {
+                            <MudIconButton OnClick="() => MakeSongPublicAsync(context)"
+                                           Icon="@Icons.Material.Filled.Public"
+                                           Variant="Variant.Outlined"
+                                           Size="Size.Small"
+                                           Color="Color.Tertiary"
+                                           Class="ml-2"
+                                           Title="Make song public" />
                             <MudIconButton OnClick="() => OpenEditSongDialog(context)"
                                            Icon="@Icons.Material.Filled.Edit"
                                            Variant="Variant.Outlined"
@@ -60,7 +67,7 @@
                                            Size="Size.Small"
                                            Color="Color.Error"
                                            Class="ml-2"
-                                           Title="Delete song" />
+                                           Title="Delete song" />                            
                         }
                     }
                     else

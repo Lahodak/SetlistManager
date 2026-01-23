@@ -51,4 +51,44 @@ public class SongService : ISongService
 
     public async Task RemoveAccessFromUserAsync(int songId, int targetId)
         => await _apiService.TryDeleteAsync($"{_apiOptions.Value.SongsEndpoint}/{songId}/songsusers/{targetId}");
+
+    public async Task<PagedResponse<SongUsageStatModel>?> GetMostUsedSongsAsync(StatsPagedRequest request)
+    {
+        UriBuilder uri = new($"{_apiOptions.Value.SongsEndpoint}/most-used")
+        {
+            Query = new QueryBuilder
+            {
+                { "PageSize", request.PageSize.ToString() },
+                { "PageIndex", request.PageIndex.ToString() },
+                { "Range", request.Range.ToString()  }
+            }.ToString()
+        };
+        return await _apiService.GetAsync<PagedResponse<SongUsageStatModel>>(uri.ToString());
+    }
+
+    public async Task<PagedResponse<SongUsageStatModel>?> GetMostAddedToLibraryAsync(PagedRequest request)
+    {
+        UriBuilder uri = new($"{_apiOptions.Value.SongsEndpoint}/most-added")
+        {
+            Query = new QueryBuilder
+            {
+                { "PageSize", request.PageSize.ToString() },
+                { "PageIndex", request.PageIndex.ToString() }
+            }.ToString()
+        };
+        return await _apiService.GetAsync<PagedResponse<SongUsageStatModel>>(uri.ToString());
+    }
+
+    public async Task<PagedResponse<LatestSongStatModel>?> GetLatestPublicSongsAsync(PagedRequest request)
+    {
+        UriBuilder uri = new($"{_apiOptions.Value.SongsEndpoint}/latest-public")
+        {
+            Query = new QueryBuilder
+            {
+                { "PageSize", request.PageSize.ToString() },
+                { "PageIndex", request.PageIndex.ToString() }
+            }.ToString()
+        };
+        return await _apiService.GetAsync<PagedResponse<LatestSongStatModel>>(uri.ToString());
+    }
 }

@@ -18,5 +18,7 @@ public class SongsSetlistsConfig : IEntityTypeConfiguration<SongsSetlists>
 
         builder.Property(sl => sl.SetlistId)
             .IsRequired();
+
+        builder.Property(x => x.CreatedAt);
     }
 }
