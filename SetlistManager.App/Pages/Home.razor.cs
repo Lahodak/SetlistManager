@@ -7,8 +7,8 @@ public partial class Home
 {
     private StatsRange _selectedRange = StatsRange.Week;
     private List<string> MostUsedLabels = [];
-    private List<ChartSeries> MostUsedSeries = [];
     private List<string> MostAddedLabels = [];
+    private List<ChartSeries> MostUsedSeries = [];
     private List<ChartSeries> MostAddedSeries = [];
     private List<LatestSongStatModel>? LatestSongs;
 
@@ -25,11 +25,9 @@ public partial class Home
 
     private async Task LoadDashboardAsync()
     {
-        await Task.WhenAll(
-            LoadMostUsedAsync(),
-            LoadMostAddedAsync(),
-            LoadLatestPublicAsync()
-        );
+        await LoadMostUsedAsync();
+        await LoadMostAddedAsync();
+        await LoadLatestPublicAsync();
     }
 
     private async Task LoadMostUsedAsync()
@@ -41,21 +39,27 @@ public partial class Home
             PageSize = 5
         });
 
-        if (response?.Items is null || !response.Items.Any())
+        if (response?.Items is null || response.Items.Count == 0)
         {
             MostUsedLabels = [];
             MostUsedSeries = [];
+
             StateHasChanged();
             return;
         }
 
-        MostUsedLabels = response.Items.Select(x => x.Name).ToList();
-        MostUsedSeries = new List<ChartSeries>
+        MostUsedLabels = response.Items
+            .Select(x => x.Name)
+            .ToList();
+
+        MostUsedSeries = new()
         {
             new ChartSeries
             {
                 Name = "Usage Count",
-                Data = response.Items.Select(x => (double)x.UsageCount).ToArray()
+                Data = response.Items
+                    .Select(x => (double)x.UsageCount)
+                    .ToArray()
             }
         };
         StateHasChanged();
@@ -69,21 +73,27 @@ public partial class Home
             PageSize = 5
         });
 
-        if (response?.Items is null || !response.Items.Any())
+        if (response?.Items is null || response.Items.Count == 0)
         {
             MostAddedLabels = [];
             MostAddedSeries = [];
+
             StateHasChanged();
             return;
         }
 
-        MostAddedLabels = response.Items.Select(x => x.Name).ToList();
-        MostAddedSeries = new List<ChartSeries>
+        MostAddedLabels = response.Items
+            .Select(x => x.Name)
+            .ToList();
+
+        MostAddedSeries = new()
         {
             new ChartSeries
             {
                 Name = "Added Count",
-                Data = response.Items.Select(x => (double)x.UsageCount).ToArray()
+                Data = response.Items
+                    .Select(x => (double)x.UsageCount)
+                    .ToArray()
             }
         };
         StateHasChanged();
