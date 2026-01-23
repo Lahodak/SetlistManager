@@ -19,7 +19,7 @@ public partial class SongsPortal
     public required IUserService UserService { get; set; }
 
     private MudTable<SongModel> table = new();
-    private PagedRequest pageState = new() { ContentType = ContentType.Private };
+    private readonly PagedRequest _pageState = new() { ContentType = ContentType.Private };
     private string? searchString;
     private int _userId;
 
@@ -32,11 +32,11 @@ public partial class SongsPortal
     {
         await Task.Delay(300, token);
 
-        pageState.Query = searchString;
-        pageState.PageIndex = state.Page;
-        pageState.PageSize = state.PageSize;
+        _pageState.Query = searchString;
+        _pageState.PageIndex = state.Page;
+        _pageState.PageSize = state.PageSize;
 
-        var response = await SongService.GetAllSongsAsync(pageState);
+        var response = await SongService.GetAllSongsAsync(_pageState);
 
         if (response?.Items is null)
             return null;
@@ -131,6 +131,22 @@ public partial class SongsPortal
         await table.ReloadServerData();
     }
 
+    public async Task MakeSongPublicAsync(SongModel song)
+    {
+        bool? dialogResult = await DialogService.ShowMessageBox(
+            "Confirm Publishing",
+            $"Are you sure you want to make the song '{song.Name}' public? This action cannot be undone.",
+            yesText: "Make Public", noText: "Cancel", options: new DialogOptions { CloseOnEscapeKey = true }
+        );
+
+        if (dialogResult is not true)
+            return;
+
+        await SongService.TryMakeSongPublicAsync(song.Id);
+        Snackbar.Add($"{song.Name} is now public!", Severity.Success);
+        
+        await table.ReloadServerData();
+    }
     public async Task AddAccessToUserAsync(int id)
     {
         var parameters = new DialogParameters

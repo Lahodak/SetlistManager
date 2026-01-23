@@ -212,7 +212,7 @@ public class SongService : ISongService
         };
 
         var baseQuery = _dbContext.SongsSetlists
-            .Where(ss => ss.CreatedAt >= from );
+            .Where(ss => ss.CreatedAt >= from && ss.Song.IsPublic);
 
         var totalCount = await baseQuery
             .Select(ss => ss.SongId)
@@ -242,10 +242,10 @@ public class SongService : ISongService
 
     public async Task<PagedResponse<SongUsageStatModel>> GetMostAddedToLibraryAsync(PagedRequest request)
     {
-        var baseQuery = _dbContext.SongsUsers;
+        var baseQuery = _dbContext.SongsUsers.Where(x => x.Song.IsPublic);
 
         var totalCount = await baseQuery
-            .Select(su => su.SongId)
+            .Select(su => su.SongId)            
             .Distinct()
             .CountAsync();
 

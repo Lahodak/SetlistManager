@@ -141,6 +141,22 @@ public partial class ArtistsPortal
         }
     }
 
+    private async Task MakeArtistPublicAsync(ArtistModel artist)
+    {
+        bool? result = await DialogService.ShowMessageBox(
+            "Confirm Make Public",
+            $"Are you sure you want to make the artist '{artist.Nick}' public? This action cannot be undone.",
+            yesText: "Make Public", noText: "Cancel", options: new DialogOptions { CloseOnEscapeKey = true }
+        );
+        if (result is not true)
+            return;
+
+        await ArtistService.TryMakeArtistPublicAsync(artist.Id);        
+
+        Snackbar.Add("Artist made public successfully!", Severity.Success);
+        await _table.ReloadServerData();
+    }
+
     public async Task AddAccessToUserAsync(int id)
     {
         var parameters = new DialogParameters

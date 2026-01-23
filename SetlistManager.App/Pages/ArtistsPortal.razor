@@ -43,8 +43,9 @@
                         
                         if (!context.IsPublic)
                         {
-                            <MudIconButton OnClick="() => DeleteArtistAsync(context)" Icon="@Icons.Material.Filled.DeleteForever" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Error" Class="ml-2" />
+                            <MudIconButton OnClick="() => MakeArtistPublicAsync(context)" Icon="@Icons.Material.Filled.Public" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Tertiary" />
                             <MudIconButton OnClick="() => UpdateArtistAsync(context)" Icon="@Icons.Material.Filled.Edit" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Primary" />
+                            <MudIconButton OnClick="() => DeleteArtistAsync(context)" Icon="@Icons.Material.Filled.DeleteForever" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Error" Class="ml-2" />
                         }                        
                     }
                     else
