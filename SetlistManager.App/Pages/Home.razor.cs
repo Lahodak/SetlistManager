@@ -1,16 +1,20 @@
 using SetlistManager.Common.Models;
 using MudBlazor;
+using Microsoft.AspNetCore.Components;
+using SetlistManager.App.Services;
 
 namespace SetlistManager.App.Pages;
 
 public partial class Home
 {
+    [Inject]
+    public required ISongService SongService { get; set; }
     private StatsRange _selectedRange = StatsRange.Week;
-    private List<string> MostUsedLabels = [];
-    private List<string> MostAddedLabels = [];
-    private List<ChartSeries> MostUsedSeries = [];
-    private List<ChartSeries> MostAddedSeries = [];
-    private List<LatestSongStatModel>? LatestSongs;
+    private List<string> _mostUsedLabels = [];
+    private List<string> _mostAddedLabels = [];
+    private List<ChartSeries> _mostUsedSeries = [];
+    private List<ChartSeries> _mostAddedSeries = [];
+    private List<LatestSongStatModel>? _latestSongs;
 
     protected override async Task OnInitializedAsync()
     {
@@ -41,19 +45,19 @@ public partial class Home
 
         if (response?.Items is null || response.Items.Count == 0)
         {
-            MostUsedLabels = [];
-            MostUsedSeries = [];
+            _mostUsedLabels = [];
+            _mostUsedSeries = [];
 
             StateHasChanged();
             return;
         }
 
-        MostUsedLabels = response.Items
+        _mostUsedLabels = response.Items
             .Select(x => x.Name)
             .ToList();
 
-        MostUsedSeries = new()
-        {
+        _mostUsedSeries =
+        [
             new ChartSeries
             {
                 Name = "Usage Count",
@@ -61,7 +65,7 @@ public partial class Home
                     .Select(x => (double)x.UsageCount)
                     .ToArray()
             }
-        };
+        ];
         StateHasChanged();
     }
 
@@ -75,19 +79,19 @@ public partial class Home
 
         if (response?.Items is null || response.Items.Count == 0)
         {
-            MostAddedLabels = [];
-            MostAddedSeries = [];
+            _mostAddedLabels = [];
+            _mostAddedSeries = [];
 
             StateHasChanged();
             return;
         }
 
-        MostAddedLabels = response.Items
+        _mostAddedLabels = response.Items
             .Select(x => x.Name)
             .ToList();
 
-        MostAddedSeries = new()
-        {
+        _mostAddedSeries =
+        [
             new ChartSeries
             {
                 Name = "Added Count",
@@ -95,7 +99,7 @@ public partial class Home
                     .Select(x => (double)x.UsageCount)
                     .ToArray()
             }
-        };
+        ];
         StateHasChanged();
     }
 
@@ -106,7 +110,7 @@ public partial class Home
             PageIndex = 0,
             PageSize = 5
         });
-        LatestSongs = response?.Items;
+        _latestSongs = response?.Items;
         StateHasChanged();
     }
 }
