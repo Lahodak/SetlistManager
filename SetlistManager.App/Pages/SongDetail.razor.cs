@@ -31,7 +31,7 @@ public partial class SongDetail
     {
         if (_lyricsData is not null)
         {
-            await JSRuntime.InvokeVoidAsync("geniusEmbed.loadEmbed",
+            await JSRuntime.InvokeVoidAsync("window.geniusEmbed.loadEmbed",
                 _lyricsData.SongId,
                 _lyricsData.Title,
                 _lyricsData.Artist,

@@ -1,36 +1,66 @@
 ﻿window.geniusEmbed = {
-    loadEmbed: function (songId, title, artist, url) {
+    loadEmbed: async function (songId, title, artist, url) {
         const container = document.getElementById('genius-lyrics-container');
         if (!container) {
             console.error('Container not found');
             return;
         }
 
-        container.innerHTML = `
-            <div style="border: 1px solid #e0e0e0; border-radius: 8px; padding: 24px; background: #fafafa; max-width: 600px;">
-                <div style="margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #e0e0e0;">
-                    <span style="color: #999; text-decoration: none; font-size: 11px; font-weight: 600; letter-spacing: 0.5px;">
-                        POWERED BY GENIUS
-                    </span>
+        try {
+            // Fetch the embed script
+            const response = await fetch(`https://genius.com/songs/${songId}/embed.js`);
+            const scriptText = await response.text();
+
+            // Extract the CSS link
+            const cssMatch = scriptText.match(/href="([^"]+embedded_song[^"]+\.css)"/);
+            if (cssMatch && !document.querySelector(`link[href="${cssMatch[1]}"]`)) {
+                const link = document.createElement('link');
+                link.href = cssMatch[1];
+                link.rel = 'stylesheet';
+                link.type = 'text/css';
+                document.head.appendChild(link);
+            }
+
+            // Extract the JSON string more carefully
+            const jsonMatch = scriptText.match(/document\.write\(JSON\.parse\(('.*?')\)\)/s);
+            if (!jsonMatch) {
+                return;
+            }
+
+            // Parse the outer single-quoted string, then parse the JSON inside
+            let jsonString = jsonMatch[1];
+            // Remove outer quotes
+            jsonString = jsonString.slice(1, -1);
+            // Unescape the string
+            jsonString = jsonString.replace(/\\'/g, "'")
+                .replace(/\\"/g, '"')
+                .replace(/\\\\/g, '\\');
+
+            // Now parse as JSON
+            const htmlContent = JSON.parse(jsonString);
+
+            // Inject the HTML
+            container.innerHTML = htmlContent;
+
+            // Load the interactive script
+            const jsMatch = scriptText.match(/src="([^"]+embedded_song[^"]+\.js)"/);
+            if (jsMatch && !document.querySelector(`script[src="${jsMatch[1]}"]`)) {
+                const script = document.createElement('script');
+                script.src = jsMatch[1];
+                script.async = true;
+                script.crossOrigin = 'true';
+                document.body.appendChild(script);
+            }
+
+        } catch (error) {
+            console.error('Error loading Genius embed:', error);
+            // Fallback: simple link
+            container.innerHTML = `
+                <div style="padding: 20px; border: 1px solid #ddd; border-radius: 4px; background: #1a1a1a;">
+                    <p style="margin: 0 0 10px 0;">View lyrics on <a href="${url}" target="_blank" style="color: #ffff64; font-weight: bold; text-decoration: none;">Genius</a></p>
+                    <p style="margin: 0;"><strong style="color: #fff;">${title}</strong> <span style="color: #999;">by ${artist}</span></p>
                 </div>
-                <div style="margin-bottom: 20px;">
-                    <div style="font-size: 20px; font-weight: 600; margin-bottom: 8px; color: #000; line-height: 1.3;">
-                        ${title}
-                    </div>
-                    <div style="font-size: 15px; color: #666;">
-                        ${artist}
-                    </div>
-                </div>
-                <div>
-                    <a href="${url}" 
-                       target="_blank" 
-                       style="display: inline-block; padding: 12px 24px; background: #ffff64; color: #000; text-decoration: none; border-radius: 4px; font-weight: 600; font-size: 14px; transition: background 0.2s;"
-                       onmouseover="this.style.background='#ffff50'" 
-                       onmouseout="this.style.background='#ffff64'">
-                        Read Full Lyrics on Genius →
-                    </a>
-                </div>
-            </div>
-        `;
+            `;
+        }
     }
 };
