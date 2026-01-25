@@ -10,9 +10,7 @@
             <MudItem xs="12" md="5">
                 <MudPaper Class="pa-6" Elevation="3" Style="height: fit-content;">
                     <MudText Typo="Typo.h3" Color="Color.Primary" Class="mb-4">@_song.Name</MudText>
-
                     <MudDivider Class="mb-4" />
-
                     <MudStack Spacing="3">
                         <div class="d-flex align-center">
                             <MudIcon Icon="@Icons.Material.Filled.Person" Class="mr-2" />
@@ -42,50 +40,25 @@
                             <MudIcon Icon="@Icons.Material.Filled.Tune" Class="mr-2" />
                             <MudText Typo="Typo.body1">Tuning: <b>@_song.Tuning</b></MudText>
                         </div>
-
                         <MudDivider Class="mb-4" />
-
                         <div class="d-flex align-center">
                             <MudIcon Icon="@Icons.Material.Filled.PersonPin" Class="mr-2" />
                             <MudText Typo="Typo.body1"><i>Owner: @_song.OwnerNick</i></MudText>
                         </div>
-
-
                         <MudDivider Class="my-4" />
-
                         <MudText Typo="Typo.subtitle2" Class="mb-n2">Autoscroll Controls</MudText>
                         <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
                             @if (!_isScrolling)
                             {
-                                <MudIconButton Icon="@Icons.Material.Filled.PlayArrow"
-                                               Color="Color.Success"
-                                               OnClick="@(() => ToggleScroll(true))"
-                                               Variant="Variant.Filled"
-                                               Size="Size.Small" />
+                                <MudIconButton Icon="@Icons.Material.Filled.PlayArrow" Color="Color.Success" OnClick="@(() => ToggleScroll(true))" Variant="Variant.Filled" Size="Size.Small" />
                             }
                             else
                             {
-                                <MudIconButton Icon="@Icons.Material.Filled.Stop"
-                                               Color="Color.Error"
-                                               OnClick="@(() => ToggleScroll(false))"
-                                               Variant="Variant.Filled"
-                                               Size="Size.Small" />
+                                <MudIconButton Icon="@Icons.Material.Filled.Stop" Color="Color.Error" OnClick="@(() => ToggleScroll(false))" Variant="Variant.Filled" Size="Size.Small" />
                             }
-
-                            <MudIconButton Icon="@Icons.Material.Filled.ArrowUpward"
-                                           Color="Color.Default"
-                                           OnClick="ResetScroll"
-                                           Variant="Variant.Outlined"
-                                           Size="Size.Small" />
-
+                            <MudIconButton Icon="@Icons.Material.Filled.ArrowUpward" Color="Color.Default" OnClick="ResetScroll" Variant="Variant.Outlined" Size="Size.Small" />
                             <div style="flex-grow: 1;">
-                                <MudSlider T="int"
-                                           Value="@_scrollSpeed"
-                                           ValueChanged="OnSpeedChanged"
-                                           Min="1"
-                                           Max="100"
-                                           Step="1"
-                                           Color="Color.Info">
+                                <MudSlider T="int" Value="@_scrollSpeed" ValueChanged="OnSpeedChanged" Min="1" Max="100" Step="1" Color="Color.Info">
                                     Speed: @_scrollSpeed
                                 </MudSlider>
                             </div>
@@ -96,11 +69,17 @@
 
             <MudItem xs="12" md="7">
                 <MudPaper Class="pa-4" Elevation="3">
-                    <MudText Typo="Typo.h6" Class="mb-2">Lyrics</MudText>
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-2">
+                        <MudText Typo="Typo.h6">Lyrics</MudText>
+                        <MudToggleGroup T="double" Value="@_fontScale" ValueChanged="OnFontScaleChanged" Outline="true" Delimiters="true" Dense="true" CheckMark="false" FixedContent="true">
+                            <MudToggleItem Value="1.0">Standard</MudToggleItem>
+                            <MudToggleItem Value="2.0">Large</MudToggleItem>
+                        </MudToggleGroup>
+                    </MudStack>
                     @if (_lyricsData is not null)
-                    {   
+                    {
                         <div id="genius-lyrics-container"
-                             style="height: calc(100vh - 200px); overflow-y: auto; overflow-x: hidden; border-radius: 8px; background-color: #1a1a1a;">
+                             style="height: calc(100vh - 200px); overflow-y: auto; overflow-x: hidden; border-radius: 8px; --lyrics-zoom: @_fontScale;">
                         </div>
                     }
                     else
@@ -112,10 +91,36 @@
         </MudGrid>
     }
 </MudContainer>
+
 <style>
     #genius-lyrics-container .rg_embed {
-        margin: 0 !important;
-        width: 100% !important;
+        transform: scale(var(--lyrics-zoom, 1.0)) !important;
+        transform-origin: top center !important;
+        width: calc(100% / var(--lyrics-zoom, 1.0)) !important;
+        margin: 0 auto !important;
+        display: block !important;
+        background: transparent !important;
+    }
+
+    #genius-lyrics-container .rg_embed_body,
+    #genius-lyrics-container .rg_embed_body div,
+    #genius-lyrics-container .rg_embed_body p,
+    #genius-lyrics-container .lyrics,
+    #genius-lyrics-container .lyrics p {
+        color: var(--mud-palette-text-primary) !important;
+        background-color: transparent !important;
+    }
+
+        #genius-lyrics-container .rg_embed_body a {
+            color: var(--mud-palette-text-primary) !important;
+            text-decoration: none !important;
+        }
+
+    #genius-lyrics-container .rg_embed_header,
+    #genius-lyrics-container .rg_embed_footer {
+        background: transparent !important;
+        color: var(--mud-palette-text-secondary) !important;
+        border: none !important;
     }
 
     #genius-lyrics-container::-webkit-scrollbar {
@@ -123,15 +128,15 @@
     }
 
     #genius-lyrics-container::-webkit-scrollbar-track {
-        background: #121212;
+        background: transparent;
     }
 
     #genius-lyrics-container::-webkit-scrollbar-thumb {
-        background: #444;
+        background: var(--mud-palette-lines-inputs);
         border-radius: 10px;
     }
 
         #genius-lyrics-container::-webkit-scrollbar-thumb:hover {
-            background: #ffff64;
+            background: var(--mud-palette-text-secondary);
         }
 </style>
