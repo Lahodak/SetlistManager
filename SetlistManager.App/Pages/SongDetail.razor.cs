@@ -18,7 +18,9 @@ public partial class SongDetail
     
     private SongModel? _song;
     private GeniusEmbedModel? _lyricsData;
-    
+    private int _scrollSpeed = 5;
+    private bool _isScrolling = false;
+
     protected override async Task OnInitializedAsync()
     {
         _song = await SongService.GetSongByIdAsync(SongId);
@@ -36,6 +38,38 @@ public partial class SongDetail
                 _lyricsData.Title,
                 _lyricsData.Artist,
                 _lyricsData.Url);
+        }
+    }
+
+    private async Task ToggleScroll(bool scroll)
+    {
+        _isScrolling = scroll;
+        if (_isScrolling)
+        {
+            await JSRuntime.InvokeVoidAsync("window.scrollingFunctions.startAutoScroll", "genius-lyrics-container", _scrollSpeed);
+        }
+        else
+        {
+            await JSRuntime.InvokeVoidAsync("window.scrollingFunctions.stopAutoScroll");
+        }
+        StateHasChanged();
+    }
+
+    private async Task ResetScroll()
+    {
+        await JSRuntime.InvokeVoidAsync("eval", "document.getElementById('genius-lyrics-container').scrollTop = 0");
+        if (_isScrolling)
+        {
+            await ToggleScroll(true);
+        }
+    }
+
+    private async Task OnSpeedChanged(int newSpeed)
+    {
+        _scrollSpeed = newSpeed;
+        if (_isScrolling)
+        {
+            await JSRuntime.InvokeVoidAsync("window.scrollingFunctions.startAutoScroll", "genius-lyrics-container", _scrollSpeed);
         }
     }
 }

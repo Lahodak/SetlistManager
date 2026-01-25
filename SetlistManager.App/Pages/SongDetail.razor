@@ -18,36 +18,26 @@
                             <MudIcon Icon="@Icons.Material.Filled.Person" Class="mr-2" />
                             <MudText Typo="Typo.h5">Artist: <b>@_song.Artist?.Nick</b></MudText>
                         </div>
-
                         <div class="d-flex align-center">
                             <MudIcon Icon="@Icons.Material.Filled.Language" Class="mr-2" />
                             <MudText Typo="Typo.body1">Language: <b>@_song.Language?.Code (@_song.Language?.Name)</b></MudText>
                         </div>
-
                         <div class="d-flex align-center">
                             <MudIcon Icon="@Icons.Material.Filled.LibraryMusic" Class="mr-2" />
-                            <MudLink Href="@_song.TabsURL" Target="_blank" Underline="Underline.Hover">
-                                View Tabs
-                            </MudLink>
+                            <MudLink Href="@_song.TabsURL" Target="_blank" Underline="Underline.Hover">View Tabs</MudLink>
                         </div>
-
                         <div class="d-flex align-center">
                             <MudIcon Icon="@Icons.Custom.Brands.YouTube" Color="Color.Error" Class="mr-2" />
-                            <MudLink Href="@_song.AudioURL" Target="_blank" Underline="Underline.Hover">
-                                Watch on YouTube
-                            </MudLink>
+                            <MudLink Href="@_song.AudioURL" Target="_blank" Underline="Underline.Hover">Watch on YouTube</MudLink>
                         </div>
-
                         <div class="d-flex align-center">
                             <MudIcon Icon="@Icons.Material.Filled.Speed" Class="mr-2" />
                             <MudText Typo="Typo.body1">BPM: <b>@_song.BPM.ToString()</b></MudText>
                         </div>
-                        
                         <div class="d-flex align-center">
                             <MudIcon Icon="@Icons.Material.Filled.MusicNote" Class="mr-2" />
                             <MudText Typo="Typo.body1">Key: <b>@_song.Key</b></MudText>
                         </div>
-
                         <div class="d-flex align-center">
                             <MudIcon Icon="@Icons.Material.Filled.Tune" Class="mr-2" />
                             <MudText Typo="Typo.body1">Tuning: <b>@_song.Tuning</b></MudText>
@@ -59,14 +49,54 @@
                             <MudIcon Icon="@Icons.Material.Filled.PersonPin" Class="mr-2" />
                             <MudText Typo="Typo.body1"><i>Owner: @_song.OwnerNick</i></MudText>
                         </div>
+
+
+                        <MudDivider Class="my-4" />
+
+                        <MudText Typo="Typo.subtitle2" Class="mb-n2">Autoscroll Controls</MudText>
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                            @if (!_isScrolling)
+                            {
+                                <MudIconButton Icon="@Icons.Material.Filled.PlayArrow"
+                                               Color="Color.Success"
+                                               OnClick="@(() => ToggleScroll(true))"
+                                               Variant="Variant.Filled"
+                                               Size="Size.Small" />
+                            }
+                            else
+                            {
+                                <MudIconButton Icon="@Icons.Material.Filled.Stop"
+                                               Color="Color.Error"
+                                               OnClick="@(() => ToggleScroll(false))"
+                                               Variant="Variant.Filled"
+                                               Size="Size.Small" />
+                            }
+
+                            <MudIconButton Icon="@Icons.Material.Filled.ArrowUpward"
+                                           Color="Color.Default"
+                                           OnClick="ResetScroll"
+                                           Variant="Variant.Outlined"
+                                           Size="Size.Small" />
+
+                            <div style="flex-grow: 1;">
+                                <MudSlider T="int"
+                                           Value="@_scrollSpeed"
+                                           ValueChanged="OnSpeedChanged"
+                                           Min="1"
+                                           Max="100"
+                                           Step="1"
+                                           Color="Color.Info">
+                                    Speed: @_scrollSpeed
+                                </MudSlider>
+                            </div>
+                        </MudStack>
                     </MudStack>
                 </MudPaper>
             </MudItem>
 
-            <MudItem xs="12" md="4">
+            <MudItem xs="12" md="7">
                 <MudPaper Class="pa-4" Elevation="3">
                     <MudText Typo="Typo.h6" Class="mb-2">Lyrics</MudText>
-
                     @if (_lyricsData is not null)
                     {   
                         <div id="genius-lyrics-container"
@@ -75,20 +105,13 @@
                     }
                     else
                     {
-                        <MudAlert Severity="Severity.Info">Loading lyrics or no lyrics available...</MudAlert>
+                        <MudAlert Severity="Severity.Info">Loading lyrics...</MudAlert>
                     }
                 </MudPaper>
             </MudItem>
         </MudGrid>
     }
-    else
-    {
-        <MudAlert Severity="Severity.Warning" Variant="Variant.Filled" Class="mt-3">
-            Song not found!
-        </MudAlert>
-    }
 </MudContainer>
-
 <style>
     #genius-lyrics-container .rg_embed {
         margin: 0 !important;
@@ -98,14 +121,17 @@
     #genius-lyrics-container::-webkit-scrollbar {
         width: 6px;
     }
+
     #genius-lyrics-container::-webkit-scrollbar-track {
         background: #121212;
     }
+
     #genius-lyrics-container::-webkit-scrollbar-thumb {
         background: #444;
         border-radius: 10px;
     }
-    #genius-lyrics-container::-webkit-scrollbar-thumb:hover {
-        background: #ffff64;
-    }
+
+        #genius-lyrics-container::-webkit-scrollbar-thumb:hover {
+            background: #ffff64;
+        }
 </style>
