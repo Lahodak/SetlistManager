@@ -22,6 +22,7 @@ public static class SongMapper
             CreatedAt = entity.CreatedAt,
             UpdatedAt = entity.UpdatedAt,
             OwnerId = entity.OwnerId,
+            OwnerNick = entity.Owner?.UserName,
             IsPublic = entity.IsPublic
         };
         return model;

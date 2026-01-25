@@ -13,6 +13,7 @@ public class SongModel
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
     public int OwnerId { get; set; }
+    public string? OwnerNick { get; set; } = string.Empty;
     public LanguageModel Language { get; set; } = new();
     public int LanguageId { get; set; }
     public int Order { get; set; }
