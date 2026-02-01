@@ -5,7 +5,7 @@ namespace SetlistManager.Business.Services;
 
 public interface IRoomsService
 {
-    Task<RoomModel> CreateRoomAsync(RoomCreateModel createRoomModel, int hostId);
+    Task<RoomModel> CreateRoomAsync(RoomCreateModel createRoomModel);
     Task<RoomModel?> JoinRoomAsync(JoinRoomModel joinRoomModel, User user);
     Task ChangeCurrentSongAsync(ChangeCurrentSongModel changeCurrentSongModel);
     Task<RoomModel?> GetRoomByIdAsync(int roomId);

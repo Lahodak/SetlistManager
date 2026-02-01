@@ -12,10 +12,12 @@ public class RoomsService : IRoomsService
     private const string roomCodeAvailableCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     private const int roomCodeLength = 6;
     private readonly AppDbContext _dbContext;
+    private readonly ICurrentUserContext _currentUserContext;
 
-    public RoomsService(AppDbContext dbContext)
+    public RoomsService(AppDbContext dbContext, ICurrentUserContext currentUserContext)
     {
         _dbContext = dbContext;
+        _currentUserContext = currentUserContext;
     }
 
     public async Task<RoomModel?> GetRoomByIdAsync(int roomId)
@@ -46,8 +48,10 @@ public class RoomsService : IRoomsService
         return model;
     }
 
-    public async Task<RoomModel> CreateRoomAsync(RoomCreateModel createRoomModel, int hostId)
-    {                       
+    public async Task<RoomModel> CreateRoomAsync(RoomCreateModel createRoomModel)
+    {
+        int hostId = _currentUserContext.GetCurrentUserId()!.Value;
+
         StringBuilder code = new(roomCodeLength);
 
         do

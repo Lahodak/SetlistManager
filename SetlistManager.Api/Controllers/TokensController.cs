@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using SetlistManager.Api.Services;
 using SetlistManager.Business.Services;
 using SetlistManager.Common.Models;
 
@@ -19,14 +18,11 @@ public class TokensController : BaseController
     [HttpGet]
     public async Task<ActionResult<UrlResponseModel>> AuthorizeWithGenius()
     {
-        var userId = _userContext.GetCurrentUserId();
-
-        if (userId is null)
-            return BadRequest();
+        var userId = _userContext.GetCurrentUserId()!.Value;
 
         UrlResponseModel model = new()
         {
-            Url = await _geniusAuthService.GetGrantAccessTokenRequestUri(userId.Value)
+            Url = await _geniusAuthService.GetGrantAccessTokenRequestUri(userId)
         };
 
         return Ok(model);

@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using SetlistManager.Api.Services;
 using SetlistManager.Business.Options;
 using SetlistManager.Business.Services;
 using SetlistManager.Common.Genius.Models;
@@ -14,12 +13,12 @@ public class UsersController : BaseController
     private readonly IUserService _userService;
     private readonly ICurrentUserContext _currentUserContext;
     private readonly IGeniusAuthService _geniusAuthService;
-    private readonly IOptions<AppOptions> _appOptions;
+    private readonly AppOptions _appOptions;
 
     public UsersController(IUserService userService, ICurrentUserContext currentUserContext, 
         IGeniusAuthService geniusAuthService, IOptions<AppOptions> appOptions)
     {
-        _appOptions = appOptions;
+        _appOptions = appOptions.Value;
         _userService = userService;
         _currentUserContext = currentUserContext;
         _geniusAuthService = geniusAuthService;
@@ -51,9 +50,6 @@ public class UsersController : BaseController
     [HttpGet("tokens")]
     public async Task<ActionResult> AddUserToken([FromQuery] GrantAccessTokenResultModel grantResultModel)
     {
-        if (grantResultModel is null)
-            return BadRequest();
-
         var user = await _userService.GetUserByTempSalt(grantResultModel.State);
 
         if (user is null)
@@ -76,7 +72,7 @@ public class UsersController : BaseController
         if(!result)
             return BadRequest("Could not add token to user, provider not found");
 
-        return Redirect(_appOptions.Value.UserPortalUrl);
+        return Redirect(_appOptions.UserPortalUrl);
     }    
 
     [HttpPost("{id}/friendships")]

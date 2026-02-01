@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SetlistManager.Common.Models;
-using SetlistManager.Api.Services;
 using SetlistManager.Business.Services;
 
 namespace SetlistManager.Api.Controllers;
@@ -8,20 +7,16 @@ namespace SetlistManager.Api.Controllers;
 public class RoomsController : BaseController
 {
     private readonly IRoomsService _roomsService;
-    private readonly ICurrentUserContext _userContext;
 
-    public RoomsController(IRoomsService roomsService, ICurrentUserContext userContext)
+    public RoomsController(IRoomsService roomsService)
     {
         _roomsService = roomsService;
-        _userContext = userContext;
     }
 
     [HttpPost]
     public async Task<ActionResult<RoomModel>> CreateRoomAsync(RoomCreateModel roomCreateModel)
     {
-        var userId = _userContext.GetCurrentUserId()!.Value;
-
-        var roomModel = await _roomsService.CreateRoomAsync(roomCreateModel, userId);
+        var roomModel = await _roomsService.CreateRoomAsync(roomCreateModel);
 
         return Ok(roomModel);
     }
