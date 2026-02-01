@@ -5,6 +5,7 @@ namespace SetlistManager.Api.Controllers;
 
 [ApiController]
 [Authorize]
+[Route("api/[controller]")]
 
 public class BaseController : ControllerBase
 {

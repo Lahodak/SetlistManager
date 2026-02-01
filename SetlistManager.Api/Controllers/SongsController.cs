@@ -5,8 +5,6 @@ using SetlistManager.Api.Services;
 
 namespace SetlistManager.Api.Controllers;
 
-[Route("api/songs")]
-
 public class SongsController : BaseController
 {
     private readonly ISongService _songService;

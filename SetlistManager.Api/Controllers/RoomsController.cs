@@ -5,8 +5,6 @@ using SetlistManager.Business.Services;
 
 namespace SetlistManager.Api.Controllers;
 
-[Route("api/rooms")]
-
 public class RoomsController : BaseController
 {
     private readonly IRoomsService _roomsService;

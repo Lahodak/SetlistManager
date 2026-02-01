@@ -9,14 +9,18 @@ namespace SetlistManager.Business.Services.Implementations;
 public class ArtistService : IArtistService
 {
     private readonly AppDbContext _dbContext;
+    private readonly ICurrentUserContext _currentUserContext;
 
-    public ArtistService(AppDbContext dbContext)
+    public ArtistService(AppDbContext dbContext, ICurrentUserContext currentUserContext)
     {
         _dbContext = dbContext;
+        _currentUserContext = currentUserContext;
     }
 
-    public async Task<PagedResponse<ArtistModel>> GetArtistsAsync(PagedRequest request, int userId)
+    public async Task<PagedResponse<ArtistModel>> GetArtistsAsync(PagedRequest request)
     {
+        int userId = _currentUserContext.GetCurrentUserId()!.Value;
+
         var searchQuery = request.Query ?? string.Empty;
         var query = _dbContext.Artists
             .Where(x => x.Nick.Contains(searchQuery));
@@ -45,8 +49,10 @@ public class ArtistService : IArtistService
         };
     }
 
-    public async Task<ArtistModel?> GetArtistByIdAsync(int artistId, int userId, ContentType contentType)
+    public async Task<ArtistModel?> GetArtistByIdAsync(int artistId, ContentType contentType)
     {
+        int userId = _currentUserContext.GetCurrentUserId()!.Value;
+
         var artist = await _dbContext.Artists
             .Where(x => x.Id == artistId)
             .Where(x => contentType == ContentType.Public
@@ -62,8 +68,10 @@ public class ArtistService : IArtistService
         return artist?.ToModel(true);
     }
 
-    public async Task<bool> TryCreateArtistAsync(ArtistCreateModel createModel, int creatorId)
+    public async Task<bool> TryCreateArtistAsync(ArtistCreateModel createModel)
     {
+        int creatorId = _currentUserContext.GetCurrentUserId()!.Value;
+
         if (await _dbContext.Artists.AnyAsync(x => (!x.IsPublic && x.OwnerId == creatorId && (x.Nick == createModel.Nick)) 
         || (x.ArtistsUsers.Any(x => x.UserId == creatorId) && x.Nick == createModel.Nick)))   
             return false;
@@ -81,8 +89,10 @@ public class ArtistService : IArtistService
         return true;
     }
 
-    public async Task<bool> TryDeleteArtistAsync(int artistId, int userId)
+    public async Task<bool> TryDeleteArtistAsync(int artistId)
     {
+        int userId = _currentUserContext.GetCurrentUserId()!.Value;
+
         var artist = await _dbContext.Artists
             .Include(x => x.Owner)
             .Include(x => x.Songs)
@@ -97,8 +107,10 @@ public class ArtistService : IArtistService
         return true;
     }
 
-    public async Task<bool> TryUpdateArtistAsync(int id, ArtistUpdateModel updateModel, int currentUserId)
+    public async Task<bool> TryUpdateArtistAsync(int id, ArtistUpdateModel updateModel)
     {
+        int currentUserId = _currentUserContext.GetCurrentUserId()!.Value;
+
         var artist = await _dbContext.Artists.FirstOrDefaultAsync(x => x.Id == id && x.OwnerId == currentUserId);
         
         if (artist is null || await _dbContext.Artists.AnyAsync(x => x.Nick == updateModel.Nick && x.Id != id))
@@ -110,8 +122,10 @@ public class ArtistService : IArtistService
         return true;
     }
 
-    public async Task<bool> TryMakeArtistPublicAsync(int artistId, int currentUserId)
+    public async Task<bool> TryMakeArtistPublicAsync(int artistId)
     {
+        int currentUserId = _currentUserContext.GetCurrentUserId()!.Value;
+
         var artist = await _dbContext.Artists
             .FirstOrDefaultAsync(x => x.Id == artistId && x.OwnerId == currentUserId);
 
@@ -124,8 +138,10 @@ public class ArtistService : IArtistService
         return true;
     }
 
-    public async Task<bool> TryGiveAccessToUserAsync(int artistId, int targetId, int currentUserId)
+    public async Task<bool> TryGiveAccessToUserAsync(int artistId, int targetId)
     {
+        int currentUserId = _currentUserContext.GetCurrentUserId()!.Value;
+
         var artist = await _dbContext.Artists
             .Include(x => x.ArtistsUsers.Where(x => x.UserId == targetId))
             .FirstOrDefaultAsync(x => x.Id == artistId);
@@ -145,8 +161,10 @@ public class ArtistService : IArtistService
         return true;
     }
 
-    public async Task RemoveAccessFromUserAsync(int artistId, int targetId, int currentUserId)
+    public async Task RemoveAccessFromUserAsync(int artistId, int targetId)
     {
+        int currentUserId = _currentUserContext.GetCurrentUserId()!.Value;
+
         var artistUser = await _dbContext.ArtistsUsers
             .Include(x => x.Artist)
             .Include(x => x.User)

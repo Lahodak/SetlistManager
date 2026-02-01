@@ -5,7 +5,6 @@ using SetlistManager.Common.Models;
 
 namespace SetlistManager.Api.Controllers;
 
-[Route("api/tokens")]
 public class TokensController : BaseController
 {
     private readonly ICurrentUserContext _userContext;    

@@ -9,7 +9,6 @@ using SetlistManager.Common.Models;
 
 namespace SetlistManager.Api.Controllers;
 
-[Route("api/users")]
 public class UsersController : BaseController
 {
     private readonly IUserService _userService;

@@ -1,35 +1,28 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SetlistManager.Common.Models;
 using SetlistManager.Business.Services;
-using SetlistManager.Api.Services;
 
 namespace SetlistManager.Api.Controllers;
 
-[Route("api/artists")]
 public class ArtistsController : BaseController
 {
     private readonly IArtistService _artistService;
-    private readonly ICurrentUserContext _userContext;
 
-    public ArtistsController(IArtistService artistService, ICurrentUserContext userContext)
+    public ArtistsController(IArtistService artistService)
     {
         _artistService = artistService;
-        _userContext = userContext;
     }
 
     [HttpGet]
     public async Task<ActionResult<PagedResponse<ArtistModel>>> GetAllArtists([FromQuery] PagedRequest request)
     {
-        var userId = _userContext.GetCurrentUserId();
-        
-        return Ok(await _artistService.GetArtistsAsync(request, userId!.Value));
+        return Ok(await _artistService.GetArtistsAsync(request));
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<ArtistModel>> GetArtistById(int id, [FromQuery] ContentType contentType)
     {        
-        var userId = _userContext.GetCurrentUserId();
-        var result = await _artistService.GetArtistByIdAsync(id, userId!.Value, contentType);
+        var result = await _artistService.GetArtistByIdAsync(id, contentType);
         
         if (result is null)
             return NotFound();
@@ -40,8 +33,7 @@ public class ArtistsController : BaseController
     [HttpPost]
     public async Task<ActionResult> CreateArtist(ArtistCreateModel createModel)
     {
-        var userId = _userContext.GetCurrentUserId();
-        var result = await _artistService.TryCreateArtistAsync(createModel, userId!.Value);
+        var result = await _artistService.TryCreateArtistAsync(createModel);
         
         if(!result)
             return BadRequest();
@@ -51,10 +43,8 @@ public class ArtistsController : BaseController
 
     [HttpPut("{id}")]
     public async Task<ActionResult> UpdateArtist(int id, ArtistUpdateModel updateModel)
-    {
-        var userId = _userContext.GetCurrentUserId();
-        
-        if (await _artistService.TryUpdateArtistAsync(id, updateModel, userId!.Value))
+    {        
+        if (await _artistService.TryUpdateArtistAsync(id, updateModel))
             return NoContent();
 
         return BadRequest();
@@ -62,10 +52,8 @@ public class ArtistsController : BaseController
 
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteArtist(int id)
-    {
-        var userId = _userContext.GetCurrentUserId();
-        
-        if (await _artistService.TryDeleteArtistAsync(id, userId!.Value))
+    {        
+        if (await _artistService.TryDeleteArtistAsync(id))
             return NoContent();
 
         return BadRequest();
@@ -73,10 +61,8 @@ public class ArtistsController : BaseController
 
     [HttpPost("{id}/public")]
     public async Task<ActionResult> MakeArtistPublic(int id)
-    {
-        var userId = _userContext.GetCurrentUserId();
-        
-        if (await _artistService.TryMakeArtistPublicAsync(id, userId!.Value))
+    {        
+        if (await _artistService.TryMakeArtistPublicAsync(id))
             return NoContent();
         
         return BadRequest();
@@ -85,9 +71,7 @@ public class ArtistsController : BaseController
     [HttpPost("{id}/artistsusers/{userId}")]
     public async Task<ActionResult> GiveAccessToUser(int id, int userId)
     {
-        var currentUserId = _userContext.GetCurrentUserId();
-
-        if (await _artistService.TryGiveAccessToUserAsync(id, userId, currentUserId!.Value))
+        if (await _artistService.TryGiveAccessToUserAsync(id, userId))
             return NoContent();
         
         return BadRequest();
@@ -96,9 +80,7 @@ public class ArtistsController : BaseController
     [HttpDelete("{id}/artistsusers/{userId}")]
     public async Task<ActionResult> RemoveAccessFromUser(int id, int userId)
     {
-        var currentUserId = _userContext.GetCurrentUserId();
-
-        await _artistService.RemoveAccessFromUserAsync(id, userId, currentUserId!.Value);
+        await _artistService.RemoveAccessFromUserAsync(id, userId);
 
         return NoContent();
     }

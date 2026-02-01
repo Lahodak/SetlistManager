@@ -20,6 +20,7 @@ public static class ServiceCollectionExtentions
         services.AddScoped<ITempAuthStorageService, TempAuthStorageService>();
         services.AddScoped<IGeniusAuthService, GeniusAuthService>();
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<ICurrentUserContext, CurrentUserContext>();
         return services;
     }
 }

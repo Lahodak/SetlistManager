@@ -5,8 +5,6 @@ using SetlistManager.Common.Models;
 
 namespace SetlistManager.Api.Controllers;
 
-[Route("api/setlists")]
-
 public class SetlistsController : BaseController
 {
     private readonly ISetlistsService _setlistService;

@@ -4,8 +4,6 @@ using SetlistManager.Business.Services;
 
 namespace SetlistManager.Api.Controllers;
 
-[Route("api/languages")]
-
 public class LanguagesController : BaseController
 {
     private readonly ILanguageService _languageService;

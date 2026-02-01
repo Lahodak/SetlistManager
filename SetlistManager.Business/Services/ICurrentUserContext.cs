@@ -1,4 +1,4 @@
-﻿namespace SetlistManager. Api.Services;
+﻿namespace SetlistManager.Business.Services;
 
 public interface ICurrentUserContext
 {

@@ -1,6 +1,7 @@
-﻿using System.Security.Claims;
+﻿using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
 
-namespace SetlistManager.Api.Services;
+namespace SetlistManager.Business.Services.Implementations;
 
 public class CurrentUserContext : ICurrentUserContext
 {

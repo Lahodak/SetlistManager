@@ -8,8 +8,6 @@ using SetlistManager.Data.Entities;
 
 namespace SetlistManager.Api.Controllers;
 
-[Route("api/auth")]
-
 public class AuthController : BaseController
 {
     private readonly SignInManager<User> _signInManager;
