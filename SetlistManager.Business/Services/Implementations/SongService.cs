@@ -9,14 +9,18 @@ namespace SetlistManager.Business.Services.Implementations;
 public class SongService : ISongService
 {
     private readonly AppDbContext _dbContext;
+    private readonly ICurrentUserContext _currentUserContext;
 
-    public SongService(AppDbContext dbContext)
+    public SongService(AppDbContext dbContext, ICurrentUserContext currentUserContext)
     {
         _dbContext = dbContext;
+        _currentUserContext = currentUserContext;
     }
 
-    public async Task<PagedResponse<SongModel>> GetSongsAsync(PagedRequest request, int userId)
+    public async Task<PagedResponse<SongModel>> GetSongsAsync(PagedRequest request)
     {
+        int userId = _currentUserContext.GetCurrentUserId()!.Value;
+
         var searchQuery = request.Query ?? string.Empty;
         var query = _dbContext.Songs
             .Where(x => x.Name.Contains(searchQuery) || x.Artist.Nick.Contains(searchQuery));
@@ -45,8 +49,10 @@ public class SongService : ISongService
         };
     }
 
-    public async Task<bool> TryGiveAccessToUserAsync(int songId, int targetId, int currentUserId)
+    public async Task<bool> TryGiveAccessToUserAsync(int songId, int targetId)
     {
+        int currentUserId = _currentUserContext.GetCurrentUserId()!.Value;
+
         var song = await _dbContext.Songs
             .Include(x => x.SongsUsers)
             .Include(x => x.Artist)
@@ -80,8 +86,10 @@ public class SongService : ISongService
         return true;
     }
 
-    public async Task<SongModel?> GetSongByIdAsync(int songId, int userId)
+    public async Task<SongModel?> GetSongByIdAsync(int songId)
     {
+        int userId = _currentUserContext.GetCurrentUserId()!.Value;
+
         var song = await _dbContext.Songs
         .Include(x => x.Language)
         .Include(x => x.Artist)
@@ -96,8 +104,10 @@ public class SongService : ISongService
         return song.ToModel();
     }
 
-    public async Task<bool> TryCreateSongAsync(SongCreateModel songCreateModel, int userId)
+    public async Task<bool> TryCreateSongAsync(SongCreateModel songCreateModel)
     {
+        int userId = _currentUserContext.GetCurrentUserId()!.Value;
+
         if (await _dbContext.Songs
         .AnyAsync(x => x.Name == songCreateModel.Name 
             && x.ArtistId == songCreateModel.ArtistId
@@ -131,8 +141,10 @@ public class SongService : ISongService
         return true;
     }
 
-    public async Task<bool> TryUpdateSongAsync(int songId, SongUpdateModel updateModel, int userId)
+    public async Task<bool> TryUpdateSongAsync(int songId, SongUpdateModel updateModel)
     {
+        int userId = _currentUserContext.GetCurrentUserId()!.Value;
+
         if (await _dbContext.Songs.AnyAsync(x => (x.Name == updateModel.Name) && (x.ArtistId == updateModel.ArtistId)
         && ((x.OwnerId == userId) || x.SongsUsers.Any(x => x.Song.ArtistId == updateModel.ArtistId && x.UserId == userId))))
             return false;
@@ -156,8 +168,10 @@ public class SongService : ISongService
         return true;
     }
 
-    public async Task<bool> TryDeleteSongAsync(int songId, int userId)
+    public async Task<bool> TryDeleteSongAsync(int songId)
     {
+        int userId = _currentUserContext.GetCurrentUserId()!.Value;
+
         var song = await _dbContext.Songs.FirstOrDefaultAsync(x => x.Id == songId && x.OwnerId == userId);
         
         if (song is null)
@@ -169,8 +183,10 @@ public class SongService : ISongService
         return true;
     }
 
-    public async Task<bool> TryMakeSongPublicAsync(int songId, int userId)
+    public async Task<bool> TryMakeSongPublicAsync(int songId)
     {
+        int userId = _currentUserContext.GetCurrentUserId()!.Value;
+
         var song = await _dbContext.Songs
             .Include(x => x.Artist)
             .FirstOrDefaultAsync(x => x.Id == songId && x.OwnerId == userId);       
@@ -185,8 +201,10 @@ public class SongService : ISongService
         return true;
     }
 
-    public async Task RemoveAccessFromUserAsync(int songId, int userId, int currentUserId)
+    public async Task RemoveAccessFromUserAsync(int songId, int userId)
     {
+        int currentUserId = _currentUserContext.GetCurrentUserId()!.Value;
+
         var songUser = await _dbContext.SongsUsers
             .Include(x => x.Song)
                 .ThenInclude(x => x.Artist)
