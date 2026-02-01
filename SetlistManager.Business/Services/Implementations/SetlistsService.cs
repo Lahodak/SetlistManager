@@ -9,14 +9,18 @@ namespace SetlistManager.Business.Services.Implementations;
 public class SetlistsService : ISetlistsService
 {
     private readonly AppDbContext _dbContext;
+    private readonly ICurrentUserContext _currentUserContext;
 
-    public SetlistsService(AppDbContext dbContext)
+    public SetlistsService(AppDbContext dbContext, ICurrentUserContext currentUserContext)
     {
         _dbContext = dbContext;
+        _currentUserContext = currentUserContext;
     }
 
-    public async Task<SetlistModel?> GetSetlistByIdAsync(int setlistId, int userId)
+    public async Task<SetlistModel?> GetSetlistByIdAsync(int setlistId)
     {
+        int userId = _currentUserContext.GetCurrentUserId()!.Value;
+
         var setlist = await _dbContext.Setlists
             .Include(s => s.SongsSetlists)
                 .ThenInclude(s => s.Song)
@@ -30,8 +34,10 @@ public class SetlistsService : ISetlistsService
         return setlist?.ToModel();
     }
 
-    public async Task<PagedResponse<SetlistModel>?> GetSetlistsAsync(int userId, PagedRequest request)
+    public async Task<PagedResponse<SetlistModel>?> GetSetlistsAsync(PagedRequest request)
     {
+        int userId = _currentUserContext.GetCurrentUserId()!.Value;
+
         var query = _dbContext.Setlists
             .Where(s =>
             (string.IsNullOrEmpty(request.Query) || s.Name.Contains(request.Query))
@@ -64,8 +70,10 @@ public class SetlistsService : ISetlistsService
         return response;
     }
 
-    public async Task<bool> TryGiveAccessToSetlistAsync(int setlistId, int targetId, int currentUserId)
+    public async Task<bool> TryGiveAccessToSetlistAsync(int setlistId, int targetId)
     {
+        int currentUserId = _currentUserContext.GetCurrentUserId()!.Value;
+
         var setlist = await _dbContext.Setlists
             .Include(s => s.SetlistsUsers)
             .FirstOrDefaultAsync(s => s.Id == setlistId && s.OwnerId == currentUserId);
@@ -83,9 +91,11 @@ public class SetlistsService : ISetlistsService
         return true;
     }
 
-    public async Task<bool> TryCreateSetlistAsync(SetlistModel setlistModel, int creatorId)
+    public async Task<bool> TryCreateSetlistAsync(SetlistModel setlistModel)
     {
-        if(await _dbContext.Setlists
+        int creatorId = _currentUserContext.GetCurrentUserId()!.Value;
+
+        if (await _dbContext.Setlists
             .AnyAsync(s => s.Name == setlistModel.Name 
             && (s.OwnerId == creatorId || s.SetlistsUsers.Any(x => x.UserId == creatorId))))        
             return false;
@@ -103,8 +113,10 @@ public class SetlistsService : ISetlistsService
         return true;
     }
 
-    public async Task EditSetlistAsync(SetlistModel setlistModel, int currentUserId)
+    public async Task EditSetlistAsync(SetlistModel setlistModel)
     {
+        int currentUserId = _currentUserContext.GetCurrentUserId()!.Value;
+
         var setlistToBeEdited = await _dbContext.Setlists
             .Include(x => x.SongsSetlists)
             .ThenInclude(x => x.Song)
@@ -157,8 +169,10 @@ public class SetlistsService : ISetlistsService
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task<bool> TryDeleteSetlistAsync(int setlistId, int currentUserId)
+    public async Task<bool> TryDeleteSetlistAsync(int setlistId)
     {
+        int currentUserId = _currentUserContext.GetCurrentUserId()!.Value;
+
         var setlistToBeDeleted = await _dbContext.Setlists
             .FirstOrDefaultAsync(x => x.Id == setlistId && x.OwnerId == currentUserId);
 
@@ -171,8 +185,10 @@ public class SetlistsService : ISetlistsService
         return true;
     }
 
-    public async Task RemoveAccessFromUserAsync(int setlistId, int userId, int currentUserId)
+    public async Task RemoveAccessFromUserAsync(int setlistId, int userId)
     {
+        int currentUserId = _currentUserContext.GetCurrentUserId()!.Value;
+
         var setlistUser = await _dbContext.SetlistsUsers
             .Include(su => su.Setlist)
             .FirstOrDefaultAsync(su => su.SetlistId == setlistId && su.UserId == userId);

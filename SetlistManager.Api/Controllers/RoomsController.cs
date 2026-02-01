@@ -19,12 +19,9 @@ public class RoomsController : BaseController
     [HttpPost]
     public async Task<ActionResult<RoomModel>> CreateRoomAsync(RoomCreateModel roomCreateModel)
     {
-        var userId = _userContext.GetCurrentUserId();
+        var userId = _userContext.GetCurrentUserId()!.Value;
 
-        if (userId is null)
-            return Unauthorized();
-
-        var roomModel = await _roomsService.CreateRoomAsync(roomCreateModel, userId.Value);        
+        var roomModel = await _roomsService.CreateRoomAsync(roomCreateModel, userId);
 
         return Ok(roomModel);
     }
