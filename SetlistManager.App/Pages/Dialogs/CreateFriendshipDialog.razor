@@ -20,7 +20,7 @@
 
         @if (_searchResults is not null && _searchResults.Any())
         {
-            <MudList T="UserViewModel" Clickable="true">
+            <MudList T="UserViewModel">
                 @foreach (var user in _searchResults)
                 {
                     <MudListItem>

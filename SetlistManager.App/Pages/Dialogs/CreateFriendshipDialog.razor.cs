@@ -30,32 +30,30 @@ public partial class CreateFriendshipDialog
         _isSearching = true;
         _hasSearched = true;
 
-        try
-        {
-            var request = new PagedRequest
-            {
-                PageSize = 10,
-                PageIndex = 0,
-                Query = _searchQuery
-            };
+        StateHasChanged();
 
-            var result = await UserService.GetPagedUsersAsync(request);
-            var userId = await UserService.GetCurrentUserIdAsync();
+        var request = new PagedRequest
+        {
+            PageSize = 10,
+            PageIndex = 0,
+            Query = _searchQuery
+        };
+
+        var result = await UserService.GetPagedUsersAsync(request);
+        var userId = await UserService.GetCurrentUserIdAsync();
             
-            if(result?.Items is null)
-            {
-                _searchResults = [];
-                return;
-            }
-
-            _searchResults = result?.Items?
-                .Where(u => u.Id != userId)
-                .ToList();
-        }
-        finally
+        if(result?.Items is null)
         {
-            _isSearching = false;
+            _searchResults = [];
+            return;
         }
+
+        _searchResults = result?.Items?
+            .Where(u => u.Id != userId)
+            .ToList();
+
+        _isSearching = false;
+        StateHasChanged();
     }
 
     private async Task OnSearchKeyUp(KeyboardEventArgs e)

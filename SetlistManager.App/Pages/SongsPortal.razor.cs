@@ -147,6 +147,7 @@ public partial class SongsPortal
         
         await table.ReloadServerData();
     }
+
     public async Task AddAccessToUserAsync(int id)
     {
         var parameters = new DialogParameters

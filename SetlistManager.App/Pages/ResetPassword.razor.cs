@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.WebUtilities;
+using MudBlazor;
 using SetlistManager.App.Services;
 
 namespace SetlistManager.App.Pages;
@@ -10,7 +11,12 @@ public partial class ResetPassword
     public required NavigationManager NavigationManager { get; set; }
     [Inject]
     public required IUserService UserService { get; set; }
+    [Inject]
+    public required ISnackbar Snackbar { get; set; }
 
+    private const string _tokenParameterKey = "token";
+    private const string _emailParameterKey = "email";
+    private const string _loginUri = "/login";
     private bool isSubmitting = false;
     private bool canReset = false;
 
@@ -18,7 +24,6 @@ public partial class ResetPassword
     private string? email;
     private string? newPassword;
     private string? confirmPassword;
-    private string? successMessage;
     private string? errorMessage;
 
     protected override void OnInitialized()
@@ -26,10 +31,10 @@ public partial class ResetPassword
         var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
         var queryParams = QueryHelpers.ParseQuery(uri.Query);
 
-        if (queryParams.TryGetValue("token", out var t) && queryParams.TryGetValue("email", out var e))
+        if (queryParams.TryGetValue(_tokenParameterKey, out var t) && queryParams.TryGetValue(_emailParameterKey, out var e))
         {
-            token = t!;
-            email = e!;
+            token = t;
+            email = e;
             canReset = true;
         }
         else
@@ -40,7 +45,7 @@ public partial class ResetPassword
 
     private async Task HandleResetPassword()
     {
-        if (newPassword is null || confirmPassword is null || newPassword != confirmPassword)
+        if (string.IsNullOrEmpty(newPassword) || string.IsNullOrEmpty(confirmPassword) || newPassword != confirmPassword)
         {
             errorMessage = "Passwords do not match.";
             return;
@@ -60,10 +65,9 @@ public partial class ResetPassword
 
         if (result)
         {
-            successMessage = "Password reset successfully! Redirecting to login...";
+            Snackbar.Add("Password reset successfully! Redirecting to login...", Severity.Success);
             errorMessage = null;
-            await Task.Delay(2000);
-            NavigationManager.NavigateTo("/login");
+            NavigationManager.NavigateTo(_loginUri);
         }
         else
         {

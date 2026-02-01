@@ -9,10 +9,10 @@ public interface IUserService
     Task<List<SetlistModel>?> GetAllUserSetlists();
     Task RegisterAsync(RegisterRequestModel model);
     Task LogOutAsync();
-    Task<string?> GetUserToken();
+    Task<string?> GetUserTokenAsync();
     Task<bool> IsUserLoggedInAsync();
     Task<bool> TryUpdateUser(UserModel user);
-    Task LogInAsync(LoginRequestModel model);
+    Task<bool> LogInAsync(LoginRequestModel model);
     Task<bool> VerifyEmailAsync(string token, string email);
     Task<bool> RequestPasswordResetAsync(string email);
     Task<bool> ResetPasswordAsync(string email, string newPassword, string token);
@@ -22,4 +22,6 @@ public interface IUserService
     Task<bool> TryAcceptFriendshipAsync(int friendshipId);
     Task<PagedResponse<UserViewModel>?> GetPagedUsersAsync(PagedRequest request);
     Task<int?> GetCurrentUserIdAsync();
+    Task<bool> GetUserDarkModeSettings();
+    Task UpdateUserDarkModeSettingsAsync(bool newValue);
 }

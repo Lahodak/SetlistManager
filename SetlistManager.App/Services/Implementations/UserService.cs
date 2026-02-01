@@ -18,6 +18,7 @@ public class UserService : IUserService
     private const string _resetPasswordRequestSuffix = "/request-password-reset";
     private const string _friendshipsSuffix = "/friendships";
     private const string _tokensEndpointSuffix = "/tokens";
+    private const string _darkModeSettingsKey = "ToggleDarkMode";
 
     private readonly IHttpClientFactory _httpClientFactory; 
     private readonly ILocalStorageService _localStorage;
@@ -35,6 +36,16 @@ public class UserService : IUserService
 
     public async Task AddNewProviderToken(TokenCreateModel tokenModel) 
         => await _apiService.PutAsync(_apiOptions.Value.UsersEndpoint + _tokensEndpointSuffix, tokenModel);
+
+    public async Task<bool> GetUserDarkModeSettings()
+    {
+        return await _localStorage.GetItemAsync<bool>(_darkModeSettingsKey);
+    }
+
+    public async Task UpdateUserDarkModeSettingsAsync(bool newValue)
+    {
+        await _localStorage.SetItemAsync(_darkModeSettingsKey, newValue);
+    }
 
     public async Task<UserModel?> GetUserAsync()
     {
@@ -62,7 +73,7 @@ public class UserService : IUserService
     public async Task LogOutAsync() 
         => await _localStorage.RemoveItemAsync(_tokenKey);
 
-    public async Task<string?> GetUserToken() 
+    public async Task<string?> GetUserTokenAsync() 
         => await _localStorage.GetItemAsync<string>(_tokenKey);
 
     public async Task<bool> IsUserLoggedInAsync()
@@ -95,21 +106,22 @@ public class UserService : IUserService
         return true;
     }
 
-    public async Task LogInAsync(LoginRequestModel model)
+    public async Task<bool> LogInAsync(LoginRequestModel model)
     {
         var client = _httpClientFactory.CreateClient();
 
         var message = await client.PostAsJsonAsync($"{_apiOptions.Value.AuthEndpoint}{_loginUserSuffix}", model);
 
         if (!message.IsSuccessStatusCode)
-            return;
+            return false;
         
         var loginResult = await message.Content.ReadFromJsonAsync<LoginResultModel>();
 
         if (loginResult?.Token is null)
-            return;     
+            return false;
 
         await _localStorage.SetItemAsync(_tokenKey, loginResult.Token);
+        return true;
     }
 
     public async Task<bool> VerifyEmailAsync(string token, string email)

@@ -35,8 +35,6 @@ public partial class CreateSongDialog
         _song = new SongModel
         {
             Name = string.Empty,
-            Artist = null!,
-            Language = null!,
             TabsURL = string.Empty,
             AudioURL = string.Empty,
             Tuning = string.Empty,
@@ -49,7 +47,7 @@ public partial class CreateSongDialog
     private Task<IEnumerable<ArtistModel>> SearchArtists(string value, CancellationToken token)
     {
         if (_artists is null)
-            return Task.FromResult<IEnumerable<ArtistModel>>(new List<ArtistModel>());
+            return Task.FromResult<IEnumerable<ArtistModel>>([]);
 
         if (string.IsNullOrWhiteSpace(value))
             return Task.FromResult<IEnumerable<ArtistModel>>(_artists);

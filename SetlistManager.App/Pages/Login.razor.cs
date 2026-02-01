@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components;
+using MudBlazor;
 using SetlistManager.App.Services;
 using SetlistManager.Common.Models;
 
@@ -10,19 +11,23 @@ public partial class Login
     public required IUserService UserService { get; set; }
     [Inject]
     public required NavigationManager Navigation { get; set; }
+    [Inject]
+    public required ISnackbar Snackbar { get; set; }
 
     private readonly LoginRequestModel _loginRequestModel = new();
 
     private async Task LoginUser()
     {
-        if (_loginRequestModel.Password == string.Empty || _loginRequestModel.Email == string.Empty)
+        if (string.IsNullOrEmpty(_loginRequestModel.Password) || string.IsNullOrEmpty(_loginRequestModel.Email))
             return;
 
-        await UserService.LogInAsync(_loginRequestModel);
+        var result = await UserService.LogInAsync(_loginRequestModel);
 
-        if (await UserService.GetUserToken() is not null)
-        {
-            Navigation.NavigateTo("/");
+        if (!result)
+        {         
+            Snackbar.Add("Login failed. Please check your credentials.", Severity.Error);
         }
+
+        Navigation.NavigateTo("/");
     }
 }

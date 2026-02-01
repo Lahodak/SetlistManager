@@ -20,9 +20,9 @@ public partial class Register
 
     private async Task LoginUser()
     {
-        if (_registerRequestModel.Password == string.Empty
-            || _registerRequestModel.Email == string.Empty
-            || _registerRequestModel.UserName == string.Empty
+        if (string.IsNullOrEmpty(_registerRequestModel.Password)
+            || string.IsNullOrEmpty(_registerRequestModel.Email)
+            || string.IsNullOrEmpty(_registerRequestModel.UserName)
             || confirmPassword != _registerRequestModel.Password)
             return;
 

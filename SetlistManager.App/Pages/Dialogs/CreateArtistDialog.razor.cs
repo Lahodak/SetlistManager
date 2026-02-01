@@ -16,8 +16,9 @@ public partial class CreateArtistDialog
 
     private async Task Save()
     {
-        if (_artistCreateModel.Nick == string.Empty)
+        if (string.IsNullOrEmpty(_artistCreateModel.Nick))
             return;
+
         await ArtistService.UploadArtistAsync(_artistCreateModel);
         MudDialog.Close(DialogResult.Ok(_artistCreateModel));
     }

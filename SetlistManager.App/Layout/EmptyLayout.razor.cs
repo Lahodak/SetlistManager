@@ -1,6 +1,6 @@
-using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
+using SetlistManager.App.Services;
 
 namespace SetlistManager.App.Layout;
 
@@ -9,24 +9,27 @@ public partial class EmptyLayout
     [Inject]
     public required NavigationManager NavigationManager { get; set; }
     [Inject]
-    public required ILocalStorageService LocalStorage { get; set; }
+    public required IUserService UserService { get; set; }
 
-    private const string _localStorageKey = "ToggleDarkMode";
-    private const string _authTokenKey = "authToken";
     private readonly MudTheme _theme = new();
     private bool _isDarkMode;
+    
+    private const string _loginUri = "/login";
+    private const string _resetPasswordUri = "/reset-password";
+    private const string _requestResetPasswordUri = "/request-password-reset";
 
     protected override async Task OnInitializedAsync()
     {
-        var localData = await LocalStorage.GetItemAsync<bool>(_localStorageKey);
-        _isDarkMode = localData;
-        StateHasChanged();
-
-        var token = await LocalStorage.GetItemAsStringAsync(_authTokenKey);
-        if (string.IsNullOrWhiteSpace(token) && !NavigationManager.Uri.Contains("/login") && !NavigationManager.Uri.Contains("/reset-password")
-        && !NavigationManager.Uri.Contains("/request-password-reset"))
+        _isDarkMode = await UserService.GetUserDarkModeSettings();
+        
+        StateHasChanged();        
+        
+        var token = await UserService.GetUserTokenAsync();
+        
+        if (string.IsNullOrWhiteSpace(token) && !NavigationManager.Uri.Contains(_loginUri) && !NavigationManager.Uri.Contains(_resetPasswordUri) 
+            && !NavigationManager.Uri.Contains(_requestResetPasswordUri))
         {
-            NavigationManager.NavigateTo("/login", true);
+            NavigationManager.NavigateTo(_loginUri, true);
         }
     }
 }

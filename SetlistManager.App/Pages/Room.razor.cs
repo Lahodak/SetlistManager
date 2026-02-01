@@ -9,14 +9,24 @@ namespace SetlistManager.App.Pages;
 
 public partial class Room : IAsyncDisposable
 {
-    [Parameter] public string RoomCode { get; set; } = string.Empty;
+    [Parameter] 
+    public string RoomCode { get; set; } = string.Empty;
+    [Inject] 
+    public required IRoomService RoomService { get; set; }
+    [Inject] 
+    public required NavigationManager NavigationManager { get; set; }
+    [Inject] 
+    public required IUserService UserService { get; set; }
+    [Inject] 
+    public required IDialogService DialogService { get; set; }
+    [Inject] 
+    public required IJSRuntime JSRuntime { get; set; }
+    [Inject]
+    public required ISnackbar Snackbar { get; set; }
 
-    [Inject] public required IRoomService RoomService { get; set; }
-    [Inject] public required NavigationManager NavigationManager { get; set; }
-    [Inject] public required IUserService UserService { get; set; }
-    [Inject] public required IDialogService DialogService { get; set; }
-    [Inject] public required IJSRuntime JSRuntime { get; set; }
-
+    private const string _roomsPortalUri = "/RoomsPortal";
+    private const string _toggleFullscreenMethod = "toggleFullscreen";
+    private const string _scrollToCurrentSongMethod = "scrollToCurrentSong";
     private RoomModel? _roomModel;
     private SongModel? _currentSong;
     private UserModel? _user;
@@ -27,7 +37,8 @@ public partial class Room : IAsyncDisposable
     {
         if (string.IsNullOrWhiteSpace(RoomCode))
         {
-            NavigationManager.NavigateTo("/error");
+            Snackbar.Add("RoomCode cannot be blank!", Severity.Error);
+            NavigationManager.NavigateTo(_roomsPortalUri);
             return;
         }
 
@@ -42,7 +53,8 @@ public partial class Room : IAsyncDisposable
 
         if (_roomModel is null)
         {
-            NavigationManager.NavigateTo("/roomnotfound");
+            Snackbar.Add($"Room with the code {RoomCode} not found", Severity.Error);
+            NavigationManager.NavigateTo(_roomsPortalUri);
             return;
         }
 
@@ -69,7 +81,6 @@ public partial class Room : IAsyncDisposable
             }
             catch
             {
-                // Ignore JS interop errors
             }
         }
 
@@ -85,13 +96,12 @@ public partial class Room : IAsyncDisposable
         {
             if (_jsModule != null)
             {
-                _isFullscreen = await _jsModule.InvokeAsync<bool>("toggleFullscreen");
+                _isFullscreen = await _jsModule.InvokeAsync<bool>(_toggleFullscreenMethod);
                 StateHasChanged();
             }
         }
         catch
         {
-            // Ignore JS interop errors
         }
     }
 
@@ -99,7 +109,8 @@ public partial class Room : IAsyncDisposable
     {
         _roomModel = room;
 
-        if (_roomModel?.Setlist is null || _roomModel.CurrentSong is null) return;
+        if (_roomModel?.Setlist is null || _roomModel.CurrentSong is null) 
+            return;
 
         _currentSong = _roomModel.Setlist.Songs.FirstOrDefault(x => x.Id == _roomModel.CurrentSong);
 
@@ -108,7 +119,8 @@ public partial class Room : IAsyncDisposable
 
     private async Task SelectSong(SongModel song)
     {
-        if (_roomModel is null || _currentSong is null || song.Id == _currentSong.Id) return;
+        if (_roomModel is null || _currentSong is null || song.Id == _currentSong.Id) 
+            return;
 
         ChangeCurrentSongModel changeCurrentSongModel = new()
         {
@@ -158,11 +170,10 @@ public partial class Room : IAsyncDisposable
     {
         try
         {
-            await JSRuntime.InvokeVoidAsync("scrollToCurrentSong");
+            await JSRuntime.InvokeVoidAsync(_scrollToCurrentSongMethod);
         }
         catch
         {
-            // Ignore JS interop errors
         }
     }
 

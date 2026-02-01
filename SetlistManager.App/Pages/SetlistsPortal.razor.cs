@@ -4,7 +4,6 @@ using SetlistManager.App.Models;
 using SetlistManager.App.Pages.Dialogs;
 using SetlistManager.App.Services;
 using SetlistManager.Common.Models;
-using System.Reflection;
 
 namespace SetlistManager.App.Pages;
 

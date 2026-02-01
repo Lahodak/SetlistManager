@@ -11,53 +11,52 @@ namespace SetlistManager.App.Layout
         [Inject]
         public required NavigationManager Navigation { get; set; }
         [Inject]
-        public required ILocalStorageService LocalStorage { get; set; }
-        [Inject]
         public required IUserService UserService { get; set; }
 
+        private const string _loginUri = "/login";
+        private const string _homeUri = "/Home";
+        private const string _userPortalUri = "/UserPortal";
         private bool _drawerOpen = true;
-        private const string _localStorageKey = "ToggleDarkMode";
-        private const string _authTokenKey = "authToken";
         private readonly MudTheme _theme = new();
         private bool _isDarkMode;
         private UserModel? userModel;
 
         protected override async Task OnInitializedAsync()
-        {
-            var localData = await LocalStorage.GetItemAsync<bool>(_localStorageKey);
-            _isDarkMode = localData;
+        {                       
+            _isDarkMode = await UserService.GetUserDarkModeSettings();
             StateHasChanged();
 
-            var token = await LocalStorage.GetItemAsStringAsync(_authTokenKey);
+            var token = await UserService.GetUserTokenAsync();
 
-            if (string.IsNullOrWhiteSpace(token) && !Navigation.Uri.Contains("/login"))
+            if (string.IsNullOrWhiteSpace(token) && !Navigation.Uri.Contains(_loginUri))
             {
-                Navigation.NavigateTo("/login", true);
+                Navigation.NavigateTo(_loginUri, true);
                 return;
             }
 
             userModel = await UserService.GetUserAsync();
         }
 
-        void DrawerToggle()
+        private void DrawerToggle()
         {
             _drawerOpen = !_drawerOpen;
         }
 
-        void NavigateHome()
+        private void NavigateHome()
         {
-            Navigation.NavigateTo("/Home");
+            Navigation.NavigateTo(_homeUri);
         }
 
         private void OpenUserDetail()
         {
-            Navigation.NavigateTo("/UserPortal");
+            Navigation.NavigateTo(_userPortalUri);
         }
 
         private async Task ToggleTheme()
         {
             _isDarkMode = !_isDarkMode;
-            await LocalStorage.SetItemAsync(_localStorageKey, _isDarkMode);
+
+            await UserService.UpdateUserDarkModeSettingsAsync(_isDarkMode);
             StateHasChanged();
         }
     }
