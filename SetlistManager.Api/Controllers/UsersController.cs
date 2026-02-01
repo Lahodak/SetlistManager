@@ -11,17 +11,12 @@ namespace SetlistManager.Api.Controllers;
 public class UsersController : BaseController
 {
     private readonly IUserService _userService;
-    private readonly ICurrentUserContext _currentUserContext;
-    private readonly IGeniusAuthService _geniusAuthService;
     private readonly AppOptions _appOptions;
 
-    public UsersController(IUserService userService, ICurrentUserContext currentUserContext, 
-        IGeniusAuthService geniusAuthService, IOptions<AppOptions> appOptions)
+    public UsersController(IUserService userService, IOptions<AppOptions> appOptions)
     {
         _appOptions = appOptions.Value;
         _userService = userService;
-        _currentUserContext = currentUserContext;
-        _geniusAuthService = geniusAuthService;
     }
 
     [HttpGet]
@@ -33,9 +28,6 @@ public class UsersController : BaseController
     [HttpGet("{id}")]
     public async Task<ActionResult<UserModel>> GetUserById(int id)
     {
-        if (!IsAuthorized(id))
-            return Unauthorized();
-
         return Ok(await _userService.GetCurrentUserAsync(id));
     }
 
@@ -43,34 +35,15 @@ public class UsersController : BaseController
     public async Task<ActionResult> UpdateUser(UserModel model)
     {
         await _userService.UpdateUserAsync(model);
+
         return NoContent();
     }
 
     [AllowAnonymous]
     [HttpGet("tokens")]
-    public async Task<ActionResult> AddUserToken([FromQuery] GrantAccessTokenResultModel grantResultModel)
+    public async Task<ActionResult> AddGeniusTokenToUser([FromQuery] GrantAccessTokenResultModel grantResultModel)
     {
-        var user = await _userService.GetUserByTempSalt(grantResultModel.State);
-
-        if (user is null)
-            return NotFound("User not found");
-
-        var resultAccessTokenModel = await _geniusAuthService.ExchangeGeniusCode(grantResultModel.Code);
-
-        if (resultAccessTokenModel is null || resultAccessTokenModel.AccessToken is null)
-            return BadRequest();
-
-        TokenCreateModel tokenModel = new()
-        {
-            Provider = ProviderEnum.Genius,
-            AccessToken = resultAccessTokenModel.AccessToken,
-            RefreshToken = null
-        };
-
-        var result = await _userService.TryAddUserTokenAsync(user.Id, tokenModel);
-        
-        if(!result)
-            return BadRequest("Could not add token to user, provider not found");
+        await _userService.TryAddGeniusTokenToUserAsync(grantResultModel);       
 
         return Redirect(_appOptions.UserPortalUrl);
     }    
@@ -78,9 +51,6 @@ public class UsersController : BaseController
     [HttpPost("{id}/friendships")]
     public async Task<ActionResult> InitiateFriendship(int id, [FromBody] FriendshipRequestModel requestModel)
     {
-        if (!IsAuthorized(id))
-            return Unauthorized();
-
         await _userService.HandleFriendshipRequestAsync(id, requestModel);
         
         return NoContent();
@@ -89,9 +59,6 @@ public class UsersController : BaseController
     [HttpDelete("{id}/friendships/{friendshipId}")]
     public async Task<ActionResult> RemoveFriendship(int id, int friendshipId)
     {
-        if (!IsAuthorized(id))
-            return Unauthorized();
-
         await _userService.RemoveFriendshipAsync(id, friendshipId);
         
         return NoContent();
@@ -99,10 +66,7 @@ public class UsersController : BaseController
 
     [HttpGet("{id}/friendships")]
     public async Task<ActionResult<PagedResponse<FriendModel>>> GetUserFriends(int id, [FromQuery] PagedRequest pagedRequest)
-    {        
-        if (!IsAuthorized(id))
-            return Unauthorized();
-        
+    {
         var result = await _userService.GetUserFriendsAsync(id, pagedRequest);
                 
         return Ok(result);
@@ -111,17 +75,8 @@ public class UsersController : BaseController
     [HttpPut("{id}/friendships/{friendshipId}")]
     public async Task<ActionResult> AcceptFriendship(int id, int friendshipId)
     {
-        if (!IsAuthorized(id))
-            return Unauthorized();
-
         await _userService.AcceptFriendshipAsync(id, friendshipId);
         
         return NoContent();
-    }
-
-    private bool IsAuthorized(int id)
-    {
-        var currentUserId = _currentUserContext.GetCurrentUserId();
-        return currentUserId is not null && currentUserId.Value == id;
     }
 }
