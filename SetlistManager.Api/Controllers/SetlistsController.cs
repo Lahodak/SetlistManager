@@ -65,7 +65,7 @@ public class SetlistsController : BaseController
     [HttpPost("{id}/setlistsusers/{userId}")]
     public async Task<ActionResult> TryGiveAccessToSetlist(int id, int userId)
     {
-        var result = await _setlistService.TryGiveAccessToSetlistAsync(id);
+        var result = await _setlistService.TryGiveAccessToSetlistAsync(id, userId);
 
         if (!result)
             return NotFound();
