@@ -6,7 +6,7 @@ public interface IRoomService
 {
     event Action<RoomModel>? RoomUpdated;
     Task<RoomModel?> JoinRoomAsync(JoinRoomModel joinRoomModel);
-    Task<RoomModel?> CreateRoomAsync(RoomCreateModel createRoomModel);
-    Task<PagedResponse<RoomModel>?> GetPublicActiveRoomsAsync(PagedRequest request);
+    Task<RoomModel?> CreateRoomAsync(RoomCreateModel createModel);
+    Task<PagedResponse<RoomModel>> GetPublicActiveRoomsAsync(PagedRequest request);
     Task<RoomModel?> ChangeCurrentSongAsync(ChangeCurrentSongModel changeCurrentSongModel);
 }

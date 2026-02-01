@@ -6,31 +6,33 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using SetlistManager.App.Options;
 using SetlistManager.App.Models;
+using SetlistManager.Common.Exceptions;
 
 namespace SetlistManager.App.Services.Implementations;
 
 public class GeniusService : IGeniusService
 {
     private const string _searchEndpointSuffix = "/search?";
-    
+    private const string _geniusAccessTokenKey = "access_token";
+    private const string _geniusQueryKey = "q";
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IUserService _userService;
-    private readonly IOptions<GeniusOptions> _geniusOptions;
-    private readonly IOptions<SetlistManagerApiOptions> _apiOptions;
     private readonly IApiService _apiService;
+    private readonly GeniusOptions _geniusOptions;
+    private readonly SetlistManagerApiOptions _apiOptions;
     
     public GeniusService(IHttpClientFactory factory, IOptions<GeniusOptions> geniusOptions, IUserService userService, IApiService apiService, IOptions<SetlistManagerApiOptions> apiOptions)
     {
         _apiService = apiService;
-        _apiOptions = apiOptions;
-        _geniusOptions = geniusOptions;
+        _apiOptions = apiOptions.Value;
+        _geniusOptions = geniusOptions.Value;
         _httpClientFactory = factory;
         _userService = userService;
     }
 
     public async Task<string> AuthorizeAsync()
     {
-        var response = await _apiService.GetAsync<UrlResponseModel>(_apiOptions.Value.TokensEndpoint);
+        var response = await _apiService.GetAsync<UrlResponseModel>(_apiOptions.TokensEndpoint);
 
         if (response is null)
             return "/error";
@@ -46,17 +48,21 @@ public class GeniusService : IGeniusService
         if (token is null)
             return null;
 
-        UriBuilder uri = new(_geniusOptions.Value.BaseApiUrl + _searchEndpointSuffix)
+        UriBuilder uri = new(_geniusOptions.BaseApiUrl + _searchEndpointSuffix)
         {
             Query = new QueryBuilder
             {
-                { "access_token", token.AccessToken },
-                { "q", song.Name }
+                { _geniusAccessTokenKey, token.AccessToken },
+                { _geniusQueryKey, song.Name }
             }.ToString()
         };
 
         SearchResponseModel? responseModel;
         var searchResponse = await client.GetAsync(uri.ToString());
+
+        if (!searchResponse.IsSuccessStatusCode)
+            throw new GeniusSongLyricsNotFoundException();
+        
         string response = await searchResponse.Content.ReadAsStringAsync();
 
         try

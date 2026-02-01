@@ -4,7 +4,7 @@ namespace SetlistManager.App.Services;
 
 public interface ISongService
 {
-    Task<PagedResponse<SongModel>?> GetAllSongsAsync(PagedRequest request);
+    Task<PagedResponse<SongModel>> GetAllSongsAsync(PagedRequest request);
     Task<SongModel?> GetSongByIdAsync(int id);
     Task UploadSongAsync(SongCreateModel songCreateModel);
     Task<bool> TryUpdateSongAsync(int id, SongUpdateModel songModel); 
@@ -12,7 +12,7 @@ public interface ISongService
     Task<bool> TryMakeSongPublicAsync(int id);
     Task<bool> TryGiveAccessToUserAsync(int songId, int targetId);
     Task RemoveAccessFromUserAsync(int songId, int targetId);
-    Task<PagedResponse<SongUsageStatModel>?> GetMostUsedSongsAsync(StatsPagedRequest request);
-    Task<PagedResponse<SongUsageStatModel>?> GetMostAddedToLibraryAsync(PagedRequest request);
-    Task<PagedResponse<LatestSongStatModel>?> GetLatestPublicSongsAsync(PagedRequest request);
+    Task<PagedResponse<SongUsageStatModel>> GetMostUsedSongsAsync(StatsPagedRequest request);
+    Task<PagedResponse<SongUsageStatModel>> GetMostAddedToLibraryAsync(PagedRequest request);
+    Task<PagedResponse<LatestSongStatModel>> GetLatestPublicSongsAsync(PagedRequest request);
 }

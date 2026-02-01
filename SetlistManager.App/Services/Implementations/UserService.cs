@@ -23,19 +23,19 @@ public class UserService : IUserService
     private readonly IHttpClientFactory _httpClientFactory; 
     private readonly ILocalStorageService _localStorage;
     private readonly IApiService _apiService;
-    private readonly IOptions<SetlistManagerApiOptions> _apiOptions;
+    private readonly SetlistManagerApiOptions _apiOptions;
 
     public UserService(IHttpClientFactory httpClientFactory, ILocalStorageService localStorageService, IApiService apiService, 
         IOptions<SetlistManagerApiOptions> apiOptions)
     {
-        _apiOptions = apiOptions;
+        _apiOptions = apiOptions.Value;
         _httpClientFactory = httpClientFactory;
         _localStorage = localStorageService;
         _apiService = apiService;
     }
 
     public async Task AddNewProviderToken(TokenCreateModel tokenModel) 
-        => await _apiService.PutAsync(_apiOptions.Value.UsersEndpoint + _tokensEndpointSuffix, tokenModel);
+        => await _apiService.PutAsync(_apiOptions.UsersEndpoint + _tokensEndpointSuffix, tokenModel);
 
     public async Task<bool> GetUserDarkModeSettings()
     {
@@ -54,7 +54,7 @@ public class UserService : IUserService
         if (userId is null)
             return null;
 
-        return await _apiService.GetAsync<UserModel?>($"{_apiOptions.Value.UsersEndpoint}/{userId}");
+        return await _apiService.GetAsync<UserModel?>($"{_apiOptions.UsersEndpoint}/{userId}");
     }
 
     public async Task<List<SetlistModel>?> GetAllUserSetlists()
@@ -64,11 +64,11 @@ public class UserService : IUserService
         if (user is null)
             return null;
 
-        return await _apiService.GetAsync<List<SetlistModel>?>($"{_apiOptions.Value.UsersEndpoint}/{user.Id}{_getUserSetlistsSuffix}");
+        return await _apiService.GetAsync<List<SetlistModel>?>($"{_apiOptions.UsersEndpoint}/{user.Id}{_getUserSetlistsSuffix}");
     }
 
     public async Task RegisterAsync(RegisterRequestModel model) 
-        => await _apiService.PostAsync(_apiOptions.Value.AuthEndpoint, model);
+        => await _apiService.PostAsync(_apiOptions.AuthEndpoint, model);
 
     public async Task LogOutAsync() 
         => await _localStorage.RemoveItemAsync(_tokenKey);
@@ -102,7 +102,7 @@ public class UserService : IUserService
         if (userId is null)
             return false;
 
-        await _apiService.PutAsync($"{_apiOptions.Value.UsersEndpoint}/{userId}", user);
+        await _apiService.PutAsync($"{_apiOptions.UsersEndpoint}/{userId}", user);
         return true;
     }
 
@@ -110,7 +110,7 @@ public class UserService : IUserService
     {
         var client = _httpClientFactory.CreateClient();
 
-        var message = await client.PostAsJsonAsync($"{_apiOptions.Value.AuthEndpoint}{_loginUserSuffix}", model);
+        var message = await client.PostAsJsonAsync($"{_apiOptions.AuthEndpoint}{_loginUserSuffix}", model);
 
         if (!message.IsSuccessStatusCode)
             return false;
@@ -132,7 +132,7 @@ public class UserService : IUserService
             Token = token
         };
 
-        await _apiService.PostAsync($"{_apiOptions.Value.AuthEndpoint}{_verifyEmailSuffix}", verifyModel);
+        await _apiService.PostAsync($"{_apiOptions.AuthEndpoint}{_verifyEmailSuffix}", verifyModel);
         
         return true;                
     }
@@ -144,7 +144,7 @@ public class UserService : IUserService
             Email = email
         };
 
-        await _apiService.PostAsync($"{_apiOptions.Value.AuthEndpoint}{_resetPasswordRequestSuffix}", model);
+        await _apiService.PostAsync($"{_apiOptions.AuthEndpoint}{_resetPasswordRequestSuffix}", model);
 
         return true;
     }
@@ -158,7 +158,7 @@ public class UserService : IUserService
             Token = token
         };
 
-        await _apiService.PostAsync($"{_apiOptions.Value.AuthEndpoint}{_resetPasswordSuffix}", resetModel);
+        await _apiService.PostAsync($"{_apiOptions.AuthEndpoint}{_resetPasswordSuffix}", resetModel);
         
         return true;
     }
@@ -191,13 +191,13 @@ public class UserService : IUserService
         if (userId is null)
             return null;
 
-        UriBuilder uri = new($"{_apiOptions.Value.UsersEndpoint}/{userId}{_friendshipsSuffix}")
+        UriBuilder uri = new($"{_apiOptions.UsersEndpoint}/{userId}{_friendshipsSuffix}")
         {
             Query = new QueryBuilder
             {
-                { "PageSize", request.PageSize.ToString() },
-                { "PageIndex", request.PageIndex.ToString() },
-                { "Query", request.Query ?? string.Empty }
+                { nameof(request.PageSize), request.PageSize.ToString() },
+                { nameof(request.PageIndex), request.PageIndex.ToString() },
+                { nameof(request.Query), request.Query ?? string.Empty }
             }.ToString()
         };
 
@@ -211,7 +211,7 @@ public class UserService : IUserService
         if (initiatorId is null)
             return;
 
-        await _apiService.PostAsync($"{_apiOptions.Value.UsersEndpoint}/{initiatorId}{_friendshipsSuffix}", friendshipRequest);
+        await _apiService.PostAsync($"{_apiOptions.UsersEndpoint}/{initiatorId}{_friendshipsSuffix}", friendshipRequest);
     }
 
     public async Task<bool> TryRemoveFriendshipAsync(int friendshipId)
@@ -221,7 +221,7 @@ public class UserService : IUserService
         if (initiatorId is null)
             return false;
         
-        return await _apiService.TryDeleteAsync($"{_apiOptions.Value.UsersEndpoint}/{initiatorId}{_friendshipsSuffix}/{friendshipId}");
+        return await _apiService.TryDeleteAsync($"{_apiOptions.UsersEndpoint}/{initiatorId}{_friendshipsSuffix}/{friendshipId}");
     }
 
     public async Task<bool> TryAcceptFriendshipAsync(int friendshipId)
@@ -231,18 +231,18 @@ public class UserService : IUserService
         if (initiatorId is null)
             return false;
 
-        return await _apiService.TryPutAsync($"{_apiOptions.Value.UsersEndpoint}/{initiatorId}{_friendshipsSuffix}/{friendshipId}", "");
+        return await _apiService.TryPutAsync($"{_apiOptions.UsersEndpoint}/{initiatorId}{_friendshipsSuffix}/{friendshipId}", "");
     }
 
     public async Task<PagedResponse<UserViewModel>?> GetPagedUsersAsync(PagedRequest request)
     {
-        UriBuilder uri = new($"{_apiOptions.Value.UsersEndpoint}")
+        UriBuilder uri = new($"{_apiOptions.UsersEndpoint}")
         {
             Query = new QueryBuilder
             {
-                { "PageSize", request.PageSize.ToString() },
-                { "PageIndex", request.PageIndex.ToString() },
-                { "Query", request.Query ?? string.Empty }
+                { nameof(request.PageSize), request.PageSize.ToString() },
+                { nameof(request.PageIndex), request.PageIndex.ToString() },
+                { nameof(request.Query), request.Query ?? string.Empty }
             }.ToString()
         };
         
