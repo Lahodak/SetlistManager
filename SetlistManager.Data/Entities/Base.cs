@@ -1,6 +1,9 @@
-﻿namespace SetlistManager.Data.Entities;
+﻿using System.ComponentModel.DataAnnotations;
 
-public class Base
+namespace SetlistManager.Data.Entities;
+
+public abstract class Base
 {
+    [Key]
     public int Id { get; set; }
 }

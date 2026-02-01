@@ -188,7 +188,7 @@ public class UserService : IUserService
             State = FriendshipState.Pending
         };
 
-        await _dbContext.Friendships.AddAsync(newFriendship);
+        _dbContext.Friendships.Add(newFriendship);
         await _dbContext.SaveChangesAsync();
     }
 

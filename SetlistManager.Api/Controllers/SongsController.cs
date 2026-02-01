@@ -92,12 +92,14 @@ public class SongsController : BaseController
         return NoContent();
     }
 
+    //statistics?contenttype=song/setlist/askdjas&metric=most-used/most-added&range=all-time/last-month/last-year
+
     [HttpGet("most-used")]
     public async Task<ActionResult<PagedResponse<SongUsageStatModel>>> MostUsed([FromQuery] StatsPagedRequest request)
     {
         return Ok(await _songService.GetMostUsedSongsAsync(request));
     }
-
+     
     [HttpGet("most-added")]
     public async Task<ActionResult<PagedResponse<SongUsageStatModel>>> MostAdded([FromQuery] PagedRequest request)
     {

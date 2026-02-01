@@ -40,7 +40,7 @@ public class UsersController : BaseController
     }
 
     [AllowAnonymous]
-    [HttpGet("tokens")]
+    [HttpGet("genius-tokens-callback")]
     public async Task<ActionResult> AddGeniusTokenToUser([FromQuery] GrantAccessTokenResultModel grantResultModel)
     {
         await _userService.TryAddGeniusTokenToUserAsync(grantResultModel);       

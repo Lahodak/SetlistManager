@@ -2,7 +2,7 @@
 
 public class GeniusAccessTokenNotRecievedException : Exception
 {
-    public GeniusAccessTokenNotRecievedException() : base($"SetlistManager didn't recieve Access Token from Genius.")
+    public GeniusAccessTokenNotRecievedException() : base("SetlistManager didn't recieve Access Token from Genius.")
     {
     }
 }
