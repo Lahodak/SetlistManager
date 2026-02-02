@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SetlistManager.Business.Extentions;
 using SetlistManager.Business.Mappers;
 using SetlistManager.Common.Models;
 using SetlistManager.Data;
@@ -29,21 +30,17 @@ public class SongService : ISongService
             ? query.Where(x => x.OwnerId == userId || x.SongsUsers.Any(su => su.UserId == userId))
             : query.Where(x => x.IsPublic);
 
-        var totalCount = await query.CountAsync();
-
-        var songs = await query
+        var result = await query
             .Include(x => x.Language)
             .Include(x => x.Artist)
             .Include(x => x.Owner)
-            .Skip(request.PageIndex * request.PageSize)
-            .Take(request.PageSize)
             .AsNoTracking()
-            .ToListAsync();
+            .ToPaginatedResultAsync(request);
 
         return new PagedResponse<SongModel>
         {
-            TotalCount = totalCount,
-            Items = songs
+            TotalCount = result.TotalCount,
+            Items = result.Items?
                 .Select(x => x.ToModel())
                 .ToList()
         };
@@ -120,20 +117,7 @@ public class SongService : ISongService
         if ((await _dbContext.Artists.FirstOrDefaultAsync(x => x.Id == songCreateModel.ArtistId))!.IsPublic)
             isArtistPublic = true;
 
-        Song song = new()
-        {
-            Name = songCreateModel.Name,
-            ArtistId = songCreateModel.ArtistId,
-            TabsURL = songCreateModel.TabsURL,
-            AudioURL = songCreateModel.AudioURL,
-            Key = songCreateModel.Key,
-            Tuning = songCreateModel.Tuning,
-            BPM = songCreateModel.BPM!.Value,
-            CreatedAt = DateTime.UtcNow,            
-            OwnerId = userId,
-            LanguageId = songCreateModel.LanguageId,
-            IsPublic = isArtistPublic
-        };
+        Song song = songCreateModel.ToEntity(userId, isArtistPublic);
 
         _dbContext.Songs.Add(song);
         await _dbContext.SaveChangesAsync();
@@ -154,15 +138,7 @@ public class SongService : ISongService
         if (song is null || song.OwnerId != userId || song.IsPublic)
             return false;
 
-        song.Name = updateModel.Name;
-        song.ArtistId = updateModel.ArtistId;
-        song.TabsURL = updateModel.TabsURL;
-        song.AudioURL = updateModel.AudioURL;
-        song.Key = updateModel.Key;
-        song.Tuning = updateModel.Tuning;
-        song.BPM = updateModel.BPM;
-        song.LanguageId = updateModel.LanguageId;
-        song.UpdatedAt = DateTime.UtcNow;
+        song.UpdateEntity(updateModel);
 
         await _dbContext.SaveChangesAsync();        
         return true;

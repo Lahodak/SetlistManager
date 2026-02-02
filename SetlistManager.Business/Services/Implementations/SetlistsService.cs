@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SetlistManager.Business.Extentions;
 using SetlistManager.Business.Mappers;
 using SetlistManager.Common.Models;
 using SetlistManager.Data;
@@ -43,9 +44,7 @@ public class SetlistsService : ISetlistsService
             (string.IsNullOrEmpty(request.Query) || s.Name.Contains(request.Query))
             && (s.SetlistsUsers.Any(x => x.UserId == userId) || s.OwnerId == userId));
 
-        var totalCount = await query.CountAsync();
-
-        var setlists = await query
+        var result = await query
             .Include(s => s.SongsSetlists)
                 .ThenInclude(s => s.Song)
                     .ThenInclude(l => l.Language)
@@ -53,21 +52,16 @@ public class SetlistsService : ISetlistsService
                 .ThenInclude(s => s.Song)
                     .ThenInclude(s => s.Artist)
             .Include(x => x.Owner)
-            .Skip(request.PageIndex * request.PageSize)
-            .Take(request.PageSize)
             .AsNoTracking()
-            .ToListAsync();
+            .ToPaginatedResultAsync(request);
 
-        PagedResponse<SetlistModel> response = new()
+        return new PagedResponse<SetlistModel>
         {
-            TotalCount = totalCount,
-            Items = setlists
-                .Select(setlists => setlists
-                .ToModel())
+            TotalCount = result.TotalCount,
+            Items = result.Items?
+                .Select(s => s.ToModel())
                 .ToList()
         };
-
-        return response;
     }
 
     public async Task<bool> TryGiveAccessToSetlistAsync(int setlistId, int targetId)

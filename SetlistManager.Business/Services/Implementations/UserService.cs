@@ -119,7 +119,7 @@ public class UserService : IUserService
 
     public async Task TryAddGeniusTokenToUserAsync(GrantAccessTokenResultModel grantResultModel)
     {
-        var user = await GetUserByTempSalt(grantResultModel.State)
+        var user = await GetUserByTempAuthSecret(grantResultModel.State)
             ?? throw new UserNotFoundException();
 
         TokenCreateModel tokenModel = new()
@@ -146,7 +146,7 @@ public class UserService : IUserService
         return;
     }
 
-    public async Task<User?> GetUserByTempSalt(string salt)
+    public async Task<User?> GetUserByTempAuthSecret(string salt)
     {
         var tempAuth = await _dbContext.TempAuthStorage
             .FirstOrDefaultAsync(x => x.TempSecret == salt);

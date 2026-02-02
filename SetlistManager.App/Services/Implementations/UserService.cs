@@ -3,8 +3,6 @@ using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Options;
 using SetlistManager.App.Options;
 using SetlistManager.Common.Models;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 
 namespace SetlistManager.App.Services.Implementations;
 public class UserService : IUserService

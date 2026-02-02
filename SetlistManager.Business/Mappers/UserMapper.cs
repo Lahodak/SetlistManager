@@ -17,7 +17,7 @@ public static class UserMapper
                 Provider = t.Provider.Name,
             }).ToList();
 
-        return new UserModel
+        return new()
         {
             Id = user.Id,
             Username = user.UserName!,
@@ -28,17 +28,6 @@ public static class UserMapper
                 Name = user.Instrument?.Name ?? "No Instrument"
             },
             Tokens = tokens
-        };
-    }
-
-    public static User ToEntity(this UserModel model)
-    {
-        return new User
-        {
-            UserName = model.Username,
-            Email = model.Email,
-            IsActive = true,
-            InstrumentId = model.Instrument?.Id
         };
     }
 

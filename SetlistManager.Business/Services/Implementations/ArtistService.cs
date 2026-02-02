@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SetlistManager.Business.Extentions;
 using SetlistManager.Business.Mappers;
 using SetlistManager.Common.Exceptions;
 using SetlistManager.Common.Models;
@@ -22,29 +23,26 @@ public class ArtistService : IArtistService
     {
         int userId = _currentUserContext.GetCurrentUserId()!.Value;
 
-        var searchQuery = request.Query ?? string.Empty;
+        if(request.Query is null)
+            request.Query = string.Empty;
+
         var query = _dbContext.Artists
-            .Where(x => x.Nick.Contains(searchQuery));
+            .Where(x => x.Nick.Contains(request.Query));
 
         query = request.ContentType == ContentType.Private
             ? query.Where(x => x.OwnerId == userId || x.ArtistsUsers.Any(su => su.UserId == userId))
             : query.Where(x => x.IsPublic);
 
-        var totalCount = await query.CountAsync();
-
-        var artists = await query
-           .Include(x => x.Songs.Where(x => x.OwnerId == userId || x.SongsUsers.Any(su => su.UserId == userId)))
-           .ThenInclude(x => x.Language)
-           .AsNoTracking()
-           .Skip(request.PageIndex * request.PageSize)
-           .Take(request.PageSize)
-           .AsNoTracking()
-           .ToListAsync();
+        var result = await query
+            .Include(x => x.Songs.Where(x => x.OwnerId == userId || x.SongsUsers.Any(su => su.UserId == userId)))
+            .ThenInclude(x => x.Language)
+            .AsNoTracking()
+            .ToPaginatedResultAsync(request);
 
         return new PagedResponse<ArtistModel>
         {
-            TotalCount = totalCount,
-            Items = artists
+            TotalCount = result.TotalCount,
+            Items = result.Items?
                 .Select(a => a.ToModel())
                 .ToList()
         };

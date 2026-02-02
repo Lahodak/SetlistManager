@@ -1,23 +1,23 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SetlistManager.Business.Extentions;
 using SetlistManager.Business.Mappers;
 using SetlistManager.Common.Models;
 using SetlistManager.Data;
 using SetlistManager.Data.Entities;
-using System.Text;
 
 namespace SetlistManager.Business.Services.Implementations;
 
 public class RoomsService : IRoomsService
 {
-    private const string roomCodeAvailableCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    private const int roomCodeLength = 6;
-    private readonly AppDbContext _dbContext;
     private readonly ICurrentUserContext _currentUserContext;
+    private readonly IRoomCodeService _roomCodeService;
+    private readonly AppDbContext _dbContext;
 
-    public RoomsService(AppDbContext dbContext, ICurrentUserContext currentUserContext)
+    public RoomsService(AppDbContext dbContext, ICurrentUserContext currentUserContext, IRoomCodeService roomCodeService)
     {
         _dbContext = dbContext;
         _currentUserContext = currentUserContext;
+        _roomCodeService = roomCodeService;
     }
 
     public async Task<RoomModel?> GetRoomByIdAsync(int roomId)
@@ -51,20 +51,7 @@ public class RoomsService : IRoomsService
     public async Task<RoomModel> CreateRoomAsync(RoomCreateModel createRoomModel)
     {
         int hostId = _currentUserContext.GetCurrentUserId()!.Value;
-
-        StringBuilder code = new(roomCodeLength);
-
-        do
-        {
-            code.Clear();
-            for (int i = 0; i < roomCodeLength; i++)
-            {
-                int index = Random.Shared.Next(roomCodeAvailableCharacters.Length - 1);
-                code.Append(roomCodeAvailableCharacters[index]);
-            }
-        } 
-        while (await _dbContext.Rooms.AnyAsync(x => x.Code == code.ToString()));
-
+       
         Room room = new()
         {
             Name = createRoomModel.Name,
@@ -74,7 +61,7 @@ public class RoomsService : IRoomsService
             UpdatedBy = hostId,
             CreatedAt = DateTime.UtcNow,
             IsActive = true,
-            Code = code.ToString()
+            Code = await _roomCodeService.GenerateUniqueRoomCodeAsync()
         };
         
         _dbContext.Rooms.Add(room);
@@ -171,9 +158,7 @@ public class RoomsService : IRoomsService
             .Where(x => x.IsActive)
             .Where(x => x.Name.Contains(request.Query ?? string.Empty));
 
-        var totalCount = await query.CountAsync();
-
-        var rooms = await query
+        var result = await query
             .Include(x => x.Setlist)
                 .ThenInclude(x => x!.SongsSetlists)
                 .ThenInclude(x => x.Song)
@@ -184,20 +169,16 @@ public class RoomsService : IRoomsService
                 .ThenInclude(x => x.Artist)
             .Include(x => x.Users)
                 .ThenInclude(x => x.Instrument)
-            .Skip(request.PageIndex * request.PageSize)
-            .Take(request.PageSize)
             .AsNoTracking()
-            .ToListAsync();
+            .ToPaginatedResultAsync(request);
 
-        PagedResponse<RoomModel> response = new()
+        return new PagedResponse<RoomModel>
         {
-            TotalCount = totalCount,
-            Items = rooms
+            TotalCount = result.TotalCount,
+            Items = result.Items?
                 .Select(x => x.ToModel())
                 .ToList()
         };
-
-        return response;
     }
 
     public async Task<RoomModel?> GetRoomByCodeAsync(string roomCode)

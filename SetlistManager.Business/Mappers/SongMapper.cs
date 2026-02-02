@@ -27,6 +27,37 @@ public static class SongMapper
         };
     }
 
+    public static Song ToEntity(this SongCreateModel model, int creatorId, bool isArtistPublic)
+    {
+        return new()
+        {
+            Name = model.Name,
+            ArtistId = model.ArtistId,
+            TabsURL = model.TabsURL,
+            AudioURL = model.AudioURL,
+            Key = model.Key,
+            Tuning = model.Tuning,
+            BPM = model.BPM!.Value,
+            CreatedAt = DateTime.UtcNow,
+            OwnerId = creatorId,
+            LanguageId = model.LanguageId,
+            IsPublic = isArtistPublic
+        };
+    }
+
+    public static void UpdateEntity(this Song entity, SongUpdateModel model)
+    {
+        entity.Name = model.Name;
+        entity.ArtistId = model.ArtistId;
+        entity.TabsURL = model.TabsURL;
+        entity.AudioURL = model.AudioURL;
+        entity.Key = model.Key;
+        entity.Tuning = model.Tuning;
+        entity.BPM = model.BPM;
+        entity.LanguageId = model.LanguageId;
+        entity.UpdatedAt = DateTime.UtcNow;
+    }
+
     public static SongModel ToModelWithoutArtist(this Song entity)
     {
         return new()

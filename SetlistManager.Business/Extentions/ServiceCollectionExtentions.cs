@@ -21,6 +21,7 @@ public static class ServiceCollectionExtentions
         services.AddScoped<IGeniusAuthService, GeniusAuthService>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<ICurrentUserContext, CurrentUserContext>();
+        services.AddScoped<IRoomCodeService, RoomCodeService>();
         return services;
     }
 }
