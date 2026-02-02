@@ -8,7 +8,7 @@ public interface IUserService
     Task RegisterAsync(RegisterRequestModel model);
     Task LogOutAsync();
     Task<string?> GetUserTokenAsync();
-    Task<bool> IsUserLoggedInAsync();
+    Task<bool> VerifyStoredToken();
     Task<bool> TryUpdateUser(UserModel user);
     Task<bool> LogInAsync(LoginRequestModel model);
     Task<bool> VerifyEmailAsync(string token, string email);

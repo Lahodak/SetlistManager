@@ -14,7 +14,7 @@ public partial class BlankPage
 
     protected override async Task OnInitializedAsync()
     {
-        if (await UserService.IsUserLoggedInAsync())
+        if (await UserService.VerifyStoredToken())
         {
             Navigation.NavigateTo(_homeUri);
             return;

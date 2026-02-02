@@ -19,10 +19,10 @@ public class UsersController : BaseController
         return Ok(await _userService.GetUsersAsync(pagedRequest));
     }
 
-    [HttpGet("{id}")]
-    public async Task<ActionResult<UserModel>> GetUserById(int id)
+    [HttpGet("me")]
+    public async Task<ActionResult<UserModel>> GetCurrentUser()
     {
-        return Ok(await _userService.GetCurrentUserAsync(id));
+        return Ok(await _userService.GetCurrentUserAsync());
     }
 
     [HttpPut]

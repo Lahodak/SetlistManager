@@ -64,7 +64,7 @@ public class AuthController : BaseController
     }
 
     [AllowAnonymous]
-    [HttpPost("verify")]
+    [HttpPost("verify-email")]
     public async Task<ActionResult<bool>> VerifyEmail(VerifyModel verifyModel)
     {
         var result = await _authService.VerifyEmailAsync(verifyModel);
@@ -96,6 +96,12 @@ public class AuthController : BaseController
         if(!result)
             return BadRequest();
 
+        return NoContent();
+    }
+
+    [HttpPost("verify-token")]
+    public ActionResult VerifyToken()
+    {
         return NoContent();
     }
 }

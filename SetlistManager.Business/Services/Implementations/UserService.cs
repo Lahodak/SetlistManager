@@ -78,10 +78,9 @@ public class UserService : IUserService
         return pagedResponse;
     }
 
-    public async Task<UserModel?> GetCurrentUserAsync(int userId)
+    public async Task<UserModel?> GetCurrentUserAsync()
     {
-        if (userId != _currentUserContext.GetCurrentUserId()!.Value)
-            throw new UnauthorizedAccessException();
+        var userId = _currentUserContext.GetCurrentUserId()!.Value;
 
         User? user = await _dbContext.Users
             .Include(u => u.Instrument)

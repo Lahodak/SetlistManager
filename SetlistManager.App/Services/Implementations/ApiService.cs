@@ -69,6 +69,18 @@ public class ApiService : IApiService
         return await response.Content.ReadFromJsonAsync<T>();
     }
 
+    public async Task<bool> PostAsync(string endpoint)
+    {
+        await ConfigureHttpClientAsync(_client);
+        
+        var response = await _client.PostAsync(endpoint, null);
+        
+        if (response.IsSuccessStatusCode)
+            return true;
+
+        return false;
+    }
+
     public async Task<TResponse?> PostAsync<TRequest, TResponse>(string endpoint, TRequest data)
     {
         await ConfigureHttpClientAsync(_client);

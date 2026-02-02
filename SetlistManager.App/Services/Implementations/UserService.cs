@@ -4,54 +4,40 @@ using Microsoft.Extensions.Options;
 using SetlistManager.App.Options;
 using SetlistManager.Common.Models;
 using System.IdentityModel.Tokens.Jwt;
-using System.Net.Http.Json;
 using System.Security.Claims;
 
 namespace SetlistManager.App.Services.Implementations;
 public class UserService : IUserService
 {
-    private const string _loginUserSuffix = "/login";
-    private const string _tokenKey = "authToken";
-    private const string _getUserSetlistsSuffix = "/setlists";
-    private const string _verifyEmailSuffix = "/verify";
-    private const string _resetPasswordSuffix = "/reset-password";
-    private const string _resetPasswordRequestSuffix = "/request-password-reset";
-    private const string _friendshipsSuffix = "/friendships";
-    private const string _darkModeSettingsKey = "ToggleDarkMode";
-
-    private readonly IHttpClientFactory _httpClientFactory; 
     private readonly ILocalStorageService _localStorage;
     private readonly IApiService _apiService;
     private readonly SetlistManagerApiOptions _apiOptions;
+    
+    private const string _loginUserSuffix = "/login";
+    private const string _tokenKey = "authToken";
+    private const string _verifyEmailSuffix = "/verify-email";
+    private const string _resetPasswordSuffix = "/reset-password";
+    private const string _verifyTokenSuffix = "/verify-token";
+    private const string _resetPasswordRequestSuffix = "/request-password-reset";
+    private const string _friendshipsSuffix = "/friendships";
+    private const string _meSuffix = "/me";
+    private const string _darkModeSettingsKey = "ToggleDarkMode";
 
-    public UserService(IHttpClientFactory httpClientFactory, ILocalStorageService localStorageService, IApiService apiService, 
-        IOptions<SetlistManagerApiOptions> apiOptions)
+    public UserService(ILocalStorageService localStorageService, IApiService apiService, IOptions<SetlistManagerApiOptions> apiOptions)
     {
         _apiOptions = apiOptions.Value;
-        _httpClientFactory = httpClientFactory;
         _localStorage = localStorageService;
         _apiService = apiService;
     }
 
-    public async Task<bool> GetUserDarkModeSettings()
-    {
-        return await _localStorage.GetItemAsync<bool>(_darkModeSettingsKey);
-    }
+    public async Task<bool> GetUserDarkModeSettings() 
+        => await _localStorage.GetItemAsync<bool>(_darkModeSettingsKey);
 
-    public async Task UpdateUserDarkModeSettingsAsync(bool newValue)
-    {
-        await _localStorage.SetItemAsync(_darkModeSettingsKey, newValue);
-    }
+    public async Task UpdateUserDarkModeSettingsAsync(bool newValue) 
+        => await _localStorage.SetItemAsync(_darkModeSettingsKey, newValue);
 
-    public async Task<UserModel?> GetUserAsync()
-    {
-        var userId = await GetCurrentUserIdAsync();
-        
-        if (userId is null)
-            return null;
-
-        return await _apiService.GetAsync<UserModel?>($"{_apiOptions.UsersEndpoint}/{userId}");
-    }
+    public async Task<UserModel?> GetUserAsync() 
+        => await _apiService.GetAsync<UserModel?>($"{_apiOptions.UsersEndpoint}{_meSuffix}");
 
     public async Task RegisterAsync(RegisterRequestModel model) 
         => await _apiService.PostAsync(_apiOptions.AuthEndpoint, model);
@@ -62,24 +48,8 @@ public class UserService : IUserService
     public async Task<string?> GetUserTokenAsync() 
         => await _localStorage.GetItemAsync<string>(_tokenKey);
 
-    public async Task<bool> IsUserLoggedInAsync()
-    {
-        var token = await _localStorage.GetItemAsync<string>(_tokenKey);
-        if (string.IsNullOrWhiteSpace(token))
-            return false;
-
-        var handler = new JwtSecurityTokenHandler();
-        if (!handler.CanReadToken(token))
-            return false;
-
-        var jwt = handler.ReadJwtToken(token);
-        var exp = jwt.ValidTo;
-
-        if (exp < DateTime.UtcNow)
-            return false;
-
-        return true;
-    }
+    public async Task<bool> VerifyStoredToken() 
+        => await _apiService.PostAsync($"{_apiOptions.AuthEndpoint}{_verifyTokenSuffix}");
 
     public async Task<bool> TryUpdateUser(UserModel user)
     {
@@ -94,19 +64,12 @@ public class UserService : IUserService
 
     public async Task<bool> LogInAsync(LoginRequestModel model)
     {
-        var client = _httpClientFactory.CreateClient();
+        var result = await _apiService.PostAsync<LoginRequestModel, LoginResultModel>($"{_apiOptions.AuthEndpoint}{_loginUserSuffix}", model);
 
-        var message = await client.PostAsJsonAsync($"{_apiOptions.AuthEndpoint}{_loginUserSuffix}", model);
-
-        if (!message.IsSuccessStatusCode)
-            return false;
-        
-        var loginResult = await message.Content.ReadFromJsonAsync<LoginResultModel>();
-
-        if (loginResult?.Token is null)
+        if (result?.Token is null)
             return false;
 
-        await _localStorage.SetItemAsync(_tokenKey, loginResult.Token);
+        await _localStorage.SetItemAsync(_tokenKey, result.Token);
         return true;
     }
 
@@ -155,19 +118,8 @@ public class UserService : IUserService
         if (string.IsNullOrWhiteSpace(token))
             return null;
 
-        var handler = new JwtSecurityTokenHandler();
-        if (!handler.CanReadToken(token))
-            return null;
-
-        var jwt = handler.ReadJwtToken(token);
-
-        var userIdClaim = jwt.Claims
-            .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier
-                              || c.Type == "nameid");
-
-        return int.TryParse(userIdClaim?.Value, out var userId)
-            ? userId
-            : null;
+        var user = await GetUserAsync();
+        return user?.Id;
     }
 
     public async Task<PagedResponse<FriendModel>?> GetUserFriendshipsAsync(PagedRequest request)

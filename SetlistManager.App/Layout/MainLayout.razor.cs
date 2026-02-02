@@ -13,7 +13,7 @@ namespace SetlistManager.App.Layout
         public required IUserService UserService { get; set; }
 
         private const string _loginUri = "/login";
-        private const string _homeUri = "/Home";
+        private const string _homeUri = "/home";
         private const string _userPortalUri = "/UserPortal";
         private bool _drawerOpen = true;
         private readonly MudTheme _theme = new();
