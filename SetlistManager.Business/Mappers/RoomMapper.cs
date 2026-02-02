@@ -39,21 +39,4 @@ public static class RoomMapper
             Setlist = setlist
         };
     }
-
-    public static Room ToEntity(this RoomModel model)
-    {
-        return new Room
-        {
-            Name = model.Name,
-            Code = model.Name,
-            IsActive = model.IsActive,
-            IsPublic = model.IsPublic,
-            HostId = model.HostId,
-            CreatedAt = model.CreatedAt,
-            UpdatedAt = model.UpdatedAt,
-            UpdatedBy = model.UpdatedBy,
-            CurrentSongId = model.CurrentSong,
-            SetlistId = model.Setlist?.Id
-        };
-    }
 }

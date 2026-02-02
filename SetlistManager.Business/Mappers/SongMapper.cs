@@ -5,13 +5,13 @@ namespace SetlistManager.Business.Mappers;
 
 public static class SongMapper
 {
-    public static SongModel ToModel(this Song entity, bool includeArtist = true)
+    public static SongModel ToModel(this Song entity)
     {
-        SongModel model = new()
+        return new()
         {
             Id = entity.Id,
             Name = entity.Name,
-            Artist = includeArtist ? entity.Artist.ToModel(false) : new(),
+            Artist = entity.Artist.ToModelWithoutSongs(),
             TabsURL = entity.TabsURL,
             AudioURL = entity.AudioURL,
             Language = entity.Language.ToModel(),
@@ -25,6 +25,26 @@ public static class SongMapper
             OwnerNick = entity.Owner?.UserName,
             IsPublic = entity.IsPublic
         };
-        return model;
+    }
+
+    public static SongModel ToModelWithoutArtist(this Song entity)
+    {
+        return new()
+        {
+            Id = entity.Id,
+            Name = entity.Name,
+            TabsURL = entity.TabsURL,
+            AudioURL = entity.AudioURL,
+            Language = entity.Language.ToModel(),
+            LanguageId = entity.LanguageId,
+            Key = entity.Key,
+            Tuning = entity.Tuning,
+            BPM = entity.BPM,
+            CreatedAt = entity.CreatedAt,
+            UpdatedAt = entity.UpdatedAt,
+            OwnerId = entity.OwnerId,
+            OwnerNick = entity.Owner?.UserName,
+            IsPublic = entity.IsPublic
+        };
     }
 }

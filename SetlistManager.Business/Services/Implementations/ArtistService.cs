@@ -45,7 +45,7 @@ public class ArtistService : IArtistService
         {
             TotalCount = totalCount,
             Items = artists
-                .Select(a => a.ToModel(true))
+                .Select(a => a.ToModel())
                 .ToList()
         };
     }
@@ -66,7 +66,7 @@ public class ArtistService : IArtistService
             .ThenInclude(x => x.Language)
             .FirstOrDefaultAsync();
 
-        return artist?.ToModel(true);
+        return artist?.ToModel();
     }
 
     public async Task TryCreateArtistAsync(ArtistCreateModel createModel)
