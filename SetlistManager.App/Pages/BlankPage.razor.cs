@@ -9,14 +9,16 @@ public partial class BlankPage
     public required NavigationManager Navigation { get; set; }
     [Inject]
     public required IUserService UserService { get; set; }
+    private const string _homeUri = "/home";
+    private const string _loginUri = "/login";
 
     protected override async Task OnInitializedAsync()
     {
         if (await UserService.IsUserLoggedInAsync())
         {
-            Navigation.NavigateTo("/home");
+            Navigation.NavigateTo(_homeUri);
             return;
         }
-        Navigation.NavigateTo("/login");
+        Navigation.NavigateTo(_loginUri);
     }
 }

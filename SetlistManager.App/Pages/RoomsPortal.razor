@@ -27,12 +27,16 @@
         <MudTable ServerData="ServerReload" Hover="true" @ref="table">
             <ToolBarContent>
                 <MudText Typo="Typo.h6">Browse Public Rooms</MudText>
-                <MudSpacer />
-                <MudTextField T="string" ValueChanged="@(s => OnSearch(s))" Placeholder="Search rooms"
+                <MudSpacer/>
+                <MudTextField @bind-Value="searchString"
+                              Placeholder="Search artists"
                               Adornment="Adornment.Start"
                               AdornmentIcon="@Icons.Material.Filled.Search"
-                              IconSize="Size.Medium" Class="mt-0 ml-3">
-                </MudTextField>
+                              IconSize="Size.Medium"
+                              Class="mt-0 ml-4"
+                              Immediate="true"
+                              DebounceInterval="700"
+                              OnDebounceIntervalElapsed="OnSearch"/>
             </ToolBarContent>
 
             <HeaderContent>

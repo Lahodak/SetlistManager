@@ -17,7 +17,6 @@ public class UserService : IUserService
     private const string _resetPasswordSuffix = "/reset-password";
     private const string _resetPasswordRequestSuffix = "/request-password-reset";
     private const string _friendshipsSuffix = "/friendships";
-    private const string _tokensEndpointSuffix = "/tokens";
     private const string _darkModeSettingsKey = "ToggleDarkMode";
 
     private readonly IHttpClientFactory _httpClientFactory; 
@@ -33,9 +32,6 @@ public class UserService : IUserService
         _localStorage = localStorageService;
         _apiService = apiService;
     }
-
-    public async Task AddNewProviderToken(TokenCreateModel tokenModel) 
-        => await _apiService.PutAsync(_apiOptions.UsersEndpoint + _tokensEndpointSuffix, tokenModel);
 
     public async Task<bool> GetUserDarkModeSettings()
     {
@@ -55,16 +51,6 @@ public class UserService : IUserService
             return null;
 
         return await _apiService.GetAsync<UserModel?>($"{_apiOptions.UsersEndpoint}/{userId}");
-    }
-
-    public async Task<List<SetlistModel>?> GetAllUserSetlists()
-    {
-        UserModel? user = await GetUserAsync();
-        
-        if (user is null)
-            return null;
-
-        return await _apiService.GetAsync<List<SetlistModel>?>($"{_apiOptions.UsersEndpoint}/{user.Id}{_getUserSetlistsSuffix}");
     }
 
     public async Task RegisterAsync(RegisterRequestModel model) 

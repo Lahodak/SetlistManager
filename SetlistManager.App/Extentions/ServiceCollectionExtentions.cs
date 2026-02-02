@@ -1,4 +1,5 @@
-﻿using SetlistManager.App.Services;
+﻿using SetlistManager.App.Options;
+using SetlistManager.App.Services;
 using SetlistManager.App.Services.Implementations;
 
 namespace SetlistManager.App.Extentions;
@@ -17,6 +18,13 @@ public static class ServiceCollectionExtentions
         services.AddScoped<IRoomService, RoomService>();
         services.AddScoped<IGeniusService, GeniusService>();
         services.AddScoped<IQRService, QRService>();
+        return services;
+    }
+
+    public static IServiceCollection ConfigureOptions(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.Configure<SetlistManagerApiOptions>(configuration.GetSection(SetlistManagerApiOptions.SectionName))
+                .Configure<GeniusOptions>(configuration.GetSection(GeniusOptions.SectionName));
         return services;
     }
 }

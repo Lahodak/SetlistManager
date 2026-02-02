@@ -50,7 +50,6 @@ public partial class PublicArtists
     private async Task<TableData<ArtistModel>?> ServerReload(TableState state, CancellationToken token)
     {
         _loading = true;
-        await Task.Delay(300, token);
 
         pageState.Query = searchString;
         pageState.PageIndex = state.Page;

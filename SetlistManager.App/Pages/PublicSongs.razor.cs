@@ -48,7 +48,6 @@ public partial class PublicSongs
     private async Task<TableData<SongModel>?> ServerReload(TableState state, CancellationToken token)
     {
         _loading = true;
-        await Task.Delay(300, token);
 
         pageState.Query = searchString;
         pageState.PageIndex = state.Page;

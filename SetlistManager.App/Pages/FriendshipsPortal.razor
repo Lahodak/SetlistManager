@@ -14,11 +14,15 @@
                            StartIcon="@Icons.Material.Filled.PersonAdd">
                     Add Friend
                 </MudButton>
-                <MudTextField T="string" ValueChanged="@(s => OnSearch(s))" Placeholder="Search friends"
+                <MudTextField @bind-Value="searchString"
+                              Placeholder="Search artists"
                               Adornment="Adornment.Start"
                               AdornmentIcon="@Icons.Material.Filled.Search"
-                              IconSize="Size.Medium" Class="mt-0 ml-4">
-                </MudTextField>
+                              IconSize="Size.Medium" 
+                              Class="mt-0 ml-4"
+                              Immediate="true"
+                              DebounceInterval="700"
+                              OnDebounceIntervalElapsed="OnSearch" />
             </ToolBarContent>
             <HeaderContent>
                 <MudTh><MudTableSortLabel SortLabel="username_field" T="FriendModel">Username</MudTableSortLabel></MudTh>

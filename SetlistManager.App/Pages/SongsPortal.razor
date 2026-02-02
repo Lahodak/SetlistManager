@@ -16,11 +16,15 @@
                 <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OpenAddSongDialog" StartIcon="@Icons.Material.Filled.Add">
                     Add Song
                 </MudButton>
-                <MudTextField T="string" ValueChanged="@(s => OnSearch(s))" Placeholder="Search songs"
+                <MudTextField @bind-Value="searchString"
+                              Placeholder="Search artists"
                               Adornment="Adornment.Start"
                               AdornmentIcon="@Icons.Material.Filled.Search"
-                              IconSize="Size.Medium" Class="mt-0 ml-4">
-                </MudTextField>
+                              IconSize="Size.Medium"
+                              Class="mt-0 ml-4"
+                              Immediate="true"
+                              DebounceInterval="700"
+                              OnDebounceIntervalElapsed="OnSearch" />
             </ToolBarContent>
             <HeaderContent>
                 <MudTh><MudTableSortLabel SortLabel="title_field" T="SongModel">Title</MudTableSortLabel></MudTh>

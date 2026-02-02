@@ -30,8 +30,6 @@ public partial class SongsPortal
 
     private async Task<TableData<SongModel>?> ServerReload(TableState state, CancellationToken token)
     {
-        await Task.Delay(300, token);
-
         _pageState.Query = searchString;
         _pageState.PageIndex = state.Page;
         _pageState.PageSize = state.PageSize;

@@ -19,7 +19,7 @@ public partial class ArtistsPortal
     public required IUserService UserService { get; set; }
 
     private MudTable<ArtistModel> _table = new();
-    private PagedRequest pageStatus = new() { ContentType = ContentType.Private };
+    private readonly PagedRequest pageStatus = new() { ContentType = ContentType.Private };
     private string? searchString;
     private int _userId;
 
@@ -30,7 +30,6 @@ public partial class ArtistsPortal
 
     private async Task<TableData<ArtistModel>> ServerReload(TableState state, CancellationToken token)
     {
-        await Task.Delay(300, token);
         pageStatus.PageIndex = state.Page;
         pageStatus.PageSize = state.PageSize;
         pageStatus.Query = searchString;

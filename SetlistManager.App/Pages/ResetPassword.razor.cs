@@ -14,17 +14,16 @@ public partial class ResetPassword
     [Inject]
     public required ISnackbar Snackbar { get; set; }
 
+    private bool _isSubmitting = false;
+    private bool _canReset = false;
+    private string? _token;
+    private string? _email;
+    private string? _newPassword;
+    private string? _confirmPassword;
+    private string? _errorMessage;
     private const string _tokenParameterKey = "token";
     private const string _emailParameterKey = "email";
     private const string _loginUri = "/login";
-    private bool isSubmitting = false;
-    private bool canReset = false;
-
-    private string? token;
-    private string? email;
-    private string? newPassword;
-    private string? confirmPassword;
-    private string? errorMessage;
 
     protected override void OnInitialized()
     {
@@ -33,45 +32,45 @@ public partial class ResetPassword
 
         if (queryParams.TryGetValue(_tokenParameterKey, out var t) && queryParams.TryGetValue(_emailParameterKey, out var e))
         {
-            token = t;
-            email = e;
-            canReset = true;
+            _token = t;
+            _email = e;
+            _canReset = true;
         }
         else
         {
-            errorMessage = "Invalid reset password link.";
+            _errorMessage = "Invalid reset password link.";
         }
     }
 
     private async Task HandleResetPassword()
     {
-        if (string.IsNullOrEmpty(newPassword) || string.IsNullOrEmpty(confirmPassword) || newPassword != confirmPassword)
+        if (string.IsNullOrEmpty(_newPassword) || string.IsNullOrEmpty(_confirmPassword) || _newPassword != _confirmPassword)
         {
-            errorMessage = "Passwords do not match.";
+            _errorMessage = "Passwords do not match.";
             return;
         }
 
-        if (token is null || email is null)
+        if (_token is null || _email is null)
         {
-            errorMessage = "Invalid reset request.";
+            _errorMessage = "Invalid reset request.";
             return;
         }
 
-        isSubmitting = true;
+        _isSubmitting = true;
 
-        var result = await UserService.ResetPasswordAsync(email, newPassword, token);
+        var result = await UserService.ResetPasswordAsync(_email, _newPassword, _token);
 
-        isSubmitting = false;
+        _isSubmitting = false;
 
         if (result)
         {
             Snackbar.Add("Password reset successfully! Redirecting to login...", Severity.Success);
-            errorMessage = null;
+            _errorMessage = null;
             NavigationManager.NavigateTo(_loginUri);
         }
         else
         {
-            errorMessage = "Password reset failed. Invalid or expired token.";
+            _errorMessage = "Password reset failed. Invalid or expired token.";
         }
     }
 }

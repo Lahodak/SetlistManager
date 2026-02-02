@@ -13,11 +13,15 @@
                 <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => OpenGenerateDialog()">
                     + New Setlist
                 </MudButton>
-                <MudTextField T="string" ValueChanged="@(s => OnSearch(s))" Placeholder="Search setlists"
+                <MudTextField @bind-Value="searchString"
+                              Placeholder="Search artists"
                               Adornment="Adornment.Start"
                               AdornmentIcon="@Icons.Material.Filled.Search"
-                              IconSize="Size.Medium" Class="mt-0 ml-3">
-                </MudTextField>
+                              IconSize="Size.Medium"
+                              Class="mt-0 ml-4"
+                              Immediate="true"
+                              DebounceInterval="700"
+                              OnDebounceIntervalElapsed="OnSearch" />
             </ToolBarContent>
 
             <HeaderContent>

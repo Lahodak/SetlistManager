@@ -19,7 +19,7 @@ public partial class SetlistsPortal
     public required IUserService UserService { get; set; }
 
     private MudTable<SetlistModel> table = new();
-    private PagedRequest pageStatus = new() { ContentType = ContentType.Private };
+    private readonly PagedRequest pageStatus = new() { ContentType = ContentType.Private };
     private string? searchString;
     private int _userId;
 
@@ -30,11 +30,9 @@ public partial class SetlistsPortal
 
     private async Task<TableData<SetlistModel>?> ServerReload(TableState state, CancellationToken token)
     {
-        await Task.Delay(300, token);
         pageStatus.Query = searchString;
         pageStatus.PageIndex = state.Page;
-        pageStatus.PageSize = state.PageSize;
-        
+        pageStatus.PageSize = state.PageSize;        
 
         var response = await SetlistService.GetAllSetlistsAsync(pageStatus);
 

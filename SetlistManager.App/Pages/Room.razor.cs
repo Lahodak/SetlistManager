@@ -81,6 +81,7 @@ public partial class Room : IAsyncDisposable
             }
             catch
             {
+                Snackbar.Add("Fullscreen mode is not supported by your browser.", Severity.Warning);
             }
         }
 
@@ -102,6 +103,7 @@ public partial class Room : IAsyncDisposable
         }
         catch
         {
+            Snackbar.Add("Fullscreen mode is not supported by your browser.", Severity.Warning);
         }
     }
 
@@ -174,6 +176,7 @@ public partial class Room : IAsyncDisposable
         }
         catch
         {
+            Snackbar.Add("Failed to scroll to current song.", Severity.Warning);
         }
     }
 

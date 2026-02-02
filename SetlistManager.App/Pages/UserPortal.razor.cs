@@ -14,8 +14,10 @@ public partial class UserPortal
     public required IInstrumentService InstrumentService { get; set; }
     [Inject]
     public required IGeniusService GeniusService { get; set; }
+
     private UserModel? _userModel;
     private List<InstrumentModel>? _instruments;
+    private const string _loginUri = "/login";
 
     protected override async Task OnInitializedAsync()
     {
@@ -40,7 +42,7 @@ public partial class UserPortal
     private async Task LogOutAsync()
     {
         await UserService.LogOutAsync();
-        NavigationManager.NavigateTo("/login");
+        NavigationManager.NavigateTo(_loginUri);
     }
 
     private async Task AuthorizeWithGenius()

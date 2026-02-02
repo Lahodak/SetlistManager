@@ -212,7 +212,7 @@ public partial class CreateSetlistDialog
 
         if (string.IsNullOrWhiteSpace(_toBeSavedSetlistName))
         {
-            _toBeSavedSetlistName = $"Generated {DateTime.Now:HH:mm}";
+            _toBeSavedSetlistName = $"Generated {DateTime.Now:HH:mm:ss}";
         }
 
         _setlist = new SetlistModel

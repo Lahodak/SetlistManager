@@ -15,6 +15,7 @@ public partial class Register
     public required ILocalStorageService LocalStorage { get; set; }
 
     private const string _emailKey = "registeredEmail";
+    private const string _verifyEmailUri = "/verify-email";
     private readonly RegisterRequestModel _registerRequestModel = new();
     private string confirmPassword = string.Empty;
 
@@ -29,6 +30,6 @@ public partial class Register
         await UserService.RegisterAsync(_registerRequestModel);
         await LocalStorage.SetItemAsStringAsync(_emailKey, _registerRequestModel.Email);
 
-        Navigation.NavigateTo("/verify-email");
+        Navigation.NavigateTo(_verifyEmailUri);
     }
 }

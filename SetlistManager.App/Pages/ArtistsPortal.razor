@@ -15,11 +15,16 @@
                     Add Artist
                 </MudButton>
 
-                <MudTextField T="string" ValueChanged="@(s => OnSearch(s))" Placeholder="Search artists"
+                <MudTextField @bind-Value="searchString"
+                              Placeholder="Search artists"
                               Adornment="Adornment.Start"
                               AdornmentIcon="@Icons.Material.Filled.Search"
-                              IconSize="Size.Medium" Class="mt-0 ml-4">
-                </MudTextField>
+                              IconSize="Size.Medium" 
+                              Class="mt-0 ml-4"
+                              Immediate="true"
+                              DebounceInterval="700"
+                              OnDebounceIntervalElapsed="OnSearch" />
+
             </ToolBarContent>
 
             <HeaderContent>
