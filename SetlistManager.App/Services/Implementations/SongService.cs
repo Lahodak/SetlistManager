@@ -47,10 +47,10 @@ public class SongService : ISongService
         => await _apiService.PostAsync($"{_apiOptions.SongsEndpoint}/{id}/public", true);
 
     public async Task<bool> TryGiveAccessToUserAsync(int songId, int targetId)
-        => await _apiService.PostAsync($"{_apiOptions.SongsEndpoint}/{songId}/songsusers/{targetId}", true);
+        => await _apiService.PostAsync($"{_apiOptions.SongsEndpoint}/{songId}/users/{targetId}", true);
 
     public async Task RemoveAccessFromUserAsync(int songId, int targetId)
-        => await _apiService.TryDeleteAsync($"{_apiOptions.SongsEndpoint}/{songId}/songsusers/{targetId}");
+        => await _apiService.TryDeleteAsync($"{_apiOptions.SongsEndpoint}/{songId}/users/{targetId}");
 
     public async Task<PagedResponse<SongUsageStatModel>> GetMostUsedSongsAsync(StatsPagedRequest request)
     {

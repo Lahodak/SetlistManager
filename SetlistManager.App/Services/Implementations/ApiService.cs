@@ -50,11 +50,11 @@ public class ApiService : IApiService
         return false;
     }
 
-    public async Task<T?> GetAsync<T>(string endpoint)
+    public async Task<T> GetAsync<T>(string endpoint)
     {
         await ConfigureHttpClientAsync(_client);
 
-        return await _client.GetFromJsonAsync<T>(endpoint);
+        return await _client.GetFromJsonAsync<T>(endpoint) ?? default!;
     }
 
     public async Task<T?> PostAsync<T>(string endpoint, T data)
@@ -67,6 +67,18 @@ public class ApiService : IApiService
             return default;
        
         return await response.Content.ReadFromJsonAsync<T>();
+    }
+
+    public async Task<TResponse?> PostAsync<TRequest, TResponse>(string endpoint, TRequest data)
+    {
+        await ConfigureHttpClientAsync(_client);
+
+        var response = await _client.PostAsJsonAsync(endpoint, data);
+
+        if (response.Content is null || !response.IsSuccessStatusCode)
+            return default;
+
+        return await response.Content.ReadFromJsonAsync<TResponse>();
     }
 
     public async Task<T?> PutAsync<T>(string endpoint, T data)

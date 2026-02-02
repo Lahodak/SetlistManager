@@ -44,8 +44,8 @@ public class SetlistService : ISetlistService
         => await _apiService.TryDeleteAsync($"{_apiOptions.SetlistsEndpoint}/{id}");
 
     public async Task<bool> TryGiveAccessToUserAsync(int setlistId, int targetId)
-        => await _apiService.PostAsync($"{_apiOptions.SetlistsEndpoint}/{setlistId}/setlistsusers/{targetId}", true);
+        => await _apiService.PostAsync($"{_apiOptions.SetlistsEndpoint}/{setlistId}/users/{targetId}", true);
 
     public async Task RemoveAccessFromUserAsync(int setlistId, int targetId)
-        => await _apiService.TryDeleteAsync($"{_apiOptions.SetlistsEndpoint}/{setlistId}/setlistsusers/{targetId}");
+        => await _apiService.TryDeleteAsync($"{_apiOptions.SetlistsEndpoint}/{setlistId}/users/{targetId}");
 }

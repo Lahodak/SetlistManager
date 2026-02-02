@@ -1,12 +1,12 @@
 ﻿using Microsoft.AspNetCore.Http.Extensions;
 using SetlistManager.Common.Models;
-using Newtonsoft.Json;
 using SetlistManager.Common.Genius.Models.Search;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using SetlistManager.App.Options;
 using SetlistManager.App.Models;
 using SetlistManager.Common.Exceptions;
+using System.Net.Http.Json;
 
 namespace SetlistManager.App.Services.Implementations;
 
@@ -15,18 +15,18 @@ public class GeniusService : IGeniusService
     private const string _searchEndpointSuffix = "/search?";
     private const string _geniusAccessTokenKey = "access_token";
     private const string _geniusQueryKey = "q";
-    private readonly IHttpClientFactory _httpClientFactory;
     private readonly IUserService _userService;
     private readonly IApiService _apiService;
     private readonly GeniusOptions _geniusOptions;
     private readonly SetlistManagerApiOptions _apiOptions;
+    private readonly HttpClient _client;
     
-    public GeniusService(IHttpClientFactory factory, IOptions<GeniusOptions> geniusOptions, IUserService userService, IApiService apiService, IOptions<SetlistManagerApiOptions> apiOptions)
+    public GeniusService(HttpClient client, IOptions<GeniusOptions> geniusOptions, IUserService userService, IApiService apiService, IOptions<SetlistManagerApiOptions> apiOptions)
     {
         _apiService = apiService;
         _apiOptions = apiOptions.Value;
         _geniusOptions = geniusOptions.Value;
-        _httpClientFactory = factory;
+        _client = client;
         _userService = userService;
     }
 
@@ -42,7 +42,6 @@ public class GeniusService : IGeniusService
 
     public async Task<GeniusEmbedModel?> FetchSongLyricsAsync(SongModel song)
     {
-        var client = _httpClientFactory.CreateClient();
         var token = (await _userService.GetUserAsync())?.Tokens?.FirstOrDefault(x => x.Provider == ProviderEnum.Genius.ToString());
 
         if (token is null)
@@ -57,27 +56,12 @@ public class GeniusService : IGeniusService
             }.ToString()
         };
 
-        SearchResponseModel? responseModel;
-        var searchResponse = await client.GetAsync(uri.ToString());
+        var searchResponse = await _client.GetFromJsonAsync<SearchResponseModel>(uri.ToString());
 
-        if (!searchResponse.IsSuccessStatusCode)
-            throw new GeniusSongLyricsNotFoundException();
-        
-        string response = await searchResponse.Content.ReadAsStringAsync();
+        if (searchResponse is null || searchResponse.Meta.Status != StatusCodes.Status200OK || searchResponse.Response.Hits.Count == 0)
+            throw new GeniusSongLyricsNotFoundException();   
 
-        try
-        {
-            responseModel = JsonConvert.DeserializeObject<SearchResponseModel>(response);
-        }
-        catch (Exception)
-        {
-            return null;
-        }
-
-        if (responseModel is null || responseModel.Meta.Status != StatusCodes.Status200OK || responseModel.Response.Hits.Count == 0)
-            return null;
-
-        var result = responseModel.Response.Hits[0].Result;
+        var result = searchResponse.Response.Hits[0].Result;
 
         return new GeniusEmbedModel
         {

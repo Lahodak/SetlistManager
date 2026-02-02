@@ -45,11 +45,11 @@ public class ArtistService : IArtistService
         => await _apiService.TryPutAsync($"{_apiOptions.ArtistsEndpoint}/{id}", updateModel);
 
     public async Task<bool> TryGiveAccessToUserAsync(int artistId, int targetId)
-        => await _apiService.PostAsync($"{_apiOptions.ArtistsEndpoint}/{artistId}/artistsusers/{targetId}", true);
+        => await _apiService.PostAsync($"{_apiOptions.ArtistsEndpoint}/{artistId}/users/{targetId}", true);
 
     public async Task<bool> TryMakeArtistPublicAsync(int id)
         => await _apiService.PostAsync($"{_apiOptions.ArtistsEndpoint}/{id}/public", true);
 
     public async Task RemoveAccessFromUserAsync(int artistId, int targetId)
-        => await _apiService.TryDeleteAsync($"{_apiOptions.ArtistsEndpoint}/{artistId}/artistsusers/{targetId}");
+        => await _apiService.TryDeleteAsync($"{_apiOptions.ArtistsEndpoint}/{artistId}/users/{targetId}");
 }

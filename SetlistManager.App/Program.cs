@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using MudBlazor.Services;
 using SetlistManager.App;
 using SetlistManager.App.Extentions;
-using SetlistManager.App.Options;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
