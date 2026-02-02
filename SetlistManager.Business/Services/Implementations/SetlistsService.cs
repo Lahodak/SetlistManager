@@ -45,7 +45,7 @@ public class SetlistsService : ISetlistsService
 
         var totalCount = await query.CountAsync();
 
-        var setlists = await _dbContext.Setlists
+        var setlists = await query
             .Include(s => s.SongsSetlists)
                 .ThenInclude(s => s.Song)
                     .ThenInclude(l => l.Language)

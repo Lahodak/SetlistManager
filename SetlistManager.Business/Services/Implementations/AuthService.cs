@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using SetlistManager.Common.Exceptions;
 using SetlistManager.Common.Models;
 using SetlistManager.Data.Entities;
 
@@ -7,7 +8,7 @@ namespace SetlistManager.Business.Services.Implementations;
 public class AuthService : IAuthService
 {
     private readonly UserManager<User> _userManager;
-    private readonly IMailService _mailService;    
+    private readonly IMailService _mailService;
 
     public AuthService(UserManager<User> userManager, IMailService mailService)
     {
@@ -15,28 +16,18 @@ public class AuthService : IAuthService
         _mailService = mailService;
     }
 
-    public async Task<RegisterResultModel> RegisterAsync(RegisterRequestModel model)
+    public async Task RegisterAsync(RegisterRequestModel model)
     {
         var existingUser = await _userManager.FindByEmailAsync(model.Email);
 
-        if (existingUser != null)
-        {
-            return new RegisterResultModel
-            {
-                Success = false,
-                Message = "User with this email already exists."
-            };
-        }
+        if (existingUser != null)        
+            throw new DuplicateEntryException();
+        
 
         var existingUserByName = await _userManager.FindByNameAsync(model.UserName);
+
         if (existingUserByName != null)
-        {
-            return new RegisterResultModel
-            {
-                Success = false,
-                Message = "User with this username already exists."
-            };
-        }
+            throw new DuplicateEntryException();
 
         User user = new()
         {
@@ -49,24 +40,12 @@ public class AuthService : IAuthService
         var result = await _userManager.CreateAsync(user, model.Password);
 
         if (!result.Succeeded)
-        {
-            return new RegisterResultModel
-            {
-                Success = false,
-                Message = string.Join(", ", result.Errors.Select(e => e.Description))
-            };
-        }
+            throw new InvalidOperationException();
 
         var createdUser = await _userManager.FindByEmailAsync(user.Email);
 
         var confirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(createdUser!);
         await _mailService.SendVerificationEmailAsync(user.Email, confirmationToken);
-
-        return new RegisterResultModel
-        {
-            Success = true,
-            Message = "User registered successfully. Please check your email to verify your account."
-        };
     }
 
     public async Task<bool> VerifyEmailAsync(VerifyModel verifyModel)

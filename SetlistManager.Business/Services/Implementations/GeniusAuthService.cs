@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 using SetlistManager.Business.Options;
 using SetlistManager.Common.Genius.Models;
 using System.Net.Http.Json;

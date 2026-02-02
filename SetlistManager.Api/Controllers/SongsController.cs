@@ -52,7 +52,7 @@ public class SongsController : BaseController
         return NoContent();
     }
 
-    [HttpPost("{id}/songsusers/{userId}")]
+    [HttpPost("{id}/users/{userId}")]
     public async Task<ActionResult> AddSongToUserLibrary(int id, int userId)
     {
         var result = await _songService.TryGiveAccessToUserAsync(id, userId);
@@ -63,7 +63,7 @@ public class SongsController : BaseController
         return Created();
     }
 
-    [HttpDelete("{id}/songsusers/{userId}")]
+    [HttpDelete("{id}/users/{userId}")]
     public async Task<ActionResult> RemoveSongFromUserLibrary(int id, int userId)
     {
         await _songService.RemoveAccessFromUserAsync(id, userId);        

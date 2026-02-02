@@ -117,4 +117,13 @@ public static class ServiceCollectionExtentions
 
         return services;
     }
+
+    public static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
+    {
+        var connectionString = configuration.GetConnectionString("SetlistManagerDB")
+            ?? throw new InvalidOperationException("Connection string 'SetlistManagerDB' not found.");
+        
+        services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
+        return services;
+    }
 }

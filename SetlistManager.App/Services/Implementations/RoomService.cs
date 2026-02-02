@@ -1,8 +1,6 @@
-﻿using Blazored.LocalStorage;
-using Microsoft.AspNetCore.Http.Extensions;
+﻿using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 using SetlistManager.App.Options;
 using SetlistManager.Common.Models;
 using System.Net.Http.Json;

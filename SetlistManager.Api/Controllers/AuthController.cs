@@ -27,12 +27,7 @@ public class AuthController : BaseController
     [HttpPost]
     public async Task<ActionResult> Register(RegisterRequestModel model)
     {
-        var result = await _authService.RegisterAsync(model);
-
-        if(!result.Success)
-        {
-            return BadRequest(result);
-        }
+        await _authService.RegisterAsync(model);
 
         return NoContent();
     }

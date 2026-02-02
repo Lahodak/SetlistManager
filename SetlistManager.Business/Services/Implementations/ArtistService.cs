@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SetlistManager.Business.Mappers;
+using SetlistManager.Common.Exceptions;
 using SetlistManager.Common.Models;
 using SetlistManager.Data;
 using SetlistManager.Data.Entities;
@@ -68,13 +69,13 @@ public class ArtistService : IArtistService
         return artist?.ToModel(true);
     }
 
-    public async Task<bool> TryCreateArtistAsync(ArtistCreateModel createModel)
+    public async Task TryCreateArtistAsync(ArtistCreateModel createModel)
     {
         int creatorId = _currentUserContext.GetCurrentUserId()!.Value;
 
         if (await _dbContext.Artists.AnyAsync(x => (!x.IsPublic && x.OwnerId == creatorId && (x.Nick == createModel.Nick)) 
         || (x.ArtistsUsers.Any(x => x.UserId == creatorId) && x.Nick == createModel.Nick)))   
-            return false;
+            throw new DuplicateEntryException();
 
         Artist artist = new()
         {
@@ -84,9 +85,7 @@ public class ArtistService : IArtistService
         };
 
         _dbContext.Add(artist);
-        await _dbContext.SaveChangesAsync();
-        
-        return true;
+        await _dbContext.SaveChangesAsync();        
     }
 
     public async Task<bool> TryDeleteArtistAsync(int artistId)

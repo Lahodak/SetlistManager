@@ -8,28 +8,18 @@ using SetlistManager.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-builder.Services.AddHttpClient();
-
-builder.Services.AddExceptionHandler<GlobalExceptionHandlingMiddleware>();
-builder.Services.AddProblemDetails();
-
-builder.Services.AddApiServices()
-    .AddBusinessServices();
-
-builder.Services.AddControllers();
-
-builder.Services.AddDbContext<AppDbContext>(options =>
-{
-    var connectionString = builder.Configuration.GetConnectionString("SetlistManagerDB")
-        ?? throw new InvalidOperationException("Connection string 'SetlistManagerDB' not found.");
-    options.UseSqlServer(connectionString);
-});
+builder.Services
+    .AddControllers();
 
 builder.Services
+    .AddEndpointsApiExplorer()
+    .AddSwaggerGen()
+    .AddHttpClient()
+    .AddExceptionHandler<GlobalExceptionHandlingMiddleware>()
+    .AddProblemDetails()
+    .AddApiServices()
+    .AddBusinessServices()
+    .AddDatabase(builder.Configuration)
     .ConfigureOptions(builder.Configuration)
     .AddIdentityConfiguration()
     .AddSignalRConfiguration()
@@ -38,17 +28,12 @@ builder.Services
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger()
+    .UseSwaggerUI();
 
-app.UseCors("AllowAllPolicy");
-
-app.UseHttpsRedirection();
-
-app.UseAuthentication();
+app.UseCors("AllowAllPolicy")
+    .UseHttpsRedirection()
+    .UseAuthentication();
 
 using (var scope = app.Services.CreateScope())
 {
@@ -57,7 +42,6 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.UseAuthorization();
-
 app.UseResponseCompression();
 
 app.UseExceptionHandler();
@@ -65,5 +49,7 @@ app.UseExceptionHandler();
 app.MapControllers();
 
 app.MapHub<RoomHub>("/hubs/room");
+
+await app.RunAsync();
 
 await app.RunAsync();

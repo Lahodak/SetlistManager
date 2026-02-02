@@ -33,10 +33,7 @@ public class ArtistsController : BaseController
     [HttpPost]
     public async Task<ActionResult> CreateArtist(ArtistCreateModel createModel)
     {
-        var result = await _artistService.TryCreateArtistAsync(createModel);
-        
-        if(!result)
-            return BadRequest();
+        await _artistService.TryCreateArtistAsync(createModel);       
 
         return Created();
     }
@@ -68,7 +65,7 @@ public class ArtistsController : BaseController
         return BadRequest();
     }
 
-    [HttpPost("{id}/artistsusers/{userId}")]
+    [HttpPost("{id}/users/{userId}")]
     public async Task<ActionResult> GiveAccessToUser(int id, int userId)
     {
         if (await _artistService.TryGiveAccessToUserAsync(id, userId))
@@ -77,7 +74,7 @@ public class ArtistsController : BaseController
         return BadRequest();
     }
 
-    [HttpDelete("{id}/artistsusers/{userId}")]
+    [HttpDelete("{id}/users/{userId}")]
     public async Task<ActionResult> RemoveAccessFromUser(int id, int userId)
     {
         await _artistService.RemoveAccessFromUserAsync(id, userId);

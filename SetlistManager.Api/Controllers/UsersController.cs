@@ -1,9 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using SetlistManager.Business.Options;
+﻿using Microsoft.AspNetCore.Mvc;
 using SetlistManager.Business.Services;
-using SetlistManager.Common.Genius.Models;
 using SetlistManager.Common.Models;
 
 namespace SetlistManager.Api.Controllers;
@@ -11,11 +7,9 @@ namespace SetlistManager.Api.Controllers;
 public class UsersController : BaseController
 {
     private readonly IUserService _userService;
-    private readonly AppOptions _appOptions;
 
-    public UsersController(IUserService userService, IOptions<AppOptions> appOptions)
+    public UsersController(IUserService userService)
     {
-        _appOptions = appOptions.Value;
         _userService = userService;
     }
 
@@ -38,15 +32,6 @@ public class UsersController : BaseController
 
         return NoContent();
     }
-
-    [AllowAnonymous]
-    [HttpGet("genius-tokens-callback")]
-    public async Task<ActionResult> AddGeniusTokenToUser([FromQuery] GrantAccessTokenResultModel grantResultModel)
-    {
-        await _userService.TryAddGeniusTokenToUserAsync(grantResultModel);       
-
-        return Redirect(_appOptions.UserPortalUrl);
-    }    
 
     [HttpPost("{id}/friendships")]
     public async Task<ActionResult> InitiateFriendship(int id, [FromBody] FriendshipRequestModel requestModel)
