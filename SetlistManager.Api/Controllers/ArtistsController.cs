@@ -21,13 +21,8 @@ public class ArtistsController : BaseController
 
     [HttpGet("{id}")]
     public async Task<ActionResult<ArtistModel>> GetArtistById(int id, [FromQuery] ContentType contentType)
-    {        
-        var result = await _artistService.GetArtistByIdAsync(id, contentType);
-        
-        if (result is null)
-            return NotFound();
-
-        return Ok(result);
+    {                        
+        return Ok(await _artistService.GetArtistByIdAsync(id, contentType));
     }
 
     [HttpPost]
@@ -40,38 +35,34 @@ public class ArtistsController : BaseController
 
     [HttpPut("{id}")]
     public async Task<ActionResult> UpdateArtist(int id, ArtistUpdateModel updateModel)
-    {        
-        if (await _artistService.TryUpdateArtistAsync(id, updateModel))
-            return NoContent();
-
-        return BadRequest();
+    {
+        await _artistService.TryUpdateArtistAsync(id, updateModel);
+        
+        return NoContent();
     }
 
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteArtist(int id)
-    {        
-        if (await _artistService.TryDeleteArtistAsync(id))
-            return NoContent();
-
-        return BadRequest();
+    {
+        await _artistService.TryDeleteArtistAsync(id);
+        
+        return NoContent();
     }
 
     [HttpPost("{id}/public")]
     public async Task<ActionResult> MakeArtistPublic(int id)
-    {        
-        if (await _artistService.TryMakeArtistPublicAsync(id))
-            return NoContent();
-        
-        return BadRequest();
+    {
+        await _artistService.TryMakeArtistPublicAsync(id);
+
+        return NoContent();        
     }
 
     [HttpPost("{id}/users/{userId}")]
     public async Task<ActionResult> GiveAccessToUser(int id, int userId)
     {
-        if (await _artistService.TryGiveAccessToUserAsync(id, userId))
-            return NoContent();
-        
-        return BadRequest();
+        await _artistService.TryGiveAccessToUserAsync(id, userId);
+
+        return NoContent();
     }
 
     [HttpDelete("{id}/users/{userId}")]

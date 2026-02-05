@@ -56,7 +56,7 @@ public class ArtistService : IArtistService
         var artist = await _dbContext.Artists
             .Where(x => x.Id == artistId)
             .Where(x => isPublicContent 
-                ? x.IsPublic 
+                ? x.IsPublic
                 : x.OwnerId == userId || x.ArtistsUsers.Any(su => su.UserId == userId))
             .Include(x => x.Songs
                 .Where(x => isPublicContent 
@@ -65,7 +65,10 @@ public class ArtistService : IArtistService
             .ThenInclude(x => x.Language)
             .FirstOrDefaultAsync();
 
-        return artist?.ToModel();
+        if (artist is null)
+            throw new EntryNotFoundException($"Artist with Id '{artistId}' not found or you don't have access");
+
+        return artist.ToModel();
     }
 
     public async Task TryCreateArtistAsync(ArtistCreateModel createModel)
@@ -87,7 +90,7 @@ public class ArtistService : IArtistService
         await _dbContext.SaveChangesAsync();        
     }
 
-    public async Task<bool> TryDeleteArtistAsync(int artistId)
+    public async Task TryDeleteArtistAsync(int artistId)
     {
         int userId = _currentUserContext.GetCurrentUserId()!.Value;
 
@@ -97,30 +100,26 @@ public class ArtistService : IArtistService
             .FirstOrDefaultAsync(x => x.Id == artistId);
         
         if (artist is null || artist.OwnerId != userId || artist.Songs.Any(x => x.IsPublic) || artist.IsPublic)
-            return false;       
+            throw new EntryNotFoundException();       
 
         _dbContext.Artists.Remove(artist);        
         await _dbContext.SaveChangesAsync();
-        
-        return true;
     }
 
-    public async Task<bool> TryUpdateArtistAsync(int id, ArtistUpdateModel updateModel)
+    public async Task TryUpdateArtistAsync(int id, ArtistUpdateModel updateModel)
     {
         int currentUserId = _currentUserContext.GetCurrentUserId()!.Value;
 
         var artist = await _dbContext.Artists.FirstOrDefaultAsync(x => x.Id == id && x.OwnerId == currentUserId);
         
         if (artist is null || await _dbContext.Artists.AnyAsync(x => x.Nick == updateModel.Nick && x.Id != id))
-            return false;
+            throw new EntryNotFoundException();
 
         artist.Nick = updateModel.Nick;
-
         await _dbContext.SaveChangesAsync();        
-        return true;
     }
 
-    public async Task<bool> TryMakeArtistPublicAsync(int artistId)
+    public async Task TryMakeArtistPublicAsync(int artistId)
     {
         int currentUserId = _currentUserContext.GetCurrentUserId()!.Value;
 
@@ -128,15 +127,13 @@ public class ArtistService : IArtistService
             .FirstOrDefaultAsync(x => x.Id == artistId && x.OwnerId == currentUserId);
 
         if (artist is null)
-            return false;
+            throw new EntryNotFoundException();
 
         artist.IsPublic = true;
-
         await _dbContext.SaveChangesAsync();
-        return true;
     }
 
-    public async Task<bool> TryGiveAccessToUserAsync(int artistId, int targetId)
+    public async Task TryGiveAccessToUserAsync(int artistId, int targetId)
     {
         int currentUserId = _currentUserContext.GetCurrentUserId()!.Value;
 
@@ -145,7 +142,7 @@ public class ArtistService : IArtistService
             .FirstOrDefaultAsync(x => x.Id == artistId);
 
         if (artist is null || artist.ArtistsUsers.Count != 0 || (currentUserId != artist.OwnerId && targetId != currentUserId))
-            return false;
+            throw new EntryNotFoundException();
 
         ArtistsUsers artistsUsers = new()
         {
@@ -155,8 +152,6 @@ public class ArtistService : IArtistService
 
         _dbContext.ArtistsUsers.Add(artistsUsers);
         await _dbContext.SaveChangesAsync();
-        
-        return true;
     }
 
     public async Task RemoveAccessFromUserAsync(int artistId, int targetId)
@@ -170,7 +165,7 @@ public class ArtistService : IArtistService
             .FirstOrDefaultAsync(x => x.ArtistId == artistId && x.UserId == targetId);
         
         if (artistUser is null || (currentUserId != artistUser.Artist.OwnerId && targetId != currentUserId) || artistUser.User.Songs.Count != 0)
-            return;
+            throw new EntryNotFoundException();
 
         _dbContext.ArtistsUsers.Remove(artistUser);
         await _dbContext.SaveChangesAsync();
