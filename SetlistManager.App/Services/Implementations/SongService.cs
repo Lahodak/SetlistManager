@@ -40,6 +40,7 @@ public class SongService : ISongService
 
     public async Task<bool> TryUpdateSongAsync(int id, SongUpdateModel songModel)
         => await _apiService.TryPutAsync($"{_apiOptions.SongsEndpoint}/{id}", songModel);
+    
     public async Task<bool> TryDeleteSongAsync(int id)
         => await _apiService.TryDeleteAsync($"{_apiOptions.SongsEndpoint}/{id}");
 
@@ -52,43 +53,19 @@ public class SongService : ISongService
     public async Task RemoveAccessFromUserAsync(int songId, int targetId)
         => await _apiService.TryDeleteAsync($"{_apiOptions.SongsEndpoint}/{songId}/users/{targetId}");
 
-    public async Task<PagedResponse<SongUsageStatModel>> GetMostUsedSongsAsync(StatsPagedRequest request)
+    public async Task<List<SongUsageStatModel>> GetStatisticsAsync(StatsRequest request)
     {
-        UriBuilder uri = new($"{_apiOptions.SongsEndpoint}/most-used")
+        UriBuilder uri = new(_apiOptions.StatisticsEndpoint)
         {
             Query = new QueryBuilder
             {
-                { nameof(request.PageSize), request.PageSize.ToString() },
-                { nameof(request.PageIndex), request.PageIndex.ToString() },
-                { nameof(request.Range), request.Range.ToString()  }
+                { nameof(request.Subject), request.Subject.ToString() },
+                { nameof(request.Metric), request.Metric.ToString() },
+                { nameof(request.Range), request.Range.ToString() },
+                { nameof(request.Limit), request.Limit.ToString() }
             }.ToString()
         };
-        return await _apiService.GetAsync<PagedResponse<SongUsageStatModel>>(uri.ToString());
-    }
 
-    public async Task<PagedResponse<SongUsageStatModel>> GetMostAddedToLibraryAsync(PagedRequest request)
-    {
-        UriBuilder uri = new($"{_apiOptions.SongsEndpoint}/most-added")
-        {
-            Query = new QueryBuilder
-            {
-                { nameof(request.PageSize), request.PageSize.ToString() },
-                { nameof(request.PageIndex), request.PageIndex.ToString() }
-            }.ToString()
-        };
-        return await _apiService.GetAsync<PagedResponse<SongUsageStatModel>>(uri.ToString());
-    }
-
-    public async Task<PagedResponse<LatestSongStatModel>> GetLatestPublicSongsAsync(PagedRequest request)
-    {
-        UriBuilder uri = new($"{_apiOptions.SongsEndpoint}/latest-public")
-        {
-            Query = new QueryBuilder
-            {
-                { nameof(request.PageSize), request.PageSize.ToString() },
-                { nameof(request.PageIndex), request.PageIndex.ToString() }
-            }.ToString()
-        };
-        return await _apiService.GetAsync<PagedResponse<LatestSongStatModel>>(uri.ToString());
+        return await _apiService.GetAsync<List<SongUsageStatModel>>(uri.ToString());
     }
 }

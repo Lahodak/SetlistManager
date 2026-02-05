@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using SetlistManager.Business.Extentions;
 using SetlistManager.Business.Mappers;
 using SetlistManager.Common.Exceptions;
 using SetlistManager.Common.Genius.Models;
@@ -56,26 +57,19 @@ public class UserService : IUserService
     public async Task<PagedResponse<UserViewModel>> GetUsersAsync(PagedRequest request)
     {
         var query = _dbContext.Users
-            .Where(u => string.IsNullOrEmpty(request.Query) 
-                || u.UserName!.Contains(request.Query) 
-                || u.Email!.Contains(request.Query));
-        
-        var totalCount = await query.CountAsync();
-        
-        var users = await query
-            .Skip(request.PageIndex * request.PageSize)
-            .Take(request.PageSize)
-            .ToListAsync();
-        
-        PagedResponse<UserViewModel> pagedResponse = new()
-        {
-            Items = users
-                .Select(u => u.ToViewModel())
-                .ToList(),
-            TotalCount = totalCount
-        };
+            .Where(u => string.IsNullOrEmpty(request.Query) ||
+                        u.UserName!.Contains(request.Query) ||
+                        u.Email!.Contains(request.Query));
 
-        return pagedResponse;
+        var pagedResponse = await query.ToPaginatedResultAsync(request);
+
+        return new PagedResponse<UserViewModel>
+        {
+            TotalCount = pagedResponse.TotalCount,
+            Items = pagedResponse.Items
+                .Select(u => u.ToViewModel())
+                .ToList()
+        };
     }
 
     public async Task<UserModel?> GetCurrentUserAsync()
@@ -93,7 +87,7 @@ public class UserService : IUserService
             .FirstOrDefaultAsync(x => x.Id == userId);
 
         if (user is null)
-            return null;
+            throw new EntryNotFoundException();
 
         return user.ToModel();
     }
@@ -152,7 +146,7 @@ public class UserService : IUserService
             .FirstOrDefaultAsync(x => x.TempSecret == salt);
 
         if (tempAuth is null)
-            return null;
+            throw new EntryNotFoundException();
 
         return await _dbContext.Users
             .Include(u => u.Instrument)
@@ -230,7 +224,7 @@ public class UserService : IUserService
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task<PagedResponse<FriendModel>?> GetUserFriendsAsync(int userId, PagedRequest request)
+    public async Task<PagedResponse<FriendModel>> GetUserFriendsAsync(int userId, PagedRequest request)
     {
         if(userId != _currentUserContext.GetCurrentUserId()!.Value)
             throw new UnauthorizedAccessException();
@@ -251,7 +245,7 @@ public class UserService : IUserService
             .ToListAsync();
 
         if (friendships is null || friendships.Count == 0)
-            return null;
+            return new();
 
         List<FriendModel> friends = friendships.Select(f =>
         {

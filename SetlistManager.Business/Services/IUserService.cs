@@ -15,5 +15,5 @@ public interface IUserService
     Task HandleFriendshipRequestAsync(int initiatorId, FriendshipRequestModel friendshipRequest);
     Task AcceptFriendshipAsync(int id, int friendshipId);
     Task RemoveFriendshipAsync(int id, int friendshipId);
-    Task<PagedResponse<FriendModel>?> GetUserFriendsAsync(int userId, PagedRequest request);
+    Task<PagedResponse<FriendModel>> GetUserFriendsAsync(int userId, PagedRequest request);
 }

@@ -6,13 +6,11 @@ public interface ISongService
 {
     Task<SongModel?> GetSongByIdAsync(int songId);
     Task<PagedResponse<SongModel>> GetSongsAsync(PagedRequest request);
-    Task<bool> TryCreateSongAsync(SongCreateModel songCreateModel);
-    Task<bool> TryUpdateSongAsync(int songId, SongUpdateModel updateModel);
-    Task<bool> TryDeleteSongAsync(int songId);
-    Task<bool> TryGiveAccessToUserAsync(int songId, int targetId);
+    Task TryCreateSongAsync(SongCreateModel songCreateModel);
+    Task TryUpdateSongAsync(int songId, SongUpdateModel updateModel);
+    Task TryDeleteSongAsync(int songId);
+    Task TryGiveAccessToUserAsync(int songId, int targetId);
     Task RemoveAccessFromUserAsync(int songId, int userId);
-    Task<bool> TryMakeSongPublicAsync(int songId);
-    Task<PagedResponse<SongUsageStatModel>> GetMostUsedSongsAsync(StatsPagedRequest request);
-    Task<PagedResponse<SongUsageStatModel>> GetMostAddedToLibraryAsync(PagedRequest request);
-    Task<PagedResponse<LatestSongStatModel>> GetLatestPublicSongsAsync(PagedRequest request);
+    Task TryMakeSongPublicAsync(int songId);
+    Task<List<SongUsageStatModel>> GetStatisticsAsync(StatsRequest request);
 }

@@ -13,4 +13,5 @@ public class SetlistManagerApiOptions
     public string RoomsEndpoint { get; set; } = default!;
     public string TokensEndpoint { get; set; } = default!;
     public string RoomHubEndpoint { get; set; } = default!;
+    public string StatisticsEndpoint { get; set; } = default!;
 }
