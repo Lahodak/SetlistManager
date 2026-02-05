@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SetlistManager.Business.Extentions;
 using SetlistManager.Business.Mappers;
+using SetlistManager.Common.Exceptions;
 using SetlistManager.Common.Models;
 using SetlistManager.Data;
 using SetlistManager.Data.Entities;
@@ -20,7 +21,7 @@ public class RoomsService : IRoomsService
         _roomCodeService = roomCodeService;
     }
 
-    public async Task<RoomModel?> GetRoomByIdAsync(int roomId)
+    public async Task<RoomModel> GetRoomByIdAsync(int roomId)
     {
         var room = await _dbContext.Rooms
         .Include(x => x.Setlist)
@@ -36,7 +37,7 @@ public class RoomsService : IRoomsService
         .FirstOrDefaultAsync(x => x.Id == roomId);
 
         if (room is null)
-            return null;
+            throw new EntryNotFoundException();
 
         var model = room.ToModel();
 
@@ -96,7 +97,7 @@ public class RoomsService : IRoomsService
         return roomModel;
     }
 
-    public async Task<RoomModel?> JoinRoomAsync(JoinRoomModel joinRoomModel, User user)
+    public async Task<RoomModel> JoinRoomAsync(JoinRoomModel joinRoomModel, User user)
     {
         var room = await _dbContext.Rooms
             .Include(x => x.Setlist)
@@ -112,7 +113,7 @@ public class RoomsService : IRoomsService
             .FirstOrDefaultAsync(x => x.Code == joinRoomModel.RoomCode);
 
         if (room is null)
-            return null;
+            throw new EntryNotFoundException();
 
         room.Users.Add(user);
 
@@ -181,7 +182,7 @@ public class RoomsService : IRoomsService
         };
     }
 
-    public async Task<RoomModel?> GetRoomByCodeAsync(string roomCode)
+    public async Task<RoomModel> GetRoomByCodeAsync(string roomCode)
     {
         var room = await _dbContext.Rooms
             .Include(x => x.Setlist)
@@ -197,7 +198,7 @@ public class RoomsService : IRoomsService
             .FirstOrDefaultAsync(x => x.Code == roomCode);
 
         if (room is null)
-            return null;
+            throw new EntryNotFoundException();
         
         var model = room.ToModel();
 

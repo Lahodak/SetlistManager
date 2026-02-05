@@ -15,30 +15,20 @@ public class SetlistsController : BaseController
     [HttpGet]
     public async Task<ActionResult<List<SetlistModel>>> GetSetlists([FromQuery] PagedRequest request)
     {
-        var result = await _setlistService.GetSetlistsAsync(request);
-
-        return Ok(result);
+        return Ok(await _setlistService.GetSetlistsAsync(request));
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<SetlistModel>> GetSetlist(int id)
     {
-        var result = await _setlistService.GetSetlistByIdAsync(id);
-
-        if (result is null)
-            return NotFound();
-
-        return Ok(result);
+        return Ok(await _setlistService.GetSetlistByIdAsync(id));
     }
 
     [HttpPost]
     public async Task<ActionResult<SetlistModel>> CreateSetlist([FromBody] SetlistModel setlist)
     {
-        var result = await _setlistService.TryCreateSetlistAsync(setlist);
+        await _setlistService.TryCreateSetlistAsync(setlist);
         
-        if(!result)
-            return BadRequest();
-
         return Created();
     }
 
@@ -56,8 +46,7 @@ public class SetlistsController : BaseController
     [HttpDelete("{id}")]
     public async Task<ActionResult> TryDeleteSetlist(int id)
     {
-        if (!await _setlistService.TryDeleteSetlistAsync(id))
-            return NotFound();
+        await _setlistService.TryDeleteSetlistAsync(id);
 
         return NoContent();
     }
@@ -65,10 +54,7 @@ public class SetlistsController : BaseController
     [HttpPost("{id}/users/{userId}")]
     public async Task<ActionResult> TryGiveAccessToSetlist(int id, int userId)
     {
-        var result = await _setlistService.TryGiveAccessToSetlistAsync(id, userId);
-
-        if (!result)
-            return NotFound();
+        await _setlistService.TryGiveAccessToSetlistAsync(id, userId);
 
         return Created();
     }

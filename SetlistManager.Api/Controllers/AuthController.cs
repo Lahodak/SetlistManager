@@ -27,18 +27,16 @@ public class AuthController : BaseController
     [HttpPost("login")]
     public async Task<ActionResult<LoginResultModel>> Login(LoginRequestModel model)
     {
-        var result = await _authService.LoginAsync(model);
-
-        return result;
+        return Ok(await _authService.LoginAsync(model));
     }
 
     [AllowAnonymous]
     [HttpPost("verify-email")]
-    public async Task<ActionResult<bool>> VerifyEmail(VerifyModel verifyModel)
+    public async Task<ActionResult> VerifyEmail(VerifyModel verifyModel)
     {
         await _authService.VerifyEmailAsync(verifyModel);
 
-        return Ok(true);
+        return NoContent();
     }
 
     [AllowAnonymous]

@@ -52,9 +52,7 @@ public class UsersController : BaseController
     [HttpGet("{id}/friendships")]
     public async Task<ActionResult<PagedResponse<FriendModel>>> GetUserFriends(int id, [FromQuery] PagedRequest pagedRequest)
     {
-        var result = await _userService.GetUserFriendsAsync(id, pagedRequest);
-                
-        return Ok(result);
+        return Ok(await _userService.GetUserFriendsAsync(id, pagedRequest));
     }
 
     [HttpPut("{id}/friendships/{friendshipId}")]
