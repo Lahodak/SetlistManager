@@ -79,7 +79,7 @@ public class RoomHub : Hub
     public async Task ChangeCurrentSongAsync(ChangeCurrentSongModel changeCurrentSongModel)
     {
         await _roomsService.ChangeCurrentSongAsync(changeCurrentSongModel);
-        var roomModel = await _roomsService.GetRoomByIdAsync(changeCurrentSongModel.RoomId);
-        await Clients.Group(changeCurrentSongModel.RoomId.ToString()).SendAsync(_clientUpdateDataMethod, roomModel);
+        var roomModel = await _roomsService.GetRoomByIdAsync(changeCurrentSongModel.RoomId!.Value);
+        await Clients.Group(changeCurrentSongModel.RoomId!.Value.ToString()).SendAsync(_clientUpdateDataMethod, roomModel);
     }
 }
