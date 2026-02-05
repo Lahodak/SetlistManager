@@ -30,7 +30,7 @@ public class UserService : IUserService
         User? user = await _dbContext.Users.FindAsync(model.Id);
 
         if (user is null)
-            return;
+            throw new EntryNotFoundException();
 
         user.UserName = model.Username;
         user.Email = model.Email;
@@ -114,7 +114,7 @@ public class UserService : IUserService
     public async Task TryAddGeniusTokenToUserAsync(GrantAccessTokenResultModel grantResultModel)
     {
         var user = await GetUserByTempAuthSecret(grantResultModel.State)
-            ?? throw new UserNotFoundException();
+            ?? throw new EntryNotFoundException();
 
         TokenCreateModel tokenModel = new()
         {
@@ -125,7 +125,7 @@ public class UserService : IUserService
 
         var provider = await _dbContext.Providers
             .FirstOrDefaultAsync(p => p.Name == tokenModel.Provider.ToString())
-            ?? throw new ProviderNotFoundException(tokenModel.Provider.ToString());
+            ?? throw new EntryNotFoundException($"Provider '{tokenModel.Provider}' not found");
 
         await _dbContext.Tokens.AddAsync(new Token
         {
@@ -174,14 +174,7 @@ public class UserService : IUserService
             return;
         }
         
-        Friendship newFriendship = new()
-        {
-            InitiatorId = initiatorId,
-            RecieverId = friendshipRequest.RecieverId!.Value,
-            State = FriendshipState.Pending
-        };
-
-        _dbContext.Friendships.Add(newFriendship);
+        _dbContext.Friendships.Add(friendshipRequest.ToEntity(initiatorId));
         await _dbContext.SaveChangesAsync();
     }
 
@@ -218,7 +211,7 @@ public class UserService : IUserService
         var friendship = await GetFriendshipByIdAndUserIdAsync(friendshipId, currentUserId);
         
         if (friendship is null)
-            return;
+            throw new EntryNotFoundException();
 
         _dbContext.Friendships.Remove(friendship);
         await _dbContext.SaveChangesAsync();
@@ -226,9 +219,9 @@ public class UserService : IUserService
 
     public async Task<PagedResponse<FriendModel>> GetUserFriendsAsync(int userId, PagedRequest request)
     {
-        if(userId != _currentUserContext.GetCurrentUserId()!.Value)
+        if (userId != _currentUserContext.GetCurrentUserId()!.Value)
             throw new UnauthorizedAccessException();
-
+        
         var query = _dbContext.Friendships
             .Include(f => f.Initiator)
             .Include(f => f.Reciever)
@@ -237,35 +230,14 @@ public class UserService : IUserService
                 f.Initiator.UserName!.Contains(request.Query) ||
                 f.Reciever.UserName!.Contains(request.Query)));
 
-        var totalCount = await query.CountAsync();
+        var pagedResponse = await query.ToPaginatedResultAsync(request);
 
-        var friendships = await query
-            .Skip(request.PageIndex * request.PageSize)
-            .Take(request.PageSize)
-            .ToListAsync();
-
-        if (friendships is null || friendships.Count == 0)
-            return new();
-
-        List<FriendModel> friends = friendships.Select(f =>
-        {
-            var friendUser = f.InitiatorId == userId ? f.Reciever : f.Initiator;
-            return new FriendModel
-            {
-                Id = friendUser.Id,
-                Username = friendUser.UserName!,
-                State = f.State,
-                FriendshipId = f.Id,
-                InitiatedById = f.InitiatorId
-            };
-        }).ToList();
-
-        PagedResponse<FriendModel> pagedResponse = new()
-        {
-            Items = friends,
-            TotalCount = totalCount
+        return new PagedResponse<FriendModel>
+        {            
+            TotalCount = pagedResponse.TotalCount,
+            Items = pagedResponse.Items
+                .Select(f => f.ToModel(userId))
+                .ToList()
         };
-
-        return pagedResponse;
     }
 }

@@ -82,7 +82,7 @@ public class AuthService : IAuthService
         var user = await _userManager.FindByEmailAsync(verifyModel.Email);
         
         if (user is null)
-            throw new UserNotFoundException();
+            throw new EntryNotFoundException();
 
         var result = await _userManager.ConfirmEmailAsync(user, verifyModel.Token);
 
@@ -95,7 +95,7 @@ public class AuthService : IAuthService
         var user = await _userManager.FindByEmailAsync(resetModel.Email);
 
         if (user is null)
-            throw new UserNotFoundException();
+            throw new EntryNotFoundException();
 
         var result = await _userManager.ResetPasswordAsync(user, resetModel.Token, resetModel.NewPassword);
         
@@ -108,7 +108,7 @@ public class AuthService : IAuthService
         var user = await _userManager.FindByEmailAsync(resetRequestModel.Email);
         
         if (user is null)
-            throw new UserNotFoundException();
+            throw new EntryNotFoundException();
         
         var resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
 
