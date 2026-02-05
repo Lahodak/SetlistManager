@@ -1,6 +1,6 @@
 ﻿using SetlistManager.Data.Entities;
 
-namespace SetlistManager. Api.Services;
+namespace SetlistManager.Business.Services;
 
 public interface IJwtService
 {
