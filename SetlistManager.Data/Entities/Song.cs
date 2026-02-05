@@ -1,6 +1,6 @@
 ﻿namespace SetlistManager.Data.Entities;
 
-public class Song : Base
+public class Song : BaseEntity
 {
     public string Name { get; set; } = default!;
     public int ArtistId { get; set; }

@@ -8,8 +8,6 @@ public class SongsUsersConfig : IEntityTypeConfiguration<SongsUsers>
 {
     public void Configure(EntityTypeBuilder<SongsUsers> builder)
     {
-        builder.HasKey(x => x.Id);
-
         builder.HasOne(su => su.Song)
             .WithMany(s => s.SongsUsers)
             .HasForeignKey(su => su.SongId)

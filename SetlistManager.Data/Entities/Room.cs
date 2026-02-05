@@ -1,6 +1,6 @@
 ﻿namespace SetlistManager.Data.Entities;
 
-public class Room : Base
+public class Room : BaseEntity
 {
     public string Name { get; set; } = default!;
     public string Code { get; set; } = default!;

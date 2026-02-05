@@ -1,6 +1,6 @@
 ﻿namespace SetlistManager.Data.Entities;
 
-public class Token : Base
+public class Token : BaseEntity
 {
     public string AccessToken { get; set; } = default!;
     public string? RefreshToken { get; set; }

@@ -8,8 +8,6 @@ public class FriendshipConfig : IEntityTypeConfiguration<Friendship>
 {
     public void Configure(EntityTypeBuilder<Friendship> builder)
     {
-        builder.HasKey(x => x.Id);
-
         builder.HasOne(f => f.Initiator)
             .WithMany(u => u.InitiatedFriendships)
             .HasForeignKey(f => f.InitiatorId)

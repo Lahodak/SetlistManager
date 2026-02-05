@@ -1,6 +1,6 @@
 ﻿namespace SetlistManager.Data.Entities;
 
-public class Setlist : Base
+public class Setlist : BaseEntity
 {
     public string Name { get; set; } = default!;
     public DateTime CreatedAt { get; set; }

@@ -8,8 +8,6 @@ public class SetlistsUsersConfig : IEntityTypeConfiguration<SetlistsUsers>
 {
     public void Configure(EntityTypeBuilder<SetlistsUsers> builder)
     {
-        builder.HasKey(x => x.Id);
-
         builder.HasOne(su => su.Setlist)
             .WithMany(s => s.SetlistsUsers)
             .HasForeignKey(su => su.SetlistId)

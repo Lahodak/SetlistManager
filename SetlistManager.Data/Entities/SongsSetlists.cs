@@ -1,6 +1,6 @@
 ﻿namespace SetlistManager.Data.Entities;
 
-public class SongsSetlists : Base
+public class SongsSetlists : BaseEntity
 {
     public int SongId { get; set; }
     public virtual Song Song { get; set; } = default!;
