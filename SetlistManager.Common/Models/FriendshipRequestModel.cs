@@ -1,6 +1,9 @@
-﻿namespace SetlistManager.Common.Models;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace SetlistManager.Common.Models;
 
 public class FriendshipRequestModel
 {
-    public int RecieverId { get; set; }
+    [Required]
+    public int? RecieverId { get; set; }
 }

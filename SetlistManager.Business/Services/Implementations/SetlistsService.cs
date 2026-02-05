@@ -58,7 +58,7 @@ public class SetlistsService : ISetlistsService
         return new PagedResponse<SetlistModel>
         {
             TotalCount = result.TotalCount,
-            Items = result.Items?
+            Items = result.Items
                 .Select(s => s.ToModel())
                 .ToList()
         };

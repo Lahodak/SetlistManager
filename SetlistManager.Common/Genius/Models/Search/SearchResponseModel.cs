@@ -1,11 +1,11 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace SetlistManager.Common.Genius.Models.Search;
 
 public class SearchResponseModel
 {
-    [JsonProperty("meta")]
+    [JsonPropertyName("meta")]
     public Meta Meta { get; set; } = default!;
-    [JsonProperty("response")]
+    [JsonPropertyName("response")]
     public Response Response { get; set; } = default!;
 }

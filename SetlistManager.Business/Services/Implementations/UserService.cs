@@ -56,9 +56,9 @@ public class UserService : IUserService
     public async Task<PagedResponse<UserViewModel>> GetUsersAsync(PagedRequest request)
     {
         var query = _dbContext.Users
-            .Where(u => string.IsNullOrEmpty(request.Query) ||
-                u.UserName!.Contains(request.Query) ||
-                u.Email!.Contains(request.Query));
+            .Where(u => string.IsNullOrEmpty(request.Query) 
+                || u.UserName!.Contains(request.Query) 
+                || u.Email!.Contains(request.Query));
         
         var totalCount = await query.CountAsync();
         
@@ -183,12 +183,19 @@ public class UserService : IUserService
         Friendship newFriendship = new()
         {
             InitiatorId = initiatorId,
-            RecieverId = friendshipRequest.RecieverId,
+            RecieverId = friendshipRequest.RecieverId!.Value,
             State = FriendshipState.Pending
         };
 
         _dbContext.Friendships.Add(newFriendship);
         await _dbContext.SaveChangesAsync();
+    }
+
+    private async Task<Friendship?> GetFriendshipByIdAndUserIdAsync(int friendshipId, int userId)
+    {
+        return await _dbContext.Friendships
+            .FirstOrDefaultAsync(f => f.Id == friendshipId &&
+                (f.InitiatorId == userId || f.RecieverId == userId));
     }
 
     public async Task AcceptFriendshipAsync(int id, int friendshipId)
@@ -198,12 +205,9 @@ public class UserService : IUserService
         if(currentUserId != id)
             throw new UnauthorizedAccessException();
 
-        var friendship = await _dbContext.Friendships
-            .FirstOrDefaultAsync(f => f.Id == friendshipId &&
-                (f.InitiatorId == currentUserId || f.RecieverId == currentUserId) &&
-                f.State == FriendshipState.Pending);
+        var friendship = await GetFriendshipByIdAndUserIdAsync(friendshipId, currentUserId);
 
-        if (friendship is null)
+        if (friendship is null || friendship.State != FriendshipState.Pending)
             return;
 
         friendship.State = FriendshipState.Accepted;
@@ -217,9 +221,7 @@ public class UserService : IUserService
         if (currentUserId != id)
             throw new UnauthorizedAccessException();
 
-        var friendship = await _dbContext.Friendships
-            .FirstOrDefaultAsync(f => f.Id == friendshipId &&
-                (f.InitiatorId == currentUserId || f.RecieverId == currentUserId));
+        var friendship = await GetFriendshipByIdAndUserIdAsync(friendshipId, currentUserId);
         
         if (friendship is null)
             return;

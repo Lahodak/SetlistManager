@@ -175,7 +175,7 @@ public class RoomsService : IRoomsService
         return new PagedResponse<RoomModel>
         {
             TotalCount = result.TotalCount,
-            Items = result.Items?
+            Items = result.Items
                 .Select(x => x.ToModel())
                 .ToList()
         };

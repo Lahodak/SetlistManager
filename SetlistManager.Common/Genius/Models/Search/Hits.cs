@@ -1,11 +1,11 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace SetlistManager.Common.Genius.Models.Search;
 
 public class Hits
 {
-    [JsonProperty("type")]
+    [JsonPropertyName("type")]
     public string Type { get; set; } = default!;
-    [JsonProperty("result")]
+    [JsonPropertyName("result")]
     public Result Result { get; set; } = default!;
 }

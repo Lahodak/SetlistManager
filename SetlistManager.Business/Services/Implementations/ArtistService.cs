@@ -42,7 +42,7 @@ public class ArtistService : IArtistService
         return new PagedResponse<ArtistModel>
         {
             TotalCount = result.TotalCount,
-            Items = result.Items?
+            Items = result.Items
                 .Select(a => a.ToModel())
                 .ToList()
         };
@@ -51,16 +51,17 @@ public class ArtistService : IArtistService
     public async Task<ArtistModel?> GetArtistByIdAsync(int artistId, ContentType contentType)
     {
         int userId = _currentUserContext.GetCurrentUserId()!.Value;
+        bool isPublicContent = contentType == ContentType.Public;
 
         var artist = await _dbContext.Artists
             .Where(x => x.Id == artistId)
-            .Where(x => contentType == ContentType.Public
-                ? x.IsPublic
+            .Where(x => isPublicContent 
+                ? x.IsPublic 
                 : x.OwnerId == userId || x.ArtistsUsers.Any(su => su.UserId == userId))
             .Include(x => x.Songs
-                .Where(x => contentType == ContentType.Public
-                    ? x.IsPublic
-                    : x.SongsUsers.Any(s => s.UserId == userId) || x.OwnerId == userId))
+                .Where(x => isPublicContent 
+                ? x.IsPublic 
+                : x.OwnerId == userId || x.SongsUsers.Any(s => s.UserId == userId)))
             .ThenInclude(x => x.Language)
             .FirstOrDefaultAsync();
 

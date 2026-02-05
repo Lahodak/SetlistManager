@@ -40,7 +40,7 @@ public class SongService : ISongService
         return new PagedResponse<SongModel>
         {
             TotalCount = result.TotalCount,
-            Items = result.Items?
+            Items = result.Items
                 .Select(x => x.ToModel())
                 .ToList()
         };
@@ -129,8 +129,13 @@ public class SongService : ISongService
     {
         int userId = _currentUserContext.GetCurrentUserId()!.Value;
 
-        if (await _dbContext.Songs.AnyAsync(x => (x.Name == updateModel.Name) && (x.ArtistId == updateModel.ArtistId)
-        && ((x.OwnerId == userId) || x.SongsUsers.Any(x => x.Song.ArtistId == updateModel.ArtistId && x.UserId == userId))))
+        if (await _dbContext.Songs.
+            AnyAsync(x => 
+            (x.Name == updateModel.Name) 
+            && (x.ArtistId == updateModel.ArtistId)
+            && ((x.OwnerId == userId) 
+            || x.SongsUsers
+            .Any(x => x.Song.ArtistId == updateModel.ArtistId && x.UserId == userId))))
             return false;
         
         var song = await _dbContext.Songs.FirstOrDefaultAsync(x => x.Id == songId && x.OwnerId == userId);
@@ -224,7 +229,6 @@ public class SongService : ISongService
             .OrderByDescending(x => x.UsageCount)
             .Skip(request.PageIndex * request.PageSize)
             .Take(request.PageSize)
-            .AsNoTracking()
             .ToListAsync();
 
         return new PagedResponse<SongUsageStatModel>
@@ -254,7 +258,6 @@ public class SongService : ISongService
             .OrderByDescending(x => x.UsageCount)
             .Skip(request.PageIndex * request.PageSize)
             .Take(request.PageSize)
-            .AsNoTracking()
             .ToListAsync();
 
         return new PagedResponse<SongUsageStatModel>
@@ -282,7 +285,6 @@ public class SongService : ISongService
                 CreatedAt = s.CreatedAt,
                 ArtistNick = s.Artist.Nick
             })
-            .AsNoTracking()
             .ToListAsync();
 
         return new PagedResponse<LatestSongStatModel>

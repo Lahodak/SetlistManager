@@ -7,10 +7,3 @@ public class PagedRequest
     public string? Query { get; set; }
     public ContentType ContentType { get; set; } = ContentType.All;
 }
-
-public enum ContentType
-{
-    Private,
-    Public,
-    All
-}

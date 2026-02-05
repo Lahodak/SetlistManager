@@ -1,8 +1,9 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
+
 namespace SetlistManager.Common.Genius.Models.Search;
 
 public class Meta
 {
-    [JsonProperty("status")]
+    [JsonPropertyName("status")]
     public int Status { get; set; }
 }

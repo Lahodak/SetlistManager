@@ -1,9 +1,9 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace SetlistManager.Common.Genius.Models.Songs;
 
 public class Response
 {
-    [JsonProperty("song")]
+    [JsonPropertyName("song")]
     public Song Song { get; set; } = default!;
 }

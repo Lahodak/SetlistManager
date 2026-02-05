@@ -1,13 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace SetlistManager.Common.Models;
+﻿namespace SetlistManager.Common.Models;
 
 public class RoomModel
 {
     public int Id { get; set; }
-    [Required]
     public string Name { get; set; } = default!;
-    [Required]
     public string Code { get; set; } = default!;
     public bool IsActive { get; set; }
     public bool IsPublic { get; set; }

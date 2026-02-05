@@ -8,10 +8,12 @@ public class SongCreateModel
     [MinLength(1)]
     public string Name { get; set; } = default!;
     [Required]
-    public int ArtistId { get; set; }
+    public int? ArtistId { get; set; }
     [Required]
-    public int LanguageId { get; set; }
+    public int? LanguageId { get; set; }
+    [MaxLength(512)]
     public string TabsURL { get; set; } = default!;
+    [MaxLength(512)]
     public string AudioURL { get; set; } = default!;
     [Required]
     [MaxLength(10)]

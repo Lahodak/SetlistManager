@@ -1,9 +1,9 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace SetlistManager.Common.Genius.Models;
 
 public class CodeExchangeResponseModel
 {
-    [JsonProperty("access_token")]
+    [JsonPropertyName("access_token")]
     public string AccessToken { get; set; } = default!;
 }

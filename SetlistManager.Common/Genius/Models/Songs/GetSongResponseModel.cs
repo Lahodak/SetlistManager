@@ -1,11 +1,11 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace SetlistManager.Common.Genius.Models.Songs;
 
 public class GetSongResponseModel
 {
-    [JsonProperty("meta")]
+    [JsonPropertyName("meta")]
     public Meta Meta { get; set; } = default!;
-    [JsonProperty("response")]
+    [JsonPropertyName("response")]
     public Response Response { get; set; } = default!;
 }
