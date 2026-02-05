@@ -38,6 +38,18 @@ public class ApiService : IApiService
         return false;
     }
 
+    public async Task<bool> TryPostAsync<T>(string endpoint, T data)
+    {
+        await ConfigureHttpClientAsync(_client);    
+        
+        var response = await _client.PostAsJsonAsync(endpoint, data);
+        
+        if (response.IsSuccessStatusCode)
+            return true;
+        
+        return false;
+    }
+
     public async Task<bool> TryPutAsync<T>(string endpoint, T data)
     {
         await ConfigureHttpClientAsync(_client);        

@@ -35,8 +35,8 @@ public class SongService : ISongService
     public async Task<SongModel?> GetSongByIdAsync(int id)
         => await _apiService.GetAsync<SongModel>($"{_apiOptions.SongsEndpoint}/{id}");
 
-    public async Task UploadSongAsync(SongCreateModel songCreateModel) 
-        => await _apiService.PostAsync(_apiOptions.SongsEndpoint, songCreateModel);
+    public async Task<bool> TryCreateSongAsync(SongCreateModel songCreateModel) 
+        => await _apiService.TryPostAsync(_apiOptions.SongsEndpoint, songCreateModel);
 
     public async Task<bool> TryUpdateSongAsync(int id, SongUpdateModel songModel)
         => await _apiService.TryPutAsync($"{_apiOptions.SongsEndpoint}/{id}", songModel);
@@ -45,10 +45,10 @@ public class SongService : ISongService
         => await _apiService.TryDeleteAsync($"{_apiOptions.SongsEndpoint}/{id}");
 
     public async Task<bool> TryMakeSongPublicAsync(int id)
-        => await _apiService.PostAsync($"{_apiOptions.SongsEndpoint}/{id}/public", true);
+        => await _apiService.TryPostAsync($"{_apiOptions.SongsEndpoint}/{id}/public", true);
 
     public async Task<bool> TryGiveAccessToUserAsync(int songId, int targetId)
-        => await _apiService.PostAsync($"{_apiOptions.SongsEndpoint}/{songId}/users/{targetId}", true);
+        => await _apiService.TryPostAsync($"{_apiOptions.SongsEndpoint}/{songId}/users/{targetId}", true);
 
     public async Task RemoveAccessFromUserAsync(int songId, int targetId)
         => await _apiService.TryDeleteAsync($"{_apiOptions.SongsEndpoint}/{songId}/users/{targetId}");

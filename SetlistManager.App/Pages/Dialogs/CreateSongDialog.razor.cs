@@ -9,60 +9,44 @@ public partial class CreateSongDialog
 {
     [CascadingParameter]
     public required IMudDialogInstance MudDialog { get; set; }
+
     [Inject]
     public required ISnackbar Snackbar { get; set; }
+
     [Inject]
     public required ISongService SongService { get; set; }
+
     [Inject]
     public required ILanguageService LanguageService { get; set; }
+
     [Inject]
     public required IArtistService ArtistService { get; set; }
 
     private List<LanguageModel>? _languages;
-    private List<ArtistModel>? _artists;
-    private SongModel? _song;
+    private SongCreateModel _songModel = new();
 
     protected override async Task OnInitializedAsync()
     {
         _languages = await LanguageService.GetAvailableLanguagesAsync();
-        _artists = (await ArtistService.GetAvailableArtistsAsync(new() { PageSize = int.MaxValue, ContentType = ContentType.Private }))?.Items;
-
-        if (_artists is null || _artists.Count == 0)
-        {
-            Snackbar.Add("Add Artists First!", Severity.Warning);
-        }
-
-        _song = new SongModel
-        {
-            Name = string.Empty,
-            TabsURL = string.Empty,
-            AudioURL = string.Empty,
-            Tuning = string.Empty,
-            Key = string.Empty,
-            BPM = 120,
-            IsPublic = false
-        };
     }
 
-    private Task<IEnumerable<ArtistModel>> SearchArtists(string value, CancellationToken token)
+    private async Task<IEnumerable<ArtistModel>> SearchArtists(string value, CancellationToken token)
     {
-        if (_artists is null)
-            return Task.FromResult<IEnumerable<ArtistModel>>([]);
+        var request = new PagedRequest
+        {
+            PageSize = 10,
+            Query = value,
+            ContentType = ContentType.Private
+        };
 
-        if (string.IsNullOrWhiteSpace(value))
-            return Task.FromResult<IEnumerable<ArtistModel>>(_artists);
-
-        var searchResults = _artists
-            .Where(a => a.Nick.Contains(value, StringComparison.OrdinalIgnoreCase))
-            .ToList();
-
-        return Task.FromResult<IEnumerable<ArtistModel>>(searchResults);
+        var result = await ArtistService.GetAvailableArtistsAsync(request);
+        return result?.Items ?? [];
     }
 
     private Task<IEnumerable<LanguageModel>> SearchLanguages(string value, CancellationToken token)
     {
         if (_languages is null)
-            return Task.FromResult<IEnumerable<LanguageModel>>(new List<LanguageModel>());
+            return Task.FromResult<IEnumerable<LanguageModel>>([]);
 
         if (string.IsNullOrWhiteSpace(value))
             return Task.FromResult<IEnumerable<LanguageModel>>(_languages);
@@ -74,69 +58,54 @@ public partial class CreateSongDialog
         return Task.FromResult<IEnumerable<LanguageModel>>(searchResults);
     }
 
-    private void OnArtistSelected(ArtistModel selectedArtist)
+    private void OnArtistSelected(ArtistModel? selectedArtist)
     {
-        if (_song is not null)
-        {
-            _song.Artist = selectedArtist;
-        }
+        _songModel.Artist = selectedArtist;
+        _songModel.ArtistId = selectedArtist?.Id;
     }
 
-    private void OnLanguageSelected(LanguageModel selectedLanguage)
+    private void OnLanguageSelected(LanguageModel? selectedLanguage)
     {
-        if (_song is not null)
-        {
-            _song.Language = selectedLanguage;
-        }
+        _songModel.Language = selectedLanguage;
+        _songModel.LanguageId = selectedLanguage?.Id;
     }
 
-    private async Task SaveSong()
+    private async Task SaveAsync()
     {
-        if (_song is null)
-            return;
-
-        if (_artists is null || _artists.Count == 0)
+        if (string.IsNullOrWhiteSpace(_songModel.Name))
         {
-            Snackbar.Add("Add Artists First!", Severity.Error);
+            Snackbar.Add("Please provide Song Name", Severity.Warning);
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(_song.Name))
+        if (_songModel.Name.Length < 2)
         {
-            Snackbar.Add("Please provide Song Name", Severity.Error);
+            Snackbar.Add("Song name must be at least 2 characters", Severity.Warning);
             return;
         }
 
-        if (_song.Artist is null)
+        if (_songModel.ArtistId is null)
         {
-            Snackbar.Add("Please select an Artist", Severity.Error);
+            Snackbar.Add("Please select an Artist", Severity.Warning);
             return;
         }
 
-        if (_song.Language is null)
+        if (_songModel.LanguageId is null)
         {
-            Snackbar.Add("Please select a Language", Severity.Error);
+            Snackbar.Add("Please select a Language", Severity.Warning);
             return;
         }
 
-        _song.LanguageId = _song.Language.Id;
+        var result = await SongService.TryCreateSongAsync(_songModel);
 
-        SongCreateModel songCreateModel = new()
+        if (!result)
         {
-            Name = _song.Name,
-            ArtistId = _song.Artist.Id,
-            LanguageId = _song.Language.Id,
-            TabsURL = _song.TabsURL,
-            AudioURL = _song.AudioURL,
-            Key = _song.Key,
-            Tuning = _song.Tuning,
-            BPM = _song.BPM,
-            IsPublic = _song.IsPublic
-        };
+            Snackbar.Add("Failed to create song", Severity.Error);
+            return;
+        }
 
-        await SongService.UploadSongAsync(songCreateModel);
-        Snackbar.Add("Song added successfully!", Severity.Success);
-        MudDialog.Close(DialogResult.Ok(_song));
+        Snackbar.Add("Song created successfully!", Severity.Success);
+        MudDialog.Close();
     }
 
     private void Cancel() => MudDialog.Cancel();

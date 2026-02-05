@@ -9,29 +9,56 @@ public partial class CreateRoomDialog
 {
     [CascadingParameter]
     public required IMudDialogInstance MudDialog { get; set; }
+
     [Inject]
     public required IRoomService RoomService { get; set; }
+
     [Inject]
     public required ISetlistService SetlistService { get; set; }
-    [Inject]
-    public required NavigationManager NavigationManager { get; set; }
+
     [Inject]
     public required ISnackbar Snackbar { get; set; }
+
+    [Inject]
+    public required NavigationManager NavigationManager { get; set; }
 
     private readonly RoomCreateModel _createRoomModel = new();
     private List<SetlistModel>? _availableSetlists;
     private SetlistModel? _selectedSetlist;
-    private string _searchString = string.Empty;
     private readonly HashSet<SetlistModel> _expandedSetlists = [];
+    private string _searchString = string.Empty;
+    private bool _isLoading;
 
     protected override async Task OnInitializedAsync()
     {
-        _availableSetlists = (await SetlistService.GetAllSetlistsAsync(new() { PageSize = int.MaxValue }))?.Items;
+        await LoadSetlists();
+    }
 
-        if (_availableSetlists is null)
+    private async Task LoadSetlists()
+    {
+        _isLoading = true;
+
+        var result = await SetlistService.GetAllSetlistsAsync(new()
         {
-            Snackbar.Add("Couldn't find any available Setlists", Severity.Error);
+            PageSize = 10,
+            Query = _searchString,
+            ContentType = ContentType.Private
+        });
+
+        _availableSetlists = result?.Items;
+
+        if (_availableSetlists is null || !_availableSetlists.Any())
+        {
+            Snackbar.Add("Couldn't find any available Setlists", Severity.Info);
         }
+
+        _isLoading = false;
+    }
+
+    private async Task OnSearchChanged(string searchValue)
+    {
+        _searchString = searchValue;
+        await LoadSetlists();
     }
 
     private void SelectSetlist(SetlistModel setlist)
@@ -42,27 +69,36 @@ public partial class CreateRoomDialog
     private async Task Save()
     {
         if (string.IsNullOrWhiteSpace(_createRoomModel.Name))
+        {
+            Snackbar.Add("Please enter a room name", Severity.Warning);
             return;
+        }
+
+        if (_createRoomModel.Name.Length < 3)
+        {
+            Snackbar.Add("Room name must be at least 3 characters", Severity.Warning);
+            return;
+        }
+
+        if (_selectedSetlist is null)
+        {
+            Snackbar.Add("Please select a setlist", Severity.Warning);
+            return;
+        }
 
         _createRoomModel.SetlistModel = _selectedSetlist;
 
         RoomModel? createdRoom = await RoomService.CreateRoomAsync(_createRoomModel);
 
         if (createdRoom is not null && createdRoom.Code is not null)
+        {
             NavigationManager.NavigateTo($"/room/{createdRoom.Code}");
-
-        MudDialog.Close(DialogResult.Ok(createdRoom));
-    }
-
-    private bool FilterSetlists(SetlistModel setlist)
-    {
-        if (string.IsNullOrWhiteSpace(_searchString))
-            return true;
-
-        if (setlist.Name.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-
-        return false;
+            MudDialog.Close(DialogResult.Ok(createdRoom));
+        }
+        else
+        {
+            Snackbar.Add("Failed to create room", Severity.Error);
+        }
     }
 
     private void ToggleRowExpand(SetlistModel setlist)

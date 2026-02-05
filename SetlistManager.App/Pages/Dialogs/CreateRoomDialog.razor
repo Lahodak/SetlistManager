@@ -11,22 +11,30 @@
                 <MudItem xs="12" Class="mt-2">
                     <MudCheckBox T="bool" @bind-Value="_createRoomModel.IsPublic"
                                  Color="Color.Primary"
-                                 Label="Make Room Public (visible to others)"/>
+                                 Label="Make Room Public (visible to others)" />
                 </MudItem>
             </MudGrid>
         </MudPaper>
 
         <MudPaper Class="pa-4 mt-4" Elevation="2">
             <MudText Typo="Typo.h6" Class="mb-3">Select a Setlist to assign:</MudText>
-            <MudText Typo="Typo.body2" Class="mb-2">Selected Setlist: **@(_selectedSetlist?.Name ?? "None")**</MudText>
-            
-            @if (_availableSetlists == null)
+            <MudText Typo="Typo.body2" Class="mb-2">
+                Selected Setlist: <strong>@(_selectedSetlist?.Name ?? "None")</strong>
+            </MudText>
+
+            @if (_isLoading)
             {
                 <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7" />
             }
+            else if (_availableSetlists == null || !_availableSetlists.Any())
+            {
+                <MudAlert Severity="Severity.Info" Class="mt-3">
+                    No setlists found. @(_searchString.Length > 0 ? "Try a different search term." : "Create a setlist first.")
+                </MudAlert>
+            }
             else
             {
-                <MudTable Items="@_availableSetlists.Where(FilterSetlists)"
+                <MudTable Items="@_availableSetlists"
                           Dense="true"
                           Hover="true"
                           Bordered="true"
@@ -39,7 +47,10 @@
                                       Adornment="Adornment.Start"
                                       AdornmentIcon="@Icons.Material.Filled.Search"
                                       IconSize="Size.Medium"
-                                      Class="mt-0" />
+                                      Class="mt-0"
+                                      Immediate="false"
+                                      DebounceInterval="700"
+                                      OnDebounceIntervalElapsed="OnSearchChanged" />
                     </ToolBarContent>
 
                     <HeaderContent>
@@ -76,9 +87,9 @@
                                     <MudText Typo="Typo.subtitle2" Class="mb-2">Songs in Setlist:</MudText>
                                     @if (context.Songs.Any())
                                     {
-                                        @foreach (var song in context.Songs)
+                                        @foreach (var song in context.Songs.OrderBy(s => s.Order))
                                         {
-                                            <MudText Typo="Typo.body2">- @song.Name (by @(song.Artist?.Nick ?? "N/A"))</MudText>
+                                            <MudText Typo="Typo.body2">@song.Order. @song.Name (by @(song.Artist?.Nick ?? "N/A"))</MudText>
                                         }
                                     }
                                     else
@@ -97,8 +108,12 @@
     </DialogContent>
 
     <DialogActions>
-        <MudButton Class="pa-2 ml-2" Variant="Variant.Outlined" Color="Color.Primary" Style="height: 50px;"
-                   OnClick="() => Save()">
+        <MudButton Class="pa-2 ml-2"
+                   Variant="Variant.Outlined"
+                   Color="Color.Primary"
+                   Style="height: 50px;"
+                   OnClick="Save"
+                   Disabled="_isLoading">
             Create Room
         </MudButton>
         <MudButton Variant="Variant.Text" OnClick="Cancel">Cancel</MudButton>
