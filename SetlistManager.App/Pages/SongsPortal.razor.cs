@@ -34,7 +34,7 @@ public partial class SongsPortal
         _pageState.PageIndex = state.Page;
         _pageState.PageSize = state.PageSize;
 
-        var response = await SongService.GetAllSongsAsync(_pageState);
+        var response = await SongService.GetSongsAsync(_pageState);
 
         if (response?.Items is null)
             return null;
@@ -125,7 +125,7 @@ public partial class SongsPortal
         if (result is not true)
             return;
 
-        await SongService.RemoveAccessFromUserAsync(song.Id, _userId);
+        await SongService.TryRemoveAccessFromUserAsync(song.Id, _userId);
         await table.ReloadServerData();
     }
 

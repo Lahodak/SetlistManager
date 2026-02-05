@@ -16,7 +16,7 @@ public class SongService : ISongService
         _apiService = apiService;
     }
 
-    public async Task<PagedResponse<SongModel>> GetAllSongsAsync(PagedRequest request)
+    public async Task<PagedResponse<SongModel>> GetSongsAsync(PagedRequest request)
     {
         UriBuilder uri = new(_apiOptions.SongsEndpoint)
         {
@@ -50,7 +50,7 @@ public class SongService : ISongService
     public async Task<bool> TryGiveAccessToUserAsync(int songId, int targetId)
         => await _apiService.TryPostAsync($"{_apiOptions.SongsEndpoint}/{songId}/users/{targetId}", true);
 
-    public async Task RemoveAccessFromUserAsync(int songId, int targetId)
+    public async Task<bool> TryRemoveAccessFromUserAsync(int songId, int targetId)
         => await _apiService.TryDeleteAsync($"{_apiOptions.SongsEndpoint}/{songId}/users/{targetId}");
 
     public async Task<List<SongUsageStatModel>> GetStatisticsAsync(StatsRequest request)

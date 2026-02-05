@@ -16,7 +16,7 @@ public class ArtistService : IArtistService
         _apiService = apiService;
     }
 
-    public async Task<PagedResponse<ArtistModel>> GetAvailableArtistsAsync(PagedRequest request)
+    public async Task<PagedResponse<ArtistModel>> GetArtistsAsync(PagedRequest request)
     {
         UriBuilder uri = new(_apiOptions.ArtistsEndpoint)
         {
@@ -35,8 +35,8 @@ public class ArtistService : IArtistService
     public async Task<ArtistModel?> GetArtistByIdAsync(int id) 
         => await _apiService.GetAsync<ArtistModel>($"{_apiOptions.ArtistsEndpoint}/{id}" );
 
-    public async Task UploadArtistAsync(ArtistCreateModel createModel)
-        => await _apiService.PostAsync(_apiOptions.ArtistsEndpoint, createModel);
+    public async Task<bool> TryCreateArtistAsync(ArtistCreateModel createModel)
+        => await _apiService.TryPostAsync(_apiOptions.ArtistsEndpoint, createModel);
 
     public async Task<bool> TryDeleteArtistAsync(int id)
         => await _apiService.TryDeleteAsync($"{_apiOptions.ArtistsEndpoint}/{id}");
@@ -45,11 +45,11 @@ public class ArtistService : IArtistService
         => await _apiService.TryPutAsync($"{_apiOptions.ArtistsEndpoint}/{id}", updateModel);
 
     public async Task<bool> TryGiveAccessToUserAsync(int artistId, int targetId)
-        => await _apiService.PostAsync($"{_apiOptions.ArtistsEndpoint}/{artistId}/users/{targetId}", true);
+        => await _apiService.TryPostAsync($"{_apiOptions.ArtistsEndpoint}/{artistId}/users/{targetId}", true);
 
     public async Task<bool> TryMakeArtistPublicAsync(int id)
-        => await _apiService.PostAsync($"{_apiOptions.ArtistsEndpoint}/{id}/public", true);
+        => await _apiService.TryPostAsync($"{_apiOptions.ArtistsEndpoint}/{id}/public", true);
 
-    public async Task RemoveAccessFromUserAsync(int artistId, int targetId)
+    public async Task<bool> TryRemoveAccessFromUserAsync(int artistId, int targetId)
         => await _apiService.TryDeleteAsync($"{_apiOptions.ArtistsEndpoint}/{artistId}/users/{targetId}");
 }

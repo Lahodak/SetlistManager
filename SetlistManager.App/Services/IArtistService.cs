@@ -4,12 +4,12 @@ namespace SetlistManager.App.Services;
 
 public interface IArtistService
 {
-    Task<PagedResponse<ArtistModel>> GetAvailableArtistsAsync(PagedRequest request);
+    Task<PagedResponse<ArtistModel>> GetArtistsAsync(PagedRequest request);
     Task<ArtistModel?> GetArtistByIdAsync(int id);
-    Task UploadArtistAsync(ArtistCreateModel createModel);
-    Task<bool> TryDeleteArtistAsync(int id);
+    Task<bool> TryCreateArtistAsync(ArtistCreateModel createModel);
     Task<bool> TryUpdateArtistAsync(int id, ArtistUpdateModel updateModel);
-    Task<bool> TryMakeArtistPublicAsync(int id);
+    Task<bool> TryDeleteArtistAsync(int id);
     Task<bool> TryGiveAccessToUserAsync(int artistId, int targetId);
-    Task RemoveAccessFromUserAsync(int artistId, int targetId);
+    Task<bool> TryRemoveAccessFromUserAsync(int artistId, int targetId);
+    Task<bool> TryMakeArtistPublicAsync(int id);
 }

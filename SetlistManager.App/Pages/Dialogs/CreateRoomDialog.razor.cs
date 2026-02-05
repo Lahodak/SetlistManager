@@ -38,7 +38,7 @@ public partial class CreateRoomDialog
     {
         _isLoading = true;
 
-        var result = await SetlistService.GetAllSetlistsAsync(new()
+        var result = await SetlistService.GetSetlistsAsync(new()
         {
             PageSize = 10,
             Query = _searchString,

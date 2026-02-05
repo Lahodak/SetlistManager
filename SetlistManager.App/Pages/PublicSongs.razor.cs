@@ -38,7 +38,7 @@ public partial class PublicSongs
             PageSize = int.MaxValue
         };
 
-        var userSongs = await SongService.GetAllSongsAsync(userSongsRequest);
+        var userSongs = await SongService.GetSongsAsync(userSongsRequest);
         if (userSongs?.Items != null)
         {
             _userSongIds = userSongs.Items.Select(s => s.Id).ToHashSet();
@@ -53,7 +53,7 @@ public partial class PublicSongs
         pageState.PageIndex = state.Page;
         pageState.PageSize = state.PageSize;
 
-        var response = await SongService.GetAllSongsAsync(pageState);
+        var response = await SongService.GetSongsAsync(pageState);
 
         _loading = false;
 

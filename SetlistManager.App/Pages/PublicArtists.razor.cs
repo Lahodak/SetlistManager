@@ -40,7 +40,7 @@ public partial class PublicArtists
             PageSize = int.MaxValue
         };
 
-        var userArtists = await ArtistService.GetAvailableArtistsAsync(userArtistsRequest);
+        var userArtists = await ArtistService.GetArtistsAsync(userArtistsRequest);
         if (userArtists?.Items != null)
         {
             _userArtistIds = userArtists.Items.Select(a => a.Id).ToHashSet();
@@ -55,7 +55,7 @@ public partial class PublicArtists
         pageState.PageIndex = state.Page;
         pageState.PageSize = state.PageSize;
 
-        var response = await ArtistService.GetAvailableArtistsAsync(pageState);
+        var response = await ArtistService.GetArtistsAsync(pageState);
         _loading = false;
 
         if (response?.Items is null)

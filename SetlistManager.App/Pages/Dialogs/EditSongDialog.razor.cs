@@ -57,7 +57,7 @@ public partial class EditSongDialog
             ContentType = ContentType.Private
         };
 
-        var result = await ArtistService.GetAvailableArtistsAsync(request);
+        var result = await ArtistService.GetArtistsAsync(request);
         return result?.Items ?? [];
     }
 

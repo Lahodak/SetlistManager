@@ -9,12 +9,16 @@ public partial class CreateSetlistDialog
 {
     [CascadingParameter]
     public required IMudDialogInstance MudDialog { get; set; }
+
     [Inject]
     public required ISetlistService SetlistService { get; set; }
+
     [Inject]
     public required IUserService UserService { get; set; }
+
     [Inject]
     public required ISongService SongService { get; set; }
+
     [Inject]
     public required ISnackbar Snackbar { get; set; }
 
@@ -38,7 +42,12 @@ public partial class CreateSetlistDialog
 
     protected override async Task OnInitializedAsync()
     {
-        _allSongs = (await SongService.GetAllSongsAsync(new() { PageSize = int.MaxValue, ContentType = ContentType.Private }))?.Items;
+        _allSongs = (await SongService.GetSongsAsync(new()
+        {
+            PageSize = int.MaxValue,
+            ContentType = ContentType.Private
+        }))?.Items;
+
         _user = await UserService.GetUserAsync();
 
         if (_user is null)
@@ -60,18 +69,14 @@ public partial class CreateSetlistDialog
     private void OnCreationModeChanged(CreationMode newMode)
     {
         _creationMode = newMode;
-        _shuffeledSongCollection.Clear();
-        _manuallyAddedSongs.Clear();
-        _showSetlistContentUI = false;
-        _showSaveSetlistUI = false;
-        _toBeSavedSetlistName = null;
+        ClearSetlist();
         StateHasChanged();
     }
 
     private string GetGenerationHelperText()
     {
         if (_manuallyAddedSongs.Count == 0)
-            return "All songs will be randomly selected";
+            return "All songs will be randomly selected from your Library";
 
         int randomCount = Math.Max(0, _length - _manuallyAddedSongs.Count);
         return $"{_manuallyAddedSongs.Count} specific + {randomCount} random songs";
@@ -125,10 +130,7 @@ public partial class CreateSetlistDialog
         _shuffeledSongCollection.Remove(songToRemove);
         _manuallyAddedSongs.Remove(songToRemove);
 
-        for (int i = 0; i < _shuffeledSongCollection.Count; i++)
-        {
-            _shuffeledSongCollection[i].Order = i + 1;
-        }
+        ReorderSongs();
 
         if (_shuffeledSongCollection.Count == 0)
         {
@@ -149,87 +151,113 @@ public partial class CreateSetlistDialog
 
         if (string.IsNullOrWhiteSpace(_toBeSavedSetlistName))
         {
-            _toBeSavedSetlistName = $"Manual {DateTime.Now:HH:mm}";
+            _toBeSavedSetlistName = $"Manual {DateTime.Now:HH:mm:ss}";
         }
 
-        _setlist = new SetlistModel
-        {
-            Name = _toBeSavedSetlistName,
-            Songs = _shuffeledSongCollection
-        };
-
+        _setlist = CreateSetlistModel(_toBeSavedSetlistName, _shuffeledSongCollection);
         _showSaveSetlistUI = true;
     }
 
     private void Generate()
     {
+        if (!ValidateGenerationPreconditions())
+            return;
+
+        var generatedSongs = GenerateSongList();
+
+        UpdateShuffledCollection(generatedSongs);
+        SetDefaultNameIfEmpty();
+        UpdateSetlistModel();
+        ShowUI();
+        ShowWarningIfIncomplete(generatedSongs.Count);
+
+        StateHasChanged();
+    }
+
+    private bool ValidateGenerationPreconditions()
+    {
         if (_allSongs is null)
         {
             Snackbar.Add("Couldn't find any available songs", Severity.Error);
-            return;
+            return false;
         }
 
         int finalLength = Math.Min(_length, _maxNumber);
-
         if (finalLength <= 0)
         {
             Snackbar.Add("Invalid setlist length", Severity.Error);
-            return;
+            return false;
         }
 
-        var currentManualSongs = new List<SongModel>(_manuallyAddedSongs);
-        int remainingSlots = finalLength - currentManualSongs.Count;
+        return true;
+    }
 
-        if (remainingSlots < 0)
-        {
-            remainingSlots = 0;
-        }
+    private List<SongModel> GenerateSongList()
+    {
+        int finalLength = Math.Min(_length, _maxNumber);
+        var manualSongs = new List<SongModel>(_manuallyAddedSongs);
+        int remainingSlots = Math.Max(0, finalLength - manualSongs.Count);
 
-        var shufflePool = (_allSongs ?? [])
-            .Where(s => !currentManualSongs.Any(ms => ms.Id == s.Id))
+        var randomSongs = GetRandomSongs(manualSongs, remainingSlots);
+
+        var finalList = new List<SongModel>(manualSongs);
+        finalList.AddRange(randomSongs);
+
+        return finalList;
+    }
+
+    private List<SongModel> GetRandomSongs(List<SongModel> manualSongs, int count)
+    {
+        if (count <= 0 || _allSongs is null)
+            return [];
+
+        var availablePool = _allSongs
+            .Where(s => !manualSongs.Any(ms => ms.Id == s.Id))
             .ToList();
 
-        var finalSetlist = new List<SongModel>(currentManualSongs);
+        if (availablePool.Count == 0)
+            return [];
 
-        if (remainingSlots > 0 && shufflePool.Count > 0)
-        {
-            ShuffleService.ShuffleList(shufflePool);
+        ShuffleService.ShuffleList(availablePool);
+        return availablePool.Take(count).ToList();
+    }
 
-            var randomSongs = shufflePool
-                .Take(remainingSlots)
-                .ToList();
-
-            finalSetlist.AddRange(randomSongs);
-        }
-
+    private void UpdateShuffledCollection(List<SongModel> songs)
+    {
         _shuffeledSongCollection.Clear();
-        _shuffeledSongCollection.AddRange(finalSetlist);
+        _shuffeledSongCollection.AddRange(songs);
+        ReorderSongs();
+    }
 
-        for (int i = 0; i < _shuffeledSongCollection.Count; i++)
-        {
-            _shuffeledSongCollection[i].Order = i + 1;
-        }
-
+    private void SetDefaultNameIfEmpty()
+    {
         if (string.IsNullOrWhiteSpace(_toBeSavedSetlistName))
         {
             _toBeSavedSetlistName = $"Generated {DateTime.Now:HH:mm:ss}";
         }
+    }
 
-        _setlist = new SetlistModel
-        {
-            Name = _toBeSavedSetlistName,
-            Songs = _shuffeledSongCollection
-        };
+    private void UpdateSetlistModel()
+    {
+        _setlist = CreateSetlistModel(_toBeSavedSetlistName!, _shuffeledSongCollection);
+    }
 
+    private void ShowUI()
+    {
         _showSetlistContentUI = true;
         _showSaveSetlistUI = true;
+    }
 
-        if (_shuffeledSongCollection.Count != finalLength)
+    private void ShowWarningIfIncomplete(int actualCount)
+    {
+        int requestedLength = Math.Min(_length, _maxNumber);
+        if (actualCount != requestedLength)
         {
-            Snackbar.Add($"Could only generate {_shuffeledSongCollection.Count} songs (Max available: {_maxNumber})", Severity.Warning);
+            Snackbar.Add(
+                $"Could only generate {actualCount} songs (Max available: {_maxNumber})",
+                Severity.Warning
+            );
         }
-
-        StateHasChanged();
     }
 
     private async Task Save()
@@ -240,28 +268,31 @@ public partial class CreateSetlistDialog
             return;
         }
 
-        if(_user is null)
+        if (_user is null)
             return;
-        
+
         if (_toBeSavedSetlistName.Length < 4)
         {
             Snackbar.Add("Setlist name has to be 4 characters or longer", Severity.Warning);
             return;
         }
 
-        for (int i = 0; i < _shuffeledSongCollection.Count; i++)
-        {
-            _shuffeledSongCollection[i].Order = i + 1;
-        }
+        ReorderSongs();
 
-        _setlist.Name = _toBeSavedSetlistName;            
+        _setlist.Name = _toBeSavedSetlistName;
         _setlist.OwnerId = _user.Id;
         _setlist.Songs = _shuffeledSongCollection;
 
-        if (_setlist is null) return;
+        var result = await SetlistService.TryCreateSetlistAsync(_setlist);
+        
+        if(!result)
+        {
+            Snackbar.Add("Failed to save setlist", Severity.Error);
+            return;
+        }
 
-        await SetlistService.SaveSetlistAsync(_setlist);
-        MudDialog.Close(DialogResult.Ok(_setlist));
+        Snackbar.Add("Setlist saved successfully", Severity.Success);
+        MudDialog.Close();
     }
 
     private void RegenerateSong(int songId)
@@ -276,9 +307,7 @@ public partial class CreateSetlistDialog
             return;
         }
 
-        var availableSongs = GetAvailableSongs()
-            .Where(s => !_manuallyAddedSongs.Any(ms => ms.Id == s.Id))
-            .ToList();
+        var availableSongs = GetAvailableSongsExcludingManual();
 
         if (availableSongs.Count <= 0)
         {
@@ -291,10 +320,43 @@ public partial class CreateSetlistDialog
         StateHasChanged();
     }
 
+    private void ClearSetlist()
+    {
+        _shuffeledSongCollection.Clear();
+        _manuallyAddedSongs.Clear();
+        _showSetlistContentUI = false;
+        _showSaveSetlistUI = false;
+        _toBeSavedSetlistName = null;
+    }
+
+    private void ReorderSongs()
+    {
+        for (int i = 0; i < _shuffeledSongCollection.Count; i++)
+        {
+            _shuffeledSongCollection[i].Order = i + 1;
+        }
+    }
+
+    private SetlistModel CreateSetlistModel(string name, List<SongModel> songs)
+    {
+        return new SetlistModel
+        {
+            Name = name,
+            Songs = songs
+        };
+    }
+
     private List<SongModel> GetAvailableSongs()
     {
         return (_allSongs ?? [])
             .Where(s => !_shuffeledSongCollection.Any(ss => ss.Id == s.Id))
+            .ToList();
+    }
+
+    private List<SongModel> GetAvailableSongsExcludingManual()
+    {
+        return GetAvailableSongs()
+            .Where(s => !_manuallyAddedSongs.Any(ms => ms.Id == s.Id))
             .ToList();
     }
 

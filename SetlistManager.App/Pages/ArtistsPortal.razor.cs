@@ -34,7 +34,7 @@ public partial class ArtistsPortal
         pageStatus.PageSize = state.PageSize;
         pageStatus.Query = searchString;
 
-        var result = await ArtistService.GetAvailableArtistsAsync(pageStatus);
+        var result = await ArtistService.GetArtistsAsync(pageStatus);
 
         if(result?.Items is null)
         {
@@ -102,7 +102,7 @@ public partial class ArtistsPortal
         if (result is not true)
             return;
 
-        await ArtistService.RemoveAccessFromUserAsync(artist.Id, _userId);
+        await ArtistService.TryRemoveAccessFromUserAsync(artist.Id, _userId);
         await _table.ReloadServerData();
     }
 

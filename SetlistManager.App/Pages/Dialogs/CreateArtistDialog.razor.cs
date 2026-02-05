@@ -19,7 +19,7 @@ public partial class CreateArtistDialog
         if (string.IsNullOrEmpty(_artistCreateModel.Nick))
             return;
 
-        await ArtistService.UploadArtistAsync(_artistCreateModel);
+        await ArtistService.TryCreateArtistAsync(_artistCreateModel);
         MudDialog.Close(DialogResult.Ok(_artistCreateModel));
     }
 

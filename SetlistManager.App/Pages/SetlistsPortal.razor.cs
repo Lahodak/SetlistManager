@@ -34,7 +34,7 @@ public partial class SetlistsPortal
         pageStatus.PageIndex = state.Page;
         pageStatus.PageSize = state.PageSize;        
 
-        var response = await SetlistService.GetAllSetlistsAsync(pageStatus);
+        var response = await SetlistService.GetSetlistsAsync(pageStatus);
 
         if (response?.Items is null)
         {
@@ -124,7 +124,7 @@ public partial class SetlistsPortal
         if (result is not true)
             return;
 
-        await SetlistService.RemoveAccessFromUserAsync(model.Id, _userId);
+        await SetlistService.TryRemoveAccessFromUserAsync(model.Id, _userId);
         await table.ReloadServerData();
     }
 

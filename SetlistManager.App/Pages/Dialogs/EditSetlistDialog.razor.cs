@@ -28,7 +28,7 @@ public partial class EditSetlistDialog
 
     protected override async Task OnInitializedAsync()
     {
-        var result = await SongService.GetAllSongsAsync(new() { PageSize = 10, ContentType = ContentType.Private });
+        var result = await SongService.GetSongsAsync(new() { PageSize = 10, ContentType = ContentType.Private });
 
         _allSongs = result?.Items;
 
@@ -55,7 +55,7 @@ public partial class EditSetlistDialog
             ContentType = ContentType.Private
         };
 
-        var result = await SongService.GetAllSongsAsync(request);
+        var result = await SongService.GetSongsAsync(request);
 
         if (result?.Items is null)
             return [];
