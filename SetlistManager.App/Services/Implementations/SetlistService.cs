@@ -37,8 +37,8 @@ public class SetlistService : ISetlistService
         return await _apiService.GetAsync<PagedResponse<SetlistModel>?>(uri.ToString());
     }
 
-    public async Task EditSetlist(SetlistModel setlistModel)
-        => await _apiService.PutAsync($"{_apiOptions.SetlistsEndpoint}/{setlistModel.Id}", setlistModel);
+    public async Task<bool> TryEditSetlist(SetlistModel setlistModel)
+        => await _apiService.TryPutAsync($"{_apiOptions.SetlistsEndpoint}/{setlistModel.Id}", setlistModel);
 
     public async Task<bool> TryDeleteSetlistAsync(int id)
         => await _apiService.TryDeleteAsync($"{_apiOptions.SetlistsEndpoint}/{id}");
