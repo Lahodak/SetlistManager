@@ -1,10 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SetlistManager.Business.Extentions;
 using SetlistManager.Business.Mappers;
 using SetlistManager.Common.Models;
 using SetlistManager.Common.Exceptions;
 using SetlistManager.Data;
 using SetlistManager.Data.Entities;
+using SetlistManager.Business.Extensions;
 
 namespace SetlistManager.Business.Services.Implementations;
 

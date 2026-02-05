@@ -2,9 +2,9 @@
 using SetlistManager.App.Services;
 using SetlistManager.App.Services.Implementations;
 
-namespace SetlistManager.App.Extentions;
+namespace SetlistManager.App.Extensions;
 
-public static class ServiceCollectionExtentions
+public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddServices(this IServiceCollection services)
     {

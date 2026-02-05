@@ -1,10 +1,10 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using SetlistManager.Business.Services; 
+using SetlistManager.Business.Services;
 using SetlistManager.Business.Services.Implementations;
 
-namespace SetlistManager.Business.Extentions;
+namespace SetlistManager.Business.Extensions;
 
-public static class ServiceCollectionExtentions
+public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddBusinessServices(this IServiceCollection services)
     {

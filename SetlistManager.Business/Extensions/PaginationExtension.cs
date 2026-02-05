@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SetlistManager.Common.Models;
 
-namespace SetlistManager.Business.Extentions;
+namespace SetlistManager.Business.Extensions;
 
 public static class PaginationExtension
 {

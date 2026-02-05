@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Http.Extensions;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
+using SetlistManager.App.Extensions;
 using SetlistManager.App.Options;
 using SetlistManager.Common.Models;
 
@@ -18,18 +18,8 @@ public class ArtistService : IArtistService
 
     public async Task<PagedResponse<ArtistModel>> GetArtistsAsync(PagedRequest request)
     {
-        UriBuilder uri = new(_apiOptions.ArtistsEndpoint)
-        {
-            Query = new QueryBuilder
-            {
-                { nameof(request.PageSize), request.PageSize.ToString() },
-                { nameof(request.PageIndex), request.PageIndex.ToString() },
-                { nameof(request.Query), request.Query ?? string.Empty },
-                { nameof(request.ContentType), request.ContentType.ToString() }
-            }.ToString()
-        };
-
-        return await _apiService.GetAsync<PagedResponse<ArtistModel>>(uri.ToString());
+        var uri = request.ToUri(_apiOptions.ArtistsEndpoint);
+        return await _apiService.GetAsync<PagedResponse<ArtistModel>>(uri);
     }
 
     public async Task<ArtistModel?> GetArtistByIdAsync(int id) 

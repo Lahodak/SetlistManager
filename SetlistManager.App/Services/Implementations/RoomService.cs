@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Http.Extensions;
-using Microsoft.AspNetCore.SignalR.Client;
+﻿using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Options;
+using SetlistManager.App.Extensions;
 using SetlistManager.App.Options;
 using SetlistManager.Common.Models;
 
@@ -11,10 +11,13 @@ public class RoomService : IRoomService
     private readonly IUserService _userService;
     private readonly IApiService _apiService;
     private readonly SetlistManagerApiOptions _apiOptions;
+
     public event Action<RoomModel>? RoomUpdated;
+
     private const string _joinRoomMethod = "JoinRoomAsync";
     private const string _updateDataMethod = "UpdateData";
     private const string _changeCurrentSongMethod = "ChangeCurrentSongAsync";
+
     public HubConnection HubConnection { get; }
 
     public RoomService(IOptions<SetlistManagerApiOptions> apiOptions, IApiService apiService, IUserService userService)
@@ -38,7 +41,6 @@ public class RoomService : IRoomService
         {
             RoomUpdated?.Invoke(room);
         });
-        _userService = userService;
     }
 
     public async Task<RoomModel?> JoinRoomAsync(JoinRoomModel joinRoomModel)
@@ -49,7 +51,6 @@ public class RoomService : IRoomService
         try
         {
             var room = await HubConnection.InvokeAsync<RoomModel>(_joinRoomMethod, joinRoomModel);
-
             return room;
         }
         catch
@@ -76,25 +77,14 @@ public class RoomService : IRoomService
 
     public async Task<RoomModel?> CreateRoomAsync(RoomCreateModel createModel)
     {
-        var response = await _apiService.PostAsync<RoomCreateModel,RoomModel>(_apiOptions.RoomsEndpoint, createModel);
-
+        var response = await _apiService.PostAsync<RoomCreateModel, RoomModel>(_apiOptions.RoomsEndpoint, createModel);
         return response;
     }
 
     public async Task<PagedResponse<RoomModel>> GetPublicActiveRoomsAsync(PagedRequest request)
     {
-        UriBuilder uri = new(_apiOptions.RoomsEndpoint)
-        {
-            Query = new QueryBuilder
-            {
-                { nameof(request.PageSize), request.PageSize.ToString() },
-                { nameof(request.PageIndex), request.PageIndex.ToString() },
-                { nameof(request.Query), request.Query ?? string.Empty }
-            }.ToString()
-        };
-
-        var response = await _apiService.GetAsync<PagedResponse<RoomModel>>(uri.ToString());
-
+        var uri = request.ToUri(_apiOptions.RoomsEndpoint);
+        var response = await _apiService.GetAsync<PagedResponse<RoomModel>>(uri);
         return response!;
     }
 }

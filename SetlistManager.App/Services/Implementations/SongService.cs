@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Http.Extensions;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
+using SetlistManager.App.Extensions;
 using SetlistManager.App.Options;
 using SetlistManager.Common.Models;
 
@@ -18,29 +18,19 @@ public class SongService : ISongService
 
     public async Task<PagedResponse<SongModel>> GetSongsAsync(PagedRequest request)
     {
-        UriBuilder uri = new(_apiOptions.SongsEndpoint)
-        {
-            Query = new QueryBuilder
-            {
-                { nameof(request.PageSize), request.PageSize.ToString() },
-                { nameof(request.PageIndex), request.PageIndex.ToString() },
-                { nameof(request.Query), request.Query ?? string.Empty },
-                { nameof(request.ContentType), request.ContentType.ToString() }
-            }.ToString()
-        };
-
-        return await _apiService.GetAsync<PagedResponse<SongModel>>(uri.ToString());
+        var uri = request.ToUri(_apiOptions.SongsEndpoint);
+        return await _apiService.GetAsync<PagedResponse<SongModel>>(uri);
     }
 
     public async Task<SongModel?> GetSongByIdAsync(int id)
         => await _apiService.GetAsync<SongModel>($"{_apiOptions.SongsEndpoint}/{id}");
 
-    public async Task<bool> TryCreateSongAsync(SongCreateModel songCreateModel) 
+    public async Task<bool> TryCreateSongAsync(SongCreateModel songCreateModel)
         => await _apiService.TryPostAsync(_apiOptions.SongsEndpoint, songCreateModel);
 
     public async Task<bool> TryUpdateSongAsync(int id, SongUpdateModel songModel)
         => await _apiService.TryPutAsync($"{_apiOptions.SongsEndpoint}/{id}", songModel);
-    
+
     public async Task<bool> TryDeleteSongAsync(int id)
         => await _apiService.TryDeleteAsync($"{_apiOptions.SongsEndpoint}/{id}");
 
@@ -55,17 +45,7 @@ public class SongService : ISongService
 
     public async Task<List<SongUsageStatModel>> GetStatisticsAsync(StatsRequest request)
     {
-        UriBuilder uri = new(_apiOptions.StatisticsEndpoint)
-        {
-            Query = new QueryBuilder
-            {
-                { nameof(request.Subject), request.Subject.ToString() },
-                { nameof(request.Metric), request.Metric.ToString() },
-                { nameof(request.Range), request.Range.ToString() },
-                { nameof(request.Limit), request.Limit.ToString() }
-            }.ToString()
-        };
-
-        return await _apiService.GetAsync<List<SongUsageStatModel>>(uri.ToString());
+        var uri = request.ToUri(_apiOptions.StatisticsEndpoint);
+        return await _apiService.GetAsync<List<SongUsageStatModel>>(uri);
     }
 }

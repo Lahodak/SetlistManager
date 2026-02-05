@@ -10,10 +10,16 @@ using SetlistManager.Data;
 using SetlistManager.Data.Entities;
 using System.Text;
 
-namespace SetlistManager.Api.Extentions;
+namespace SetlistManager.Api.Extensions;
 
-public static class ServiceCollectionExtentions
+public static class ServiceCollectionExtensions
 {
+    private const string _dbConnectionStringKey = "SetlistManagerDB";
+    private const string _jwtBearerAccessTokenScheme = "access_token";
+    private const string _reponseCompression = "application/octet-stream";
+    private const string _corsPolicyName = "AllowAllPolicy";
+    private const string _roomHubPath = "/hubs/room";
+
     public static IServiceCollection AddApiServices(this IServiceCollection services)
     {
         services.AddScoped<IJwtService, JwtService>();
@@ -27,7 +33,7 @@ public static class ServiceCollectionExtentions
         services.AddResponseCompression(opts =>
         {
             opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
-                ["application/octet-stream"]);
+                [_reponseCompression]);
         });
 
         return services;
@@ -69,10 +75,10 @@ public static class ServiceCollectionExtentions
             {
                 OnMessageReceived = context =>
                 {
-                    var accessToken = context.Request.Query["access_token"];
+                    var accessToken = context.Request.Query[_jwtBearerAccessTokenScheme];
                     var path = context.HttpContext.Request.Path;
 
-                    if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs/room"))
+                    if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments(_roomHubPath))
                     {
                         context.Token = accessToken;
                     }
@@ -89,7 +95,7 @@ public static class ServiceCollectionExtentions
     {
         services.AddCors(options =>
         {
-            options.AddPolicy("AllowAllPolicy", builder =>
+            options.AddPolicy(_corsPolicyName, builder =>
             {
                 builder.AllowAnyOrigin()
                     .AllowAnyMethod()
@@ -120,7 +126,7 @@ public static class ServiceCollectionExtentions
 
     public static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("SetlistManagerDB")
+        var connectionString = configuration.GetConnectionString(_dbConnectionStringKey)
             ?? throw new InvalidOperationException("Connection string 'SetlistManagerDB' not found.");
         
         services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));

@@ -25,8 +25,8 @@ public class UsersController : BaseController
         return Ok(await _userService.GetCurrentUserAsync());
     }
 
-    [HttpPut]
-    public async Task<ActionResult> UpdateUser(UserModel model)
+    [HttpPut("{id}")]
+    public async Task<ActionResult> UpdateUser(int id, [FromBody] UserModel model)
     {
         await _userService.UpdateUserAsync(model);
 

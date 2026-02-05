@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace SetlistManager.Common.Models;
+﻿namespace SetlistManager.Common.Models;
 
 public class ArtistModel
 {

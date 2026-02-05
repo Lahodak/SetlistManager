@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Mvc;
 using MudBlazor;
 using SetlistManager.App.Services;
 using SetlistManager.Common.Models;

@@ -1,16 +1,17 @@
 ﻿using Blazored.LocalStorage;
-using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Options;
+using SetlistManager.App.Extensions;
 using SetlistManager.App.Options;
 using SetlistManager.Common.Models;
 
 namespace SetlistManager.App.Services.Implementations;
+
 public class UserService : IUserService
 {
     private readonly ILocalStorageService _localStorage;
     private readonly IApiService _apiService;
     private readonly SetlistManagerApiOptions _apiOptions;
-    
+
     private const string _loginUserSuffix = "/login";
     private const string _tokenKey = "authToken";
     private const string _verifyEmailSuffix = "/verify-email";
@@ -28,25 +29,25 @@ public class UserService : IUserService
         _apiService = apiService;
     }
 
-    public async Task<bool> GetUserDarkModeSettings() 
+    public async Task<bool> GetUserDarkModeSettings()
         => await _localStorage.GetItemAsync<bool>(_darkModeSettingsKey);
 
-    public async Task UpdateUserDarkModeSettingsAsync(bool newValue) 
+    public async Task UpdateUserDarkModeSettingsAsync(bool newValue)
         => await _localStorage.SetItemAsync(_darkModeSettingsKey, newValue);
 
-    public async Task<UserModel?> GetUserAsync() 
+    public async Task<UserModel?> GetUserAsync()
         => await _apiService.GetAsync<UserModel?>($"{_apiOptions.UsersEndpoint}{_meSuffix}");
 
-    public async Task RegisterAsync(RegisterRequestModel model) 
+    public async Task RegisterAsync(RegisterRequestModel model)
         => await _apiService.PostAsync(_apiOptions.AuthEndpoint, model);
 
-    public async Task LogOutAsync() 
+    public async Task LogOutAsync()
         => await _localStorage.RemoveItemAsync(_tokenKey);
 
-    public async Task<string?> GetUserTokenAsync() 
+    public async Task<string?> GetUserTokenAsync()
         => await _localStorage.GetItemAsync<string>(_tokenKey);
 
-    public async Task<bool> VerifyStoredToken() 
+    public async Task<bool> VerifyStoredToken()
         => await _apiService.PostAsync($"{_apiOptions.AuthEndpoint}{_verifyTokenSuffix}");
 
     public async Task<bool> TryUpdateUser(UserModel user)
@@ -55,14 +56,16 @@ public class UserService : IUserService
 
         if (userId is null)
             return false;
-
-        await _apiService.PutAsync($"{_apiOptions.UsersEndpoint}/{userId}", user);
-        return true;
+        
+        return await _apiService.TryPutAsync($"{_apiOptions.UsersEndpoint}/{userId}", user);
     }
 
     public async Task<bool> LogInAsync(LoginRequestModel model)
     {
-        var result = await _apiService.PostAsync<LoginRequestModel, LoginResultModel>($"{_apiOptions.AuthEndpoint}{_loginUserSuffix}", model);
+        var result = await _apiService.PostAsync<LoginRequestModel, LoginResultModel>(
+            $"{_apiOptions.AuthEndpoint}{_loginUserSuffix}",
+            model
+        );
 
         if (result?.Token is null)
             return false;
@@ -80,8 +83,7 @@ public class UserService : IUserService
         };
 
         await _apiService.PostAsync($"{_apiOptions.AuthEndpoint}{_verifyEmailSuffix}", verifyModel);
-        
-        return true;                
+        return true;
     }
 
     public async Task<bool> RequestPasswordResetAsync(string email)
@@ -92,7 +94,6 @@ public class UserService : IUserService
         };
 
         await _apiService.PostAsync($"{_apiOptions.AuthEndpoint}{_resetPasswordRequestSuffix}", model);
-
         return true;
     }
 
@@ -106,7 +107,6 @@ public class UserService : IUserService
         };
 
         await _apiService.PostAsync($"{_apiOptions.AuthEndpoint}{_resetPasswordSuffix}", resetModel);
-        
         return true;
     }
 
@@ -127,17 +127,8 @@ public class UserService : IUserService
         if (userId is null)
             return null;
 
-        UriBuilder uri = new($"{_apiOptions.UsersEndpoint}/{userId}{_friendshipsSuffix}")
-        {
-            Query = new QueryBuilder
-            {
-                { nameof(request.PageSize), request.PageSize.ToString() },
-                { nameof(request.PageIndex), request.PageIndex.ToString() },
-                { nameof(request.Query), request.Query ?? string.Empty }
-            }.ToString()
-        };
-
-        return await _apiService.GetAsync<PagedResponse<FriendModel>>(uri.ToString());
+        var uri = request.ToUri($"{_apiOptions.UsersEndpoint}/{userId}{_friendshipsSuffix}");
+        return await _apiService.GetAsync<PagedResponse<FriendModel>>(uri);
     }
 
     public async Task HandleFriendshipRequestAsync(FriendshipRequestModel friendshipRequest)
@@ -147,41 +138,40 @@ public class UserService : IUserService
         if (initiatorId is null)
             return;
 
-        await _apiService.PostAsync($"{_apiOptions.UsersEndpoint}/{initiatorId}{_friendshipsSuffix}", friendshipRequest);
+        await _apiService.PostAsync(
+            $"{_apiOptions.UsersEndpoint}/{initiatorId}{_friendshipsSuffix}",
+            friendshipRequest
+        );
     }
 
     public async Task<bool> TryRemoveFriendshipAsync(int friendshipId)
     {
         var initiatorId = await GetCurrentUserIdAsync();
-        
+
         if (initiatorId is null)
             return false;
-        
-        return await _apiService.TryDeleteAsync($"{_apiOptions.UsersEndpoint}/{initiatorId}{_friendshipsSuffix}/{friendshipId}");
+
+        return await _apiService.TryDeleteAsync(
+            $"{_apiOptions.UsersEndpoint}/{initiatorId}{_friendshipsSuffix}/{friendshipId}"
+        );
     }
 
     public async Task<bool> TryAcceptFriendshipAsync(int friendshipId)
     {
         var initiatorId = await GetCurrentUserIdAsync();
-        
+
         if (initiatorId is null)
             return false;
 
-        return await _apiService.TryPutAsync($"{_apiOptions.UsersEndpoint}/{initiatorId}{_friendshipsSuffix}/{friendshipId}", "");
+        return await _apiService.TryPutAsync(
+            $"{_apiOptions.UsersEndpoint}/{initiatorId}{_friendshipsSuffix}/{friendshipId}",
+            ""
+        );
     }
 
     public async Task<PagedResponse<UserViewModel>?> GetPagedUsersAsync(PagedRequest request)
     {
-        UriBuilder uri = new($"{_apiOptions.UsersEndpoint}")
-        {
-            Query = new QueryBuilder
-            {
-                { nameof(request.PageSize), request.PageSize.ToString() },
-                { nameof(request.PageIndex), request.PageIndex.ToString() },
-                { nameof(request.Query), request.Query ?? string.Empty }
-            }.ToString()
-        };
-        
-        return await _apiService.GetAsync<PagedResponse<UserViewModel>>(uri.ToString());
+        var uri = request.ToUri(_apiOptions.UsersEndpoint);
+        return await _apiService.GetAsync<PagedResponse<UserViewModel>>(uri);
     }
 }

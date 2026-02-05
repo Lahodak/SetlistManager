@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using SetlistManager.Api.Extentions;
+using SetlistManager.Api.Extensions;
 using SetlistManager.Api.Hubs;
 using SetlistManager.Api.Middleware;
-using SetlistManager.Business.Extentions;
+using SetlistManager.Business.Extensions;
 using SetlistManager.Data;
 
 var builder = WebApplication.CreateBuilder(args);

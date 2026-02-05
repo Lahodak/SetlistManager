@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Http.Extensions;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
+using SetlistManager.App.Extensions;
 using SetlistManager.App.Options;
 using SetlistManager.Common.Models;
 
@@ -9,32 +9,23 @@ public class SetlistService : ISetlistService
 {
     private readonly IApiService _apiService;
     private readonly SetlistManagerApiOptions _apiOptions;
+
     public SetlistService(IApiService apiService, IOptions<SetlistManagerApiOptions> apiOptions)
     {
         _apiOptions = apiOptions.Value;
         _apiService = apiService;
     }
 
-    public async Task<bool> TryCreateSetlistAsync(SetlistModel setlistModel) 
+    public async Task<bool> TryCreateSetlistAsync(SetlistModel setlistModel)
         => await _apiService.TryPostAsync(_apiOptions.SetlistsEndpoint, setlistModel);
 
-    public async Task<SetlistModel?> GetSetlistById(int id) 
+    public async Task<SetlistModel?> GetSetlistById(int id)
         => await _apiService.GetAsync<SetlistModel>($"{_apiOptions.SetlistsEndpoint}/{id}");
 
     public async Task<PagedResponse<SetlistModel>> GetSetlistsAsync(PagedRequest request)
     {
-        UriBuilder uri = new(_apiOptions.SetlistsEndpoint)
-        {
-            Query = new QueryBuilder
-            {
-                { nameof(request.PageSize), request.PageSize.ToString() },
-                { nameof(request.PageIndex), request.PageIndex.ToString() },
-                { nameof(request.Query), request.Query ?? string.Empty },
-                { nameof(request.ContentType), request.ContentType.ToString()}
-            }.ToString()
-        };
-
-        return await _apiService.GetAsync<PagedResponse<SetlistModel>>(uri.ToString());
+        var uri = request.ToUri(_apiOptions.SetlistsEndpoint);
+        return await _apiService.GetAsync<PagedResponse<SetlistModel>>(uri);
     }
 
     public async Task<bool> TryEditSetlist(SetlistModel setlistModel)

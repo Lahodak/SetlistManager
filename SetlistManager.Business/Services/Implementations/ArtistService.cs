@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SetlistManager.Business.Extentions;
+using SetlistManager.Business.Extensions;
 using SetlistManager.Business.Mappers;
 using SetlistManager.Common.Exceptions;
 using SetlistManager.Common.Models;
