@@ -1,26 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <UserSecretsId>b24c1629-9ca2-4941-9ce0-f2f931a93492</UserSecretsId>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Http.Extensions" Version="2.3.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.3.9" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\SetlistManager.Common\SetlistManager.Common.csproj" />
-    <ProjectReference Include="..\SetlistManager.Data\SetlistManager.Data.csproj" />
-    <ProjectReference Include="..\SetlistManager.Resources\SetlistManager.Resources.csproj" />
-  </ItemGroup>
-
+	<PropertyGroup>
+		<UserSecretsId>b24c1629-9ca2-4941-9ce0-f2f931a93492</UserSecretsId>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.Http.Extensions" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" />
+		<PackageReference Include="Microsoft.Extensions.Http" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\SetlistManager.Common\SetlistManager.Common.csproj" />
+		<ProjectReference Include="..\SetlistManager.Data\SetlistManager.Data.csproj" />
+		<ProjectReference Include="..\SetlistManager.Resources\SetlistManager.Resources.csproj" />
+	</ItemGroup>
 </Project>
