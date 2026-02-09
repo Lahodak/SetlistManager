@@ -138,7 +138,7 @@ public class UserService : IUserService
         if (initiatorId is null)
             return;
 
-        await _apiService.PostAsync(
+        await _apiService.TryPostAsync(
             $"{_apiOptions.UsersEndpoint}/{initiatorId}{_friendshipsSuffix}",
             friendshipRequest
         );

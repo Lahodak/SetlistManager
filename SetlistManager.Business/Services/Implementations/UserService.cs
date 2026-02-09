@@ -14,19 +14,22 @@ public class UserService : IUserService
 {
     public readonly UserManager<User> _userManager;
     private readonly AppDbContext _dbContext;
-    private readonly ICurrentUserContext _currentUserContext;
     private readonly IGeniusAuthService _geniusAuthService;
+    private readonly int _currentUserId;
 
     public UserService(UserManager<User> userManager, AppDbContext dbContext, ICurrentUserContext currentUserContext, IGeniusAuthService geniusAuthService)
     {
         _userManager = userManager;
         _dbContext = dbContext;
-        _currentUserContext = currentUserContext;
         _geniusAuthService = geniusAuthService;
+        _currentUserId = currentUserContext.UserId;
     }
 
     public async Task UpdateUserAsync(UserModel model)
     {
+        if(model.Id != _currentUserId)
+            throw new UnauthorizedAccessException();
+        
         User? user = await _dbContext.Users.FindAsync(model.Id);
 
         if (user is null)
@@ -37,13 +40,11 @@ public class UserService : IUserService
 
         if (model.Instrument is not null)
         {
-            var instrument = await _dbContext.Instruments.
-                FirstOrDefaultAsync(i => i.Name == model.Instrument.Name);
-            
+            var instrument = await _dbContext.Instruments
+                .FirstOrDefaultAsync(i => i.Name == model.Instrument.Name);
+
             if (instrument != null)
-            {
                 user.Instrument = instrument;
-            }
         }
         else
         {
@@ -57,26 +58,18 @@ public class UserService : IUserService
     public async Task<PagedResponse<UserViewModel>> GetUsersAsync(PagedRequest request)
     {
         var query = _dbContext.Users
-            .Where(u => string.IsNullOrEmpty(request.Query) ||
-                        u.UserName!.Contains(request.Query) ||
-                        u.Email!.Contains(request.Query));
+            .Where(u =>
+                string.IsNullOrEmpty(request.Query) ||
+                u.UserName!.Contains(request.Query) ||
+                u.Email!.Contains(request.Query))
+            .Select(u => u.ToViewModel());
 
-        var pagedResponse = await query.ToPaginatedResultAsync(request);
-
-        return new PagedResponse<UserViewModel>
-        {
-            TotalCount = pagedResponse.TotalCount,
-            Items = pagedResponse.Items
-                .Select(u => u.ToViewModel())
-                .ToList()
-        };
+        return await query.ToPaginatedResultAsync(request);
     }
 
     public async Task<UserModel?> GetCurrentUserAsync()
     {
-        var userId = _currentUserContext.GetCurrentUserId()!.Value;
-
-        User? user = await _dbContext.Users
+        var user = await _dbContext.Users
             .Include(u => u.Instrument)
             .Include(u => u.Tokens)!
                 .ThenInclude(t => t.Provider)
@@ -84,7 +77,7 @@ public class UserService : IUserService
                 .ThenInclude(f => f.Reciever)
             .Include(u => u.ReceivedFriendships)
                 .ThenInclude(f => f.Initiator)
-            .FirstOrDefaultAsync(x => x.Id == userId);
+            .FirstOrDefaultAsync(x => x.Id == _currentUserId);
 
         if (user is null)
             throw new EntryNotFoundException();
@@ -93,7 +86,7 @@ public class UserService : IUserService
     }
 
     public async Task<User?> GetUserEntityByIdAsync(int userId)
-    { 
+    {
         return await _dbContext.Users
             .Include(u => u.Instrument)
             .Include(u => u.Tokens)!
@@ -101,52 +94,43 @@ public class UserService : IUserService
             .FirstOrDefaultAsync(u => u.Id == userId);
     }
 
-    private async Task<string> ExchangeCodeForGeniusAccessTokenAsync(GrantAccessTokenResultModel grantResultModel)
-    {
-        var resultAccessTokenModel = await _geniusAuthService.ExchangeGeniusCode(grantResultModel.Code);
-
-        if (resultAccessTokenModel?.AccessToken is null)
-            throw new GeniusAccessTokenNotRecievedException();
-
-        return resultAccessTokenModel.AccessToken;
-    }
-
     public async Task TryAddGeniusTokenToUserAsync(GrantAccessTokenResultModel grantResultModel)
     {
         var user = await GetUserByTempAuthSecret(grantResultModel.State)
             ?? throw new EntryNotFoundException();
 
-        TokenCreateModel tokenModel = new()
-        {
-            Provider = ProviderEnum.Genius,
-            AccessToken = await ExchangeCodeForGeniusAccessTokenAsync(grantResultModel),
-            RefreshToken = null
-        };
+        var accessToken = await ExchangeCodeForGeniusAccessTokenAsync(grantResultModel);
 
         var provider = await _dbContext.Providers
-            .FirstOrDefaultAsync(p => p.Name == tokenModel.Provider.ToString())
-            ?? throw new EntryNotFoundException($"Provider '{tokenModel.Provider}' not found");
+            .FirstOrDefaultAsync(p => p.Name == ProviderEnum.Genius.ToString())
+            ?? throw new EntryNotFoundException();
 
         await _dbContext.Tokens.AddAsync(new Token
         {
             UserId = user.Id,
             Provider = provider,
-            AccessToken = tokenModel.AccessToken,
+            AccessToken = accessToken,
             CreatedAt = DateTime.UtcNow
         });
 
         await _dbContext.SaveChangesAsync();
+    }
 
-        return;
+    private async Task<string> ExchangeCodeForGeniusAccessTokenAsync(GrantAccessTokenResultModel grantResultModel)
+    {
+        var result = await _geniusAuthService.ExchangeGeniusCode(grantResultModel.Code);
+
+        if (result?.AccessToken is null)
+            throw new GeniusAccessTokenNotRecievedException();
+
+        return result.AccessToken;
     }
 
     public async Task<User?> GetUserByTempAuthSecret(string salt)
     {
         var tempAuth = await _dbContext.TempAuthStorage
-            .FirstOrDefaultAsync(x => x.TempSecret == salt);
-
-        if (tempAuth is null)
-            throw new EntryNotFoundException();
+            .FirstOrDefaultAsync(x => x.TempSecret == salt)
+            ?? throw new EntryNotFoundException();
 
         return await _dbContext.Users
             .Include(u => u.Instrument)
@@ -157,12 +141,12 @@ public class UserService : IUserService
 
     public async Task HandleFriendshipRequestAsync(int initiatorId, FriendshipRequestModel friendshipRequest)
     {
-        if(initiatorId != _currentUserContext.GetCurrentUserId()!.Value)
+        if (initiatorId != _currentUserId)
             throw new UnauthorizedAccessException();
 
         var friendship = await _dbContext.Friendships.FirstOrDefaultAsync(f =>
-                (f.InitiatorId == initiatorId && f.RecieverId == friendshipRequest.RecieverId) ||
-                (f.InitiatorId == friendshipRequest.RecieverId && f.RecieverId == initiatorId));
+            (f.InitiatorId == initiatorId && f.RecieverId == friendshipRequest.RecieverId) ||
+            (f.InitiatorId == friendshipRequest.RecieverId && f.RecieverId == initiatorId));
 
         if (friendship is not null)
         {
@@ -173,26 +157,17 @@ public class UserService : IUserService
             }
             return;
         }
-        
+
         _dbContext.Friendships.Add(friendshipRequest.ToEntity(initiatorId));
         await _dbContext.SaveChangesAsync();
     }
 
-    private async Task<Friendship?> GetFriendshipByIdAndUserIdAsync(int friendshipId, int userId)
-    {
-        return await _dbContext.Friendships
-            .FirstOrDefaultAsync(f => f.Id == friendshipId &&
-                (f.InitiatorId == userId || f.RecieverId == userId));
-    }
-
     public async Task AcceptFriendshipAsync(int id, int friendshipId)
     {
-        int currentUserId = _currentUserContext.GetCurrentUserId()!.Value;
-        
-        if(currentUserId != id)
+        if (_currentUserId != id)
             throw new UnauthorizedAccessException();
 
-        var friendship = await GetFriendshipByIdAndUserIdAsync(friendshipId, currentUserId);
+        var friendship = await GetFriendshipByIdAndUserIdAsync(friendshipId, _currentUserId);
 
         if (friendship is null || friendship.State != FriendshipState.Pending)
             return;
@@ -203,15 +178,11 @@ public class UserService : IUserService
 
     public async Task RemoveFriendshipAsync(int id, int friendshipId)
     {
-        int currentUserId = _currentUserContext.GetCurrentUserId()!.Value;
-
-        if (currentUserId != id)
+        if (_currentUserId != id)
             throw new UnauthorizedAccessException();
 
-        var friendship = await GetFriendshipByIdAndUserIdAsync(friendshipId, currentUserId);
-        
-        if (friendship is null)
-            throw new EntryNotFoundException();
+        var friendship = await GetFriendshipByIdAndUserIdAsync(friendshipId, _currentUserId)
+            ?? throw new EntryNotFoundException();
 
         _dbContext.Friendships.Remove(friendship);
         await _dbContext.SaveChangesAsync();
@@ -219,25 +190,27 @@ public class UserService : IUserService
 
     public async Task<PagedResponse<FriendModel>> GetUserFriendsAsync(int userId, PagedRequest request)
     {
-        if (userId != _currentUserContext.GetCurrentUserId()!.Value)
+        if (userId != _currentUserId)
             throw new UnauthorizedAccessException();
-        
+
         var query = _dbContext.Friendships
             .Include(f => f.Initiator)
             .Include(f => f.Reciever)
-            .Where(f => (f.InitiatorId == userId || f.RecieverId == userId) &&
+            .Where(f =>
+                (f.InitiatorId == userId || f.RecieverId == userId) &&
                 (string.IsNullOrEmpty(request.Query) ||
-                f.Initiator.UserName!.Contains(request.Query) ||
-                f.Reciever.UserName!.Contains(request.Query)));
+                 f.Initiator.UserName!.Contains(request.Query) ||
+                 f.Reciever.UserName!.Contains(request.Query)))
+            .Select(f => f.ToModel(userId));
 
-        var pagedResponse = await query.ToPaginatedResultAsync(request);
+        return await query.ToPaginatedResultAsync(request);
+    }
 
-        return new PagedResponse<FriendModel>
-        {            
-            TotalCount = pagedResponse.TotalCount,
-            Items = pagedResponse.Items
-                .Select(f => f.ToModel(userId))
-                .ToList()
-        };
+    private async Task<Friendship?> GetFriendshipByIdAndUserIdAsync(int friendshipId, int userId)
+    {
+        return await _dbContext.Friendships
+            .FirstOrDefaultAsync(f =>
+                f.Id == friendshipId &&
+                (f.InitiatorId == userId || f.RecieverId == userId));
     }
 }

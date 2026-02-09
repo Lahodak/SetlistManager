@@ -6,10 +6,12 @@ namespace SetlistManager.Business.Services.Implementations;
 public class CurrentUserContext : ICurrentUserContext
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
+    public int UserId { get; set; }
 
     public CurrentUserContext(IHttpContextAccessor httpContextAccessor)
     {
         _httpContextAccessor = httpContextAccessor;
+        UserId = GetCurrentUserId()!.Value;
     }
 
     public int? GetCurrentUserId()

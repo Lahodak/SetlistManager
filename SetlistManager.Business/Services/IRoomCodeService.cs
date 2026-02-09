@@ -1,4 +1,4 @@
-﻿namespace SetlistManager.Business.Services.Implementations;
+﻿namespace SetlistManager.Business.Services;
 
 public interface IRoomCodeService
 {

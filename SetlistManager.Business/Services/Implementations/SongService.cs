@@ -11,46 +11,34 @@ namespace SetlistManager.Business.Services.Implementations;
 public class SongService : ISongService
 {
     private readonly AppDbContext _dbContext;
-    private readonly ICurrentUserContext _currentUserContext;
+    private readonly int _currentUserId;
 
     public SongService(AppDbContext dbContext, ICurrentUserContext currentUserContext)
     {
         _dbContext = dbContext;
-        _currentUserContext = currentUserContext;
+        _currentUserId = currentUserContext.UserId;
     }
 
     public async Task<PagedResponse<SongModel>> GetSongsAsync(PagedRequest request)
     {
-        int userId = _currentUserContext.GetCurrentUserId()!.Value;
-
         var searchQuery = request.Query ?? string.Empty;
         var query = _dbContext.Songs
             .Where(x => x.Name.Contains(searchQuery) || x.Artist.Nick.Contains(searchQuery));
 
         query = request.ContentType == ContentType.Private
-            ? query.Where(x => x.OwnerId == userId || x.SongsUsers.Any(su => su.UserId == userId))
+            ? query.Where(x => x.OwnerId == _currentUserId || x.SongsUsers.Any(su => su.UserId == _currentUserId))
             : query.Where(x => x.IsPublic);
 
-        var result = await query
+        return await query
             .Include(x => x.Language)
             .Include(x => x.Artist)
             .Include(x => x.Owner)
-            .AsNoTracking()
+            .Select(x => x.ToModel())
             .ToPaginatedResultAsync(request);
-
-        return new PagedResponse<SongModel>
-        {
-            TotalCount = result.TotalCount,
-            Items = result.Items
-                .Select(x => x.ToModel())
-                .ToList()
-        };
     }
 
     public async Task TryGiveAccessToUserAsync(int songId, int targetId)
     {
-        int currentUserId = _currentUserContext.GetCurrentUserId()!.Value;
-
         var song = await _dbContext.Songs
             .Include(x => x.SongsUsers)
             .Include(x => x.Artist)
@@ -58,7 +46,7 @@ public class SongService : ISongService
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == songId);
 
-        if (song is null || song.SongsUsers.Count != 0 || (currentUserId != song.OwnerId && targetId != currentUserId))
+        if (song is null || song.SongsUsers.Count != 0 || (_currentUserId != song.OwnerId && targetId != _currentUserId))
             throw new EntryNotFoundException();
 
         SongsUsers songsUsers = new()
@@ -67,7 +55,7 @@ public class SongService : ISongService
             UserId = targetId
         };
 
-        if(song.Artist.ArtistsUsers.Count == 0 || song.Artist.OwnerId == targetId)
+        if (song.Artist.ArtistsUsers.Count == 0 || song.Artist.OwnerId == targetId)
         {
             ArtistsUsers artistsUsers = new()
             {
@@ -77,46 +65,38 @@ public class SongService : ISongService
 
             _dbContext.ArtistsUsers.Add(artistsUsers);
         }
-        
+
         _dbContext.SongsUsers.Add(songsUsers);
         await _dbContext.SaveChangesAsync();
     }
 
     public async Task<SongModel?> GetSongByIdAsync(int songId)
     {
-        int userId = _currentUserContext.GetCurrentUserId()!.Value;
-
         var song = await _dbContext.Songs
-        .Include(x => x.Language)
-        .Include(x => x.Artist)
-        .Include(x => x.Owner)
-        .Include(x => x.SongsUsers)
-        .AsNoTracking()
-        .FirstOrDefaultAsync(x => x.Id == songId);               
+            .Include(x => x.Language)
+            .Include(x => x.Artist)
+            .Include(x => x.Owner)
+            .Include(x => x.SongsUsers)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == songId);
 
-        if (song is null || (!song.IsPublic && !(song.OwnerId == userId || song.SongsUsers.Any(x => x.UserId == userId))))
+        if (song is null || (!song.IsPublic && !(song.OwnerId == _currentUserId || song.SongsUsers.Any(x => x.UserId == _currentUserId))))
             return null;
-        
+
         return song.ToModel();
     }
 
     public async Task TryCreateSongAsync(SongCreateModel songCreateModel)
     {
-        int userId = _currentUserContext.GetCurrentUserId()!.Value;
-
-        if (await _dbContext.Songs
-        .AnyAsync(x => x.Name == songCreateModel.Name
-            && x.ArtistId == songCreateModel.ArtistId
-            && (x.OwnerId == userId
-            || x.SongsUsers!.Any(su => su.UserId == userId))))
+        if (await _dbContext.Songs.AnyAsync(x =>
+            x.Name == songCreateModel.Name &&
+            x.ArtistId == songCreateModel.ArtistId &&
+            (x.OwnerId == _currentUserId || x.SongsUsers!.Any(su => su.UserId == _currentUserId))))
             throw new DuplicateEntryException();
 
-        bool isArtistPublic = false;
+        bool isArtistPublic = (await _dbContext.Artists.FirstOrDefaultAsync(x => x.Id == songCreateModel.ArtistId))!.IsPublic;
 
-        if ((await _dbContext.Artists.FirstOrDefaultAsync(x => x.Id == songCreateModel.ArtistId))!.IsPublic)
-            isArtistPublic = true;
-
-        Song song = songCreateModel.ToEntity(userId, isArtistPublic);
+        Song song = songCreateModel.ToEntity(_currentUserId, isArtistPublic);
 
         _dbContext.Songs.Add(song);
         await _dbContext.SaveChangesAsync();
@@ -124,47 +104,38 @@ public class SongService : ISongService
 
     public async Task TryUpdateSongAsync(int songId, SongUpdateModel updateModel)
     {
-        int userId = _currentUserContext.GetCurrentUserId()!.Value;
-
-        if (await _dbContext.Songs.
-            AnyAsync(x => 
-            (x.Name == updateModel.Name) 
-            && (x.ArtistId == updateModel.ArtistId)
-            && ((x.OwnerId == userId) 
-            || x.SongsUsers
-            .Any(x => x.Song.ArtistId == updateModel.ArtistId && x.UserId == userId))))
+        if (await _dbContext.Songs.AnyAsync(x =>
+            x.Name == updateModel.Name &&
+            x.ArtistId == updateModel.ArtistId &&
+            (x.OwnerId == _currentUserId ||
+             x.SongsUsers.Any(x => x.Song.ArtistId == updateModel.ArtistId && x.UserId == _currentUserId))))
             throw new DuplicateEntryException();
 
-        var song = await _dbContext.Songs.FirstOrDefaultAsync(x => x.Id == songId && x.OwnerId == userId);
+        var song = await _dbContext.Songs.FirstOrDefaultAsync(x => x.Id == songId && x.OwnerId == _currentUserId);
 
-        if (song is null || song.OwnerId != userId || song.IsPublic)
+        if (song is null || song.IsPublic)
             throw new EntryNotFoundException();
 
         song.UpdateEntity(updateModel);
-
-        await _dbContext.SaveChangesAsync();        
+        await _dbContext.SaveChangesAsync();
     }
 
     public async Task TryDeleteSongAsync(int songId)
     {
-        int userId = _currentUserContext.GetCurrentUserId()!.Value;
-
-        var song = await _dbContext.Songs.FirstOrDefaultAsync(x => x.Id == songId && x.OwnerId == userId);
+        var song = await _dbContext.Songs.FirstOrDefaultAsync(x => x.Id == songId && x.OwnerId == _currentUserId);
 
         if (song is null)
             throw new EntryNotFoundException();
-        
-        _dbContext.Songs.Remove(song);        
+
+        _dbContext.Songs.Remove(song);
         await _dbContext.SaveChangesAsync();
     }
 
     public async Task TryMakeSongPublicAsync(int songId)
     {
-        int userId = _currentUserContext.GetCurrentUserId()!.Value;
-
         var song = await _dbContext.Songs
             .Include(x => x.Artist)
-            .FirstOrDefaultAsync(x => x.Id == songId && x.OwnerId == userId);       
+            .FirstOrDefaultAsync(x => x.Id == songId && x.OwnerId == _currentUserId);
 
         if (song is null)
             throw new EntryNotFoundException();
@@ -177,8 +148,6 @@ public class SongService : ISongService
 
     public async Task RemoveAccessFromUserAsync(int songId, int userId)
     {
-        int currentUserId = _currentUserContext.GetCurrentUserId()!.Value;
-
         var songUser = await _dbContext.SongsUsers
             .Include(x => x.Song)
                 .ThenInclude(x => x.Artist)
@@ -186,7 +155,7 @@ public class SongService : ISongService
             .Include(x => x.User)
             .FirstOrDefaultAsync(x => x.SongId == songId && x.UserId == userId);
 
-        if (songUser is null || (songUser.Song.OwnerId != currentUserId && userId != currentUserId))
+        if (songUser is null || (songUser.Song.OwnerId != _currentUserId && userId != _currentUserId))
             return;
 
         _dbContext.SongsUsers.Remove(songUser);
@@ -204,11 +173,20 @@ public class SongService : ISongService
         };
     }
 
+    private static DateTime GetDateFromForStats(StatsRange range) =>
+        range switch
+        {
+            StatsRange.Day => DateTime.UtcNow.AddDays(-1),
+            StatsRange.Week => DateTime.UtcNow.AddDays(-7),
+            StatsRange.Month => DateTime.UtcNow.AddMonths(-1),
+            _ => DateTime.MinValue
+        };
+
     private async Task<List<SongUsageStatModel>> GetMostUsedStatsAsync(StatsRequest request)
     {
         var from = GetDateFromForStats(request.Range!.Value);
 
-        var result = await _dbContext.SongsSetlists
+        return await _dbContext.SongsSetlists
             .Where(ss => ss.CreatedAt >= from && ss.Song.IsPublic)
             .GroupBy(ss => ss.SongId)
             .Select(g => new SongUsageStatModel
@@ -222,15 +200,13 @@ public class SongService : ISongService
             .Take(request.Limit!.Value)
             .AsNoTracking()
             .ToListAsync();
-
-        return result;
     }
 
     private async Task<List<SongUsageStatModel>> GetMostAddedStatsAsync(StatsRequest request)
     {
         var from = GetDateFromForStats(request.Range!.Value);
 
-        var result = await _dbContext.Songs
+        return await _dbContext.Songs
             .Where(s => s.CreatedAt >= from && s.IsPublic)
             .Select(s => new SongUsageStatModel
             {
@@ -243,13 +219,11 @@ public class SongService : ISongService
             .Take(request.Limit!.Value)
             .AsNoTracking()
             .ToListAsync();
-
-        return result;
     }
 
     private async Task<List<SongUsageStatModel>> GetLatestPublicStatsAsync(StatsRequest request)
     {
-        var result = await _dbContext.Songs
+        return await _dbContext.Songs
             .Where(s => s.IsPublic)
             .OrderByDescending(s => s.CreatedAt)
             .Select(s => new SongUsageStatModel
@@ -261,18 +235,5 @@ public class SongService : ISongService
             .Take(request.Limit!.Value)
             .AsNoTracking()
             .ToListAsync();
-
-        return result;
-    }
-
-    private static DateTime GetDateFromForStats(StatsRange range)
-    {
-        return range switch
-        {
-            StatsRange.Day => DateTime.UtcNow.AddDays(-1),
-            StatsRange.Week => DateTime.UtcNow.AddDays(-7),
-            StatsRange.Month => DateTime.UtcNow.AddMonths(-1),
-            _ => DateTime.MinValue
-        };
     }
 }

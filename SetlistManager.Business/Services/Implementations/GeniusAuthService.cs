@@ -14,7 +14,7 @@ public class GeniusAuthService : IGeniusAuthService
     private readonly ITempAuthStorageService _tempAuthStorageService;
     private readonly IOptions<GeniusOptions> _geniusOptions;
     private readonly ILogger<GeniusAuthService> _logger;
-    private readonly ICurrentUserContext _userContext;
+    private readonly int _currentUserId;
 
     private const string _authorizeEndpointSuffix = "/oauth/authorize";
     private const string _codeExchangeEndpointSuffix = "/oauth/token";
@@ -26,26 +26,29 @@ public class GeniusAuthService : IGeniusAuthService
     private const string _stateKey = "state";
     private const string _responseTypeKey = "response_type";
 
-    public GeniusAuthService(IOptions<GeniusOptions> geniusOptions, IHttpClientFactory httpClientFactory, ITempAuthStorageService tempAuthStorageService, ILogger<GeniusAuthService> logger, ICurrentUserContext userContext)
+    public GeniusAuthService(
+        IOptions<GeniusOptions> geniusOptions,
+        IHttpClientFactory httpClientFactory,
+        ITempAuthStorageService tempAuthStorageService,
+        ILogger<GeniusAuthService> logger,
+        ICurrentUserContext userContext)
     {
         _geniusOptions = geniusOptions;
         _httpClientFactory = httpClientFactory;
         _tempAuthStorageService = tempAuthStorageService;
         _logger = logger;
-        _userContext = userContext;
+        _currentUserId = userContext.UserId;
     }
 
     public async Task<UrlResponseModel> GetGrantAccessTokenRequestUri()
     {
-        var userId = _userContext.GetCurrentUserId()!.Value;
-
         GrantAccessTokenModel grantModel = new()
         {
             ClientId = _geniusOptions.Value.ClientId,
             RedirectUri = _geniusOptions.Value.GetGrantAccessTokenRequest.RedirectUri,
             ResponseType = _responseType,
             Scope = _scope,
-            State = await _tempAuthStorageService.CreateNewTempAuthSecret(userId)
+            State = await _tempAuthStorageService.CreateNewTempAuthSecret(_currentUserId)
         };
 
         UriBuilder uri = new(_geniusOptions.Value.ApiBaseUrl + _authorizeEndpointSuffix)
@@ -60,7 +63,7 @@ public class GeniusAuthService : IGeniusAuthService
             }.ToString()
         };
 
-        return new()
+        return new UrlResponseModel
         {
             Url = uri.ToString()
         };
@@ -75,6 +78,7 @@ public class GeniusAuthService : IGeniusAuthService
             Code = code,
             RedirectUri = _geniusOptions.Value.GetGrantAccessTokenRequest.RedirectUri
         };
+
         UriBuilder uri = new(_geniusOptions.Value.ApiBaseUrl + _codeExchangeEndpointSuffix);
 
         var client = _httpClientFactory.CreateClient();
