@@ -32,11 +32,10 @@ public partial class CreateSongDialog
 
     private async Task<IEnumerable<ArtistModel>> SearchArtists(string value, CancellationToken token)
     {
-        var request = new PagedRequest
+        var request = new ContentPagedRequest
         {
             PageSize = 10,
-            Query = value,
-            ContentType = ContentType.Private
+            Query = value        
         };
 
         var result = await ArtistService.GetArtistsAsync(request);

@@ -14,7 +14,7 @@ public class SongsController : BaseController
     }
 
     [HttpGet]
-    public async Task<ActionResult<PagedResponse<SongModel>>> GetSongs([FromQuery] PagedRequest request)
+    public async Task<ActionResult<PagedResponse<SongModel>>> GetSongs([FromQuery] ContentPagedRequest request)
     {
         return Ok(await _songService.GetSongsAsync(request));
     }

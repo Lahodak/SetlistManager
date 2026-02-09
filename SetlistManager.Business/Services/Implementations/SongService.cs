@@ -19,7 +19,7 @@ public class SongService : ISongService
         _currentUserId = currentUserContext.UserId;
     }
 
-    public async Task<PagedResponse<SongModel>> GetSongsAsync(PagedRequest request)
+    public async Task<PagedResponse<SongModel>> GetSongsAsync(ContentPagedRequest request)
     {
         var searchQuery = request.Query ?? string.Empty;
         var query = _dbContext.Songs

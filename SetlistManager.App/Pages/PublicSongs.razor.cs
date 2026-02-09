@@ -15,7 +15,7 @@ public partial class PublicSongs
     public required ISnackbar Snackbar { get; set; }
 
     private MudTable<SongModel> table = new();
-    private PagedRequest pageState = new()
+    private ContentPagedRequest pageState = new()
     {
         ContentType = ContentType.Public
     };
@@ -32,16 +32,17 @@ public partial class PublicSongs
 
     private async Task LoadUserSongs()
     {
-        var userSongsRequest = new PagedRequest
+        var userSongsRequest = new ContentPagedRequest
         {
-            ContentType = ContentType.Private,
             PageSize = int.MaxValue
         };
 
         var userSongs = await SongService.GetSongsAsync(userSongsRequest);
         if (userSongs?.Items != null)
         {
-            _userSongIds = userSongs.Items.Select(s => s.Id).ToHashSet();
+            _userSongIds = userSongs.Items
+                .Select(s => s.Id)
+                .ToHashSet();
         }
     }
 

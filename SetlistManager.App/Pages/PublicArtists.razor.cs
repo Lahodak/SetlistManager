@@ -17,7 +17,7 @@ public partial class PublicArtists
     public required ISnackbar Snackbar { get; set; }
 
     private MudTable<ArtistModel> table = new();
-    private PagedRequest pageState = new()
+    private ContentPagedRequest pageState = new()
     {
         ContentType = ContentType.Public
     };
@@ -34,9 +34,8 @@ public partial class PublicArtists
 
     private async Task LoadUserArtists()
     {
-        var userArtistsRequest = new PagedRequest
+        var userArtistsRequest = new ContentPagedRequest
         {
-            ContentType = ContentType.Private,
             PageSize = int.MaxValue
         };
 

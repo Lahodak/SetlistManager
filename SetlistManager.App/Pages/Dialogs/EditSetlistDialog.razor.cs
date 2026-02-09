@@ -27,7 +27,7 @@ public partial class EditSetlistDialog
 
     protected override async Task OnInitializedAsync()
     {
-        var result = await SongService.GetSongsAsync(new() { PageSize = 10, ContentType = ContentType.Private });
+        var result = await SongService.GetSongsAsync(new() { PageSize = 10 });
 
         _allSongs = result?.Items;
 
@@ -47,11 +47,10 @@ public partial class EditSetlistDialog
 
     private async Task<IEnumerable<SongModel>> Search(string value, CancellationToken token)
     {
-        var request = new PagedRequest
+        var request = new ContentPagedRequest
         {
             PageSize = 5,
-            Query = value,
-            ContentType = ContentType.Private
+            Query = value
         };
 
         var result = await SongService.GetSongsAsync(request);

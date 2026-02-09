@@ -44,8 +44,7 @@ public partial class CreateSetlistDialog
     {
         _allSongs = (await SongService.GetSongsAsync(new()
         {
-            PageSize = int.MaxValue,
-            ContentType = ContentType.Private
+            PageSize = int.MaxValue
         }))?.Items;
 
         _user = await UserService.GetUserAsync();

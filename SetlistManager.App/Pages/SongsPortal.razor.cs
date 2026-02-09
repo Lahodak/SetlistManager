@@ -19,7 +19,7 @@ public partial class SongsPortal
     public required IUserService UserService { get; set; }
 
     private MudTable<SongModel> table = new();
-    private readonly PagedRequest _pageState = new() { ContentType = ContentType.Private };
+    private readonly ContentPagedRequest _pageState = new();
     private string? searchString;
     private int _userId;
 

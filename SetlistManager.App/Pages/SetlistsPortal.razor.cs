@@ -19,7 +19,7 @@ public partial class SetlistsPortal
     public required IUserService UserService { get; set; }
 
     private MudTable<SetlistModel> table = new();
-    private readonly PagedRequest pageStatus = new() { ContentType = ContentType.Private };
+    private readonly ContentPagedRequest pageStatus = new();
     private string? searchString;
     private int _userId;
 

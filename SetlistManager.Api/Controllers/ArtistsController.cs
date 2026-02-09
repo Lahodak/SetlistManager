@@ -14,7 +14,7 @@ public class ArtistsController : BaseController
     }
 
     [HttpGet]
-    public async Task<ActionResult<PagedResponse<ArtistModel>>> GetAllArtists([FromQuery] PagedRequest request)
+    public async Task<ActionResult<PagedResponse<ArtistModel>>> GetAllArtists([FromQuery] ContentPagedRequest request)
     {
         return Ok(await _artistService.GetArtistsAsync(request));
     }

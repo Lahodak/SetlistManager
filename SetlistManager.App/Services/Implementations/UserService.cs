@@ -127,7 +127,7 @@ public class UserService : IUserService
         if (userId is null)
             return null;
 
-        var uri = request.ToUri($"{_apiOptions.UsersEndpoint}/{userId}{_friendshipsSuffix}");
+        var uri = request.ToPagedRequestUri($"{_apiOptions.UsersEndpoint}/{userId}{_friendshipsSuffix}");
         return await _apiService.GetAsync<PagedResponse<FriendModel>>(uri);
     }
 
@@ -171,7 +171,7 @@ public class UserService : IUserService
 
     public async Task<PagedResponse<UserViewModel>?> GetPagedUsersAsync(PagedRequest request)
     {
-        var uri = request.ToUri(_apiOptions.UsersEndpoint);
+        var uri = request.ToPagedRequestUri(_apiOptions.UsersEndpoint);
         return await _apiService.GetAsync<PagedResponse<UserViewModel>>(uri);
     }
 }

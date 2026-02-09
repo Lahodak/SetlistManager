@@ -16,9 +16,9 @@ public class SongService : ISongService
         _apiService = apiService;
     }
 
-    public async Task<PagedResponse<SongModel>> GetSongsAsync(PagedRequest request)
+    public async Task<PagedResponse<SongModel>> GetSongsAsync(ContentPagedRequest request)
     {
-        var uri = request.ToUri(_apiOptions.SongsEndpoint);
+        var uri = request.ToContentPagedRequestUri(_apiOptions.SongsEndpoint);
         return await _apiService.GetAsync<PagedResponse<SongModel>>(uri);
     }
 

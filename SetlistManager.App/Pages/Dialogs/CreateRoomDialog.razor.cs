@@ -41,8 +41,7 @@ public partial class CreateRoomDialog
         var result = await SetlistService.GetSetlistsAsync(new()
         {
             PageSize = 10,
-            Query = _searchString,
-            ContentType = ContentType.Private
+            Query = _searchString
         });
 
         _availableSetlists = result?.Items;

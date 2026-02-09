@@ -5,7 +5,28 @@ namespace SetlistManager.App.Extensions;
 
 public static class QueryBuilderExtensions
 {
-    public static string ToUri(this PagedRequest request, string endpoint)
+    public static string ToPagedRequestUri(this PagedRequest request, string endpoint)
+    {
+        var queryBuilder = new QueryBuilder
+        {
+            { nameof(request.PageSize), request.PageSize.ToString() },
+            { nameof(request.PageIndex), request.PageIndex.ToString() }
+        };
+
+        if (!string.IsNullOrWhiteSpace(request.Query))
+        {
+            queryBuilder.Add(nameof(request.Query), request.Query);
+        }
+
+        var uri = new UriBuilder(endpoint)
+        {
+            Query = queryBuilder.ToString()
+        };
+
+        return uri.ToString();
+    }
+
+    public static string ToContentPagedRequestUri(this ContentPagedRequest request, string endpoint)
     {
         var queryBuilder = new QueryBuilder
         {

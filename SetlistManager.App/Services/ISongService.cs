@@ -4,7 +4,7 @@ namespace SetlistManager.App.Services;
 
 public interface ISongService
 {
-    Task<PagedResponse<SongModel>> GetSongsAsync(PagedRequest request);
+    Task<PagedResponse<SongModel>> GetSongsAsync(ContentPagedRequest request);
     Task<SongModel?> GetSongByIdAsync(int id);
     Task<bool> TryCreateSongAsync(SongCreateModel songCreateModel);
     Task<bool> TryUpdateSongAsync(int id, SongUpdateModel songModel); 

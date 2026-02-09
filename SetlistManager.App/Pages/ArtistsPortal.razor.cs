@@ -19,7 +19,7 @@ public partial class ArtistsPortal
     public required IUserService UserService { get; set; }
 
     private MudTable<ArtistModel> _table = new();
-    private readonly PagedRequest pageStatus = new() { ContentType = ContentType.Private };
+    private readonly ContentPagedRequest pageStatus = new();
     private string? searchString;
     private int _userId;
 

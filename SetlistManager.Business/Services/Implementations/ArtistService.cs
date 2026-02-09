@@ -19,7 +19,7 @@ public class ArtistService : IArtistService
         _currentUserId = currentUserContext.UserId;
     }
 
-    public async Task<PagedResponse<ArtistModel>> GetArtistsAsync(PagedRequest request)
+    public async Task<PagedResponse<ArtistModel>> GetArtistsAsync(ContentPagedRequest request)
     {
         if (request.Query is null)
             request.Query = string.Empty;

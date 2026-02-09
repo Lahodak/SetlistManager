@@ -4,7 +4,7 @@ namespace SetlistManager.App.Services;
 
 public interface IArtistService
 {
-    Task<PagedResponse<ArtistModel>> GetArtistsAsync(PagedRequest request);
+    Task<PagedResponse<ArtistModel>> GetArtistsAsync(ContentPagedRequest request);
     Task<ArtistModel?> GetArtistByIdAsync(int id);
     Task<bool> TryCreateArtistAsync(ArtistCreateModel createModel);
     Task<bool> TryUpdateArtistAsync(int id, ArtistUpdateModel updateModel);

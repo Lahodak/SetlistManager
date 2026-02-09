@@ -24,7 +24,7 @@ public class SetlistService : ISetlistService
 
     public async Task<PagedResponse<SetlistModel>> GetSetlistsAsync(PagedRequest request)
     {
-        var uri = request.ToUri(_apiOptions.SetlistsEndpoint);
+        var uri = request.ToPagedRequestUri(_apiOptions.SetlistsEndpoint);
         return await _apiService.GetAsync<PagedResponse<SetlistModel>>(uri);
     }
 

@@ -83,7 +83,7 @@ public class RoomService : IRoomService
 
     public async Task<PagedResponse<RoomModel>> GetPublicActiveRoomsAsync(PagedRequest request)
     {
-        var uri = request.ToUri(_apiOptions.RoomsEndpoint);
+        var uri = request.ToPagedRequestUri(_apiOptions.RoomsEndpoint);
         var response = await _apiService.GetAsync<PagedResponse<RoomModel>>(uri);
         return response!;
     }

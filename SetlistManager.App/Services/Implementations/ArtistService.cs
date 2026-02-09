@@ -16,9 +16,9 @@ public class ArtistService : IArtistService
         _apiService = apiService;
     }
 
-    public async Task<PagedResponse<ArtistModel>> GetArtistsAsync(PagedRequest request)
+    public async Task<PagedResponse<ArtistModel>> GetArtistsAsync(ContentPagedRequest request)
     {
-        var uri = request.ToUri(_apiOptions.ArtistsEndpoint);
+        var uri = request.ToContentPagedRequestUri(_apiOptions.ArtistsEndpoint);
         return await _apiService.GetAsync<PagedResponse<ArtistModel>>(uri);
     }
 
