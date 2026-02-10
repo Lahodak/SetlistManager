@@ -32,7 +32,7 @@ public class GeniusService : IGeniusService
 
     public async Task<string> AuthorizeAsync()
     {
-        var response = await _apiService.GetAsync<UrlResponseModel>(_apiOptions.TokensEndpoint);
+        var response = await _apiService.GetAsync<UrlResponseModel>(_apiOptions.BaseUrl + _apiOptions.TokensEndpoint);
 
         if (response is null)
             return "/error";

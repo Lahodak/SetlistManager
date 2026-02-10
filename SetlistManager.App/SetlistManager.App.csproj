@@ -2,6 +2,7 @@
 	<PropertyGroup>
 		<UserSecretsId>892d756c-fa25-4fc7-9599-95a690ca9ae6</UserSecretsId>
 		<ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
+		<Configurations>Debug;Release;Development</Configurations>
 	</PropertyGroup>
 	<ItemGroup>
 		<None Include="..\.dockerignore" Link=".dockerignore">

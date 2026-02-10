@@ -7,14 +7,13 @@ namespace SetlistManager.App.Services.Implementations;
 public class InstrumentService : IInstrumentService
 {
     private readonly IApiService _apiService;
-    private readonly SetlistManagerApiOptions _apiOptions;
-
+    private readonly string _apiPath;
     public InstrumentService(IApiService apiService, IOptions<SetlistManagerApiOptions> apiOptions)
     {
-        _apiOptions = apiOptions.Value;
         _apiService = apiService;
+        _apiPath = apiOptions.Value.BaseUrl + apiOptions.Value.InstrumentsEndpoint;
     }
 
     public async Task<List<InstrumentModel>?> GetAvailableInstrumentsAsync()
-        => await _apiService.GetAsync<List<InstrumentModel>>(_apiOptions.InstrumentsEndpoint);
+        => await _apiService.GetAsync<List<InstrumentModel>>(_apiPath);
 }

@@ -10,7 +10,7 @@ public class RoomService : IRoomService
 {
     private readonly IUserService _userService;
     private readonly IApiService _apiService;
-    private readonly SetlistManagerApiOptions _apiOptions;
+    private readonly string _apiPath;
 
     public event Action<RoomModel>? RoomUpdated;
 
@@ -22,12 +22,12 @@ public class RoomService : IRoomService
 
     public RoomService(IOptions<SetlistManagerApiOptions> apiOptions, IApiService apiService, IUserService userService)
     {
-        _apiOptions = apiOptions.Value;
         _userService = userService;
         _apiService = apiService;
+        _apiPath = apiOptions.Value.BaseUrl + apiOptions.Value.RoomsEndpoint;
 
         HubConnection = new HubConnectionBuilder()
-            .WithUrl(_apiOptions.RoomHubEndpoint, options =>
+            .WithUrl(apiOptions.Value.BaseHubUrl + apiOptions.Value.RoomHubEndpoint, options =>
             {
                 options.AccessTokenProvider = async () =>
                 {
@@ -77,13 +77,13 @@ public class RoomService : IRoomService
 
     public async Task<RoomModel?> CreateRoomAsync(RoomCreateModel createModel)
     {
-        var response = await _apiService.PostAsync<RoomCreateModel, RoomModel>(_apiOptions.RoomsEndpoint, createModel);
+        var response = await _apiService.PostAsync<RoomCreateModel, RoomModel>(_apiPath, createModel);
         return response;
     }
 
     public async Task<PagedResponse<RoomModel>> GetPublicActiveRoomsAsync(PagedRequest request)
     {
-        var uri = request.ToPagedRequestUri(_apiOptions.RoomsEndpoint);
+        var uri = request.ToPagedRequestUri(_apiPath);
         var response = await _apiService.GetAsync<PagedResponse<RoomModel>>(uri);
         return response!;
     }
