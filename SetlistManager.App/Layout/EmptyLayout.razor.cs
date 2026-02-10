@@ -20,17 +20,17 @@ public partial class EmptyLayout
     private const string _landingUri = "/";
 
     protected override async Task OnInitializedAsync()
-    {
+    {        
         _isDarkMode = await UserService.GetUserDarkModeSettings();
         
-        StateHasChanged();        
-        
+        StateHasChanged();
+
         var token = await UserService.GetUserTokenAsync();
-        
-        if (string.IsNullOrWhiteSpace(token) && !NavigationManager.Uri.Contains(_loginUri) && !NavigationManager.Uri.Contains(_resetPasswordUri) 
+
+        if (string.IsNullOrWhiteSpace(token) && !NavigationManager.Uri.Contains(_loginUri) && !NavigationManager.Uri.Contains(_resetPasswordUri)
             && !NavigationManager.Uri.Contains(_requestResetPasswordUri) && !NavigationManager.Uri.Contains(_landingUri))
         {
-            NavigationManager.NavigateTo(_loginUri, true);
+            NavigationManager.NavigateTo(_loginUri);
         }
     }
 }

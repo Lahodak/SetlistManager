@@ -25,11 +25,9 @@ namespace SetlistManager.App.Layout
             _isDarkMode = await UserService.GetUserDarkModeSettings();
             StateHasChanged();
 
-            var token = await UserService.GetUserTokenAsync();
-
-            if (string.IsNullOrWhiteSpace(token) && !Navigation.Uri.Contains(_loginUri))
+            if (!await UserService.VerifyStoredToken() && !Navigation.Uri.Contains(_loginUri))
             {
-                Navigation.NavigateTo(_loginUri, true);
+                Navigation.NavigateTo(_loginUri);
                 return;
             }
 

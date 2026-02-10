@@ -15,6 +15,7 @@ public partial class Login
     public required ISnackbar Snackbar { get; set; }
 
     private readonly LoginRequestModel _loginRequestModel = new();
+    private const string _homeUri = "/home";
 
     private async Task LoginUser()
     {
@@ -26,8 +27,9 @@ public partial class Login
         if (!result)
         {         
             Snackbar.Add("Login failed. Please check your credentials.", Severity.Error);
+            return;
         }
 
-        Navigation.NavigateTo("/");
+        Navigation.NavigateTo(_homeUri);
     }
 }
