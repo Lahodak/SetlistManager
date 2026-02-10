@@ -17,6 +17,7 @@ public partial class EmptyLayout
     private const string _loginUri = "/login";
     private const string _resetPasswordUri = "/reset-password";
     private const string _requestResetPasswordUri = "/request-password-reset";
+    private const string _landingUri = "/";
 
     protected override async Task OnInitializedAsync()
     {
@@ -27,7 +28,7 @@ public partial class EmptyLayout
         var token = await UserService.GetUserTokenAsync();
         
         if (string.IsNullOrWhiteSpace(token) && !NavigationManager.Uri.Contains(_loginUri) && !NavigationManager.Uri.Contains(_resetPasswordUri) 
-            && !NavigationManager.Uri.Contains(_requestResetPasswordUri))
+            && !NavigationManager.Uri.Contains(_requestResetPasswordUri) && !NavigationManager.Uri.Contains(_landingUri))
         {
             NavigationManager.NavigateTo(_loginUri, true);
         }
