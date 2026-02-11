@@ -129,7 +129,7 @@ public static class ServiceCollectionExtensions
         var connectionString = configuration.GetConnectionString(_dbConnectionStringKey)
             ?? throw new InvalidOperationException("Connection string 'SetlistManagerDB' not found.");
         
-        services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
+        services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
         return services;
     }
 }
