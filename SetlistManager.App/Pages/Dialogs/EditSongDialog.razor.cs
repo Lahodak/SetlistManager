@@ -9,28 +9,25 @@ public partial class EditSongDialog
 {
     [CascadingParameter]
     public required IMudDialogInstance MudDialog { get; set; }
-
     [Parameter]
     public required SongModel Song { get; set; }
-
     [Inject]
     public required ISongService SongService { get; set; }
-
     [Inject]
     public required ILanguageService LanguageService { get; set; }
-
     [Inject]
     public required IArtistService ArtistService { get; set; }
-
     [Inject]
     public required ISnackbar Snackbar { get; set; }
 
     private List<LanguageModel>? _languages;
     private SongUpdateModel _updateModel = new();
 
+    private ArtistModel? _selectedArtist;
+    private LanguageModel? _selectedLanguage;
+
     protected override async Task OnInitializedAsync()
     {
-
         _updateModel = new SongUpdateModel
         {
             Name = Song.Name,
@@ -40,10 +37,11 @@ public partial class EditSongDialog
             AudioURL = Song.AudioURL,
             Tuning = Song.Tuning,
             Key = Song.Key,
-            BPM = Song.BPM,
-            Artist = Song.Artist,
-            Language = Song.Language
+            BPM = Song.BPM
         };
+
+        _selectedArtist = Song.Artist;
+        _selectedLanguage = Song.Language;
 
         _languages = await LanguageService.GetAvailableLanguagesAsync();
     }
@@ -55,7 +53,6 @@ public partial class EditSongDialog
             PageSize = 10,
             Query = value
         };
-
         var result = await ArtistService.GetArtistsAsync(request);
         return result?.Items ?? [];
     }
@@ -77,13 +74,13 @@ public partial class EditSongDialog
 
     private void OnArtistSelected(ArtistModel? selectedArtist)
     {
-        _updateModel.Artist = selectedArtist;
+        _selectedArtist = selectedArtist;
         _updateModel.ArtistId = selectedArtist?.Id;
     }
 
     private void OnLanguageSelected(LanguageModel? selectedLanguage)
     {
-        _updateModel.Language = selectedLanguage;
+        _selectedLanguage = selectedLanguage;
         _updateModel.LanguageId = selectedLanguage?.Id;
     }
 

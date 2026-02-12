@@ -104,17 +104,18 @@ public class SongService : ISongService
 
     public async Task TryUpdateSongAsync(int songId, SongUpdateModel updateModel)
     {
-        if (await _dbContext.Songs.AnyAsync(x =>
-            x.Name == updateModel.Name &&
-            x.ArtistId == updateModel.ArtistId &&
-            (x.OwnerId == _currentUserId ||
-             x.SongsUsers.Any(x => x.Song.ArtistId == updateModel.ArtistId && x.UserId == _currentUserId))))
-            throw new DuplicateEntryException();
-
         var song = await _dbContext.Songs.FirstOrDefaultAsync(x => x.Id == songId && x.OwnerId == _currentUserId);
 
         if (song is null || song.IsPublic)
             throw new EntryNotFoundException();
+
+        if (await _dbContext.Songs.AnyAsync(x =>
+            x.Id != songId &&
+            x.Name == updateModel.Name &&
+            x.ArtistId == updateModel.ArtistId &&
+            (x.OwnerId == _currentUserId ||
+             x.SongsUsers.Any(su => su.SongId == x.Id && su.UserId == _currentUserId))))
+            throw new DuplicateEntryException();
 
         song.UpdateEntity(updateModel);
         await _dbContext.SaveChangesAsync();

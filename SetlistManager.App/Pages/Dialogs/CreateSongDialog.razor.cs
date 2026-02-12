@@ -9,21 +9,20 @@ public partial class CreateSongDialog
 {
     [CascadingParameter]
     public required IMudDialogInstance MudDialog { get; set; }
-
     [Inject]
     public required ISnackbar Snackbar { get; set; }
-
     [Inject]
     public required ISongService SongService { get; set; }
-
     [Inject]
     public required ILanguageService LanguageService { get; set; }
-
     [Inject]
     public required IArtistService ArtistService { get; set; }
 
     private List<LanguageModel>? _languages;
-    private SongCreateModel _songModel = new();
+    private readonly SongCreateModel _songModel = new();
+
+    private ArtistModel? _selectedArtist;
+    private LanguageModel? _selectedLanguage;
 
     protected override async Task OnInitializedAsync()
     {
@@ -35,9 +34,8 @@ public partial class CreateSongDialog
         var request = new ContentPagedRequest
         {
             PageSize = 10,
-            Query = value        
+            Query = value
         };
-
         var result = await ArtistService.GetArtistsAsync(request);
         return result?.Items ?? [];
     }
@@ -59,13 +57,13 @@ public partial class CreateSongDialog
 
     private void OnArtistSelected(ArtistModel? selectedArtist)
     {
-        _songModel.Artist = selectedArtist;
+        _selectedArtist = selectedArtist;
         _songModel.ArtistId = selectedArtist?.Id;
     }
 
     private void OnLanguageSelected(LanguageModel? selectedLanguage)
     {
-        _songModel.Language = selectedLanguage;
+        _selectedLanguage = selectedLanguage;
         _songModel.LanguageId = selectedLanguage?.Id;
     }
 

@@ -35,11 +35,11 @@ app.UseCors("AllowAllPolicy")
     .UseHttpsRedirection()
     .UseAuthentication();
 
-using (var scope = app.Services.CreateScope())
-{
-    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    await dbContext.Database.MigrateAsync();
-}
+//using (var scope = app.Services.CreateScope())
+//{
+//    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+//    await dbContext.Database.MigrateAsync();
+//}
 
 app.UseAuthorization();
 app.UseResponseCompression();

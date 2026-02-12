@@ -21,11 +21,11 @@ public class SongUpdateModel
     public string AudioURL { get; set; } = default!;
 
     [Required]
-    [MaxLength(10)]
+    [MaxLength(20)]
     public string Tuning { get; set; } = default!;
 
     [Required]
-    [MaxLength(10)]
+    [MaxLength(20)]
     public string Key { get; set; } = default!;
 
     [Required]
@@ -33,7 +33,4 @@ public class SongUpdateModel
     public int? BPM { get; set; } = 120;
 
     public bool IsPublic { get; set; } = false;
-
-    public ArtistModel? Artist { get; set; }
-    public LanguageModel? Language { get; set; }
 }
