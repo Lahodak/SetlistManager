@@ -89,7 +89,7 @@ public class SetlistsService : ISetlistsService
             Name = setlistModel.Name,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
-            OwnerId = setlistModel.OwnerId
+            OwnerId = _currentUserId
         };
 
         _dbContext.Setlists.Add(setlistModel.MapSongModelToEntity(setlistToCreate));

@@ -12,7 +12,6 @@ public static class SongOrderMapper
             setlist.SongsSetlists.Add(new SongsSetlists
             {
                 SongId = songModel.Id,
-                SetlistId = setlist.Id,
                 Order = songModel.Order
             });            
         }
