@@ -11,7 +11,11 @@ public class CurrentUserContext : ICurrentUserContext
     public CurrentUserContext(IHttpContextAccessor httpContextAccessor)
     {
         _httpContextAccessor = httpContextAccessor;
-        UserId = GetCurrentUserId()!.Value;
+        var userId = GetCurrentUserId();
+        if (userId.HasValue)
+        {
+            UserId = userId.Value;
+        }
     }
 
     public int? GetCurrentUserId()

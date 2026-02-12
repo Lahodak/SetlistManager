@@ -26,12 +26,8 @@ public class GeniusAuthService : IGeniusAuthService
     private const string _stateKey = "state";
     private const string _responseTypeKey = "response_type";
 
-    public GeniusAuthService(
-        IOptions<GeniusOptions> geniusOptions,
-        IHttpClientFactory httpClientFactory,
-        ITempAuthStorageService tempAuthStorageService,
-        ILogger<GeniusAuthService> logger,
-        ICurrentUserContext userContext)
+    public GeniusAuthService(IOptions<GeniusOptions> geniusOptions, IHttpClientFactory httpClientFactory, ITempAuthStorageService tempAuthStorageService, 
+        ILogger<GeniusAuthService> logger, ICurrentUserContext userContext)
     {
         _geniusOptions = geniusOptions;
         _httpClientFactory = httpClientFactory;
