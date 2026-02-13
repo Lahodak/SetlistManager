@@ -4,34 +4,56 @@ using MudBlazor;
 using SetlistManager.App.Pages.Dialogs;
 using SetlistManager.App.Services;
 using SetlistManager.Common.Models;
+using SetlistManager.App.Models;
 
 namespace SetlistManager.App.Pages;
 
 public partial class Room : IAsyncDisposable
 {
-    [Parameter] 
+    [Parameter]
     public string RoomCode { get; set; } = string.Empty;
-    [Inject] 
+
+    [Inject]
     public required IRoomService RoomService { get; set; }
-    [Inject] 
+
+    [Inject]
     public required NavigationManager NavigationManager { get; set; }
-    [Inject] 
+
+    [Inject]
     public required IUserService UserService { get; set; }
-    [Inject] 
+
+    [Inject]
     public required IDialogService DialogService { get; set; }
-    [Inject] 
+
+    [Inject]
     public required IJSRuntime JSRuntime { get; set; }
+
     [Inject]
     public required ISnackbar Snackbar { get; set; }
 
+    [Inject]
+    public required IGeniusService GeniusService { get; set; }
+
     private const string _roomsPortalUri = "/RoomsPortal";
-    private const string _toggleFullscreenMethod = "toggleFullscreen";
-    private const string _scrollToCurrentSongMethod = "scrollToCurrentSong";
+    private const string _viewModeStorageKey = "roomViewMode";
+
     private RoomModel? _roomModel;
     private SongModel? _currentSong;
     private UserModel? _user;
+    private GeniusEmbedModel? _lyricsData;
+
     private bool _isFullscreen = false;
+    private bool _drawerOpen = false;
+    private bool _isLoadingLyrics = false;
+    private bool _isScrolling = false;
+
+    private ViewMode _currentViewMode = ViewMode.SongAndSetlist;
+    private int _scrollSpeed = 5;
+    private double _fontScale = 1.0;
+
     private IJSObjectReference? _jsModule;
+    private int? _previousSongId;
+    private bool _needsLyricsReload = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -41,6 +63,9 @@ public partial class Room : IAsyncDisposable
             NavigationManager.NavigateTo(_roomsPortalUri);
             return;
         }
+
+        // Load saved view mode from localStorage
+        await LoadViewModeFromStorage();
 
         JoinRoomModel joinRoomModel = new()
         {
@@ -65,6 +90,9 @@ public partial class Room : IAsyncDisposable
 
         _user = await UserService.GetUserAsync();
 
+        // Load lyrics if needed
+        await LoadLyricsIfNeeded();
+
         StateHasChanged();
         await ScrollToCurrentSong();
     }
@@ -85,10 +113,77 @@ public partial class Room : IAsyncDisposable
             }
         }
 
-        if (!firstRender && _currentSong != null)
+        // Render lyrics if available and needs reload
+        if (_lyricsData is not null && (_previousSongId != _currentSong?.Id || _needsLyricsReload))
         {
-            await ScrollToCurrentSong();
+            try
+            {
+                await JSRuntime.InvokeVoidAsync("window.geniusEmbed.loadEmbed",
+                    _lyricsData.SongId, _lyricsData.Title, _lyricsData.Artist, _lyricsData.Url);
+                _previousSongId = _currentSong?.Id;
+                _needsLyricsReload = false;
+            }
+            catch
+            {
+                // Lyrics embed failed, silently continue
+            }
         }
+    }
+
+    private async Task LoadViewModeFromStorage()
+    {
+        try
+        {
+            var savedMode = await JSRuntime.InvokeAsync<string>("localStorage.getItem", _viewModeStorageKey);
+            if (!string.IsNullOrEmpty(savedMode) && Enum.TryParse<ViewMode>(savedMode, out var viewMode))
+            {
+                _currentViewMode = viewMode;
+            }
+        }
+        catch
+        {
+            // If localStorage fails, use default
+        }
+    }
+
+    private async Task SaveViewModeToStorage()
+    {
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("localStorage.setItem", _viewModeStorageKey, _currentViewMode.ToString());
+        }
+        catch
+        {
+            // If localStorage fails, continue without saving
+        }
+    }
+
+    private async Task OnViewModeChanged(ViewMode newMode)
+    {
+        _currentViewMode = newMode;
+        await SaveViewModeToStorage();
+
+        // Check if new view mode has lyrics
+        var currentHasLyrics = newMode == ViewMode.SongAndLyrics ||
+                               newMode == ViewMode.LyricsAndSetlist ||
+                               newMode == ViewMode.LyricsOnly;
+
+        // If switching to a lyrics view and we already have lyrics data, mark for reload
+        if (currentHasLyrics && _lyricsData != null)
+        {
+            _needsLyricsReload = true;
+        }
+
+        // Load lyrics if switching to a lyrics view
+        await LoadLyricsIfNeeded();
+
+        _drawerOpen = false;
+        StateHasChanged();
+    }
+
+    private void ToggleDrawer()
+    {
+        _drawerOpen = !_drawerOpen;
     }
 
     private async Task ToggleFullscreen()
@@ -97,7 +192,8 @@ public partial class Room : IAsyncDisposable
         {
             if (_jsModule != null)
             {
-                _isFullscreen = await _jsModule.InvokeAsync<bool>(_toggleFullscreenMethod);
+                _isFullscreen = await _jsModule.InvokeAsync<bool>("toggleFullscreen");
+                _drawerOpen = false;
                 StateHasChanged();
             }
         }
@@ -107,21 +203,64 @@ public partial class Room : IAsyncDisposable
         }
     }
 
-    private void OnRoomUpdated(RoomModel room)
+    private async void OnRoomUpdated(RoomModel room)
     {
         _roomModel = room;
 
-        if (_roomModel?.Setlist is null || _roomModel.CurrentSong is null) 
+        if (_roomModel?.Setlist is null || _roomModel.CurrentSong is null)
             return;
 
-        _currentSong = _roomModel.Setlist.Songs.FirstOrDefault(x => x.Id == _roomModel.CurrentSong);
+        var newCurrentSong = _roomModel.Setlist.Songs.FirstOrDefault(x => x.Id == _roomModel.CurrentSong);
+
+        // Check if song changed
+        if (newCurrentSong?.Id != _currentSong?.Id)
+        {
+            _currentSong = newCurrentSong;
+
+            // Load lyrics for new song if in lyrics view
+            await LoadLyricsIfNeeded();
+            await ScrollToCurrentSong();
+        }
 
         StateHasChanged();
     }
 
+    private async Task LoadLyricsIfNeeded()
+    {
+        // Only load lyrics if current view mode includes lyrics
+        if (_currentSong != null &&
+            (_currentViewMode == ViewMode.SongAndLyrics ||
+             _currentViewMode == ViewMode.LyricsAndSetlist ||
+             _currentViewMode == ViewMode.LyricsOnly))
+        {
+            // Only reload if song changed
+            if (_lyricsData == null || _previousSongId != _currentSong.Id)
+            {
+                _isLoadingLyrics = true;
+                _lyricsData = null;
+                StateHasChanged();
+
+                try
+                {
+                    _lyricsData = await GeniusService.FetchSongLyricsAsync(_currentSong);
+                    _needsLyricsReload = true; // Mark for reload in AfterRender
+                }
+                catch
+                {
+                    // Lyrics fetch failed
+                }
+                finally
+                {
+                    _isLoadingLyrics = false;
+                    StateHasChanged();
+                }
+            }
+        }
+    }
+
     private async Task SelectSong(SongModel song)
     {
-        if (_roomModel is null || _currentSong is null || song.Id == _currentSong.Id) 
+        if (_roomModel is null || _currentSong is null || song.Id == _currentSong.Id)
             return;
 
         ChangeCurrentSongModel changeCurrentSongModel = new()
@@ -168,31 +307,75 @@ public partial class Room : IAsyncDisposable
         }
     }
 
+    private bool CanMoveToNextSong()
+    {
+        if (_roomModel?.Setlist?.Songs == null || _currentSong == null) return false;
+
+        var orderedSongs = _roomModel.Setlist.Songs.OrderBy(s => s.Order).ToList();
+        var currentIndex = orderedSongs.FindIndex(s => s.Id == _currentSong.Id);
+
+        return currentIndex >= 0 && currentIndex < orderedSongs.Count - 1;
+    }
+
+    private bool CanMoveToPrevSong()
+    {
+        if (_roomModel?.Setlist?.Songs == null || _currentSong == null) return false;
+
+        var orderedSongs = _roomModel.Setlist.Songs.OrderBy(s => s.Order).ToList();
+        var currentIndex = orderedSongs.FindIndex(s => s.Id == _currentSong.Id);
+
+        return currentIndex > 0;
+    }
+
     private async Task ScrollToCurrentSong()
     {
         try
         {
-            await JSRuntime.InvokeVoidAsync(_scrollToCurrentSongMethod);
+            await JSRuntime.InvokeVoidAsync("window.scrollToCurrentSong");
         }
         catch
         {
-            Snackbar.Add("Failed to scroll to current song.", Severity.Warning);
+            // Scroll failed, silently continue
         }
     }
 
-    private async Task OpenSetlistContentDialog()
+    // Lyrics autoscroll methods
+    private async Task ToggleScroll(bool scroll)
     {
-        if (_roomModel is null || _roomModel.Setlist is null || _currentSong is null) return;
-
-        var parameters = new DialogParameters
+        _isScrolling = scroll;
+        if (_isScrolling)
         {
-            { nameof(ShowSetlistContentDialog.Setlist), _roomModel.Setlist },
-            { nameof(ShowSetlistContentDialog.CurrentSongId), _currentSong.Id }
-        };
+            await JSRuntime.InvokeVoidAsync("window.scrollingFunctions.startAutoScroll", "genius-lyrics-container", _scrollSpeed);
+        }
+        else
+        {
+            await JSRuntime.InvokeVoidAsync("window.scrollingFunctions.stopAutoScroll");
+        }
+        StateHasChanged();
+    }
 
-        var options = new DialogOptions { CloseButton = true };
+    private async Task ResetScroll()
+    {
+        await JSRuntime.InvokeVoidAsync("eval", "document.getElementById('genius-lyrics-container').scrollTop = 0");
+        if (_isScrolling)
+        {
+            await ToggleScroll(true);
+        }
+    }
 
-        await DialogService.ShowAsync<ShowSetlistContentDialog>("Setlist Content", parameters, options);
+    private async Task OnSpeedChanged(int newSpeed)
+    {
+        _scrollSpeed = newSpeed;
+        if (_isScrolling)
+        {
+            await JSRuntime.InvokeVoidAsync("window.scrollingFunctions.startAutoScroll", "genius-lyrics-container", _scrollSpeed);
+        }
+    }
+
+    private void OnFontScaleChanged(double newScale)
+    {
+        _fontScale = newScale;
+        StateHasChanged();
     }
 
     private async Task OpenQrCodeDialog()
@@ -212,6 +395,8 @@ public partial class Room : IAsyncDisposable
         };
 
         await DialogService.ShowAsync<QrCodeDialog>("Room Access", parameters, options);
+
+        _drawerOpen = false;
     }
 
     public async ValueTask DisposeAsync()
@@ -223,4 +408,14 @@ public partial class Room : IAsyncDisposable
             await _jsModule.DisposeAsync();
         }
     }
+}
+
+public enum ViewMode
+{
+    SongAndSetlist,
+    SongAndLyrics,
+    LyricsAndSetlist,
+    SongOnly,
+    LyricsOnly,
+    SetlistOnly
 }
