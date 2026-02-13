@@ -402,7 +402,7 @@ public partial class Room : IAsyncDisposable
 
         if (tabsUrl.Contains("songsterr.com"))
         {
-            var match = System.Text.RegularExpressions.Regex.Match(tabsUrl, @"-s(\d+)");
+            var match = System.Text.RegularExpressions.Regex.Match(tabsUrl, @"-s(\d+)$");
             if (match.Success)
             {
                 var songId = match.Groups[1].Value;
