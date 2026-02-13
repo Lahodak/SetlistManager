@@ -64,7 +64,6 @@ public partial class Room : IAsyncDisposable
             return;
         }
 
-        // Load saved view mode from localStorage
         await LoadViewModeFromStorage();
 
         JoinRoomModel joinRoomModel = new()
@@ -90,7 +89,6 @@ public partial class Room : IAsyncDisposable
 
         _user = await UserService.GetUserAsync();
 
-        // Load lyrics if needed
         await LoadLyricsIfNeeded();
 
         StateHasChanged();
@@ -113,7 +111,6 @@ public partial class Room : IAsyncDisposable
             }
         }
 
-        // Render lyrics if available and needs reload
         if (_lyricsData is not null && (_previousSongId != _currentSong?.Id || _needsLyricsReload))
         {
             try
@@ -125,7 +122,6 @@ public partial class Room : IAsyncDisposable
             }
             catch
             {
-                // Lyrics embed failed, silently continue
             }
         }
     }
@@ -142,7 +138,6 @@ public partial class Room : IAsyncDisposable
         }
         catch
         {
-            // If localStorage fails, use default
         }
     }
 
@@ -154,7 +149,6 @@ public partial class Room : IAsyncDisposable
         }
         catch
         {
-            // If localStorage fails, continue without saving
         }
     }
 
@@ -163,18 +157,16 @@ public partial class Room : IAsyncDisposable
         _currentViewMode = newMode;
         await SaveViewModeToStorage();
 
-        // Check if new view mode has lyrics
         var currentHasLyrics = newMode == ViewMode.SongAndLyrics ||
                                newMode == ViewMode.LyricsAndSetlist ||
+                               newMode == ViewMode.LyricsAndTabs ||
                                newMode == ViewMode.LyricsOnly;
 
-        // If switching to a lyrics view and we already have lyrics data, mark for reload
         if (currentHasLyrics && _lyricsData != null)
         {
             _needsLyricsReload = true;
         }
 
-        // Load lyrics if switching to a lyrics view
         await LoadLyricsIfNeeded();
 
         _drawerOpen = false;
@@ -212,12 +204,10 @@ public partial class Room : IAsyncDisposable
 
         var newCurrentSong = _roomModel.Setlist.Songs.FirstOrDefault(x => x.Id == _roomModel.CurrentSong);
 
-        // Check if song changed
         if (newCurrentSong?.Id != _currentSong?.Id)
         {
             _currentSong = newCurrentSong;
 
-            // Load lyrics for new song if in lyrics view
             await LoadLyricsIfNeeded();
             await ScrollToCurrentSong();
         }
@@ -227,13 +217,12 @@ public partial class Room : IAsyncDisposable
 
     private async Task LoadLyricsIfNeeded()
     {
-        // Only load lyrics if current view mode includes lyrics
         if (_currentSong != null &&
             (_currentViewMode == ViewMode.SongAndLyrics ||
              _currentViewMode == ViewMode.LyricsAndSetlist ||
+             _currentViewMode == ViewMode.LyricsAndTabs ||
              _currentViewMode == ViewMode.LyricsOnly))
         {
-            // Only reload if song changed
             if (_lyricsData == null || _previousSongId != _currentSong.Id)
             {
                 _isLoadingLyrics = true;
@@ -243,11 +232,10 @@ public partial class Room : IAsyncDisposable
                 try
                 {
                     _lyricsData = await GeniusService.FetchSongLyricsAsync(_currentSong);
-                    _needsLyricsReload = true; // Mark for reload in AfterRender
+                    _needsLyricsReload = true;
                 }
                 catch
                 {
-                    // Lyrics fetch failed
                 }
                 finally
                 {
@@ -335,11 +323,9 @@ public partial class Room : IAsyncDisposable
         }
         catch
         {
-            // Scroll failed, silently continue
         }
     }
 
-    // Lyrics autoscroll methods
     private async Task ToggleScroll(bool scroll)
     {
         _isScrolling = scroll;
@@ -408,14 +394,37 @@ public partial class Room : IAsyncDisposable
             await _jsModule.DisposeAsync();
         }
     }
+
+    private string ConvertToEmbeddableTabsUrl(string tabsUrl)
+    {
+        if (string.IsNullOrEmpty(tabsUrl))
+            return tabsUrl;
+
+        if (tabsUrl.Contains("songsterr.com"))
+        {
+            var match = System.Text.RegularExpressions.Regex.Match(tabsUrl, @"-s(\d+)");
+            if (match.Success)
+            {
+                var songId = match.Groups[1].Value;
+                return $"https://www.songsterr.com/a/wa/player?id={songId}";
+            }
+        }
+
+        return tabsUrl;
+    }
+
 }
 
 public enum ViewMode
 {
     SongAndSetlist,
     SongAndLyrics,
+    SongAndTabs,
     LyricsAndSetlist,
+    TabsAndSetlist,
+    LyricsAndTabs,
     SongOnly,
     LyricsOnly,
+    TabsOnly,
     SetlistOnly
 }
