@@ -1,4 +1,5 @@
-﻿using SetlistManager.Common.Models;
+﻿using SetlistManager.App.Models;
+using SetlistManager.Common.Models;
 
 namespace SetlistManager.App.Services;
 
@@ -22,4 +23,6 @@ public interface IUserService
     Task<int?> GetCurrentUserIdAsync();
     Task<bool> GetUserDarkModeSettings();
     Task UpdateUserDarkModeSettingsAsync(bool newValue);
+    Task<List<PanelType>?> GetPanelConfigAsync();
+    Task SavePanelConfigAsync(List<PanelType> panels);
 }

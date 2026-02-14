@@ -1,6 +1,8 @@
 ﻿using Blazored.LocalStorage;
 using Microsoft.Extensions.Options;
+using Microsoft.JSInterop;
 using SetlistManager.App.Extensions;
+using SetlistManager.App.Models;
 using SetlistManager.App.Options;
 using SetlistManager.Common.Models;
 
@@ -22,6 +24,7 @@ public class UserService : IUserService
     private const string _friendshipsSuffix = "/friendships";
     private const string _meSuffix = "/me";
     private const string _darkModeSettingsKey = "ToggleDarkMode";
+    private const string _panelConfigStorageKey = "roomPanelConfig";
 
     public UserService(ILocalStorageService localStorageService, IApiService apiService, IOptions<SetlistManagerApiOptions> apiOptions)
     {
@@ -60,6 +63,28 @@ public class UserService : IUserService
             return false;
         
         return await _apiService.TryPutAsync($"{_apiUsersEndpointPath}/{userId}", user);
+    }
+
+    public async Task<List<PanelType>?> GetPanelConfigAsync()
+    {        
+        var savedConfig = await _localStorage.GetItemAsStringAsync(_panelConfigStorageKey);
+        
+        if (string.IsNullOrEmpty(savedConfig)) 
+            return null;
+
+        List<PanelType>? panels = savedConfig.Split(',')
+                .Select(p => Enum.TryParse<PanelType>(p, out var panel) ? panel : (PanelType?)null)
+                .Where(p => p.HasValue)
+                .Select(p => p!.Value)
+                .ToList();
+        
+        return panels;
+    }
+
+    public async Task SavePanelConfigAsync(List<PanelType> panels)
+    {
+        var configString = string.Join(",", panels);
+        await _localStorage.SetItemAsStringAsync(_panelConfigStorageKey, configString);
     }
 
     public async Task<bool> LogInAsync(LoginRequestModel model)

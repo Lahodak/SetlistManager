@@ -1,4 +1,4 @@
-﻿export function toggleFullscreen() {
+﻿window.toggleFullscreen = function () {
     if (!document.fullscreenElement) {
         document.documentElement.requestFullscreen().catch(err => {
             console.error(`Error attempting to enable fullscreen: ${err.message}`);
@@ -10,11 +10,11 @@
         }
         return false;
     }
-}
+};
 
-export function isFullscreen() {
+window.isFullscreen = function () {
     return !!document.fullscreenElement;
-}
+};
 
 document.addEventListener('fullscreenchange', () => {
     const isFullscreen = !!document.fullscreenElement;

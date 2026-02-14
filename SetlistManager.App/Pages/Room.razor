@@ -1,4 +1,5 @@
 ﻿@page "/room/{RoomCode}"
+@using SetlistManager.App.Models
 @layout EmptyLayout
 
 <MudContainer MaxWidth="MaxWidth.False" Class="pa-0" Style="position: relative;">
@@ -19,25 +20,68 @@
         <MudDivider />
         <MudList Clickable="true" T="object">
             <MudListItem>
-                <MudText Typo="Typo.subtitle2" Class="mb-2">View Mode</MudText>
-                <MudSelect T="ViewMode"
-                           Value="@_currentViewMode"
-                           ValueChanged="OnViewModeChanged"
-                           Variant="Variant.Outlined"
-                           Margin="Margin.Dense"
-                           FullWidth="true">
-                    <MudSelectItem Value="ViewMode.SongAndSetlist">Song + Setlist</MudSelectItem>
-                    <MudSelectItem Value="ViewMode.SongAndLyrics">Song + Lyrics</MudSelectItem>
-                    <MudSelectItem Value="ViewMode.SongAndTabs">Song + Tabs</MudSelectItem>
-                    <MudSelectItem Value="ViewMode.LyricsAndSetlist">Lyrics + Setlist</MudSelectItem>
-                    <MudSelectItem Value="ViewMode.TabsAndSetlist">Tabs + Setlist</MudSelectItem>
-                    <MudSelectItem Value="ViewMode.LyricsAndTabs">Lyrics + Tabs</MudSelectItem>
-                    <MudSelectItem Value="ViewMode.SongOnly">Song Only</MudSelectItem>
-                    <MudSelectItem Value="ViewMode.LyricsOnly">Lyrics Only</MudSelectItem>
-                    <MudSelectItem Value="ViewMode.TabsOnly">Tabs Only</MudSelectItem>
-                    <MudSelectItem Value="ViewMode.SetlistOnly">Setlist Only</MudSelectItem>
-                </MudSelect>
+                <MudText Typo="Typo.subtitle2" Class="mb-3">Active Panels</MudText>
+                <div class="d-flex flex-column gap-2">
+                    @foreach (var panel in _activePanels)
+                    {
+                        <div class="d-flex align-center gap-2">
+                            <MudIconButton Icon="@Icons.Material.Filled.ArrowUpward"
+                                           Size="Size.Small"
+                                           OnClick="@(() => MovePanel(panel, true))"
+                                           Disabled="@(_activePanels.IndexOf(panel) == 0)" />
+                            <MudIconButton Icon="@Icons.Material.Filled.ArrowDownward"
+                                           Size="Size.Small"
+                                           OnClick="@(() => MovePanel(panel, false))"
+                                           Disabled="@(_activePanels.IndexOf(panel) == _activePanels.Count - 1)" />
+                            <MudChip Color="Color.Primary" Size="Size.Small" Style="flex: 1;">
+                                @panel.ToString()
+                            </MudChip>
+                            <MudIconButton Icon="@Icons.Material.Filled.Close"
+                                           Size="Size.Small"
+                                           Color="Color.Error"
+                                           OnClick="@(() => TogglePanel(panel))"
+                                           Disabled="@(_activePanels.Count == 1)" />
+                        </div>
+                    }
+                </div>
             </MudListItem>
+
+            @if (_activePanels.Count < 3)
+            {
+                <MudListItem>
+                    <MudText Typo="Typo.subtitle2" Class="mb-2">Add Panel</MudText>
+                    <div class="d-flex flex-wrap gap-2">
+                        @if (!_activePanels.Contains(PanelType.Song))
+                        {
+                            <MudChip Color="Color.Default"
+                                     Size="Size.Small"
+                                     OnClick="@(() => TogglePanel(PanelType.Song))"
+                                     Style="cursor: pointer;">
+                                + Song
+                            </MudChip>
+                        }
+                        @if (!_activePanels.Contains(PanelType.Lyrics))
+                        {
+                            <MudChip Color="Color.Default"
+                                     Size="Size.Small"
+                                     OnClick="@(() => TogglePanel(PanelType.Lyrics))"
+                                     Style="cursor: pointer;">
+                                + Lyrics
+                            </MudChip>
+                        }
+                        @if (!_activePanels.Contains(PanelType.Setlist))
+                        {
+                            <MudChip Color="Color.Default"
+                                     Size="Size.Small"
+                                     OnClick="@(() => TogglePanel(PanelType.Setlist))"
+                                     Style="cursor: pointer;">
+                                + Setlist
+                            </MudChip>
+                        }
+                    </div>
+                </MudListItem>
+            }
+
             <MudDivider Class="my-2" />
             <MudListItem>
                 <div class="d-flex align-center justify-space-between">
@@ -75,99 +119,36 @@
         }
         else
         {
-            @if (_currentViewMode == ViewMode.SongAndSetlist)
-            {
-                <MudGrid Spacing="0" Style="height: 100%; margin: 0;">
-                    <MudItem xs="12" md="6" Style="height: 100%; padding: 12px;">
-                        @RenderSongInfo()
-                    </MudItem>
-                    <MudItem xs="12" md="6" Style="height: 100%; padding: 12px;">
-                        @RenderSetlist()
-                    </MudItem>
-                </MudGrid>
-            }
-            else if (_currentViewMode == ViewMode.SongAndLyrics)
-            {
-                <MudGrid Spacing="0" Style="height: 100%; margin: 0;">
-                    <MudItem xs="12" md="5" Style="height: 100%; padding: 12px;">
-                        @RenderSongInfo()
-                    </MudItem>
-                    <MudItem xs="12" md="7" Style="height: 100%; padding: 12px;">
-                        @RenderLyrics()
-                    </MudItem>
-                </MudGrid>
-            }
-            else if (_currentViewMode == ViewMode.SongAndTabs)
-            {
-                <MudGrid Spacing="0" Style="height: 100%; margin: 0;">
-                    <MudItem xs="12" md="5" Style="height: 100%; padding: 12px;">
-                        @RenderSongInfo()
-                    </MudItem>
-                    <MudItem xs="12" md="7" Style="height: 100%; padding: 12px;">
-                        @RenderTabs()
-                    </MudItem>
-                </MudGrid>
-            }
-            else if (_currentViewMode == ViewMode.LyricsAndSetlist)
-            {
-                <MudGrid Spacing="0" Style="height: 100%; margin: 0;">
-                    <MudItem xs="12" md="7" Style="height: 100%; padding: 12px;">
-                        @RenderLyrics()
-                    </MudItem>
-                    <MudItem xs="12" md="5" Style="height: 100%; padding: 12px;">
-                        @RenderSetlist()
-                    </MudItem>
-                </MudGrid>
-            }
-            else if (_currentViewMode == ViewMode.TabsAndSetlist)
-            {
-                <MudGrid Spacing="0" Style="height: 100%; margin: 0;">
-                    <MudItem xs="12" md="7" Style="height: 100%; padding: 12px;">
-                        @RenderTabs()
-                    </MudItem>
-                    <MudItem xs="12" md="5" Style="height: 100%; padding: 12px;">
-                        @RenderSetlist()
-                    </MudItem>
-                </MudGrid>
-            }
-            else if (_currentViewMode == ViewMode.LyricsAndTabs)
-            {
-                <MudGrid Spacing="0" Style="height: 100%; margin: 0;">
-                    <MudItem xs="12" md="6" Style="height: 100%; padding: 12px;">
-                        @RenderLyrics()
-                    </MudItem>
-                    <MudItem xs="12" md="6" Style="height: 100%; padding: 12px;">
-                        @RenderTabs()
-                    </MudItem>
-                </MudGrid>
-            }
-            else if (_currentViewMode == ViewMode.SongOnly)
-            {
-                <div style="height: 100%; padding: 12px; display: flex; align-items: center; justify-content: center;">
-                    <div style="max-width: 800px; width: 100%;">
-                        @RenderSongInfo()
-                    </div>
-                </div>
-            }
-            else if (_currentViewMode == ViewMode.LyricsOnly)
+            @if (_activePanels.Count == 1)
             {
                 <div style="height: 100%; padding: 12px;">
-                    @RenderLyrics()
+                    @RenderPanel(_activePanels[0])
                 </div>
             }
-            else if (_currentViewMode == ViewMode.TabsOnly)
+            else if (_activePanels.Count == 2)
             {
-                <div style="height: 100%; padding: 12px;">
-                    @RenderTabs()
-                </div>
+                <MudGrid Spacing="0" Style="height: 100%; margin: 0;">
+                    <MudItem xs="12" md="6" Style="height: 100%; padding: 12px;">
+                        @RenderPanel(_activePanels[0])
+                    </MudItem>
+                    <MudItem xs="12" md="6" Style="height: 100%; padding: 12px;">
+                        @RenderPanel(_activePanels[1])
+                    </MudItem>
+                </MudGrid>
             }
-            else if (_currentViewMode == ViewMode.SetlistOnly)
+            else if (_activePanels.Count == 3)
             {
-                <div style="height: 100%; padding: 12px; display: flex; align-items: center; justify-content: center;">
-                    <div style="max-width: 600px; width: 100%;">
-                        @RenderSetlist()
-                    </div>
-                </div>
+                <MudGrid Spacing="0" Style="height: 100%; margin: 0;">
+                    <MudItem xs="12" md="4" Style="height: 100%; padding: 12px;">
+                        @RenderPanel(_activePanels[0])
+                    </MudItem>
+                    <MudItem xs="12" md="4" Style="height: 100%; padding: 12px;">
+                        @RenderPanel(_activePanels[1])
+                    </MudItem>
+                    <MudItem xs="12" md="4" Style="height: 100%; padding: 12px;">
+                        @RenderPanel(_activePanels[2])
+                    </MudItem>
+                </MudGrid>
             }
         }
     </MudContainer>
@@ -191,6 +172,14 @@
 </MudContainer>
 
 @code {
+    private RenderFragment RenderPanel(PanelType panelType) => panelType switch
+    {
+        PanelType.Song => RenderSongInfo(),
+        PanelType.Lyrics => RenderLyrics(),
+        PanelType.Setlist => RenderSetlist(),
+        _ => __builder => { }
+    };
+
     private RenderFragment RenderSongInfo() => __builder =>
     {
         <MudPaper Elevation="2" Class="pa-6" Style="height: 100%; border-radius: 12px; overflow-y: auto;">
@@ -345,29 +334,6 @@
             else
             {
                 <MudAlert Severity="Severity.Info" Class="mt-2">No lyrics available for this song.</MudAlert>
-            }
-        </MudPaper>
-    };
-
-    private RenderFragment RenderTabs() => __builder =>
-    {
-        <MudPaper Elevation="2" Class="pa-4" Style="height: 100%; border-radius: 12px; display: flex; flex-direction: column;">
-            <MudText Typo="Typo.h6" Class="mb-3" Style="font-weight: 600;">Tabs</MudText>
-
-            @if (!string.IsNullOrEmpty(_currentSong.TabsURL))
-            {
-                var embeddableUrl = ConvertToEmbeddableTabsUrl(_currentSong.TabsURL);
-                <iframe src="@embeddableUrl"
-                        style="flex: 1; width: 100%; border: none; border-radius: 8px;"
-                        title="Song Tabs"
-                        allowfullscreen>
-                </iframe>
-            }
-            else
-            {
-                <div class="d-flex align-center justify-center" style="flex: 1;">
-                    <MudAlert Severity="Severity.Info">No tabs available for this song.</MudAlert>
-                </div>
             }
         </MudPaper>
     };

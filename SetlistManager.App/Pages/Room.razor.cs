@@ -8,34 +8,27 @@ using SetlistManager.App.Models;
 
 namespace SetlistManager.App.Pages;
 
-public partial class Room : IAsyncDisposable
+public partial class Room
 {
     [Parameter]
     public string RoomCode { get; set; } = string.Empty;
 
     [Inject]
     public required IRoomService RoomService { get; set; }
-
     [Inject]
     public required NavigationManager NavigationManager { get; set; }
-
     [Inject]
     public required IUserService UserService { get; set; }
-
     [Inject]
     public required IDialogService DialogService { get; set; }
-
     [Inject]
     public required IJSRuntime JSRuntime { get; set; }
-
     [Inject]
     public required ISnackbar Snackbar { get; set; }
-
     [Inject]
     public required IGeniusService GeniusService { get; set; }
 
     private const string _roomsPortalUri = "/RoomsPortal";
-    private const string _viewModeStorageKey = "roomViewMode";
 
     private RoomModel? _roomModel;
     private SongModel? _currentSong;
@@ -47,13 +40,13 @@ public partial class Room : IAsyncDisposable
     private bool _isLoadingLyrics = false;
     private bool _isScrolling = false;
 
-    private ViewMode _currentViewMode = ViewMode.SongAndSetlist;
+    private List<PanelType> _activePanels = new() { PanelType.Song, PanelType.Setlist };
     private int _scrollSpeed = 5;
     private double _fontScale = 1.0;
 
-    private IJSObjectReference? _jsModule;
     private int? _previousSongId;
     private bool _needsLyricsReload = false;
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -64,7 +57,7 @@ public partial class Room : IAsyncDisposable
             return;
         }
 
-        await LoadViewModeFromStorage();
+        await LoadPanelConfigFromStorage();
 
         JoinRoomModel joinRoomModel = new()
         {
@@ -82,7 +75,8 @@ public partial class Room : IAsyncDisposable
             return;
         }
 
-        if (_roomModel.Setlist is null) return;
+        if (_roomModel.Setlist is null)
+            return;
 
         _currentSong = _roomModel.Setlist.Songs.FirstOrDefault(x => x.Id == _roomModel.CurrentSong);
         _roomModel.CurrentSong = _currentSong?.Id;
@@ -99,95 +93,99 @@ public partial class Room : IAsyncDisposable
     {
         await base.OnAfterRenderAsync(firstRender);
 
-        if (firstRender)
-        {
-            try
-            {
-                _jsModule = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "/js/fullscreen.js");
-            }
-            catch
-            {
-                Snackbar.Add("Fullscreen mode is not supported by your browser.", Severity.Warning);
-            }
-        }
-
         if (_lyricsData is not null && (_previousSongId != _currentSong?.Id || _needsLyricsReload))
         {
             try
             {
-                await JSRuntime.InvokeVoidAsync("window.geniusEmbed.loadEmbed",
-                    _lyricsData.SongId, _lyricsData.Title, _lyricsData.Artist, _lyricsData.Url);
+                await JSRuntime.InvokeVoidAsync("window.geniusEmbed.loadEmbed", _lyricsData.SongId, _lyricsData.Title, _lyricsData.Artist, _lyricsData.Url);
                 _previousSongId = _currentSong?.Id;
                 _needsLyricsReload = false;
             }
-            catch
+            catch (Exception ex) 
             {
+                Console.WriteLine($"Error loading Genius embed: {ex.Message}");
             }
         }
     }
 
-    private async Task LoadViewModeFromStorage()
+    private async Task LoadPanelConfigFromStorage()
     {
-        try
+        var panels = await UserService.GetPanelConfigAsync();
+
+        if(panels != null && panels.Count > 0)
         {
-            var savedMode = await JSRuntime.InvokeAsync<string>("localStorage.getItem", _viewModeStorageKey);
-            if (!string.IsNullOrEmpty(savedMode) && Enum.TryParse<ViewMode>(savedMode, out var viewMode))
+            _activePanels = panels;
+        }        
+    }
+
+    private async Task SavePanelConfigToStorage() 
+        => await UserService.SavePanelConfigAsync(_activePanels);
+
+    private async Task TogglePanel(PanelType panel)
+    {
+        if (_activePanels.Contains(panel))
+        {
+            if (_activePanels.Count > 1)
             {
-                _currentViewMode = viewMode;
+                _activePanels.Remove(panel);
             }
         }
-        catch
+        else
         {
+            if (_activePanels.Count < 3)
+            {
+                _activePanels.Add(panel);
+            }
         }
+
+        if (_activePanels.Contains(PanelType.Lyrics))
+        {
+            if (_lyricsData != null)
+            {
+                _needsLyricsReload = true;
+            }
+            await LoadLyricsIfNeeded();
+        }
+
+        await SavePanelConfigToStorage();
+        StateHasChanged();
     }
 
-    private async Task SaveViewModeToStorage()
+    private async Task MovePanel(PanelType panel, bool moveLeft)
     {
-        try
-        {
-            await JSRuntime.InvokeVoidAsync("localStorage.setItem", _viewModeStorageKey, _currentViewMode.ToString());
-        }
-        catch
-        {
-        }
-    }
+        var index = _activePanels.IndexOf(panel);
+        if (index == -1) 
+            return;
 
-    private async Task OnViewModeChanged(ViewMode newMode)
-    {
-        _currentViewMode = newMode;
-        await SaveViewModeToStorage();
+        var newIndex = moveLeft 
+            ? index - 1 
+            : index + 1;
+        
+        if (newIndex < 0 || newIndex >= _activePanels.Count) 
+            return;
 
-        var currentHasLyrics = newMode == ViewMode.SongAndLyrics ||
-                               newMode == ViewMode.LyricsAndSetlist ||
-                               newMode == ViewMode.LyricsAndTabs ||
-                               newMode == ViewMode.LyricsOnly;
+        _activePanels.RemoveAt(index);
+        _activePanels.Insert(newIndex, panel);
 
-        if (currentHasLyrics && _lyricsData != null)
+        if (panel == PanelType.Lyrics)
         {
             _needsLyricsReload = true;
         }
 
-        await LoadLyricsIfNeeded();
-
-        _drawerOpen = false;
+        await SavePanelConfigToStorage();
         StateHasChanged();
     }
 
-    private void ToggleDrawer()
-    {
-        _drawerOpen = !_drawerOpen;
-    }
+    private void ToggleDrawer() 
+        => _drawerOpen = !_drawerOpen;
 
     private async Task ToggleFullscreen()
     {
         try
         {
-            if (_jsModule != null)
-            {
-                _isFullscreen = await _jsModule.InvokeAsync<bool>("toggleFullscreen");
-                _drawerOpen = false;
-                StateHasChanged();
-            }
+            _isFullscreen = await JSRuntime.InvokeAsync<bool>("toggleFullscreen");
+            _drawerOpen = false;
+            StateHasChanged();
         }
         catch
         {
@@ -217,32 +215,17 @@ public partial class Room : IAsyncDisposable
 
     private async Task LoadLyricsIfNeeded()
     {
-        if (_currentSong != null &&
-            (_currentViewMode == ViewMode.SongAndLyrics ||
-             _currentViewMode == ViewMode.LyricsAndSetlist ||
-             _currentViewMode == ViewMode.LyricsAndTabs ||
-             _currentViewMode == ViewMode.LyricsOnly))
+        if (_currentSong != null && _activePanels.Contains(PanelType.Lyrics) && (_lyricsData == null || _previousSongId != _currentSong.Id))
         {
-            if (_lyricsData == null || _previousSongId != _currentSong.Id)
-            {
-                _isLoadingLyrics = true;
-                _lyricsData = null;
-                StateHasChanged();
-
-                try
-                {
-                    _lyricsData = await GeniusService.FetchSongLyricsAsync(_currentSong);
-                    _needsLyricsReload = true;
-                }
-                catch
-                {
-                }
-                finally
-                {
-                    _isLoadingLyrics = false;
-                    StateHasChanged();
-                }
-            }
+            _isLoadingLyrics = true;
+            _lyricsData = null;
+            StateHasChanged();
+            
+            _lyricsData = await GeniusService.FetchSongLyricsAsync(_currentSong);
+            _needsLyricsReload = true;
+            
+            _isLoadingLyrics = false;
+            StateHasChanged();            
         }
     }
 
@@ -269,7 +252,8 @@ public partial class Room : IAsyncDisposable
 
     private async Task MoveToNextSong()
     {
-        if (_roomModel?.Setlist?.Songs == null || _currentSong == null) return;
+        if (_roomModel?.Setlist?.Songs == null || _currentSong == null) 
+            return;
 
         var orderedSongs = _roomModel.Setlist.Songs.OrderBy(s => s.Order).ToList();
         var currentIndex = orderedSongs.FindIndex(s => s.Id == _currentSong.Id);
@@ -283,7 +267,8 @@ public partial class Room : IAsyncDisposable
 
     private async Task MoveToPrevSong()
     {
-        if (_roomModel?.Setlist?.Songs == null || _currentSong == null) return;
+        if (_roomModel?.Setlist?.Songs == null || _currentSong == null) 
+            return;
 
         var orderedSongs = _roomModel.Setlist.Songs.OrderBy(s => s.Order).ToList();
         var currentIndex = orderedSongs.FindIndex(s => s.Id == _currentSong.Id);
@@ -297,9 +282,13 @@ public partial class Room : IAsyncDisposable
 
     private bool CanMoveToNextSong()
     {
-        if (_roomModel?.Setlist?.Songs == null || _currentSong == null) return false;
+        if (_roomModel?.Setlist?.Songs == null || _currentSong == null) 
+            return false;
 
-        var orderedSongs = _roomModel.Setlist.Songs.OrderBy(s => s.Order).ToList();
+        var orderedSongs = _roomModel.Setlist.Songs
+            .OrderBy(s => s.Order)
+            .ToList();
+        
         var currentIndex = orderedSongs.FindIndex(s => s.Id == _currentSong.Id);
 
         return currentIndex >= 0 && currentIndex < orderedSongs.Count - 1;
@@ -307,24 +296,20 @@ public partial class Room : IAsyncDisposable
 
     private bool CanMoveToPrevSong()
     {
-        if (_roomModel?.Setlist?.Songs == null || _currentSong == null) return false;
+        if (_roomModel?.Setlist?.Songs == null || _currentSong == null) 
+            return false;
 
-        var orderedSongs = _roomModel.Setlist.Songs.OrderBy(s => s.Order).ToList();
+        var orderedSongs = _roomModel.Setlist.Songs
+            .OrderBy(s => s.Order)
+            .ToList();
+        
         var currentIndex = orderedSongs.FindIndex(s => s.Id == _currentSong.Id);
 
         return currentIndex > 0;
     }
 
-    private async Task ScrollToCurrentSong()
-    {
-        try
-        {
-            await JSRuntime.InvokeVoidAsync("window.scrollToCurrentSong");
-        }
-        catch
-        {
-        }
-    }
+    private async Task ScrollToCurrentSong() 
+        => await JSRuntime.InvokeVoidAsync("window.scrollToCurrentSong");
 
     private async Task ToggleScroll(bool scroll)
     {
@@ -384,47 +369,4 @@ public partial class Room : IAsyncDisposable
 
         _drawerOpen = false;
     }
-
-    public async ValueTask DisposeAsync()
-    {
-        RoomService.RoomUpdated -= OnRoomUpdated;
-
-        if (_jsModule != null)
-        {
-            await _jsModule.DisposeAsync();
-        }
-    }
-
-    private string ConvertToEmbeddableTabsUrl(string tabsUrl)
-    {
-        if (string.IsNullOrEmpty(tabsUrl))
-            return tabsUrl;
-
-        if (tabsUrl.Contains("songsterr.com"))
-        {
-            var match = System.Text.RegularExpressions.Regex.Match(tabsUrl, @"-s(\d+)$");
-            if (match.Success)
-            {
-                var songId = match.Groups[1].Value;
-                return $"https://www.songsterr.com/a/wa/player?id={songId}";
-            }
-        }
-
-        return tabsUrl;
-    }
-
-}
-
-public enum ViewMode
-{
-    SongAndSetlist,
-    SongAndLyrics,
-    SongAndTabs,
-    LyricsAndSetlist,
-    TabsAndSetlist,
-    LyricsAndTabs,
-    SongOnly,
-    LyricsOnly,
-    TabsOnly,
-    SetlistOnly
 }
