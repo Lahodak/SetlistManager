@@ -236,34 +236,40 @@
     };
 
     private RenderFragment RenderSetlist() => __builder =>
-    {
-        <MudPaper Elevation="2" Class="pa-4" Style="height: 100%; border-radius: 12px; display: flex; flex-direction: column;">
-            <MudText Typo="Typo.h6" Class="mb-3" Style="font-weight: 600;">Setlist</MudText>
-            <div id="setlist-container" style="flex: 1; overflow-y: auto; overflow-x: hidden;">
-                @if (_roomModel?.Setlist?.Songs != null)
+{
+    <MudPaper Elevation="2" Class="pa-4" Style="height: 100%; border-radius: 12px; display: flex; flex-direction: column;">
+        <MudText Typo="Typo.h6" Class="mb-3" Style="font-weight: 600;">Setlist</MudText>
+        <div id="setlist-container" style="flex: 1; overflow-y: auto; overflow-x: hidden;">
+            @if (_roomModel?.Setlist?.Songs != null)
+            {
+                @foreach (var song in _roomModel.Setlist.Songs.OrderBy(s => s.Order))
                 {
-                    @foreach (var song in _roomModel.Setlist.Songs.OrderBy(s => s.Order))
-                    {
-                        var isCurrentSong = song.Id == _currentSong.Id;
-                        var cardClass = $"pa-4 mb-3 {(isCurrentSong ? "current-song-card" : "hover-card")}";
-                        var cardStyle = $"border-radius: 10px; cursor: pointer; transition: all 0.25s ease; {(isCurrentSong ? "background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%); color: white;" : "")}";
+                    var isCurrentSong = song.Id == _currentSong.Id;
+                    var cardClass = $"pa-4 mb-3 {(isCurrentSong ? "current-song-card" : "hover-card")}";
+                    var cardStyle = $"border-radius: 10px; cursor: pointer; transition: all 0.25s ease; {(isCurrentSong ? "background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%); color: white;" : "")}";
 
-                        <MudPaper Elevation="@(isCurrentSong ? 4 : 1)"
-                                  Class="@cardClass"
-                                  Style="@cardStyle"
-                                  @onclick="@(() => SelectSong(song))">
+                    <MudPaper Elevation="@(isCurrentSong ? 4 : 1)"
+                              Class="@cardClass"
+                              Style="@cardStyle"
+                              @onclick="@(() => SelectSong(song))">
+                        <div class="d-flex justify-space-between align-center mb-2">
                             <MudText Typo="Typo.subtitle1" Style="@(isCurrentSong ? "color: white; font-weight: 600;" : "font-weight: 500;")">
                                 @song.Name
                             </MudText>
-                            <MudText Typo="Typo.body2" Style="@(isCurrentSong ? "color: rgba(255,255,255,0.9);" : "opacity: 0.7;")">
-                                @(song.Artist?.Nick ?? "N/A")
-                            </MudText>
-                        </MudPaper>
-                    }
+                            @if (!string.IsNullOrEmpty(song.Tuning))
+                            {
+                                <MudChip Size="Size.Small" T="string" Text="@song.Tuning" Style="@(isCurrentSong ? "background: rgba(255,255,255,0.2); color: white;" : "")" />
+                            }
+                        </div>
+                        <MudText Typo="Typo.body2" Style="@(isCurrentSong ? "color: rgba(255,255,255,0.9);" : "opacity: 0.7;")">
+                            @(song.Artist?.Nick ?? "N/A")
+                        </MudText>
+                    </MudPaper>
                 }
-            </div>
-        </MudPaper>
-    };
+            }
+        </div>
+    </MudPaper>
+};
 
     private RenderFragment RenderLyrics() => __builder =>
     {
