@@ -1,7 +1,7 @@
 using SetlistManager.Business.Mappers;
 using SetlistManager.Data.Entities;
 
-namespace SetlistManager.Tests;
+namespace SetlistManager.Tests.Unit;
 
 public class LanguageMapperTests
 {

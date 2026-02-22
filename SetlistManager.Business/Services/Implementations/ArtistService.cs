@@ -81,7 +81,6 @@ public class ArtistService : IArtistService
     public async Task TryDeleteArtistAsync(int artistId)
     {
         var artist = await _dbContext.Artists
-            .Include(x => x.Owner)
             .Include(x => x.Songs)
             .FirstOrDefaultAsync(x => x.Id == artistId);
 
