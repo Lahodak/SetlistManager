@@ -88,7 +88,7 @@ public class SongServiceTests : IDisposable
         _dbContext.Languages.Add(new Language { Id = 1, Name = "English", Code = "EN" });
         await _dbContext.SaveChangesAsync();
 
-        await _service.TryCreateSongAsync(model);
+        await _service.CreateSongAsync(model);
 
         var song = await _dbContext.Songs.SingleAsync(s => s.Name == "New Song");
         Assert.Equal(CurrentUserId, song.OwnerId);
@@ -114,7 +114,7 @@ public class SongServiceTests : IDisposable
         };
 
         await Assert.ThrowsAsync<DuplicateEntryException>(
-            () => _service.TryCreateSongAsync(model));
+            () => _service.CreateSongAsync(model));
     }
 
     [Fact]
@@ -172,7 +172,7 @@ public class SongServiceTests : IDisposable
             BPM = 140
         };
 
-        await _service.TryUpdateSongAsync(song.Id, model);
+        await _service.UpdateSongAsync(song.Id, model);
 
         var updated = await _dbContext.Songs.FindAsync(song.Id);
         Assert.Equal("Updated", updated!.Name);
@@ -197,7 +197,7 @@ public class SongServiceTests : IDisposable
         };
 
         await Assert.ThrowsAsync<EntryNotFoundException>(
-            () => _service.TryUpdateSongAsync(song.Id, model));
+            () => _service.UpdateSongAsync(song.Id, model));
     }
 
     [Fact]
@@ -217,7 +217,7 @@ public class SongServiceTests : IDisposable
         };
 
         await Assert.ThrowsAsync<EntryNotFoundException>(
-            () => _service.TryUpdateSongAsync(song.Id, model));
+            () => _service.UpdateSongAsync(song.Id, model));
     }
 
     [Fact]
@@ -225,7 +225,7 @@ public class SongServiceTests : IDisposable
     {
         var song = await SeedSongAsync();
 
-        await _service.TryDeleteSongAsync(song.Id);
+        await _service.DeleteSongAsync(song.Id);
 
         Assert.False(await _dbContext.Songs.AnyAsync(s => s.Id == song.Id));
     }
@@ -236,14 +236,14 @@ public class SongServiceTests : IDisposable
         var song = await SeedSongAsync(ownerId: 999);
 
         await Assert.ThrowsAsync<EntryNotFoundException>(
-            () => _service.TryDeleteSongAsync(song.Id));
+            () => _service.DeleteSongAsync(song.Id));
     }
 
     [Fact]
     public async Task TryDeleteSongAsync_Nonexistent_ThrowsEntryNotFound()
     {
         await Assert.ThrowsAsync<EntryNotFoundException>(
-            () => _service.TryDeleteSongAsync(999));
+            () => _service.DeleteSongAsync(999));
     }
 
     [Fact]
@@ -252,7 +252,7 @@ public class SongServiceTests : IDisposable
         var artist = await SeedArtistAsync(isPublic: false);
         var song = await SeedSongAsync(artist: artist);
 
-        await _service.TryMakeSongPublicAsync(song.Id);
+        await _service.MakeSongPublicAsync(song.Id);
 
         var updatedSong = await _dbContext.Songs.FindAsync(song.Id);
         var updatedArtist = await _dbContext.Artists.FindAsync(artist.Id);
@@ -266,6 +266,6 @@ public class SongServiceTests : IDisposable
         var song = await SeedSongAsync(ownerId: 999);
 
         await Assert.ThrowsAsync<EntryNotFoundException>(
-            () => _service.TryMakeSongPublicAsync(song.Id));
+            () => _service.MakeSongPublicAsync(song.Id));
     }
 }

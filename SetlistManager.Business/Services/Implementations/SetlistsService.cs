@@ -57,7 +57,7 @@ public class SetlistsService : ISetlistsService
             .ToPaginatedResultAsync(request);
     }
 
-    public async Task TryGiveAccessToSetlistAsync(int setlistId, int targetId)
+    public async Task GiveAccessToSetlistAsync(int setlistId, int targetId)
     {
         var setlist = await _dbContext.Setlists
             .Include(s => s.SetlistsUsers)
@@ -77,7 +77,7 @@ public class SetlistsService : ISetlistsService
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task TryCreateSetlistAsync(SetlistModel setlistModel)
+    public async Task CreateSetlistAsync(SetlistModel setlistModel)
     {
         if (await _dbContext.Setlists.AnyAsync(s =>
             s.Name == setlistModel.Name &&
@@ -150,7 +150,7 @@ public class SetlistsService : ISetlistsService
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task TryDeleteSetlistAsync(int setlistId)
+    public async Task DeleteSetlistAsync(int setlistId)
     {
         var setlistToBeDeleted = await _dbContext.Setlists
             .FirstOrDefaultAsync(x => x.Id == setlistId && x.OwnerId == _currentUserId);

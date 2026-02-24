@@ -90,7 +90,7 @@ public class AuthService : IAuthService
             throw new InvalidOperationException();
     }
 
-    public async Task TryResetPasswordAsync(ResetPasswordModel resetModel)
+    public async Task ResetPasswordAsync(ResetPasswordModel resetModel)
     {
         var user = await _userManager.FindByEmailAsync(resetModel.Email);
 

@@ -28,7 +28,7 @@ public class ArtistsController : BaseController
     [HttpPost]
     public async Task<ActionResult> CreateArtist(ArtistCreateModel createModel)
     {
-        await _artistService.TryCreateArtistAsync(createModel);       
+        await _artistService.CreateArtistAsync(createModel);       
 
         return Created();
     }
@@ -36,7 +36,7 @@ public class ArtistsController : BaseController
     [HttpPut("{id}")]
     public async Task<ActionResult> UpdateArtist(int id, ArtistUpdateModel updateModel)
     {
-        await _artistService.TryUpdateArtistAsync(id, updateModel);
+        await _artistService.UpdateArtistAsync(id, updateModel);
         
         return NoContent();
     }
@@ -44,7 +44,7 @@ public class ArtistsController : BaseController
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteArtist(int id)
     {
-        await _artistService.TryDeleteArtistAsync(id);
+        await _artistService.DeleteArtistAsync(id);
         
         return NoContent();
     }
@@ -52,7 +52,7 @@ public class ArtistsController : BaseController
     [HttpPost("{id}/public")]
     public async Task<ActionResult> MakeArtistPublic(int id)
     {
-        await _artistService.TryMakeArtistPublicAsync(id);
+        await _artistService.MakeArtistPublicAsync(id);
 
         return NoContent();        
     }
@@ -60,7 +60,7 @@ public class ArtistsController : BaseController
     [HttpPost("{id}/users/{userId}")]
     public async Task<ActionResult> GiveAccessToUser(int id, int userId)
     {
-        await _artistService.TryGiveAccessToUserAsync(id, userId);
+        await _artistService.GiveAccessToUserAsync(id, userId);
 
         return NoContent();
     }

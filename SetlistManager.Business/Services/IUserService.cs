@@ -8,7 +8,7 @@ public interface IUserService
 {
     Task UpdateUserAsync(UserModel model);
     Task<UserModel?> GetCurrentUserAsync();
-    Task TryAddGeniusTokenToUserAsync(GrantAccessTokenResultModel grantResultModel);
+    Task AddGeniusTokenToUserAsync(GrantAccessTokenResultModel grantResultModel);
     Task<User?> GetUserByTempAuthSecret(string salt);
     Task<User?> GetUserEntityByIdAsync(int userId);
     Task<PagedResponse<UserViewModel>> GetUsersAsync(PagedRequest request);

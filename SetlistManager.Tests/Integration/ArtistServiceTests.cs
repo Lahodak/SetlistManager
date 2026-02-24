@@ -43,7 +43,7 @@ public class ArtistServiceTests : IDisposable
     {
         var model = new ArtistCreateModel { Nick = "NewArtist", IsPublic = false };
 
-        await _service.TryCreateArtistAsync(model);
+        await _service.CreateArtistAsync(model);
 
         var artist = await _dbContext.Artists.SingleAsync();
         Assert.Equal("NewArtist", artist.Nick);
@@ -58,7 +58,7 @@ public class ArtistServiceTests : IDisposable
         var model = new ArtistCreateModel { Nick = "Duplicate" };
 
         await Assert.ThrowsAsync<DuplicateEntryException>(
-            () => _service.TryCreateArtistAsync(model));
+            () => _service.CreateArtistAsync(model));
     }
 
     [Fact]
@@ -98,7 +98,7 @@ public class ArtistServiceTests : IDisposable
         var artist = await SeedArtistAsync(nick: "OldNick");
         var model = new ArtistUpdateModel { Nick = "NewNick" };
 
-        await _service.TryUpdateArtistAsync(artist.Id, model);
+        await _service.UpdateArtistAsync(artist.Id, model);
 
         var updated = await _dbContext.Artists.FindAsync(artist.Id);
         Assert.Equal("NewNick", updated!.Nick);
@@ -112,7 +112,7 @@ public class ArtistServiceTests : IDisposable
         var model = new ArtistUpdateModel { Nick = "Existing" };
 
         await Assert.ThrowsAsync<EntryNotFoundException>(
-            () => _service.TryUpdateArtistAsync(artist.Id, model));
+            () => _service.UpdateArtistAsync(artist.Id, model));
     }
 
     [Fact]
@@ -122,7 +122,7 @@ public class ArtistServiceTests : IDisposable
         var model = new ArtistUpdateModel { Nick = "Updated" };
 
         await Assert.ThrowsAsync<EntryNotFoundException>(
-            () => _service.TryUpdateArtistAsync(artist.Id, model));
+            () => _service.UpdateArtistAsync(artist.Id, model));
     }
 
     [Fact]
@@ -130,7 +130,7 @@ public class ArtistServiceTests : IDisposable
     {
         var artist = await SeedArtistAsync();
 
-        await _service.TryDeleteArtistAsync(artist.Id);
+        await _service.DeleteArtistAsync(artist.Id);
 
         Assert.Empty(await _dbContext.Artists.ToListAsync());
     }
@@ -141,7 +141,7 @@ public class ArtistServiceTests : IDisposable
         var artist = await SeedArtistAsync(isPublic: true);
 
         await Assert.ThrowsAsync<EntryNotFoundException>(
-            () => _service.TryDeleteArtistAsync(artist.Id));
+            () => _service.DeleteArtistAsync(artist.Id));
     }
 
     [Fact]
@@ -150,7 +150,7 @@ public class ArtistServiceTests : IDisposable
         var artist = await SeedArtistAsync(ownerId: 999);
 
         await Assert.ThrowsAsync<EntryNotFoundException>(
-            () => _service.TryDeleteArtistAsync(artist.Id));
+            () => _service.DeleteArtistAsync(artist.Id));
     }
 
     [Fact]
@@ -158,7 +158,7 @@ public class ArtistServiceTests : IDisposable
     {
         var artist = await SeedArtistAsync();
 
-        await _service.TryMakeArtistPublicAsync(artist.Id);
+        await _service.MakeArtistPublicAsync(artist.Id);
 
         var updated = await _dbContext.Artists.FindAsync(artist.Id);
         Assert.True(updated!.IsPublic);
@@ -170,7 +170,7 @@ public class ArtistServiceTests : IDisposable
         var artist = await SeedArtistAsync(ownerId: 999);
 
         await Assert.ThrowsAsync<EntryNotFoundException>(
-            () => _service.TryMakeArtistPublicAsync(artist.Id));
+            () => _service.MakeArtistPublicAsync(artist.Id));
     }
 
     [Fact]
@@ -179,7 +179,7 @@ public class ArtistServiceTests : IDisposable
         var artist = await SeedArtistAsync();
         int targetUserId = 50;
 
-        await _service.TryGiveAccessToUserAsync(artist.Id, targetUserId);
+        await _service.GiveAccessToUserAsync(artist.Id, targetUserId);
 
         var entry = await _dbContext.ArtistsUsers.SingleAsync();
         Assert.Equal(artist.Id, entry.ArtistId);
@@ -190,6 +190,6 @@ public class ArtistServiceTests : IDisposable
     public async Task TryGiveAccessToUserAsync_NonexistentArtist_ThrowsEntryNotFound()
     {
         await Assert.ThrowsAsync<EntryNotFoundException>(
-            () => _service.TryGiveAccessToUserAsync(999, 50));
+            () => _service.GiveAccessToUserAsync(999, 50));
     }
 }

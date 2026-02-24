@@ -27,7 +27,7 @@ public class SetlistsController : BaseController
     [HttpPost]
     public async Task<ActionResult<SetlistModel>> CreateSetlist([FromBody] SetlistModel setlist)
     {
-        await _setlistService.TryCreateSetlistAsync(setlist);
+        await _setlistService.CreateSetlistAsync(setlist);
         
         return Created();
     }
@@ -46,7 +46,7 @@ public class SetlistsController : BaseController
     [HttpDelete("{id}")]
     public async Task<ActionResult> TryDeleteSetlist(int id)
     {
-        await _setlistService.TryDeleteSetlistAsync(id);
+        await _setlistService.DeleteSetlistAsync(id);
 
         return NoContent();
     }
@@ -54,7 +54,7 @@ public class SetlistsController : BaseController
     [HttpPost("{id}/users/{userId}")]
     public async Task<ActionResult> TryGiveAccessToSetlist(int id, int userId)
     {
-        await _setlistService.TryGiveAccessToSetlistAsync(id, userId);
+        await _setlistService.GiveAccessToSetlistAsync(id, userId);
 
         return Created();
     }

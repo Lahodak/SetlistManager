@@ -43,7 +43,7 @@ public class AuthController : BaseController
     [HttpPost("reset-password")]
     public async Task<ActionResult> ResetPassword(ResetPasswordModel resetModel)
     {
-        await _authService.TryResetPasswordAsync(resetModel);
+        await _authService.ResetPasswordAsync(resetModel);
 
         return NoContent();
     }

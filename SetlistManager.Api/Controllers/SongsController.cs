@@ -28,7 +28,7 @@ public class SongsController : BaseController
     [HttpPost]
     public async Task<ActionResult> CreateSong([FromBody] SongCreateModel createModel)
     {
-        await _songService.TryCreateSongAsync(createModel);
+        await _songService.CreateSongAsync(createModel);
 
         return Created();
     }
@@ -36,7 +36,7 @@ public class SongsController : BaseController
     [HttpPost("{id}/public")]
     public async Task<ActionResult> MakeSongPublic(int id)
     {
-        await _songService.TryMakeSongPublicAsync(id);
+        await _songService.MakeSongPublicAsync(id);
         
         return NoContent();
     }
@@ -44,7 +44,7 @@ public class SongsController : BaseController
     [HttpPost("{id}/users/{userId}")]
     public async Task<ActionResult> AddSongToUserLibrary(int id, int userId)
     {
-        await _songService.TryGiveAccessToUserAsync(id, userId);
+        await _songService.GiveAccessToUserAsync(id, userId);
         
         return Created();
     }
@@ -60,7 +60,7 @@ public class SongsController : BaseController
     [HttpPut("{id}")]
     public async Task<ActionResult> UpdateSong(int id, [FromBody] SongUpdateModel updateModel)
     {
-        await _songService.TryUpdateSongAsync(id, updateModel);
+        await _songService.UpdateSongAsync(id, updateModel);
         
         return NoContent();
     }
@@ -68,7 +68,7 @@ public class SongsController : BaseController
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteSong(int id)
     {
-        await _songService.TryDeleteSongAsync(id);
+        await _songService.DeleteSongAsync(id);
 
         return NoContent();
     }

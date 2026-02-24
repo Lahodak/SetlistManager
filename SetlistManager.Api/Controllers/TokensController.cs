@@ -31,7 +31,7 @@ public class TokensController : BaseController
     [HttpGet("genius/callback")]
     public async Task<ActionResult> AddGeniusTokenToUser([FromQuery] GrantAccessTokenResultModel grantResultModel)
     {
-        await _userService.TryAddGeniusTokenToUserAsync(grantResultModel);
+        await _userService.AddGeniusTokenToUserAsync(grantResultModel);
 
         return Redirect(_appOptions.UserPortalUrl);
     }

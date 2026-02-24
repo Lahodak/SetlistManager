@@ -37,7 +37,7 @@ public class SongService : ISongService
             .ToPaginatedResultAsync(request);
     }
 
-    public async Task TryGiveAccessToUserAsync(int songId, int targetId)
+    public async Task GiveAccessToUserAsync(int songId, int targetId)
     {
         var song = await _dbContext.Songs
             .Include(x => x.SongsUsers)
@@ -86,7 +86,7 @@ public class SongService : ISongService
         return song.ToModel();
     }
 
-    public async Task TryCreateSongAsync(SongCreateModel songCreateModel)
+    public async Task CreateSongAsync(SongCreateModel songCreateModel)
     {
         if (await _dbContext.Songs.AnyAsync(x =>
             x.Name == songCreateModel.Name &&
@@ -102,7 +102,7 @@ public class SongService : ISongService
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task TryUpdateSongAsync(int songId, SongUpdateModel updateModel)
+    public async Task UpdateSongAsync(int songId, SongUpdateModel updateModel)
     {
         var song = await _dbContext.Songs.FirstOrDefaultAsync(x => x.Id == songId && x.OwnerId == _currentUserId);
 
@@ -121,7 +121,7 @@ public class SongService : ISongService
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task TryDeleteSongAsync(int songId)
+    public async Task DeleteSongAsync(int songId)
     {
         var song = await _dbContext.Songs.FirstOrDefaultAsync(x => x.Id == songId && x.OwnerId == _currentUserId);
 
@@ -132,7 +132,7 @@ public class SongService : ISongService
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task TryMakeSongPublicAsync(int songId)
+    public async Task MakeSongPublicAsync(int songId)
     {
         var song = await _dbContext.Songs
             .Include(x => x.Artist)

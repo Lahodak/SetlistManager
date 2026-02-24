@@ -60,7 +60,7 @@ public class ArtistService : IArtistService
         return artist.ToModel();
     }
 
-    public async Task TryCreateArtistAsync(ArtistCreateModel createModel)
+    public async Task CreateArtistAsync(ArtistCreateModel createModel)
     {
         if (await _dbContext.Artists.AnyAsync(x =>
             (!x.IsPublic && x.OwnerId == _currentUserId && x.Nick == createModel.Nick) ||
@@ -78,7 +78,7 @@ public class ArtistService : IArtistService
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task TryDeleteArtistAsync(int artistId)
+    public async Task DeleteArtistAsync(int artistId)
     {
         var artist = await _dbContext.Artists
             .Include(x => x.Songs)
@@ -91,7 +91,7 @@ public class ArtistService : IArtistService
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task TryUpdateArtistAsync(int id, ArtistUpdateModel updateModel)
+    public async Task UpdateArtistAsync(int id, ArtistUpdateModel updateModel)
     {
         var artist = await _dbContext.Artists
             .FirstOrDefaultAsync(x => x.Id == id && x.OwnerId == _currentUserId);
@@ -103,7 +103,7 @@ public class ArtistService : IArtistService
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task TryMakeArtistPublicAsync(int artistId)
+    public async Task MakeArtistPublicAsync(int artistId)
     {
         var artist = await _dbContext.Artists
             .FirstOrDefaultAsync(x => x.Id == artistId && x.OwnerId == _currentUserId);
@@ -115,7 +115,7 @@ public class ArtistService : IArtistService
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task TryGiveAccessToUserAsync(int artistId, int targetId)
+    public async Task GiveAccessToUserAsync(int artistId, int targetId)
     {
         var artist = await _dbContext.Artists
             .Include(x => x.ArtistsUsers.Where(x => x.UserId == targetId))

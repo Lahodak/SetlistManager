@@ -94,7 +94,7 @@ public class UserService : IUserService
             .FirstOrDefaultAsync(u => u.Id == userId);
     }
 
-    public async Task TryAddGeniusTokenToUserAsync(GrantAccessTokenResultModel grantResultModel)
+    public async Task AddGeniusTokenToUserAsync(GrantAccessTokenResultModel grantResultModel)
     {
         var user = await GetUserByTempAuthSecret(grantResultModel.State)
             ?? throw new EntryNotFoundException();
