@@ -184,10 +184,10 @@
     {
         <MudPaper Elevation="2" Class="pa-6" Style="height: 100%; border-radius: 12px; overflow-y: auto;">
             <MudText Typo="Typo.h3" Style="font-weight: 700; word-break: break-word; line-height: 1.2;" Class="mb-3">
-                @_currentSong.Name
+                @_currentSong!.Name
             </MudText>
             <MudText Typo="Typo.h5" Class="mb-4" Style="opacity: 0.8;">
-                @(_currentSong.Artist?.Nick ?? "N/A")
+                @(_currentSong!.Artist?.Nick ?? "N/A")
             </MudText>
 
             <MudDivider Class="my-4" />
@@ -195,19 +195,19 @@
             <div class="d-flex flex-wrap gap-3">
                 <MudPaper Elevation="1" Class="pa-4 flex-grow-1" Style="min-width: 120px; border-radius: 8px;">
                     <MudText Typo="Typo.caption" Color="Color.Default">BPM</MudText>
-                    <MudText Typo="Typo.h5" Style="font-weight: 600;">@_currentSong.BPM</MudText>
+                    <MudText Typo="Typo.h5" Style="font-weight: 600;">@_currentSong!.BPM</MudText>
                 </MudPaper>
                 <MudPaper Elevation="1" Class="pa-4 flex-grow-1" Style="min-width: 120px; border-radius: 8px;">
                     <MudText Typo="Typo.caption" Color="Color.Default">Key</MudText>
-                    <MudText Typo="Typo.h5" Style="font-weight: 600;">@_currentSong.Key</MudText>
+                    <MudText Typo="Typo.h5" Style="font-weight: 600;">@_currentSong!.Key</MudText>
                 </MudPaper>
                 <MudPaper Elevation="1" Class="pa-4 flex-grow-1" Style="min-width: 120px; border-radius: 8px;">
                     <MudText Typo="Typo.caption" Color="Color.Default">Tuning</MudText>
-                    <MudText Typo="Typo.h5" Style="font-weight: 600;">@_currentSong.Tuning</MudText>
+                    <MudText Typo="Typo.h5" Style="font-weight: 600;">@_currentSong!.Tuning</MudText>
                 </MudPaper>
             </div>
 
-            @if (!string.IsNullOrEmpty(_currentSong.TabsURL))
+            @if (!string.IsNullOrEmpty(_currentSong!.TabsURL))
             {
                 <MudButton Variant="Variant.Outlined"
                            Color="Color.Primary"
@@ -244,7 +244,7 @@
             {
                 @foreach (var song in _roomModel.Setlist.Songs.OrderBy(s => s.Order))
                 {
-                    var isCurrentSong = song.Id == _currentSong.Id;
+                    var isCurrentSong = song.Id == _currentSong!.Id;
                     var cardClass = $"pa-4 mb-3 {(isCurrentSong ? "current-song-card" : "hover-card")}";
                     var cardStyle = $"border-radius: 10px; cursor: pointer; transition: all 0.25s ease; {(isCurrentSong ? "background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%); color: white;" : "")}";
 

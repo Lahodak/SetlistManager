@@ -44,7 +44,7 @@ public class UserService : IUserService
         => await _apiService.GetAsync<UserModel?>($"{_apiUsersEndpointPath}{_meSuffix}");
 
     public async Task RegisterAsync(RegisterRequestModel model)
-        => await _apiService.PostAsync(_apiAuthEndpointPath, model);
+        => await _apiService.TryPostAsync(_apiAuthEndpointPath, model);
 
     public async Task LogOutAsync()
         => await _localStorage.RemoveItemAsync(_tokenKey);
@@ -109,8 +109,7 @@ public class UserService : IUserService
             Token = token
         };
 
-        await _apiService.PostAsync($"{_apiAuthEndpointPath}{_verifyEmailSuffix}", verifyModel);
-        return true;
+        return await _apiService.TryPostAsync($"{_apiAuthEndpointPath}{_verifyEmailSuffix}", verifyModel);
     }
 
     public async Task<bool> RequestPasswordResetAsync(string email)
@@ -120,8 +119,7 @@ public class UserService : IUserService
             Email = email
         };
 
-        await _apiService.PostAsync($"{_apiAuthEndpointPath}{_resetPasswordRequestSuffix}", model);
-        return true;
+        return await _apiService.TryPostAsync($"{_apiAuthEndpointPath}{_resetPasswordRequestSuffix}", model);
     }
 
     public async Task<bool> ResetPasswordAsync(string email, string newPassword, string token)

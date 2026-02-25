@@ -7,7 +7,7 @@ using SetlistManager.Common.Models;
 using SetlistManager.Data;
 using SetlistManager.Data.Entities;
 
-namespace SetlistManager.Tests.Integration;
+namespace SetlistManager.Business.Tests.Services.Implementations;
 
 public class ArtistServiceTests : IDisposable
 {

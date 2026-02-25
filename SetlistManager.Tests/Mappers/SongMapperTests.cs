@@ -2,7 +2,7 @@ using SetlistManager.Business.Mappers;
 using SetlistManager.Common.Models;
 using SetlistManager.Data.Entities;
 
-namespace SetlistManager.Tests.Unit;
+namespace SetlistManager.Business.Tests.Mappers;
 
 public class SongMapperTests
 {

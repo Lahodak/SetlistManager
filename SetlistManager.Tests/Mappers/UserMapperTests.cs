@@ -1,7 +1,7 @@
 using SetlistManager.Business.Mappers;
 using SetlistManager.Data.Entities;
 
-namespace SetlistManager.Tests.Unit;
+namespace SetlistManager.Business.Tests.Mappers;
 
 public class UserMapperTests
 {

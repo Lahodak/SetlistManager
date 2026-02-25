@@ -7,7 +7,7 @@ using SetlistManager.Common.Models;
 using SetlistManager.Data;
 using SetlistManager.Data.Entities;
 
-namespace SetlistManager.Tests.Integration;
+namespace SetlistManager.Business.Tests.Services.Implementations;
 
 public class SongServiceTests : IDisposable
 {
@@ -125,7 +125,7 @@ public class SongServiceTests : IDisposable
         var result = await _service.GetSongByIdAsync(song.Id);
 
         Assert.NotNull(result);
-        Assert.Equal(song.Name, result.Name);
+        Assert.Equal(song.Id, result.Id);
     }
 
     [Fact]
@@ -175,7 +175,9 @@ public class SongServiceTests : IDisposable
         await _service.UpdateSongAsync(song.Id, model);
 
         var updated = await _dbContext.Songs.FindAsync(song.Id);
-        Assert.Equal("Updated", updated!.Name);
+
+        Assert.NotNull(updated);
+        Assert.Equal("Updated", updated.Name);
         Assert.Equal("Drop D", updated.Tuning);
         Assert.Equal(140, updated.BPM);
     }
