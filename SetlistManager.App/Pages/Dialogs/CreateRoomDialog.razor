@@ -89,7 +89,7 @@
                                     {
                                         @foreach (var song in context.Songs.OrderBy(s => s.Order))
                                         {
-                                            <MudText Typo="Typo.body2">@song.Order. @song.Name (by @(song.Artist?.Nick ?? "N/A"))</MudText>
+                                            <MudText Typo="Typo.body2">@song.Order. @song.Name (@(song.Artist?.Nick ?? "N/A"))</MudText>
                                         }
                                     }
                                     else

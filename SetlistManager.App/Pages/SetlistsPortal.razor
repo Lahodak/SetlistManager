@@ -14,7 +14,7 @@
                     + New Setlist
                 </MudButton>
                 <MudTextField @bind-Value="searchString"
-                              Placeholder="Search artists"
+                              Placeholder="Search setlists"
                               Adornment="Adornment.Start"
                               AdornmentIcon="@Icons.Material.Filled.Search"
                               IconSize="Size.Medium"
@@ -42,7 +42,7 @@
                 <MudTd DataLabel="Songs">@context.Songs.Count</MudTd>
                 <MudTd DataLabel="Actions">
 
-                    @if(context.OwnerId == _userId)
+                    @if(context.Owner.Id == _userId)
                     {
                         <MudIconButton OnClick="() => AddAccessToUserAsync(context.Id)" Icon="@Icons.Material.Filled.PersonAddAlt1" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Secondary" Class="ml-2" />
                         <MudIconButton Icon="@Icons.Material.Filled.Edit" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Primary"

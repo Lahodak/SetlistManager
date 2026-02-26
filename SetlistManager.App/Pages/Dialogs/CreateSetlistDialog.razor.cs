@@ -279,7 +279,7 @@ public partial class CreateSetlistDialog
         ReorderSongs();
 
         _setlist.Name = _toBeSavedSetlistName;
-        _setlist.OwnerId = _user.Id;
+        _setlist.Owner.Id = _user.Id;
         _setlist.Songs = _shuffeledSongCollection;
 
         var result = await SetlistService.TryCreateSetlistAsync(_setlist);
