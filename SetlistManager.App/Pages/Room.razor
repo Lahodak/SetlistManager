@@ -3,14 +3,14 @@
 @layout EmptyLayout
 
 <MudContainer MaxWidth="MaxWidth.False" Class="pa-0" Style="position: relative;">
-    <MudAppBar Elevation="0" Dense="true" Style="height: 56px;">
+    <MudAppBar>
         <MudIconButton Icon="@Icons.Material.Filled.Menu"
                        Color="Color.Inherit"
                        Edge="Edge.Start"
                        OnClick="ToggleDrawer" />
         <MudText Typo="Typo.h6" Style="font-weight: 500;">@(_roomModel?.Name ?? "Loading...")</MudText>
         <MudSpacer />
-        <MudText Typo="Typo.body2" Class="d-none d-sm-flex">@(_user?.Username ?? "")</MudText>
+        <MudText Typo="Typo.h5" Class="d-none d-sm-flex" Style="font-variant-numeric: tabular-nums; font-weight: 500;">@_currentTime</MudText>
     </MudAppBar>
 
     <MudDrawer @bind-Open="@_drawerOpen" Anchor="Anchor.Start" Elevation="2" Variant="DrawerVariant.Temporary">
@@ -83,12 +83,16 @@
             }
 
             <MudDivider Class="my-2" />
-            <MudListItem>
+            <MudListItem OnClick="CopyRoomCode">
                 <div class="d-flex align-center justify-space-between">
                     <MudText Typo="Typo.body2">Room Code:</MudText>
-                    <MudText Typo="Typo.body2" Style="font-weight: 600;">@RoomCode</MudText>
+                    <div class="d-flex align-center gap-1">
+                        <MudText Typo="Typo.body2" Style="font-weight: 600;">@RoomCode</MudText>
+                        <MudIcon Icon="@Icons.Material.Filled.ContentCopy" Size="Size.Small" Style="opacity: 0.6;" />
+                    </div>
                 </div>
             </MudListItem>
+            <MudDivider Class="my-2" />
             <MudListItem OnClick="OpenQrCodeDialog">
                 <div class="d-flex align-center">
                     <MudIcon Icon="@Icons.Material.Filled.QrCode" Class="mr-3" />
@@ -99,6 +103,13 @@
                 <div class="d-flex align-center">
                     <MudIcon Icon="@(_isFullscreen? Icons.Material.Filled.FullscreenExit : Icons.Material.Filled.Fullscreen)" Class="mr-3" />
                     <MudText>@(_isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen")</MudText>
+                </div>
+            </MudListItem>
+            <MudDivider Class="my-2" />
+            <MudListItem OnClick="@(() => NavigationManager.NavigateTo("/home"))">
+                <div class="d-flex align-center">
+                    <MudIcon Icon="@Icons.Material.Filled.Home" Class="mr-3" />
+                    <MudText>Go to Home</MudText>
                 </div>
             </MudListItem>
             <MudDivider Class="my-2" />

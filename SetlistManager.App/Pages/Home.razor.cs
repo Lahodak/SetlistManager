@@ -10,7 +10,7 @@ public partial class Home
     [Inject]
     public required ISongService SongService { get; set; }
     
-    private StatsRange _selectedRange = StatsRange.Week;
+    private StatsRange _selectedRange = StatsRange.Month;
     private List<string> _mostUsedLabels = [];
     private List<string> _mostAddedLabels = [];
     private List<ChartSeries> _mostUsedSeries = [];

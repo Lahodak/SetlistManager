@@ -7,17 +7,6 @@ public static class RoomMapper
 {
     public static RoomModel ToModel(this Room room)
     {
-        List<UserModel> userModels = [];
-
-        if (room.Users is not null)
-        {
-            foreach (var user in room.Users)
-            {
-                var x = user.ToModel();
-                userModels.Add(x);
-            }
-        }
-
         SetlistModel? setlist = null;
 
         if (room.Setlist is not null)
@@ -35,7 +24,9 @@ public static class RoomMapper
             UpdatedBy = room.UpdatedBy,
             CurrentSong = room.CurrentSongId,
             Id = room.Id,
-            Users = userModels,
+            Users = room.Users
+                .Select(x => x.ToPlayerModel())
+                .ToList(),
             Setlist = setlist
         };
     }

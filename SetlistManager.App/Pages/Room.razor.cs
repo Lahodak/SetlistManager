@@ -8,7 +8,7 @@ using SetlistManager.App.Models;
 
 namespace SetlistManager.App.Pages;
 
-public partial class Room
+public partial class Room : IDisposable
 {
     [Parameter]
     public string RoomCode { get; set; } = string.Empty;
@@ -40,9 +40,12 @@ public partial class Room
     private bool _isLoadingLyrics = false;
     private bool _isScrolling = false;
 
+
     private List<PanelType> _activePanels = new() { PanelType.Song, PanelType.Setlist };
     private int _scrollSpeed = 5;
     private double _fontScale = 1.0;
+    private string _currentTime = DateTime.Now.ToString("HH:mm:ss");
+    private Timer? _clockTimer;
 
     private int? _previousSongId;
     private bool _needsLyricsReload = false;
@@ -154,20 +157,20 @@ public partial class Room
     private async Task MovePanel(PanelType panel, bool moveLeft)
     {
         var index = _activePanels.IndexOf(panel);
-        if (index == -1) 
+        if (index == -1)
             return;
 
-        var newIndex = moveLeft 
-            ? index - 1 
+        var newIndex = moveLeft
+            ? index - 1
             : index + 1;
-        
-        if (newIndex < 0 || newIndex >= _activePanels.Count) 
+
+        if (newIndex < 0 || newIndex >= _activePanels.Count)
             return;
 
         _activePanels.RemoveAt(index);
         _activePanels.Insert(newIndex, panel);
 
-        if (panel == PanelType.Lyrics)
+        if (_activePanels.Contains(PanelType.Lyrics))
         {
             _needsLyricsReload = true;
         }
@@ -348,6 +351,24 @@ public partial class Room
         _fontScale = newScale;
         StateHasChanged();
     }
+
+    private async Task CopyRoomCode()
+    {
+        await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", RoomCode);
+        Snackbar.Add($"Room code \"{RoomCode}\" copied to clipboard!", Severity.Success);
+    }
+
+    protected override void OnInitialized()
+    {
+        _clockTimer = new Timer(_ =>
+        {
+            _currentTime = DateTime.Now.ToString("HH:mm:ss");
+            InvokeAsync(StateHasChanged);
+        }, null, 0, 1000);
+    }
+
+    public void Dispose() 
+        => _clockTimer?.Dispose();
 
     private async Task OpenQrCodeDialog()
     {

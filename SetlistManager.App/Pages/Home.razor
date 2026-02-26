@@ -10,13 +10,11 @@
             <MudPaper Class="pa-4">
                 <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                     <MudText Typo="Typo.h6">Most used songs</MudText>
-                    <MudSelect T="StatsRange" Dense="true"
-                               Value="@_selectedRange"
-                               ValueChanged="OnRangeChanged">
-                        <MudSelectItem Value="StatsRange.Day">Day</MudSelectItem>
-                        <MudSelectItem Value="StatsRange.Week">Week</MudSelectItem>
-                        <MudSelectItem Value="StatsRange.Month">Month</MudSelectItem>
-                    </MudSelect>
+                    <MudToggleGroup T="StatsRange" Value="@_selectedRange" ValueChanged="OnRangeChanged" Dense="true" Outlined="true" Size="Size.Small">
+                        <MudToggleItem Value="StatsRange.Day">Day</MudToggleItem>
+                        <MudToggleItem Value="StatsRange.Week">Week</MudToggleItem>
+                        <MudToggleItem Value="StatsRange.Month">Month</MudToggleItem>
+                    </MudToggleGroup>
                 </MudStack>
                 @if (_mostUsedLabels.Any())
                 {

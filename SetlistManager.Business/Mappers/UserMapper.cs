@@ -40,4 +40,13 @@ public static class UserMapper
             Email = user.Email!
         };
     }
+
+    public static UserPlayerModel ToPlayerModel(this User user)
+    {
+        return new UserPlayerModel
+        {
+            UserName = user.UserName!,
+            Instrument = user.Instrument?.Name ?? "No Instrument"
+        };
+    }
 }
