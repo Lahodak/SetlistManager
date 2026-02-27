@@ -1,73 +1,120 @@
 ﻿@page "/ArtistsPortal"
-
 <PageTitle>Artists Portal</PageTitle>
 
-<MudContainer Class="mt-5">
-    <MudPaper Class="pa-4 mt-3" Elevation="2">
-        <MudText Typo="Typo.h3" Class="ml-2">Your Artists Library</MudText>
-        <MudButton StartIcon="@Icons.Material.Filled.Public" Href="/PublicArtists" Color="Color.Primary"> Go to public artists</MudButton>
-        <MudTable ServerData="ServerReload" Hover="true" @ref="_table">
+<MudContainer Class="mt-6 mb-8">
+
+    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-6">
+        <div>
+            <MudText Typo="Typo.h4" Class="page-title">Your Artists Library</MudText>
+            <MudText Typo="Typo.body2" Class="page-subtitle">Manage the artists in your collection</MudText>
+        </div>
+        <MudButton StartIcon="@Icons.Material.Filled.Public"
+                   Href="/PublicArtists"
+                   Variant="Variant.Outlined"
+                   Color="Color.Primary"
+                   Class="public-btn">
+            Explore Public Artists
+        </MudButton>
+    </MudStack>
+
+    <MudPaper Class="portal-card" Elevation="0">
+        <MudTable ServerData="ServerReload" Hover="true" @ref="_table" Class="portal-table">
             <ToolBarContent>
-                <MudText Typo="Typo.h6">Artist Library</MudText>
+                <MudText Typo="Typo.h6" Class="toolbar-title">Artist Library</MudText>
                 <MudSpacer />
-
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OpenCreateArtistDialog" StartIcon="@Icons.Material.Filled.Add">
-                    Add Artist
-                </MudButton>
-
                 <MudTextField @bind-Value="searchString"
-                              Placeholder="Search artists"
+                              Placeholder="Search artists..."
                               Adornment="Adornment.Start"
                               AdornmentIcon="@Icons.Material.Filled.Search"
-                              IconSize="Size.Medium" 
-                              Class="mt-0 ml-4"
+                              IconSize="Size.Medium"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Class="search-field"
                               Immediate="true"
                               DebounceInterval="700"
                               OnDebounceIntervalElapsed="OnSearch" />
-
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           OnClick="OpenCreateArtistDialog"
+                           StartIcon="@Icons.Material.Filled.Add"
+                           Class="ml-3 add-btn">
+                    Add Artist
+                </MudButton>
             </ToolBarContent>
-
             <HeaderContent>
                 <MudTh><MudTableSortLabel SortLabel="nick_field" T="ArtistModel">Nick</MudTableSortLabel></MudTh>
                 <MudTh><MudTableSortLabel SortLabel="songs_field" T="ArtistModel">Songs Count</MudTableSortLabel></MudTh>
-                <MudTh>Actions</MudTh>
+                <MudTh Style="width: 160px;">Actions</MudTh>
             </HeaderContent>
-
             <RowTemplate>
                 <MudTd DataLabel="Nick">
-                    <MudLink Href="@($"artistdetail/{context.Id}")"
-                             Style="color: black; text-decoration: none; font-size: medium;">
+                    <MudLink Href="@($"artistdetail/{context.Id}")" Class="row-link">
                         @context.Nick
                     </MudLink>
                 </MudTd>
                 <MudTd DataLabel="Songs Count">@(context.Songs?.Count ?? 0)</MudTd>
                 <MudTd DataLabel="Actions">
-                    @if(context.OwnerId == _userId)
-                    {                        
-                        <MudIconButton OnClick="() => AddAccessToUserAsync(context.Id)" Icon="@Icons.Material.Filled.PersonAddAlt1" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Secondary" Class="ml-2" />
-                        
-                        if (!context.IsPublic)
+                    <MudStack Row="true" Spacing="1" AlignItems="AlignItems.Center">
+                        @if (context.OwnerId == _userId)
                         {
-                            <MudIconButton OnClick="() => MakeArtistPublicAsync(context)" Icon="@Icons.Material.Filled.Public" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Tertiary" />
-                            <MudIconButton OnClick="() => UpdateArtistAsync(context)" Icon="@Icons.Material.Filled.Edit" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Primary" />
-                            <MudIconButton OnClick="() => DeleteArtistAsync(context)" Icon="@Icons.Material.Filled.DeleteForever" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Error" Class="ml-2" />
-                        }                        
-                    }
-                    else
-                    {
-					    <MudIconButton OnClick="() => RemoveArtistFromLibraryAsync(context)" Icon="@Icons.Material.Filled.PersonRemoveAlt1" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Error" Class="ml-2" />
-                    }
+                            <MudTooltip Text="Share artist">
+                                <MudIconButton OnClick="() => AddAccessToUserAsync(context.Id)"
+                                               Icon="@Icons.Material.Filled.PersonAddAlt1"
+                                               Variant="Variant.Text"
+                                               Size="Size.Small"
+                                               Color="Color.Secondary" />
+                            </MudTooltip>
+                            @if (!context.IsPublic)
+                            {
+                                <MudTooltip Text="Make public">
+                                    <MudIconButton OnClick="() => MakeArtistPublicAsync(context)"
+                                                   Icon="@Icons.Material.Filled.Public"
+                                                   Variant="Variant.Text"
+                                                   Size="Size.Small"
+                                                   Color="Color.Tertiary" />
+                                </MudTooltip>
+                                <MudTooltip Text="Edit artist">
+                                    <MudIconButton OnClick="() => UpdateArtistAsync(context)"
+                                                   Icon="@Icons.Material.Filled.Edit"
+                                                   Variant="Variant.Text"
+                                                   Size="Size.Small"
+                                                   Color="Color.Primary" />
+                                </MudTooltip>
+                                <MudTooltip Text="Delete artist">
+                                    <MudIconButton OnClick="() => DeleteArtistAsync(context)"
+                                                   Icon="@Icons.Material.Filled.DeleteForever"
+                                                   Variant="Variant.Text"
+                                                   Size="Size.Small"
+                                                   Color="Color.Error" />
+                                </MudTooltip>
+                            }
+                        }
+                        else
+                        {
+                            <MudTooltip Text="Remove from library">
+                                <MudIconButton OnClick="() => RemoveArtistFromLibraryAsync(context)"
+                                               Icon="@Icons.Material.Filled.PersonRemoveAlt1"
+                                               Variant="Variant.Text"
+                                               Size="Size.Small"
+                                               Color="Color.Error" />
+                            </MudTooltip>
+                        }
+                    </MudStack>
                 </MudTd>
             </RowTemplate>
-
             <NoRecordsContent>
-                <MudText>No matching records found</MudText>
+                <div class="empty-state">
+                    <MudIcon Icon="@Icons.Material.Filled.PeopleOutline" Class="empty-icon" />
+                    <MudText Typo="Typo.body1" Class="empty-title">No artists found</MudText>
+                    <MudText Typo="Typo.body2" Class="empty-subtitle">Try adjusting your search or add a new artist</MudText>
+                </div>
             </NoRecordsContent>
-
             <LoadingContent>
-                <MudText>Loading...</MudText>
+                <div class="loading-state">
+                    <MudProgressCircular Indeterminate="true" Size="Size.Small" Color="Color.Primary" />
+                    <MudText Typo="Typo.body2" Class="ml-3">Loading artists...</MudText>
+                </div>
             </LoadingContent>
-
             <PagerContent>
                 <MudTablePager />
             </PagerContent>

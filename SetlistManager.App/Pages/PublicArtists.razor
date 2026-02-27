@@ -2,68 +2,95 @@
 @using SetlistManager.App.Services
 @using SetlistManager.Common.Models
 
-<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-4">
-    <MudText Typo="Typo.h4" GutterBottom="true">Public Artists</MudText>
-    <MudText Typo="Typo.body1" Class="mb-4">Browse and add artists from the community library</MudText>
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-6 mb-8">
 
-    <MudTable @ref="table"
-              ServerData="ServerReload"
-              Hover="true"
-              Breakpoint="Breakpoint.Sm"
-              Loading="@_loading"
-              LoadingProgressColor="Color.Info">
-        <ToolBarContent>
-            <MudText Typo="Typo.h6">Artist Library</MudText>
-            <MudSpacer />
-            <MudTextField @bind-Value="searchString"
-                          Placeholder="Search artists..."
-                          Adornment="Adornment.Start"
-                          AdornmentIcon="@Icons.Material.Filled.Search"
-                          IconSize="Size.Medium"
-                          Class="mt-0"
-                          Immediate="true"
-                          DebounceInterval="700"
-                          OnDebounceIntervalElapsed="OnSearch" />
-        </ToolBarContent>
-        <HeaderContent>
-            <MudTh><MudTableSortLabel SortLabel="nick_field" T="ArtistModel">Artist Name</MudTableSortLabel></MudTh>
-            <MudTh><MudTableSortLabel SortLabel="songs_field" T="ArtistModel">Songs Count</MudTableSortLabel></MudTh>
-            <MudTh>Actions</MudTh>
-        </HeaderContent>
-        <RowTemplate>
-            <MudTd DataLabel="Artist Name">
-                <MudLink Href="@($"artistdetail/{context.Id}")"
-                         Style="color: black; text-decoration: none; font-size: medium;">
-                    @context.Nick
-                </MudLink>
-            </MudTd>
-            <MudTd DataLabel="Songs Count">@(context.Songs?.Count ?? 0)</MudTd>
-            <MudTd DataLabel="Actions">
-                @if (_userArtistIds.Contains(context.Id))
-                {
-                    <MudIconButton Icon="@Icons.Material.Filled.LibraryAddCheck"
-                                   Color="Color.Success"
-                                   Size="Size.Small"
-                                   title="Already in your library" />
-                }
-                else
-                {
-                    <MudIconButton Icon="@Icons.Material.Filled.LibraryAdd"
-                                   Color="Color.Primary"
-                                   Size="Size.Small"
-                                   OnClick="@(() => AddToLibrary(context))"
-                                   title="Add to your library" />
-                }
-            </MudTd>
-        </RowTemplate>
-        <NoRecordsContent>
-            <MudText>No matching records found</MudText>
-        </NoRecordsContent>
-        <LoadingContent>
-            <MudText>Loading...</MudText>
-        </LoadingContent>
-        <PagerContent>
-            <MudTablePager />
-        </PagerContent>
-    </MudTable>
+    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-6">
+        <div>
+            <MudText Typo="Typo.h4" Class="page-title">Public Artists</MudText>
+            <MudText Typo="Typo.body2" Class="page-subtitle">Browse and add artists from the community library</MudText>
+        </div>
+        <MudButton StartIcon="@Icons.Material.Filled.Person"
+                   Href="/ArtistsPortal"
+                   Variant="Variant.Outlined"
+                   Color="Color.Primary"
+                   Class="back-btn">
+            Your Library
+        </MudButton>
+    </MudStack>
+
+    <MudPaper Class="portal-card" Elevation="0">
+        <MudTable @ref="table"
+                  ServerData="ServerReload"
+                  Hover="true"
+                  Breakpoint="Breakpoint.Sm"
+                  Loading="@_loading"
+                  LoadingProgressColor="Color.Primary"
+                  Class="portal-table">
+            <ToolBarContent>
+                <MudText Typo="Typo.h6" Class="toolbar-title">Artist Library</MudText>
+                <MudSpacer />
+                <MudTextField @bind-Value="searchString"
+                              Placeholder="Search artists..."
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.Search"
+                              IconSize="Size.Medium"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Class="search-field"
+                              Immediate="true"
+                              DebounceInterval="700"
+                              OnDebounceIntervalElapsed="OnSearch" />
+            </ToolBarContent>
+            <HeaderContent>
+                <MudTh><MudTableSortLabel SortLabel="nick_field" T="ArtistModel">Artist Name</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortLabel="songs_field" T="ArtistModel">Songs Count</MudTableSortLabel></MudTh>
+                <MudTh Style="width: 100px;">Actions</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Artist Name">
+                    <MudLink Href="@($"artistdetail/{context.Id}")" Class="row-link">
+                        @context.Nick
+                    </MudLink>
+                </MudTd>
+                <MudTd DataLabel="Songs Count">@(context.Songs?.Count ?? 0)</MudTd>
+                <MudTd DataLabel="Actions">
+                    @if (_userArtistIds.Contains(context.Id))
+                    {
+                        <MudTooltip Text="Already in your library">
+                            <MudIconButton Icon="@Icons.Material.Filled.LibraryAddCheck"
+                                           Color="Color.Success"
+                                           Variant="Variant.Text"
+                                           Size="Size.Small" />
+                        </MudTooltip>
+                    }
+                    else
+                    {
+                        <MudTooltip Text="Add to your library">
+                            <MudIconButton Icon="@Icons.Material.Filled.LibraryAdd"
+                                           Color="Color.Primary"
+                                           Variant="Variant.Text"
+                                           Size="Size.Small"
+                                           OnClick="@(() => AddToLibrary(context))" />
+                        </MudTooltip>
+                    }
+                </MudTd>
+            </RowTemplate>
+            <NoRecordsContent>
+                <div class="empty-state">
+                    <MudIcon Icon="@Icons.Material.Filled.PeopleOutline" Class="empty-icon" />
+                    <MudText Typo="Typo.body1" Class="empty-title">No artists found</MudText>
+                    <MudText Typo="Typo.body2" Class="empty-subtitle">Try adjusting your search</MudText>
+                </div>
+            </NoRecordsContent>
+            <LoadingContent>
+                <div class="loading-state">
+                    <MudProgressCircular Indeterminate="true" Size="Size.Small" Color="Color.Primary" />
+                    <MudText Typo="Typo.body2" Class="ml-3">Loading artists...</MudText>
+                </div>
+            </LoadingContent>
+            <PagerContent>
+                <MudTablePager />
+            </PagerContent>
+        </MudTable>
+    </MudPaper>
 </MudContainer>
