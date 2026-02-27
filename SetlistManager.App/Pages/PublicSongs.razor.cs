@@ -85,7 +85,7 @@ public partial class PublicSongs
 
     private async Task AddToLibrary(SongModel song)
     {
-        var result = await SongService.TryGiveAccessToUserAsync(_userId, song.Id);
+        var result = await SongService.TryGiveAccessToUserAsync(song.Id, _userId);
 
         if(result)
         {

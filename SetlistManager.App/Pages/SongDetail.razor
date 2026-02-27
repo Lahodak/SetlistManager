@@ -45,46 +45,73 @@
                             <MudIcon Icon="@Icons.Material.Filled.PersonPin" Class="mr-2" />
                             <MudText Typo="Typo.body1"><i>Owner: @_song.OwnerNick</i></MudText>
                         </div>
-                        <MudDivider Class="my-4" />
-                        <MudText Typo="Typo.subtitle2" Class="mb-n2">Autoscroll Controls</MudText>
-                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
-                            @if (!_isScrolling)
-                            {
-                                <MudIconButton Icon="@Icons.Material.Filled.PlayArrow" Color="Color.Success" OnClick="@(() => ToggleScroll(true))" Variant="Variant.Filled" Size="Size.Small" />
-                            }
-                            else
-                            {
-                                <MudIconButton Icon="@Icons.Material.Filled.Stop" Color="Color.Error" OnClick="@(() => ToggleScroll(false))" Variant="Variant.Filled" Size="Size.Small" />
-                            }
-                            <MudIconButton Icon="@Icons.Material.Filled.ArrowUpward" Color="Color.Default" OnClick="ResetScroll" Variant="Variant.Outlined" Size="Size.Small" />
-                            <div style="flex-grow: 1;">
-                                <MudSlider T="int" Value="@_scrollSpeed" ValueChanged="OnSpeedChanged" Min="1" Max="100" Step="1" Color="Color.Info">
-                                    Speed: @_scrollSpeed
-                                </MudSlider>
-                            </div>
-                        </MudStack>
+                        @if (_isGeniusAuthenticated)
+                        {
+                            <MudDivider Class="my-4" />
+                            <MudText Typo="Typo.subtitle2" Class="mb-n2">Autoscroll Controls</MudText>
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                                @if (!_isScrolling)
+                                {
+                                    <MudIconButton Icon="@Icons.Material.Filled.PlayArrow" Color="Color.Success" OnClick="@(() => ToggleScroll(true))" Variant="Variant.Filled" Size="Size.Small" />
+                                }
+                                else
+                                {
+                                    <MudIconButton Icon="@Icons.Material.Filled.Stop" Color="Color.Error" OnClick="@(() => ToggleScroll(false))" Variant="Variant.Filled" Size="Size.Small" />
+                                }
+                                <MudIconButton Icon="@Icons.Material.Filled.ArrowUpward" Color="Color.Default" OnClick="ResetScroll" Variant="Variant.Outlined" Size="Size.Small" />
+                                <div style="flex-grow: 1;">
+                                    <MudSlider T="int" Value="@_scrollSpeed" ValueChanged="OnSpeedChanged" Min="1" Max="100" Step="1" Color="Color.Info">
+                                        Speed: @_scrollSpeed
+                                    </MudSlider>
+                                </div>
+                            </MudStack>
+                        }
                     </MudStack>
                 </MudPaper>
             </MudItem>
 
             <MudItem xs="12" md="7">
                 <MudPaper Class="pa-4" Elevation="3">
-                    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-2">
-                        <MudText Typo="Typo.h6">Lyrics</MudText>
-                        <MudToggleGroup T="double" Value="@_fontScale" ValueChanged="OnFontScaleChanged" Outlined="true" Delimiters="true" CheckMark="false" FixedContent="true">
-                            <MudToggleItem Value="1.0">Standard</MudToggleItem>
-                            <MudToggleItem Value="2.0">Large</MudToggleItem>
-                        </MudToggleGroup>
-                    </MudStack>
-                    @if (_lyricsData is not null)
+                    @if (_isLoading)
                     {
-                        <div id="genius-lyrics-container"
-                             style="height: calc(100vh - 200px); overflow-y: auto; overflow-x: hidden; border-radius: 8px; --lyrics-zoom: @_fontScale;">
-                        </div>
+                        <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+                    }
+                    else if (!_isGeniusAuthenticated)
+                    {
+                        <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center" Class="pa-8" Spacing="4">
+                            <MudIcon Icon="@Icons.Material.Filled.Lyrics" Style="font-size: 4rem;" Color="Color.Secondary" />
+                            <MudText Typo="Typo.h6" Align="Align.Center">Sign in with Genius to view lyrics</MudText>
+                            <MudText Typo="Typo.body2" Align="Align.Center" Color="Color.Secondary">
+                                Connect your Genius account to access song lyrics directly within the app.
+                            </MudText>
+                            <MudButton Variant="Variant.Filled"
+                                       Color="Color.Warning"
+                                       StartIcon="@Icons.Material.Filled.Login"
+                                       OnClick="SignInWithGeniusAsync"
+                                       Size="Size.Large">
+                                Sign in with Genius
+                            </MudButton>
+                        </MudStack>
                     }
                     else
                     {
-                        <MudAlert Severity="Severity.Info">Loading lyrics...</MudAlert>
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-2">
+                            <MudText Typo="Typo.h6">Lyrics</MudText>
+                            <MudToggleGroup T="double" Value="@_fontScale" ValueChanged="OnFontScaleChanged" Outlined="true" Delimiters="true" CheckMark="false" FixedContent="true">
+                                <MudToggleItem Value="1.0">Standard</MudToggleItem>
+                                <MudToggleItem Value="2.0">Large</MudToggleItem>
+                            </MudToggleGroup>
+                        </MudStack>
+                        @if (_lyricsData is not null)
+                        {
+                            <div id="genius-lyrics-container"
+                                 style="height: calc(100vh - 200px); overflow-y: auto; overflow-x: hidden; border-radius: 8px; --lyrics-zoom: @_fontScale;">
+                            </div>
+                        }
+                        else
+                        {
+                            <MudAlert Severity="Severity.Info">Loading lyrics...</MudAlert>
+                        }
                     }
                 </MudPaper>
             </MudItem>
