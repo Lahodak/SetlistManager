@@ -2,10 +2,10 @@
 
 @if (_userModel is null)
 {
-    <MudProgressCircular Color="Color.Primary" Size="Size.Large" />    
+    <MudProgressCircular Color="Color.Primary" Size="Size.Large" />
 }
 else
-{    
+{
     <MudCard Class=" max-w-md p-6 shadow-lg rounded-2xl justify-content-center">
         <MudCardContent>
             <MudText Typo="Typo.h5" Class="mb-4 font-semibold text-center">
@@ -24,7 +24,7 @@ else
                     }
                 }
             </MudSelect>
-            @if(_userModel.Tokens!.Count == 0)
+            @if (_userModel.Tokens!.Count == 0)
             {
                 <MudButton Variant="Variant.Outlined" OnClick="AuthorizeWithGenius">
                     Authorize with Genius  <MudImage Src="GENIUS_Logo_Transparent.png" Width="20" Height="20" />
@@ -32,19 +32,24 @@ else
             }
             else
             {
-                <MudText Typo="Typo.body2" Class="mb-2">
-                    Connected to Genius <MudImage Src="GENIUS_Logo_Transparent.png" Width="20" Height="20" />
-                </MudText>
-			}
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                    <MudText Typo="Typo.body2">
+                        Connected to Genius <MudImage Src="GENIUS_Logo_Transparent.png" Width="20" Height="20" />
+                    </MudText>
+                    <MudButton Variant="Variant.Outlined" Color="Color.Error" Size="Size.Small" OnClick="RevokeGeniusTokenAsync">
+                        Disconnect
+                    </MudButton>
+                </MudStack>
+            }
         </MudCardContent>
 
         <MudCardActions>
-            <MudButton Class="me-3"OnClick="SaveAsync" Color="Color.Primary" Variant="Variant.Filled">
+            <MudButton Class="me-3" OnClick="SaveAsync" Color="Color.Primary" Variant="Variant.Filled">
                 Save
             </MudButton>
             <MudButton OnClick="LogOutAsync" Color="Color.Error" Variant="Variant.Filled">
                 Logout
             </MudButton>
         </MudCardActions>
-    </MudCard>    
+    </MudCard>
 }

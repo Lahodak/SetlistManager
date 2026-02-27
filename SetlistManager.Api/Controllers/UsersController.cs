@@ -33,6 +33,14 @@ public class UsersController : BaseController
         return NoContent();
     }
 
+    [HttpDelete("{id}/tokens/{tokenId}")]
+    public async Task<ActionResult> RevokeUserToken(int id, int tokenId)
+    {
+        await _userService.RevokeTokenAsync(id, tokenId);
+        
+        return NoContent();
+    }
+
     [HttpPost("{id}/friendships")]
     public async Task<ActionResult> InitiateFriendship(int id, [FromBody] FriendshipRequestModel requestModel)
     {

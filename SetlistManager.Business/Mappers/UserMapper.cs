@@ -12,6 +12,7 @@ public static class UserMapper
         if (user.Tokens is not null)
             tokens = user.Tokens?.Select(t => new TokenModel
             {
+                Id = t.Id,
                 AccessToken = t.AccessToken,
                 RefreshToken = t.RefreshToken,
                 Provider = t.Provider.Name,

@@ -213,4 +213,19 @@ public class UserService : IUserService
                 f.Id == friendshipId &&
                 (f.InitiatorId == userId || f.RecieverId == userId));
     }
+
+    public async Task RevokeTokenAsync(int userId, int tokenId)
+    {
+        if (userId != _currentUserId)
+            throw new UnauthorizedAccessException();
+
+        var token = await _dbContext.Tokens
+            .FirstOrDefaultAsync(t => t.UserId == userId && t.Id == tokenId);
+        
+        if (token is null)
+            throw new EntryNotFoundException();
+        
+        _dbContext.Tokens.Remove(token);
+        await _dbContext.SaveChangesAsync();
+    }
 }

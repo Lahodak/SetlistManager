@@ -191,4 +191,14 @@ public class UserService : IUserService
         var uri = request.ToPagedRequestUri(_apiUsersEndpointPath);
         return await _apiService.GetAsync<PagedResponse<UserViewModel>>(uri);
     }
+
+    public async Task<bool> TryRevokeTokenAsync(int tokenId)
+    {
+        var userId = await GetCurrentUserIdAsync();
+
+        if (userId is null)
+            return false;
+        
+        return await _apiService.TryDeleteAsync($"{_apiUsersEndpointPath}/{userId}/tokens/{tokenId}");
+    }
 }

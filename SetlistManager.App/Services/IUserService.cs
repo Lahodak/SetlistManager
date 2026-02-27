@@ -19,6 +19,7 @@ public interface IUserService
     Task HandleFriendshipRequestAsync(FriendshipRequestModel friendshipRequest);
     Task<bool> TryRemoveFriendshipAsync(int friendshipId);
     Task<bool> TryAcceptFriendshipAsync(int friendshipId);
+    Task<bool> TryRevokeTokenAsync(int tokenId);
     Task<PagedResponse<UserViewModel>?> GetPagedUsersAsync(PagedRequest request);
     Task<int?> GetCurrentUserIdAsync();
     Task<bool> GetUserDarkModeSettings();

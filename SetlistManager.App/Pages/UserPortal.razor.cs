@@ -49,4 +49,14 @@ public partial class UserPortal
     {
         NavigationManager.NavigateTo(await GeniusService.AuthorizeAsync());
     }
+
+    private async Task RevokeGeniusTokenAsync()
+    {
+        var geniusToken = _userModel?.Tokens?.FirstOrDefault(t => t.Provider == ProviderEnum.Genius.ToString());
+
+        if (geniusToken is not null && await UserService.TryRevokeTokenAsync(geniusToken.Id))
+        {
+            _userModel!.Tokens!.Remove(geniusToken);
+        }
+    }
 }
