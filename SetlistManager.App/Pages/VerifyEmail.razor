@@ -1,20 +1,55 @@
 @page "/verify-email"
 @layout EmptyLayout
 
-<MudPaper Class="mx-auto mt-12 p-6" Style="max-width:400px;" Elevation="8">
-    <MudText Typo="Typo.h5" Class="mb-4">Verify Email</MudText>
+<div class="auth-wrapper">
 
-    @if (isVerifying)
-    {
-        <MudProgressCircular Indeterminate="true" />
-        <MudText>Verifying your email...</MudText>
-    }
-    else if (successMessage != null)
-    {
-        <MudText Color="Color.Success">@successMessage</MudText>
-    }
-    else if (errorMessage != null)
-    {
-        <MudText Color="Color.Error">@errorMessage</MudText>
-    }
-</MudPaper>
+    <MudIconButton Href="/login"
+                   Icon="@Icons.Material.Filled.ArrowBack"
+                   Variant="Variant.Outlined"
+                   Color="Color.Primary"
+                   Class="auth-back-btn" />
+
+    <MudPaper Class="auth-card" Elevation="0">
+
+        <div class="auth-header">
+            <div class="auth-logo-wrap">
+                <MudIcon Icon="@Icons.Material.Filled.MarkEmailRead" Class="auth-logo-icon" />
+            </div>
+            <MudText Typo="Typo.h5" Class="auth-title">Verify your email</MudText>
+            <MudText Typo="Typo.body2" Class="auth-subtitle">Please wait while we verify your email address</MudText>
+        </div>
+
+        <div class="auth-verify-body">
+            @if (isVerifying)
+            {
+                <MudStack AlignItems="AlignItems.Center" Spacing="3">
+                    <MudProgressCircular Indeterminate="true" Color="Color.Primary" Size="Size.Large" />
+                    <MudText Typo="Typo.body2" Class="auth-subtitle">Verifying your email...</MudText>
+                </MudStack>
+            }
+            else if (successMessage != null)
+            {
+                <MudAlert Severity="Severity.Success" Variant="Variant.Filled" Dense="true">@successMessage</MudAlert>
+                <MudButton Href="/login"
+                           Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           FullWidth="true"
+                           Class="auth-btn mt-4">
+                    Continue to Sign In
+                </MudButton>
+            }
+            else if (errorMessage != null)
+            {
+                <MudAlert Severity="Severity.Error" Variant="Variant.Filled" Dense="true">@errorMessage</MudAlert>
+                <MudButton Href="/login"
+                           Variant="Variant.Text"
+                           Color="Color.Primary"
+                           FullWidth="true"
+                           Class="auth-btn mt-3">
+                    Back to Sign In
+                </MudButton>
+            }
+        </div>
+
+    </MudPaper>
+</div>

@@ -1,19 +1,62 @@
 ﻿@page "/login"
 @layout EmptyLayout;
 
-<MudForm>
-    <MudPaper Class="mx-auto mt-12 p-6" Style="max-width:400px;" Elevation="8">
-        <MudText Typo="Typo.h5" Class="mb-4">Login</MudText>
+<div class="auth-wrapper">
 
-        <MudTextField @bind-Value="_loginRequestModel.Email" Label="Email" Variant="Variant.Outlined" FullWidth="true" />
-        <MudTextField @bind-Value="_loginRequestModel.Password" Label="Password" Variant="Variant.Outlined" InputType="InputType.Password" FullWidth="true" Class="mt-3" />
+    <MudIconButton Href="/"
+                   Icon="@Icons.Material.Filled.ArrowBack"
+                   Variant="Variant.Outlined"
+                   Color="Color.Primary"
+                   Class="auth-back-btn" />
 
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="LoginUser" FullWidth="true" Class="mt-4">
-            Login
-        </MudButton>
+    <MudPaper Class="auth-card" Elevation="0">
 
-        <MudText Class="mt-4"> Don't have an account? <MudLink Href="/register">Register here</MudLink> </MudText>
+        <div class="auth-header">
+            <div class="auth-logo-wrap">
+                <MudIcon Icon="@Icons.Material.Filled.QueueMusic" Class="auth-logo-icon" />
+            </div>
+            <MudText Typo="Typo.h5" Class="auth-title">Welcome back</MudText>
+            <MudText Typo="Typo.body2" Class="auth-subtitle">Sign in to your account to continue</MudText>
+        </div>
 
-        <MudLink Href="/request-password-reset">Reset password</MudLink>
+        <MudForm Class="auth-form">
+            <MudTextField @bind-Value="_loginRequestModel.Email"
+                          Label="Email"
+                          Variant="Variant.Outlined"
+                          FullWidth="true"
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Email"
+                          Class="auth-field" />
+
+            <MudTextField @bind-Value="_loginRequestModel.Password"
+                          Label="Password"
+                          Variant="Variant.Outlined"
+                          InputType="@(_showPassword? InputType.Text: InputType.Password)"
+                          FullWidth="true"
+                          Adornment="Adornment.End"
+                          AdornmentIcon="@(_showPassword? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
+                          OnAdornmentClick="@(() => _showPassword = !_showPassword)"
+                          Class="auth-field" />
+
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       OnClick="LoginUser"
+                       FullWidth="true"
+                       Size="Size.Large"
+                       Class="auth-btn mt-2">
+                Sign In
+            </MudButton>
+        </MudForm>
+
+        <MudDivider Class="auth-divider" />
+
+        <div class="auth-footer">
+            <MudText Typo="Typo.body2" Class="auth-footer-text">
+                Don't have an account?
+                <MudLink Href="/register" Class="auth-link">Register here</MudLink>
+            </MudText>
+            <MudLink Href="/request-password-reset" Class="auth-link auth-reset-link">Forgot your password?</MudLink>
+        </div>
+
     </MudPaper>
-</MudForm>
+</div>

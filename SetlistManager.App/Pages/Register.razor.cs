@@ -18,6 +18,7 @@ public partial class Register
     private const string _verifyEmailUri = "/verify-email";
     private readonly RegisterRequestModel _registerRequestModel = new();
     private string confirmPassword = string.Empty;
+    private bool _showPassword = false;
 
     private async Task LoginUser()
     {

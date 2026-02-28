@@ -16,6 +16,7 @@ public partial class ResetPassword
 
     private bool _isSubmitting = false;
     private bool _canReset = false;
+    private bool _showPassword = false;
     private string? _token;
     private string? _email;
     private string? _newPassword;

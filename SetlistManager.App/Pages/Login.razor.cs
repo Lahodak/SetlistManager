@@ -16,6 +16,7 @@ public partial class Login
 
     private readonly LoginRequestModel _loginRequestModel = new();
     private const string _homeUri = "/home";
+    private bool _showPassword = false;
 
     private async Task LoginUser()
     {
