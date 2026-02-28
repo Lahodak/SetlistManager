@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using SetlistManager.Common.Exceptions;
 
 namespace SetlistManager.Api.Middleware;
 
@@ -14,6 +15,10 @@ public class GlobalExceptionHandlingMiddleware(
         httpContext.Response.StatusCode = exception switch
         {
             ApplicationException => StatusCodes.Status400BadRequest,
+            EntryNotFoundException => StatusCodes.Status404NotFound,
+            GeniusAccessTokenNotRecievedException => StatusCodes.Status502BadGateway,
+            DuplicateEntryException => StatusCodes.Status409Conflict,
+            InvalidOperationException => StatusCodes.Status400BadRequest,            
             _ => StatusCodes.Status500InternalServerError
         };
 

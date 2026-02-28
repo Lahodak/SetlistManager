@@ -4,8 +4,9 @@ namespace SetlistManager.Business.Services;
 
 public interface IAuthService
 {
-    Task<RegisterResultModel> RegisterAsync(RegisterRequestModel model);
-    Task<bool> VerifyEmailAsync(VerifyModel verifyModel);
-    Task<bool> TryResetPasswordAsync(ResetPasswordModel resetModel);
-    Task<bool> RequestPasswordResetAsync(PasswordResetRequestModel resetRequestModel);
+    Task RegisterAsync(RegisterRequestModel model);
+    Task VerifyEmailAsync(VerifyModel verifyModel);
+    Task ResetPasswordAsync(ResetPasswordModel resetModel);
+    Task RequestPasswordResetAsync(PasswordResetRequestModel resetRequestModel);
+    Task<LoginResultModel> LoginAsync(LoginRequestModel model);
 }

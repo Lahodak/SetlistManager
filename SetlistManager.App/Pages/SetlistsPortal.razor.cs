@@ -4,7 +4,6 @@ using SetlistManager.App.Models;
 using SetlistManager.App.Pages.Dialogs;
 using SetlistManager.App.Services;
 using SetlistManager.Common.Models;
-using System.Reflection;
 
 namespace SetlistManager.App.Pages;
 
@@ -20,7 +19,7 @@ public partial class SetlistsPortal
     public required IUserService UserService { get; set; }
 
     private MudTable<SetlistModel> table = new();
-    private PagedRequest pageStatus = new() { ContentType = ContentType.Private };
+    private readonly ContentPagedRequest pageStatus = new();
     private string? searchString;
     private int _userId;
 
@@ -31,13 +30,11 @@ public partial class SetlistsPortal
 
     private async Task<TableData<SetlistModel>?> ServerReload(TableState state, CancellationToken token)
     {
-        await Task.Delay(300, token);
         pageStatus.Query = searchString;
         pageStatus.PageIndex = state.Page;
-        pageStatus.PageSize = state.PageSize;
-        
+        pageStatus.PageSize = state.PageSize;        
 
-        var response = await SetlistService.GetAllSetlistsAsync(pageStatus);
+        var response = await SetlistService.GetSetlistsAsync(pageStatus);
 
         if (response?.Items is null)
         {
@@ -127,7 +124,7 @@ public partial class SetlistsPortal
         if (result is not true)
             return;
 
-        await SetlistService.RemoveAccessFromUserAsync(model.Id, _userId);
+        await SetlistService.TryRemoveAccessFromUserAsync(model.Id, _userId);
         await table.ReloadServerData();
     }
 

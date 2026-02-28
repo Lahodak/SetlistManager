@@ -1,6 +1,6 @@
 ﻿namespace SetlistManager.Data.Entities;
 
-public  class Artist : Base
+public  class Artist : BaseEntity
 {
     public string Nick { get; set; } = default!;
     public bool IsPublic { get; set; }

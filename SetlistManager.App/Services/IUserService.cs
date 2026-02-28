@@ -1,18 +1,17 @@
-﻿using SetlistManager.Common.Models;
+﻿using SetlistManager.App.Models;
+using SetlistManager.Common.Models;
 
 namespace SetlistManager.App.Services;
 
 public interface IUserService
 {
-    Task AddNewProviderToken(TokenCreateModel tokenModel);
     Task<UserModel?> GetUserAsync();
-    Task<List<SetlistModel>?> GetAllUserSetlists();
     Task RegisterAsync(RegisterRequestModel model);
     Task LogOutAsync();
-    Task<string?> GetUserToken();
-    Task<bool> IsUserLoggedInAsync();
+    Task<string?> GetUserTokenAsync();
+    Task<bool> VerifyStoredToken();
     Task<bool> TryUpdateUser(UserModel user);
-    Task LogInAsync(LoginRequestModel model);
+    Task<bool> LogInAsync(LoginRequestModel model);
     Task<bool> VerifyEmailAsync(string token, string email);
     Task<bool> RequestPasswordResetAsync(string email);
     Task<bool> ResetPasswordAsync(string email, string newPassword, string token);
@@ -20,6 +19,11 @@ public interface IUserService
     Task HandleFriendshipRequestAsync(FriendshipRequestModel friendshipRequest);
     Task<bool> TryRemoveFriendshipAsync(int friendshipId);
     Task<bool> TryAcceptFriendshipAsync(int friendshipId);
+    Task<bool> TryRevokeTokenAsync(int tokenId);
     Task<PagedResponse<UserViewModel>?> GetPagedUsersAsync(PagedRequest request);
     Task<int?> GetCurrentUserIdAsync();
+    Task<bool> GetUserDarkModeSettings();
+    Task UpdateUserDarkModeSettingsAsync(bool newValue);
+    Task<List<PanelType>?> GetPanelConfigAsync();
+    Task SavePanelConfigAsync(List<PanelType> panels);
 }

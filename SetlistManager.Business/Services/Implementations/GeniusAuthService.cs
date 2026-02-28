@@ -1,50 +1,68 @@
 ﻿using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 using SetlistManager.Business.Options;
 using SetlistManager.Common.Genius.Models;
+using SetlistManager.Common.Models;
+using System.Net.Http.Json;
 
 namespace SetlistManager.Business.Services.Implementations;
 
 public class GeniusAuthService : IGeniusAuthService
 {
-    private const string _authorizeEndpointSuffix = "/oauth/authorize";
-    private const string _codeExchangeEndpointSuffix = "/oauth/token";
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ITempAuthStorageService _tempAuthStorageService;
     private readonly IOptions<GeniusOptions> _geniusOptions;
+    private readonly ILogger<GeniusAuthService> _logger;
+    private readonly int _currentUserId;
 
-    public GeniusAuthService(IOptions<GeniusOptions> geniusOptions, IHttpClientFactory httpClientFactory, ITempAuthStorageService tempAuthStorageService)
+    private const string _authorizeEndpointSuffix = "/oauth/authorize";
+    private const string _codeExchangeEndpointSuffix = "/oauth/token";
+    private const string _scope = "me";
+    private const string _responseType = "code";
+    private const string _clientIdKey = "client_id";
+    private const string _redirectUriKey = "redirect_uri";
+    private const string _scopeKey = "scope";
+    private const string _stateKey = "state";
+    private const string _responseTypeKey = "response_type";
+
+    public GeniusAuthService(IOptions<GeniusOptions> geniusOptions, IHttpClientFactory httpClientFactory, ITempAuthStorageService tempAuthStorageService, 
+        ILogger<GeniusAuthService> logger, ICurrentUserContext userContext)
     {
-        _geniusOptions = geniusOptions;         
+        _geniusOptions = geniusOptions;
         _httpClientFactory = httpClientFactory;
         _tempAuthStorageService = tempAuthStorageService;
+        _logger = logger;
+        _currentUserId = userContext.UserId;
     }
 
-    public async Task<string> GetGrantAccessTokenRequestUri(int userId)
+    public async Task<UrlResponseModel> GetGrantAccessTokenRequestUri()
     {
-        var grantModel = new GrantAccessTokenModel
+        GrantAccessTokenModel grantModel = new()
         {
             ClientId = _geniusOptions.Value.ClientId,
             RedirectUri = _geniusOptions.Value.GetGrantAccessTokenRequest.RedirectUri,
-            ResponseType = "code",
-            Scope = "me",
-            State = await _tempAuthStorageService.CreateNewTempAuthSecret(userId)
+            ResponseType = _responseType,
+            Scope = _scope,
+            State = await _tempAuthStorageService.CreateNewTempAuthSecret(_currentUserId)
         };
 
         UriBuilder uri = new(_geniusOptions.Value.ApiBaseUrl + _authorizeEndpointSuffix)
         {
             Query = new QueryBuilder
             {
-                { "client_id", grantModel.ClientId },
-                { "redirect_uri", grantModel.RedirectUri },
-                { "scope", grantModel.Scope },
-                { "state", grantModel.State },
-                { "response_type", grantModel.ResponseType }
+                { _clientIdKey, grantModel.ClientId },
+                { _redirectUriKey, grantModel.RedirectUri },
+                { _scopeKey, grantModel.Scope },
+                { _stateKey, grantModel.State },
+                { _responseTypeKey, grantModel.ResponseType }
             }.ToString()
         };
 
-        return uri.ToString();
+        return new UrlResponseModel
+        {
+            Url = uri.ToString()
+        };
     }
 
     public async Task<CodeExchangeResponseModel?> ExchangeGeniusCode(string code)
@@ -56,28 +74,17 @@ public class GeniusAuthService : IGeniusAuthService
             Code = code,
             RedirectUri = _geniusOptions.Value.GetGrantAccessTokenRequest.RedirectUri
         };
+
         UriBuilder uri = new(_geniusOptions.Value.ApiBaseUrl + _codeExchangeEndpointSuffix);
 
         var client = _httpClientFactory.CreateClient();
+        var response = await client.PostAsJsonAsync(uri.ToString(), data);
 
-        string jsonData = JsonConvert.SerializeObject(data);
+        var result = await response.Content.ReadFromJsonAsync<CodeExchangeResponseModel>();
 
-        var content = new StringContent(jsonData, System.Text.Encoding.UTF8, "application/json");
+        if (result is null)
+            _logger.Log(LogLevel.Error, "Failed to read Genius code");
 
-        var response = await client.PostAsync(uri.ToString(), content);
-
-        CodeExchangeResponseModel? resultModel;
-        var responseModel = await response.Content.ReadAsStringAsync();
-
-        try
-        {
-            resultModel = JsonConvert.DeserializeObject<CodeExchangeResponseModel>(responseModel);
-        }
-        catch (Exception)
-        {
-            return null;
-        }
-
-        return resultModel;
+        return result;
     }
 }

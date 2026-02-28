@@ -1,153 +1,448 @@
 ﻿@page "/room/{RoomCode}"
+@using SetlistManager.App.Models
 @layout EmptyLayout
 
-<MudContainer MaxWidth="MaxWidth.False" Class="pa-0">
-    <MudAppBar Elevation="0">
-        <MudText Typo="Typo.h5" Style="font-weight: 300;">@(_roomModel?.Name ?? "Loading...")</MudText>
-        <MudText Typo="Typo.body2" Class="ml-4 px-3 py-1" Style="background: rgba(0,0,0,0.3); border-radius: 4px;">
-            Code: <span style="font-weight: 600;">@RoomCode</span>
-        </MudText>
+<MudContainer MaxWidth="MaxWidth.False" Class="pa-0" Style="position: relative;">
+    <MudAppBar>
+        <MudIconButton Icon="@Icons.Material.Filled.Menu"
+                       Color="Color.Inherit"
+                       Edge="Edge.Start"
+                       OnClick="ToggleDrawer" />
+        <MudText Typo="Typo.h6" Style="font-weight: 500;">@(_roomModel?.Name ?? "Loading...")</MudText>
         <MudSpacer />
-        <MudText Typo="Typo.h5" Style="font-weight: 300;">@(_user?.Username ?? "Loading...") - @(_user?.Instrument?.Name ?? "Loading...")</MudText>
-        <MudIconButton Icon="@(_isFullscreen? Icons.Material.Filled.FullscreenExit : Icons.Material.Filled.Fullscreen)"
-                       Color="Color.Inherit"
-                       Edge="Edge.End"
-                       Size="Size.Large"
-                       OnClick="ToggleFullscreen"
-                       title="@(_isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen")" />
-        <MudIconButton Icon="@Icons.Material.Filled.QrCode"
-                       Color="Color.Inherit"
-                       Edge="Edge.End"
-                       Size="Size.Large"
-                       OnClick="OpenQrCodeDialog"
-                       title="Show QR Code" />
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.End" Size="Size.Large" />
+        <MudText Typo="Typo.h5" Class="d-none d-sm-flex" Style="font-variant-numeric: tabular-nums; font-weight: 500;">@_currentTime</MudText>
     </MudAppBar>
 
-    <MudContainer MaxWidth="MaxWidth.ExtraExtraLarge" Class="mt-4 px-6" Style="height: calc(100vh - 100px);">
+    <MudDrawer @bind-Open="@_drawerOpen" Anchor="Anchor.Start" Elevation="2" Variant="DrawerVariant.Temporary">
+        <MudDrawerHeader>
+            <MudText Typo="Typo.h6">Room Controls</MudText>
+        </MudDrawerHeader>
+        <MudDivider />
+        <MudList Clickable="true" T="object">
+            <MudListItem>
+                <MudText Typo="Typo.subtitle2" Class="mb-3">Active Panels</MudText>
+                <div class="d-flex flex-column gap-2">
+                    @foreach (var panel in _activePanels)
+                    {
+                        <div class="d-flex align-center gap-2">
+                            <MudIconButton Icon="@Icons.Material.Filled.ArrowUpward"
+                                           Size="Size.Small"
+                                           OnClick="@(() => MovePanel(panel, true))"
+                                           Disabled="@(_activePanels.IndexOf(panel) == 0)" />
+                            <MudIconButton Icon="@Icons.Material.Filled.ArrowDownward"
+                                           Size="Size.Small"
+                                           OnClick="@(() => MovePanel(panel, false))"
+                                           Disabled="@(_activePanels.IndexOf(panel) == _activePanels.Count - 1)" />
+                            <MudChip Color="Color.Primary" Size="Size.Small" Style="flex: 1;">
+                                @panel.ToString()
+                            </MudChip>
+                            <MudIconButton Icon="@Icons.Material.Filled.Close"
+                                           Size="Size.Small"
+                                           Color="Color.Error"
+                                           OnClick="@(() => TogglePanel(panel))"
+                                           Disabled="@(_activePanels.Count == 1)" />
+                        </div>
+                    }
+                </div>
+            </MudListItem>
+
+            @if (_activePanels.Count < 3)
+            {
+                <MudListItem>
+                    <MudText Typo="Typo.subtitle2" Class="mb-2">Add Panel</MudText>
+                    <div class="d-flex flex-wrap gap-2">
+                        @if (!_activePanels.Contains(PanelType.Song))
+                        {
+                            <MudChip Color="Color.Default"
+                                     Size="Size.Small"
+                                     OnClick="@(() => TogglePanel(PanelType.Song))"
+                                     Style="cursor: pointer;">
+                                + Song
+                            </MudChip>
+                        }
+                        @if (!_activePanels.Contains(PanelType.Lyrics))
+                        {
+                            <MudChip Color="Color.Default"
+                                     Size="Size.Small"
+                                     OnClick="@(() => TogglePanel(PanelType.Lyrics))"
+                                     Style="cursor: pointer;">
+                                + Lyrics
+                            </MudChip>
+                        }
+                        @if (!_activePanels.Contains(PanelType.Setlist))
+                        {
+                            <MudChip Color="Color.Default"
+                                     Size="Size.Small"
+                                     OnClick="@(() => TogglePanel(PanelType.Setlist))"
+                                     Style="cursor: pointer;">
+                                + Setlist
+                            </MudChip>
+                        }
+                    </div>
+                </MudListItem>
+            }
+
+            <MudDivider Class="my-2" />
+            <MudListItem OnClick="CopyRoomCode">
+                <div class="d-flex align-center justify-space-between">
+                    <MudText Typo="Typo.body2">Room Code:</MudText>
+                    <div class="d-flex align-center gap-1">
+                        <MudText Typo="Typo.body2" Style="font-weight: 600;">@RoomCode</MudText>
+                        <MudIcon Icon="@Icons.Material.Filled.ContentCopy" Size="Size.Small" Style="opacity: 0.6;" />
+                    </div>
+                </div>
+            </MudListItem>
+            <MudDivider Class="my-2" />
+            <MudListItem OnClick="OpenQrCodeDialog">
+                <div class="d-flex align-center">
+                    <MudIcon Icon="@Icons.Material.Filled.QrCode" Class="mr-3" />
+                    <MudText>Show QR Code</MudText>
+                </div>
+            </MudListItem>
+            <MudListItem OnClick="ToggleFullscreen">
+                <div class="d-flex align-center">
+                    <MudIcon Icon="@(_isFullscreen? Icons.Material.Filled.FullscreenExit : Icons.Material.Filled.Fullscreen)" Class="mr-3" />
+                    <MudText>@(_isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen")</MudText>
+                </div>
+            </MudListItem>
+            <MudDivider Class="my-2" />
+            <MudListItem OnClick="@(() => NavigationManager.NavigateTo("/home"))">
+                <div class="d-flex align-center">
+                    <MudIcon Icon="@Icons.Material.Filled.Home" Class="mr-3" />
+                    <MudText>Go to Home</MudText>
+                </div>
+            </MudListItem>
+            <MudDivider Class="my-2" />
+            <MudListItem>
+                <MudText Typo="Typo.body2" Class="mb-2">User Info</MudText>
+                <MudText Typo="Typo.caption">@(_user?.Username ?? "Loading...")</MudText>
+                <MudText Typo="Typo.caption">@(_user?.Instrument?.Name ?? "Loading...")</MudText>
+            </MudListItem>
+        </MudList>
+    </MudDrawer>
+
+    <MudContainer MaxWidth="MaxWidth.False" Class="pa-0" Style="height: calc(100vh - 56px); overflow: hidden;">
         @if (_roomModel is null || _currentSong == null)
         {
-            <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+            <div class="d-flex align-center justify-center" style="height: 100%;">
+                <MudProgressCircular Indeterminate="true" Color="Color.Primary" Size="Size.Large" />
+            </div>
         }
         else
         {
-            <MudGrid Spacing="4">
-                <!-- Left Column: Current Song -->
-                <MudItem xs="12" md="6">
-                    <MudPaper Elevation="4" Class="pa-10" Style="border-radius: 16px">
-                        <MudText Typo="Typo.h2" Align="Align.Start" Style="font-weight: 1000; word-break: break-word;">
-                            @_currentSong.Name
-                        </MudText>
-                        <MudText Typo="Typo.h4" Align="Align.Start" Class="mt-4">
-                            Artist: @(_currentSong.Artist?.Nick ?? "N/A")
-                        </MudText>
-
-                        <div class="d-flex justify-start flex-wrap gap-3 mt-6">
-                            <MudPaper Elevation="3" Class="pa-4 d-flex flex-column align-center" Style="min-width: 100px; height: 70px; border-radius: 12px;">
-                                <MudText Typo="Typo.caption" Color="Color.Default">BPM:</MudText>
-                                <MudText Typo="Typo.h6" Style="font-weight: 500;">@_currentSong.BPM</MudText>
-                            </MudPaper>
-                            <MudPaper Elevation="3" Class="pa-4 d-flex flex-column align-center" Style="min-width: 100px; height: 70px; border-radius: 12px;">
-                                <MudText Typo="Typo.caption" Color="Color.Default">Tuning:</MudText>
-                                <MudText Typo="Typo.h6" Style="font-weight: 500;">@_currentSong.Tuning</MudText>
-                            </MudPaper>
-                            <MudPaper Elevation="3" Class="pa-4 d-flex flex-column align-center" Style="min-width: 100px; height: 70px; border-radius: 12px;">
-                                <MudText Typo="Typo.caption" Color="Color.Default">Key:</MudText>
-                                <MudText Typo="Typo.h6" Style="font-weight: 500;">@_currentSong.Key</MudText>
-                            </MudPaper>
-                            <MudPaper Elevation="3" Class="pa-4 d-flex align-center justify-center" Style="width: 70px; height: 70px; border-radius: 12px;">
-                                <MudIconButton Icon="@Icons.Material.Filled.QueueMusic" OnClick="@(() => OpenSetlistContentDialog())" Size="Size.Large" />
-                            </MudPaper>
-                            <MudPaper Elevation="3" Class="pa-4 d-flex align-center justify-center" Style="width: 70px; height: 70px; border-radius: 12px;">
-                                <MudIconButton Icon="@Icons.Material.Filled.Menu" Size="Size.Large" />
-                            </MudPaper>
-                        </div>
-                    </MudPaper>
-
-                    <MudPaper Class="pa-10 mt-4" Style="border-radius: 16px">
-                        <div class="d-flex justify-space-between gap-3">
-                            <MudButton Variant="Variant.Filled"
-                                       Color="Color.Primary"
-                                       StartIcon="@Icons.Material.Filled.ArrowBack"
-                                       OnClick="MoveToPrevSong"
-                                       Size="Size.Large"
-                                       FullWidth="true"
-                                       Style="height: 56px; font-size: 1.1rem;">
-                                Previous
-                            </MudButton>
-                            <MudButton Variant="Variant.Filled"
-                                       Color="Color.Primary"
-                                       EndIcon="@Icons.Material.Filled.ArrowForward"
-                                       OnClick="MoveToNextSong"
-                                       Size="Size.Large"
-                                       FullWidth="true"
-                                       Style="height: 56px; font-size: 1.1rem;">
-                                Next
-                            </MudButton>
-                        </div>
-                    </MudPaper>
-                </MudItem>
-
-                <!-- Right Column: Setlist -->
-                <MudItem xs="12" md="6">
-
-                    <div id="setlist-container" style="max-height: 500px; overflow-y: auto; padding-right: 8px;">
-                        @if (_roomModel?.Setlist?.Songs != null)
-                        {
-                            @foreach (var song in _roomModel.Setlist.Songs.OrderBy(s => s.Order))
-                            {
-                                var isCurrentSong = song.Id == _currentSong.Id;
-                                var cardClass = $"pa-4 mb-3 {(isCurrentSong ? "current-song-card" : "hover-card")}";
-                                var cardStyle = $"border-radius: 12px; cursor: pointer; transition: all 0.3s; {(isCurrentSong ? "background: linear-gradient(135deg, #7B2FBE 0%, #9C4DCC 100%);" : "")}";
-                                var titleStyle = isCurrentSong ? "color: white; font-weight: 600;" : "font-weight: 500;";
-                                var subtitleStyle = isCurrentSong ? "color: rgba(255,255,255,0.9);" : "";
-
-                                <MudPaper Elevation="@(isCurrentSong ? 4 : 2)"
-                                          Class="@cardClass"
-                                          Style="@cardStyle"
-                                          @onclick="@(() => SelectSong(song))">
-                                    <MudText Typo="Typo.h6" Style="@titleStyle">
-                                        @song.Name
-                                    </MudText>
-                                    <MudText Typo="Typo.body2" Style="@subtitleStyle">
-                                        @(song.Artist?.Nick ?? "N/A")
-                                    </MudText>
-                                </MudPaper>
-                            }
-                        }
-                    </div>
-                </MudItem>
-            </MudGrid>
+            @if (_activePanels.Count == 1)
+            {
+                <div style="height: 100%; padding: 12px;">
+                    @RenderPanel(_activePanels[0])
+                </div>
+            }
+            else if (_activePanels.Count == 2)
+            {
+                <MudGrid Spacing="0" Style="height: 100%; margin: 0;">
+                    <MudItem xs="12" md="6" Style="height: 100%; padding: 12px;">
+                        @RenderPanel(_activePanels[0])
+                    </MudItem>
+                    <MudItem xs="12" md="6" Style="height: 100%; padding: 12px;">
+                        @RenderPanel(_activePanels[1])
+                    </MudItem>
+                </MudGrid>
+            }
+            else if (_activePanels.Count == 3)
+            {
+                <MudGrid Spacing="0" Style="height: 100%; margin: 0;">
+                    <MudItem xs="12" md="4" Style="height: 100%; padding: 12px;">
+                        @RenderPanel(_activePanels[0])
+                    </MudItem>
+                    <MudItem xs="12" md="4" Style="height: 100%; padding: 12px;">
+                        @RenderPanel(_activePanels[1])
+                    </MudItem>
+                    <MudItem xs="12" md="4" Style="height: 100%; padding: 12px;">
+                        @RenderPanel(_activePanels[2])
+                    </MudItem>
+                </MudGrid>
+            }
         }
     </MudContainer>
+
+    @if (_currentSong != null && _roomModel?.Setlist?.Songs != null)
+    {
+        <div class="fab-container">
+            <MudFab Color="Color.Primary"
+                    StartIcon="@Icons.Material.Filled.ArrowBack"
+                    Size="Size.Medium"
+                    OnClick="MoveToPrevSong"
+                    Style="margin-right: 8px;"
+                    Disabled="@(!CanMoveToPrevSong())" />
+            <MudFab Color="Color.Primary"
+                    StartIcon="@Icons.Material.Filled.ArrowForward"
+                    Size="Size.Medium"
+                    OnClick="MoveToNextSong"
+                    Disabled="@(!CanMoveToNextSong())" />
+        </div>
+    }
 </MudContainer>
 
+@code {
+    private RenderFragment RenderPanel(PanelType panelType) => panelType switch
+    {
+        PanelType.Song => RenderSongInfo(),
+        PanelType.Lyrics => RenderLyrics(),
+        PanelType.Setlist => RenderSetlist(),
+        _ => __builder => { }
+    };
+
+    private RenderFragment RenderSongInfo() => __builder =>
+    {
+        <MudPaper Elevation="2" Class="pa-6" Style="height: 100%; border-radius: 12px; overflow-y: auto;">
+            <MudText Typo="Typo.h3" Style="font-weight: 700; word-break: break-word; line-height: 1.2;" Class="mb-3">
+                @_currentSong!.Name
+            </MudText>
+            <MudText Typo="Typo.h5" Class="mb-4" Style="opacity: 0.8;">
+                @(_currentSong!.Artist?.Nick ?? "N/A")
+            </MudText>
+
+            <MudDivider Class="my-4" />
+
+            <div class="d-flex flex-wrap gap-3">
+                <MudPaper Elevation="1" Class="pa-4 flex-grow-1" Style="min-width: 120px; border-radius: 8px;">
+                    <MudText Typo="Typo.caption" Color="Color.Default">BPM</MudText>
+                    <MudText Typo="Typo.h5" Style="font-weight: 600;">@_currentSong!.BPM</MudText>
+                </MudPaper>
+                <MudPaper Elevation="1" Class="pa-4 flex-grow-1" Style="min-width: 120px; border-radius: 8px;">
+                    <MudText Typo="Typo.caption" Color="Color.Default">Key</MudText>
+                    <MudText Typo="Typo.h5" Style="font-weight: 600;">@_currentSong!.Key</MudText>
+                </MudPaper>
+                <MudPaper Elevation="1" Class="pa-4 flex-grow-1" Style="min-width: 120px; border-radius: 8px;">
+                    <MudText Typo="Typo.caption" Color="Color.Default">Tuning</MudText>
+                    <MudText Typo="Typo.h5" Style="font-weight: 600;">@_currentSong!.Tuning</MudText>
+                </MudPaper>
+            </div>
+
+            @if (!string.IsNullOrEmpty(_currentSong!.TabsURL))
+            {
+                <MudButton Variant="Variant.Outlined"
+                           Color="Color.Primary"
+                           Href="@_currentSong.TabsURL"
+                           Target="_blank"
+                           FullWidth="true"
+                           Class="mt-4"
+                           StartIcon="@Icons.Material.Filled.LibraryMusic">
+                    View Tabs
+                </MudButton>
+            }
+
+            @if (!string.IsNullOrEmpty(_currentSong.AudioURL))
+            {
+                <MudButton Variant="Variant.Outlined"
+                           Color="Color.Error"
+                           Href="@_currentSong.AudioURL"
+                           Target="_blank"
+                           FullWidth="true"
+                           Class="mt-2"
+                           StartIcon="@Icons.Custom.Brands.YouTube">
+                    Watch on YouTube
+                </MudButton>
+            }
+        </MudPaper>
+    };
+
+    private RenderFragment RenderSetlist() => __builder =>
+{
+    <MudPaper Elevation="2" Class="pa-4" Style="height: 100%; border-radius: 12px; display: flex; flex-direction: column;">
+        <MudText Typo="Typo.h6" Class="mb-3" Style="font-weight: 600;">Setlist</MudText>
+        <div id="setlist-container" style="flex: 1; overflow-y: auto; overflow-x: hidden;">
+            @if (_roomModel?.Setlist?.Songs != null)
+            {
+                @foreach (var song in _roomModel.Setlist.Songs.OrderBy(s => s.Order))
+                {
+                    var isCurrentSong = song.Id == _currentSong!.Id;
+                    var cardClass = $"pa-4 mb-3 {(isCurrentSong ? "current-song-card" : "hover-card")}";
+                    var cardStyle = $"border-radius: 10px; cursor: pointer; transition: all 0.25s ease; {(isCurrentSong ? "background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%); color: white;" : "")}";
+
+                    <MudPaper Elevation="@(isCurrentSong ? 4 : 1)"
+                              Class="@cardClass"
+                              Style="@cardStyle"
+                              @onclick="@(() => SelectSong(song))">
+                        <div class="d-flex justify-space-between align-center mb-2">
+                            <MudText Typo="Typo.subtitle1" Style="@(isCurrentSong ? "color: white; font-weight: 600;" : "font-weight: 500;")">
+                                @song.Name
+                            </MudText>
+                            @if (!string.IsNullOrEmpty(song.Tuning))
+                            {
+                                <MudChip Size="Size.Small" T="string" Text="@song.Tuning" Style="@(isCurrentSong ? "background: rgba(255,255,255,0.2); color: white;" : "")" />
+                            }
+                        </div>
+                        <MudText Typo="Typo.body2" Style="@(isCurrentSong ? "color: rgba(255,255,255,0.9);" : "opacity: 0.7;")">
+                            @(song.Artist?.Nick ?? "N/A")
+                        </MudText>
+                    </MudPaper>
+                }
+            }
+        </div>
+    </MudPaper>
+};
+
+    private RenderFragment RenderLyrics() => __builder =>
+    {
+        <MudPaper Elevation="2" Class="pa-4" Style="height: 100%; border-radius: 12px; display: flex; flex-direction: column;">
+            <div class="d-flex justify-space-between align-center mb-3 flex-wrap gap-2">
+                <MudText Typo="Typo.h6" Style="font-weight: 600;">Lyrics</MudText>
+                <MudToggleGroup T="double"
+                                Value="@_fontScale"
+                                ValueChanged="OnFontScaleChanged"
+                                Outlined="true"
+                                Delimiters="true"
+                                CheckMark="false"
+                                FixedContent="true"
+                                Size="Size.Small">
+                    <MudToggleItem Value="1.0">Standard</MudToggleItem>
+                    <MudToggleItem Value="2.0">Large</MudToggleItem>
+                </MudToggleGroup>
+            </div>
+
+            <div class="d-flex align-center gap-2 mb-3 flex-wrap">
+                @if (!_isScrolling)
+                {
+                    <MudIconButton Icon="@Icons.Material.Filled.PlayArrow"
+                                   Color="Color.Success"
+                                   OnClick="@(() => ToggleScroll(true))"
+                                   Variant="Variant.Filled"
+                                   Size="Size.Small" />
+                }
+                else
+                {
+                    <MudIconButton Icon="@Icons.Material.Filled.Stop"
+                                   Color="Color.Error"
+                                   OnClick="@(() => ToggleScroll(false))"
+                                   Variant="Variant.Filled"
+                                   Size="Size.Small" />
+                }
+                <MudIconButton Icon="@Icons.Material.Filled.ArrowUpward"
+                               Color="Color.Default"
+                               OnClick="ResetScroll"
+                               Variant="Variant.Outlined"
+                               Size="Size.Small" />
+                <div style="flex: 1; min-width: 150px;">
+                    <MudSlider T="int"
+                               Value="@_scrollSpeed"
+                               ValueChanged="OnSpeedChanged"
+                               Min="1"
+                               Max="100"
+                               Step="1"
+                               Color="Color.Info"
+                               Size="Size.Small">
+                        Speed: @_scrollSpeed
+                    </MudSlider>
+                </div>
+            </div>
+
+            @if (_lyricsData is not null)
+            {
+                <div id="genius-lyrics-container"
+                     style="flex: 1; overflow-y: auto; overflow-x: hidden; border-radius: 8px; --lyrics-zoom: @_fontScale;">
+                </div>
+            }
+            else if (_isLoadingLyrics)
+            {
+                <div class="d-flex align-center justify-center" style="flex: 1;">
+                    <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+                </div>
+            }
+            else
+            {
+                <MudAlert Severity="Severity.Info" Class="mt-2">No lyrics available for this song.</MudAlert>
+            }
+        </MudPaper>
+    };
+}
+
 <style>
+    .fab-container {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        display: flex;
+        z-index: 1000;
+    }
+
     .hover-card:hover {
         transform: translateY(-2px);
-        box-shadow: 0 8px 16px rgba(0,0,0,0.2) !important;
+        box-shadow: 0 6px 12px rgba(0,0,0,0.15) !important;
     }
 
     .current-song-card {
         scroll-margin-top: 0px;
     }
 
-    /* Custom scrollbar styling */
-    div::-webkit-scrollbar {
-        width: 8px;
+    #setlist-container::-webkit-scrollbar {
+        width: 6px;
     }
 
-    div::-webkit-scrollbar-track {
-        background: rgba(0,0,0,0.1);
-        border-radius: 4px;
+    #setlist-container::-webkit-scrollbar-track {
+        background: rgba(0,0,0,0.05);
+        border-radius: 3px;
     }
 
-    div::-webkit-scrollbar-thumb {
-        background: rgba(123, 47, 190, 0.5);
-        border-radius: 4px;
+    #setlist-container::-webkit-scrollbar-thumb {
+        background: rgba(0,0,0,0.2);
+        border-radius: 3px;
     }
 
-        div::-webkit-scrollbar-thumb:hover {
-            background: rgba(123, 47, 190, 0.7);
+        #setlist-container::-webkit-scrollbar-thumb:hover {
+            background: rgba(0,0,0,0.3);
         }
+
+    #genius-lyrics-container .rg_embed {
+        transform: scale(var(--lyrics-zoom, 1.0)) !important;
+        transform-origin: top center !important;
+        width: calc(100% / var(--lyrics-zoom, 1.0)) !important;
+        margin: 0 auto !important;
+        display: block !important;
+        background: transparent !important;
+    }
+
+    #genius-lyrics-container .rg_embed_body,
+    #genius-lyrics-container .rg_embed_body div,
+    #genius-lyrics-container .rg_embed_body p,
+    #genius-lyrics-container .lyrics,
+    #genius-lyrics-container .lyrics p {
+        color: var(--mud-palette-text-primary) !important;
+        background-color: transparent !important;
+    }
+
+        #genius-lyrics-container .rg_embed_body a {
+            color: var(--mud-palette-text-primary) !important;
+            text-decoration: none !important;
+        }
+
+    #genius-lyrics-container .rg_embed_header,
+    #genius-lyrics-container .rg_embed_footer {
+        background: transparent !important;
+        color: var(--mud-palette-text-secondary) !important;
+        border: none !important;
+    }
+
+    #genius-lyrics-container::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    #genius-lyrics-container::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    #genius-lyrics-container::-webkit-scrollbar-thumb {
+        background: var(--mud-palette-lines-inputs);
+        border-radius: 10px;
+    }
+
+        #genius-lyrics-container::-webkit-scrollbar-thumb:hover {
+            background: var(--mud-palette-text-secondary);
+        }
+
+    @@media (max-width: 959px) {
+        .fab-container {
+            bottom: 16px;
+            right: 16px;
+        }
+    }
 </style>

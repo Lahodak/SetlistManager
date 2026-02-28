@@ -27,7 +27,7 @@ public partial class EditSetlistDialog
 
     protected override async Task OnInitializedAsync()
     {
-        var result = await SongService.GetAllSongsAsync(new() { PageSize = int.MaxValue, ContentType = ContentType.Private });
+        var result = await SongService.GetSongsAsync(new() { PageSize = 10 });
 
         _allSongs = result?.Items;
 
@@ -35,7 +35,7 @@ public partial class EditSetlistDialog
         {
             Id = Setlist.Id,
             Name = Setlist.Name,
-            OwnerId = Setlist.OwnerId,
+            Owner = Setlist.Owner,
             Songs = Setlist.Songs
         };
 
@@ -45,26 +45,24 @@ public partial class EditSetlistDialog
         }
     }
 
-    private Task<IEnumerable<SongModel>> Search(string value, CancellationToken token)
+    private async Task<IEnumerable<SongModel>> Search(string value, CancellationToken token)
     {
-        if (_allSongs is null)
-            return Task.FromResult<IEnumerable<SongModel>>(new List<SongModel>());
-
-        if (string.IsNullOrWhiteSpace(value))
+        var request = new ContentPagedRequest
         {
-            var availableSongs = _allSongs
-                .Where(s => !_setlist.Songs.Any(ss => ss.Id == s.Id))
-                .ToList();
-            return Task.FromResult<IEnumerable<SongModel>>(availableSongs);
-        }
+            PageSize = 5,
+            Query = value
+        };
 
-        var searchResults = _allSongs
-            .Where(s => (s.Name?.Contains(value, StringComparison.OrdinalIgnoreCase) ?? false) ||
-                       (s.Artist?.Nick.Contains(value, StringComparison.OrdinalIgnoreCase) ?? false))
+        var result = await SongService.GetSongsAsync(request);
+
+        if (result?.Items is null)
+            return [];
+
+        var availableSongs = result.Items
             .Where(s => !_setlist.Songs.Any(ss => ss.Id == s.Id))
             .ToList();
 
-        return Task.FromResult<IEnumerable<SongModel>>(searchResults);
+        return availableSongs;
     }
 
     private void OnSongSelected(SongModel selectedSong)
@@ -101,8 +99,15 @@ public partial class EditSetlistDialog
             _setlist.Songs[i].Order = i + 1;
         }
 
-        await SetlistService.EditSetlist(_setlist);
-        MudDialog.Close(DialogResult.Ok(_setlist));
+        var result = await SetlistService.TryEditSetlist(_setlist);
+
+        if (!result)
+        {
+            Snackbar.Add("Failed to save setlist", Severity.Error);
+            return;
+        }
+
+        MudDialog.Close();
     }
 
     private void Cancel() => MudDialog.Cancel();
@@ -119,33 +124,30 @@ public partial class EditSetlistDialog
         StateHasChanged();
     }
 
-    private void MoveSongUp(SongModel song)
+    private void MoveSongUp(SongModel song) => MoveSong(song, -1);
+
+    private void MoveSongDown(SongModel song) => MoveSong(song, 1);
+
+    private void MoveSong(SongModel song, int direction)
     {
         int index = _setlist.Songs.IndexOf(song);
-        if (index <= 0) return;
+        int newIndex = index + direction;
 
-        (_setlist.Songs[index - 1], _setlist.Songs[index]) = (_setlist.Songs[index], _setlist.Songs[index - 1]);
+        if (newIndex < 0 || newIndex >= _setlist.Songs.Count)
+            return;
 
-        for (int i = 0; i < _setlist.Songs.Count; i++)
-        {
-            _setlist.Songs[i].Order = i + 1;
-        }
+        (_setlist.Songs[newIndex], _setlist.Songs[index]) =
+            (_setlist.Songs[index], _setlist.Songs[newIndex]);
 
+        ReorderSongs();
         StateHasChanged();
     }
 
-    private void MoveSongDown(SongModel song)
+    private void ReorderSongs()
     {
-        int index = _setlist.Songs.IndexOf(song);
-        if (index >= _setlist.Songs.Count - 1) return;
-
-        (_setlist.Songs[index + 1], _setlist.Songs[index]) = (_setlist.Songs[index], _setlist.Songs[index + 1]);
-
         for (int i = 0; i < _setlist.Songs.Count; i++)
         {
             _setlist.Songs[i].Order = i + 1;
         }
-
-        StateHasChanged();
     }
 }

@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Http.Extensions;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
+using SetlistManager.App.Extensions;
 using SetlistManager.App.Options;
 using SetlistManager.Common.Models;
 
@@ -8,44 +8,35 @@ namespace SetlistManager.App.Services.Implementations;
 public class SetlistService : ISetlistService
 {
     private readonly IApiService _apiService;
-    private readonly IOptions<SetlistManagerApiOptions> _apiOptions;
+    private readonly string _apiPath;
+
     public SetlistService(IApiService apiService, IOptions<SetlistManagerApiOptions> apiOptions)
     {
-        _apiOptions = apiOptions;
         _apiService = apiService;
+        _apiPath = apiOptions.Value.BaseUrl + apiOptions.Value.SetlistsEndpoint;
     }
-
-    public async Task SaveSetlistAsync(SetlistModel setlistModel) 
-        => await _apiService.PostAsync(_apiOptions.Value.SetlistsEndpoint, setlistModel);
-
-    public async Task<SetlistModel?> GetSetlistById(int id) 
-        => await _apiService.GetAsync<SetlistModel>($"{_apiOptions.Value.SetlistsEndpoint}/{id}");
-
-    public async Task<PagedResponse<SetlistModel>?> GetAllSetlistsAsync(PagedRequest request)
+    
+    public async Task<PagedResponse<SetlistModel>> GetSetlistsAsync(PagedRequest request)
     {
-        UriBuilder uri = new(_apiOptions.Value.SetlistsEndpoint)
-        {
-            Query = new QueryBuilder
-            {
-                { "PageSize", request.PageSize.ToString() },
-                { "PageIndex", request.PageIndex.ToString() },
-                { "Query", request.Query ?? string.Empty },
-                { "ContentType", request.ContentType.ToString()}
-            }.ToString()
-        };
-
-        return await _apiService.GetAsync<PagedResponse<SetlistModel>?>(uri.ToString());
+        var uri = request.ToPagedRequestUri(_apiPath);
+        return await _apiService.GetAsync<PagedResponse<SetlistModel>>(uri);
     }
 
-    public async Task EditSetlist(SetlistModel setlistModel)
-        => await _apiService.PutAsync($"{_apiOptions.Value.SetlistsEndpoint}/{setlistModel.Id}", setlistModel);
+    public async Task<bool> TryCreateSetlistAsync(SetlistCreateModel createModel)
+        => await _apiService.TryPostAsync(_apiPath, createModel);
+
+    public async Task<SetlistModel?> GetSetlistById(int id)
+        => await _apiService.GetAsync<SetlistModel>($"{_apiPath}/{id}");
+
+    public async Task<bool> TryEditSetlist(SetlistModel setlistModel)
+        => await _apiService.TryPutAsync($"{_apiPath}/{setlistModel.Id}", setlistModel);
 
     public async Task<bool> TryDeleteSetlistAsync(int id)
-        => await _apiService.TryDeleteAsync($"{_apiOptions.Value.SetlistsEndpoint}/{id}");
+        => await _apiService.TryDeleteAsync($"{_apiPath}/{id}");
 
     public async Task<bool> TryGiveAccessToUserAsync(int setlistId, int targetId)
-        => await _apiService.PostAsync($"{_apiOptions.Value.SetlistsEndpoint}/{setlistId}/setlistsusers/{targetId}", true);
+        => await _apiService.TryPostAsync($"{_apiPath}/{setlistId}/users/{targetId}", true);
 
-    public async Task RemoveAccessFromUserAsync(int setlistId, int targetId)
-        => await _apiService.TryDeleteAsync($"{_apiOptions.Value.SetlistsEndpoint}/{setlistId}/setlistsusers/{targetId}");
+    public async Task<bool> TryRemoveAccessFromUserAsync(int setlistId, int targetId)
+        => await _apiService.TryDeleteAsync($"{_apiPath}/{setlistId}/users/{targetId}");
 }

@@ -1,40 +1,45 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SetlistManager.Business.Extensions;
 using SetlistManager.Business.Mappers;
+using SetlistManager.Common.Exceptions;
 using SetlistManager.Common.Models;
 using SetlistManager.Data;
 using SetlistManager.Data.Entities;
-using System.Text;
 
 namespace SetlistManager.Business.Services.Implementations;
 
 public class RoomsService : IRoomsService
 {
-    private const string roomCodeAvailableCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    private const int roomCodeLength = 6;
     private readonly AppDbContext _dbContext;
+    private readonly IRoomCodeService _roomCodeService;
+    private readonly int _currentUserId;
 
-    public RoomsService(AppDbContext dbContext)
+    public RoomsService(AppDbContext dbContext, ICurrentUserContext currentUserContext, IRoomCodeService roomCodeService)
     {
         _dbContext = dbContext;
+        _roomCodeService = roomCodeService;
+        _currentUserId = currentUserContext.UserId;
     }
 
-    public async Task<RoomModel?> GetRoomByIdAsync(int roomId)
+    public async Task<RoomModel> GetRoomByIdAsync(int roomId)
     {
         var room = await _dbContext.Rooms
-        .Include(x => x.Setlist)
-            .ThenInclude(x => x!.SongsSetlists)
-            .ThenInclude(x => x.Song)
-            .ThenInclude(x => x.Language)
-        .Include(x => x.Setlist)
-            .ThenInclude(x => x!.SongsSetlists)
-            .ThenInclude(x => x.Song)
-            .ThenInclude(x => x.Artist)
-        .Include(x => x.Users)
-            .ThenInclude(x => x.Instrument)
-        .FirstOrDefaultAsync(x => x.Id == roomId);
+            .Include(x => x.Setlist)
+                .ThenInclude(x => x!.Owner)
+            .Include(x => x.Setlist)
+                .ThenInclude(x => x!.SongsSetlists)
+                .ThenInclude(x => x.Song)
+                .ThenInclude(x => x.Language)
+            .Include(x => x.Setlist)
+                .ThenInclude(x => x!.SongsSetlists)
+                .ThenInclude(x => x.Song)
+                .ThenInclude(x => x.Artist)
+            .Include(x => x.Users)
+                .ThenInclude(x => x.Instrument)
+            .FirstOrDefaultAsync(x => x.Id == roomId);
 
         if (room is null)
-            return null;
+            throw new EntryNotFoundException();
 
         var model = room.ToModel();
 
@@ -46,37 +51,26 @@ public class RoomsService : IRoomsService
         return model;
     }
 
-    public async Task<RoomModel> CreateRoomAsync(RoomCreateModel createRoomModel, int hostId)
-    {                       
-        StringBuilder code = new(roomCodeLength);
-
-        do
-        {
-            code.Clear();
-            for (int i = 0; i < roomCodeLength; i++)
-            {
-                int index = Random.Shared.Next(roomCodeAvailableCharacters.Length - 1);
-                code.Append(roomCodeAvailableCharacters[index]);
-            }
-        } 
-        while (await _dbContext.Rooms.AnyAsync(x => x.Code == code.ToString()));
-
+    public async Task<RoomModel> CreateRoomAsync(RoomCreateModel createRoomModel)
+    {
         Room room = new()
         {
             Name = createRoomModel.Name,
-            HostId = hostId,
+            HostId = _currentUserId,
             SetlistId = createRoomModel.SetlistModel?.Id,
             IsPublic = createRoomModel.IsPublic,
-            UpdatedBy = hostId,
+            UpdatedBy = _currentUserId,
             CreatedAt = DateTime.UtcNow,
             IsActive = true,
-            Code = code.ToString()
+            Code = await _roomCodeService.GenerateUniqueRoomCodeAsync()            
         };
-        
+
         _dbContext.Rooms.Add(room);
         await _dbContext.SaveChangesAsync();
 
         var createdRoom = await _dbContext.Rooms
+            .Include(x => x.Setlist)
+                .ThenInclude(x => x!.Owner)
             .Include(x => x.Setlist)
                 .ThenInclude(x => x!.SongsSetlists)
                 .ThenInclude(x => x.Song)
@@ -105,9 +99,11 @@ public class RoomsService : IRoomsService
         return roomModel;
     }
 
-    public async Task<RoomModel?> JoinRoomAsync(JoinRoomModel joinRoomModel, User user)
+    public async Task<RoomModel> JoinRoomAsync(JoinRoomModel joinRoomModel, User user)
     {
         var room = await _dbContext.Rooms
+            .Include(x => x.Setlist)
+                .ThenInclude(x => x!.Owner)
             .Include(x => x.Setlist)
                 .ThenInclude(x => x!.SongsSetlists)
                 .ThenInclude(x => x.Song)
@@ -121,10 +117,9 @@ public class RoomsService : IRoomsService
             .FirstOrDefaultAsync(x => x.Code == joinRoomModel.RoomCode);
 
         if (room is null)
-            return null;
+            throw new EntryNotFoundException();
 
         room.Users.Add(user);
-
         await _dbContext.SaveChangesAsync();
 
         var roomModel = room.ToModel();
@@ -141,6 +136,8 @@ public class RoomsService : IRoomsService
     {
         var room = await _dbContext.Rooms
             .Include(x => x.Setlist)
+                .ThenInclude(x => x!.Owner)
+            .Include(x => x.Setlist)
                 .ThenInclude(x => x!.SongsSetlists)
                 .ThenInclude(x => x.Song)
                 .ThenInclude(x => x.Language)
@@ -152,11 +149,10 @@ public class RoomsService : IRoomsService
                 .ThenInclude(x => x.Instrument)
             .FirstOrDefaultAsync(x => x.Id == changeCurrentSongModel.RoomId);
 
-        if (room is null) 
-            return;    
+        if (room is null)
+            return;
 
         room.CurrentSongId = changeCurrentSongModel.NewCurrentSongId;
-
         await _dbContext.SaveChangesAsync();
     }
 
@@ -167,9 +163,9 @@ public class RoomsService : IRoomsService
             .Where(x => x.IsActive)
             .Where(x => x.Name.Contains(request.Query ?? string.Empty));
 
-        var totalCount = await query.CountAsync();
-
-        var rooms = await query
+        return await query
+            .Include(x => x.Setlist)
+                .ThenInclude(x => x!.Owner)
             .Include(x => x.Setlist)
                 .ThenInclude(x => x!.SongsSetlists)
                 .ThenInclude(x => x.Song)
@@ -180,25 +176,15 @@ public class RoomsService : IRoomsService
                 .ThenInclude(x => x.Artist)
             .Include(x => x.Users)
                 .ThenInclude(x => x.Instrument)
-            .Skip(request.PageIndex * request.PageSize)
-            .Take(request.PageSize)
-            .AsNoTracking()
-            .ToListAsync();
-
-        PagedResponse<RoomModel> response = new()
-        {
-            TotalCount = totalCount,
-            Items = rooms
-                .Select(x => x.ToModel())
-                .ToList()
-        };
-
-        return response;
+            .Select(x => x.ToModel())
+            .ToPaginatedResultAsync(request);
     }
 
-    public async Task<RoomModel?> GetRoomByCodeAsync(string roomCode)
+    public async Task<RoomModel> GetRoomByCodeAsync(string roomCode)
     {
         var room = await _dbContext.Rooms
+            .Include(x => x.Setlist)
+                .ThenInclude(x => x!.Owner)
             .Include(x => x.Setlist)
                 .ThenInclude(x => x!.SongsSetlists)
                 .ThenInclude(x => x.Song)
@@ -212,8 +198,8 @@ public class RoomsService : IRoomsService
             .FirstOrDefaultAsync(x => x.Code == roomCode);
 
         if (room is null)
-            return null;
-        
+            throw new EntryNotFoundException();
+
         var model = room.ToModel();
 
         if (room.Setlist is null || model.Setlist is null)

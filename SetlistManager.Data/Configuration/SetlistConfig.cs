@@ -8,8 +8,6 @@ public class SetlistConfig : IEntityTypeConfiguration<Setlist>
 {
     public void Configure(EntityTypeBuilder<Setlist> builder)
     {
-        builder.HasKey(x => x.Id);
-
         builder.Property(x => x.CreatedAt);
 
         builder.Property(x => x.UpdatedAt);

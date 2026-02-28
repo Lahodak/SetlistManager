@@ -4,15 +4,13 @@ namespace SetlistManager.Business.Services;
 
 public interface ISongService
 {
-    Task<SongModel?> GetSongByIdAsync(int songId, int userId);
-    Task<PagedResponse<SongModel>> GetSongsAsync(PagedRequest request, int userId);
-    Task<bool> TryCreateSongAsync(SongCreateModel songCreateModel, int userId);
-    Task<bool> TryUpdateSongAsync(int songId, SongUpdateModel updateModel, int userId);
-    Task<bool> TryDeleteSongAsync(int songId, int userId);
-    Task<bool> TryGiveAccessToUserAsync(int songId, int targetId, int currentUserId);
-    Task RemoveAccessFromUserAsync(int songId, int userId, int currentUserId);
-    Task<bool> TryMakeSongPublicAsync(int songId, int userId);
-    Task<PagedResponse<SongUsageStatModel>> GetMostUsedSongsAsync(StatsPagedRequest request);
-    Task<PagedResponse<SongUsageStatModel>> GetMostAddedToLibraryAsync(PagedRequest request);
-    Task<PagedResponse<LatestSongStatModel>> GetLatestPublicSongsAsync(PagedRequest request);
+    Task<SongModel?> GetSongByIdAsync(int songId);
+    Task<PagedResponse<SongModel>> GetSongsAsync(ContentPagedRequest request);
+    Task CreateSongAsync(SongCreateModel songCreateModel);
+    Task UpdateSongAsync(int songId, SongUpdateModel updateModel);
+    Task DeleteSongAsync(int songId);
+    Task GiveAccessToUserAsync(int songId, int targetId);
+    Task RemoveAccessFromUserAsync(int songId, int userId);
+    Task MakeSongPublicAsync(int songId);
+    Task<List<SongUsageStatModel>> GetStatisticsAsync(StatsRequest request);
 }

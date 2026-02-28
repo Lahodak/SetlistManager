@@ -17,7 +17,7 @@ public partial class PublicArtists
     public required ISnackbar Snackbar { get; set; }
 
     private MudTable<ArtistModel> table = new();
-    private PagedRequest pageState = new()
+    private ContentPagedRequest pageState = new()
     {
         ContentType = ContentType.Public
     };
@@ -34,13 +34,12 @@ public partial class PublicArtists
 
     private async Task LoadUserArtists()
     {
-        var userArtistsRequest = new PagedRequest
+        var userArtistsRequest = new ContentPagedRequest
         {
-            ContentType = ContentType.Private,
             PageSize = int.MaxValue
         };
 
-        var userArtists = await ArtistService.GetAvailableArtistsAsync(userArtistsRequest);
+        var userArtists = await ArtistService.GetArtistsAsync(userArtistsRequest);
         if (userArtists?.Items != null)
         {
             _userArtistIds = userArtists.Items.Select(a => a.Id).ToHashSet();
@@ -50,13 +49,12 @@ public partial class PublicArtists
     private async Task<TableData<ArtistModel>?> ServerReload(TableState state, CancellationToken token)
     {
         _loading = true;
-        await Task.Delay(300, token);
 
         pageState.Query = searchString;
         pageState.PageIndex = state.Page;
         pageState.PageSize = state.PageSize;
 
-        var response = await ArtistService.GetAvailableArtistsAsync(pageState);
+        var response = await ArtistService.GetArtistsAsync(pageState);
         _loading = false;
 
         if (response?.Items is null)

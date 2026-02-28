@@ -5,7 +5,7 @@ namespace SetlistManager.Business.Mappers;
 
 public static class ArtistMapper
 {
-    public static ArtistModel ToModel(this Artist artist, bool includeSongs = true)
+    public static ArtistModel ToModel(this Artist artist)
     {
         return new()
         {
@@ -13,17 +13,21 @@ public static class ArtistMapper
             Nick = artist.Nick,
             IsPublic = artist.IsPublic,
             OwnerId = artist.OwnerId,
-            Songs = includeSongs
-                ? artist.Songs?.Select(s => s.ToModel(false)).ToList()
-                : null
+            Songs = artist.Songs?
+                .Select(s => s.ToModelWithoutArtist())
+                .ToList()
         };
     }
 
-    public static Artist ToEntity(this ArtistModel model)
+    public static ArtistModel ToModelWithoutSongs(this Artist artist)
     {
         return new()
         {
-            Nick = model.Nick
+            Id = artist.Id,
+            Nick = artist.Nick,
+            IsPublic = artist.IsPublic,
+            OwnerId = artist.OwnerId,
+            Songs = null
         };
     }
 }

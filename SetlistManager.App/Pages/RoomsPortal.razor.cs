@@ -14,15 +14,13 @@ public partial class RoomsPortal
     public required IRoomService RoomService { get; set; }
     [Inject]
     public required NavigationManager NavigationManager { get; set; }
-    private PagedRequest pageStatus = new();
+    private readonly PagedRequest pageStatus = new();
 
     private MudTable<RoomModel?> table = new();
     private string? searchString;    
 
     private async Task<TableData<RoomModel?>> ServerReload(TableState state, CancellationToken token)
     {        
-        await Task.Delay(500, token);
-
         pageStatus.PageIndex = state.Page;
         pageStatus.PageSize = state.PageSize;
         pageStatus.Query = searchString;        

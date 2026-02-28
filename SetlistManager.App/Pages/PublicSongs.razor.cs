@@ -15,7 +15,7 @@ public partial class PublicSongs
     public required ISnackbar Snackbar { get; set; }
 
     private MudTable<SongModel> table = new();
-    private PagedRequest pageState = new()
+    private ContentPagedRequest pageState = new()
     {
         ContentType = ContentType.Public
     };
@@ -32,29 +32,29 @@ public partial class PublicSongs
 
     private async Task LoadUserSongs()
     {
-        var userSongsRequest = new PagedRequest
+        var userSongsRequest = new ContentPagedRequest
         {
-            ContentType = ContentType.Private,
             PageSize = int.MaxValue
         };
 
-        var userSongs = await SongService.GetAllSongsAsync(userSongsRequest);
+        var userSongs = await SongService.GetSongsAsync(userSongsRequest);
         if (userSongs?.Items != null)
         {
-            _userSongIds = userSongs.Items.Select(s => s.Id).ToHashSet();
+            _userSongIds = userSongs.Items
+                .Select(s => s.Id)
+                .ToHashSet();
         }
     }
 
     private async Task<TableData<SongModel>?> ServerReload(TableState state, CancellationToken token)
     {
         _loading = true;
-        await Task.Delay(300, token);
 
         pageState.Query = searchString;
         pageState.PageIndex = state.Page;
         pageState.PageSize = state.PageSize;
 
-        var response = await SongService.GetAllSongsAsync(pageState);
+        var response = await SongService.GetSongsAsync(pageState);
 
         _loading = false;
 
@@ -85,7 +85,7 @@ public partial class PublicSongs
 
     private async Task AddToLibrary(SongModel song)
     {
-        var result = await SongService.TryGiveAccessToUserAsync(_userId, song.Id);
+        var result = await SongService.TryGiveAccessToUserAsync(song.Id, _userId);
 
         if(result)
         {

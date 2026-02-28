@@ -2,7 +2,7 @@
 
 namespace SetlistManager.Data.Entities;
 
-public class Friendship : Base 
+public class Friendship : BaseEntity 
 {
     public int InitiatorId { get; set; }
     public virtual User Initiator { get; set; } = default!;

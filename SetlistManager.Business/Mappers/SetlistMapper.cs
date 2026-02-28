@@ -11,8 +11,8 @@ public static class SetlistMapper
         {
             Id = setlist.Id,
             Name = setlist.Name,            
-            OwnerId = setlist.OwnerId,            
-            Songs = setlist.SongsSetlists?
+            Owner = setlist.Owner.ToViewModel(),            
+            Songs = setlist.SongsSetlists
                         .Select(ss => 
                         {
                             var model = ss.Song.ToModel();
@@ -20,8 +20,7 @@ public static class SetlistMapper
                             return model;
                         })
                         .OrderBy(s => s.Order)
-                        .ToList()
-                        ?? []
+                        .ToList()                        
         };
     }
 }

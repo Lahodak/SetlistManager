@@ -1,9 +1,15 @@
-﻿namespace SetlistManager.Common.Models;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace SetlistManager.Common.Models;
 
 public class ChangeCurrentSongModel
 {
-    public int RoomId { get; set; }
-    public int CurrentSongId { get; set; }
-    public int NewCurrentSongId { get; set; }
-    public int AdminId { get; set; }
+    [Required]    
+    public int? RoomId { get; set; }
+    [Required]
+    public int? CurrentSongId { get; set; }
+    [Required]
+    public int? NewCurrentSongId { get; set; }
+    [Required]
+    public int? AdminId { get; set; }
 }

@@ -8,8 +8,6 @@ public class TokenConfig : IEntityTypeConfiguration<Token>
 {
     public void Configure(EntityTypeBuilder<Token> builder)
     {
-        builder.HasKey(x => x.Id);
-
         builder.Property(x => x.CreatedAt);
 
         builder.Property(x => x.ProviderId)

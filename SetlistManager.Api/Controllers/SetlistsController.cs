@@ -1,68 +1,44 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using SetlistManager.Api.Services;
 using SetlistManager.Business.Services;
 using SetlistManager.Common.Models;
 
 namespace SetlistManager.Api.Controllers;
 
-[Route("api/setlists")]
-
 public class SetlistsController : BaseController
 {
     private readonly ISetlistsService _setlistService;
-    private readonly ICurrentUserContext _userContext;
-    
-    public SetlistsController(ISetlistsService setlistService, ICurrentUserContext userContext)
+    public SetlistsController(ISetlistsService setlistService)
     {
         _setlistService = setlistService;
-        _userContext = userContext;
     }
 
     [HttpGet]
     public async Task<ActionResult<List<SetlistModel>>> GetSetlists([FromQuery] PagedRequest request)
     {
-        var userId = _userContext.GetCurrentUserId();
-
-        var result = await _setlistService.GetSetlistsAsync(userId!.Value, request);
-
-        return Ok(result);
+        return Ok(await _setlistService.GetSetlistsAsync(request));
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<SetlistModel>> GetSetlist(int id)
     {
-        var userId = _userContext.GetCurrentUserId();
-
-        var result = await _setlistService.GetSetlistByIdAsync(id, userId!.Value);
-
-        if (result is null)
-            return NotFound();
-
-        return Ok(result);
+        return Ok(await _setlistService.GetSetlistByIdAsync(id));
     }
 
     [HttpPost]
-    public async Task<ActionResult<SetlistModel>> CreateSetlist([FromBody] SetlistModel setlist)
+    public async Task<ActionResult> CreateSetlist([FromBody] SetlistCreateModel setlist)
     {
-        var userId = _userContext.GetCurrentUserId();        
-
-        var result = await _setlistService.TryCreateSetlistAsync(setlist, userId!.Value);
+        await _setlistService.CreateSetlistAsync(setlist);
         
-        if(!result)
-            return BadRequest();
-
         return Created();
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult> TryEditSetlist(int id, [FromBody] SetlistModel setlist)
+    public async Task<ActionResult> EditSetlist(int id, [FromBody] SetlistModel setlist)
     {
-        var currentUserId = _userContext.GetCurrentUserId();
-
         if (setlist.Songs is null)
             return BadRequest();
 
-        await _setlistService.EditSetlistAsync(setlist, currentUserId!.Value);
+        await _setlistService.EditSetlistAsync(setlist);
 
         return NoContent();    
     }
@@ -70,33 +46,23 @@ public class SetlistsController : BaseController
     [HttpDelete("{id}")]
     public async Task<ActionResult> TryDeleteSetlist(int id)
     {
-        var currentUserId = _userContext.GetCurrentUserId();
-
-        if (!await _setlistService.TryDeleteSetlistAsync(id, currentUserId!.Value))
-            return NotFound();
+        await _setlistService.DeleteSetlistAsync(id);
 
         return NoContent();
     }
 
-    [HttpPost("{id}/setlistsusers/{userId}")]
+    [HttpPost("{id}/users/{userId}")]
     public async Task<ActionResult> TryGiveAccessToSetlist(int id, int userId)
     {
-        var currentUserId = _userContext.GetCurrentUserId();
-
-        var result = await _setlistService.TryGiveAccessToSetlistAsync(id, userId, currentUserId!.Value);
-
-        if (!result)
-            return NotFound();
+        await _setlistService.GiveAccessToSetlistAsync(id, userId);
 
         return Created();
     }
 
-    [HttpDelete("{id}/setlistsusers/{userId}")]
+    [HttpDelete("{id}/users/{userId}")]
     public async Task<ActionResult> TryRemoveAccessFromUser(int id, int userId)
     {
-        var currentUserId = _userContext.GetCurrentUserId();
-        
-        await _setlistService.RemoveAccessFromUserAsync(id, userId, currentUserId!.Value);
+        await _setlistService.RemoveAccessFromUserAsync(id, userId);
 
         return NoContent();
     }

@@ -1,79 +1,94 @@
 ﻿using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Options;
 using SetlistManager.Business.Options;
+using SetlistManager.Common.Brevo.Models;
+using SetlistManager.Common.Exceptions;
 using SetlistManager.Resources.Storage;
-using System.Text;
-using System.Text.Json;
+using System.Net.Http.Json;
 
 namespace SetlistManager.Business.Services.Implementations;
 
 public class MailService : IMailService
 {
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly IOptions<BrevoOptions> _brevoOptions;
+    private readonly BrevoOptions _brevoOptions;
+    private const string _brevoApiKeySectionName = "api-key";
+    private const string _tokenSectionName = "token";
+    private const string _emailSectionName = "email";
 
     public MailService(IHttpClientFactory httpClientFactory, IOptions<BrevoOptions> brevoOptions)
     {
         _httpClientFactory = httpClientFactory;
-        _brevoOptions = brevoOptions;
+        _brevoOptions = brevoOptions.Value;
     }
 
     public async Task SendVerificationEmailAsync(string email, string token)
     {
-        UriBuilder uri = new(_brevoOptions.Value.VerifyEmailRedirect)
-        {
-            Query = new QueryBuilder
-            {
-                { "token", token },
-                { "email", email }
-            }.ToString()
-        };
-
-        var verificationLink = uri.ToString();
-        var subject = Storage.VerifyEmailMailSubject;
-        var htmlBody = string.Format(Storage.VerifyEmailMail, verificationLink);
-        var textBody = string.Format(Storage.VerifyEmailMailPlain, verificationLink);
-
-        await SendEmailAsync(email, subject, htmlBody, textBody);
+        var emailTemplate = CreateVerificationEmailTemplate(email, token);
+        await SendEmailAsync(email, emailTemplate);
     }
 
     public async Task SendPasswordResetEmailAsync(string email, string token)
     {
-        UriBuilder uri = new(_brevoOptions.Value.ResetPasswordRedirect)
+        var emailTemplate = CreatePasswordResetEmailTemplate(email, token);
+        await SendEmailAsync(email, emailTemplate);
+    }
+
+    private EmailTemplate CreateVerificationEmailTemplate(string email, string token)
+    {
+        var verificationLink = BuildRedirectUri(_brevoOptions.VerifyEmailRedirect, email, token);
+
+        return new EmailTemplate
+        {
+            Subject = Storage.VerifyEmailMailSubject,
+            HtmlContent = string.Format(Storage.VerifyEmailMail, verificationLink),
+            TextContent = string.Format(Storage.VerifyEmailMailPlain, verificationLink)
+        };
+    }
+
+    private EmailTemplate CreatePasswordResetEmailTemplate(string email, string token)
+    {
+        var resetLink = BuildRedirectUri(_brevoOptions.ResetPasswordRedirect, email, token);
+
+        return new EmailTemplate
+        {
+            Subject = Storage.ResetPasswordMailSubject,
+            HtmlContent = string.Format(Storage.ResetPasswordMail, resetLink),
+            TextContent = string.Format(Storage.ResetPasswordMailPlain, resetLink)
+        };
+    }
+
+    private string BuildRedirectUri(string baseUri, string email, string token)
+    {
+        UriBuilder uri = new(baseUri)
         {
             Query = new QueryBuilder
             {
-                { "token", token },
-                { "email", email }
+                { _tokenSectionName, token },
+                { _emailSectionName, email }
             }.ToString()
         };
 
-        var resetLink = uri.ToString();
-        var subject = Storage.ResetPasswordMailSubject;
-        var htmlBody = string.Format(Storage.ResetPasswordMail, resetLink);
-        var textBody = string.Format(Storage.ResetPasswordMailPlain, resetLink);
-
-        await SendEmailAsync(email, subject, htmlBody, textBody);
+        return uri.ToString();
     }
 
-    private async Task SendEmailAsync(string recipientEmail, string subject, string htmlContent, string textContent)
+    private async Task SendEmailAsync(string recipientEmail, EmailTemplate template)
     {
         var client = _httpClientFactory.CreateClient();
-        client.DefaultRequestHeaders.Add("api-key", _brevoOptions.Value.ApiKey);
+        client.DefaultRequestHeaders.Add(_brevoApiKeySectionName, _brevoOptions.ApiKey);
 
         var payload = new
         {
-            sender = new { name = _brevoOptions.Value.SenderName, email = _brevoOptions.Value.SenderEmail },
+            sender = new { name = _brevoOptions.SenderName, email = _brevoOptions.SenderEmail },
             to = new[] { new { email = recipientEmail } },
-            subject,
-            htmlContent,
-            textContent
+            subject = template.Subject,
+            htmlContent = template.HtmlContent,
+            textContent = template.TextContent
         };
 
-        var json = JsonSerializer.Serialize(payload);
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
-        var response = await client.PostAsync(_brevoOptions.Value.SmtpApi, content);
+        var response = await client.PostAsJsonAsync(_brevoOptions.SmtpApi, payload);
 
-        response.EnsureSuccessStatusCode();
+        if (!response.IsSuccessStatusCode)
+            throw new FailedToSendEmailException($"Failed to send email to {recipientEmail}. Status Code: {response.StatusCode}");
     }
 }

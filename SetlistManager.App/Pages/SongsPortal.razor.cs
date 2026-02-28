@@ -19,7 +19,7 @@ public partial class SongsPortal
     public required IUserService UserService { get; set; }
 
     private MudTable<SongModel> table = new();
-    private readonly PagedRequest _pageState = new() { ContentType = ContentType.Private };
+    private readonly ContentPagedRequest _pageState = new();
     private string? searchString;
     private int _userId;
 
@@ -30,13 +30,11 @@ public partial class SongsPortal
 
     private async Task<TableData<SongModel>?> ServerReload(TableState state, CancellationToken token)
     {
-        await Task.Delay(300, token);
-
         _pageState.Query = searchString;
         _pageState.PageIndex = state.Page;
         _pageState.PageSize = state.PageSize;
 
-        var response = await SongService.GetAllSongsAsync(_pageState);
+        var response = await SongService.GetSongsAsync(_pageState);
 
         if (response?.Items is null)
             return null;
@@ -127,7 +125,7 @@ public partial class SongsPortal
         if (result is not true)
             return;
 
-        await SongService.RemoveAccessFromUserAsync(song.Id, _userId);
+        await SongService.TryRemoveAccessFromUserAsync(song.Id, _userId);
         await table.ReloadServerData();
     }
 
@@ -147,6 +145,7 @@ public partial class SongsPortal
         
         await table.ReloadServerData();
     }
+
     public async Task AddAccessToUserAsync(int id)
     {
         var parameters = new DialogParameters

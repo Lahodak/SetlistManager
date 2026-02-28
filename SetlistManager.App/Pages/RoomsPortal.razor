@@ -1,65 +1,92 @@
 ﻿@page "/RoomsPortal"
-
 <PageTitle>Rooms Portal</PageTitle>
 
-<MudContainer>
-    <MudPaper>
+<MudContainer Class="mt-6 mb-8">
 
-        <MudGrid Justify="Justify.SpaceEvenly" Class="mt-6">
-            <MudItem>
-                <MudButton Variant="Variant.Filled"
-                           Color="Color.Primary"
-                           Size="Size.Large"
-                           OnClick="CreateRoomClicked">
-                    Create Room
-                </MudButton>
-            </MudItem>
-            <MudItem>
-                <MudButton Variant="Variant.Filled"
-                           Color="Color.Secondary"
-                           Size="Size.Large"
-                           OnClick="OpenJoinRoomDialog">
-                    Join Room
-                </MudButton>
-            </MudItem>
-        </MudGrid>
+    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-6">
+        <div>
+            <MudText Typo="Typo.h4" Class="page-title">Rooms</MudText>
+            <MudText Typo="Typo.body2" Class="page-subtitle">Create your own room or join an existing one</MudText>
+        </div>
+        <MudStack Row="true" Spacing="2">
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Secondary"
+                       Size="Size.Medium"
+                       OnClick="OpenJoinRoomDialog"
+                       StartIcon="@Icons.Material.Filled.MeetingRoom"
+                       Class="public-btn">
+                Join Room
+            </MudButton>
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       Size="Size.Medium"
+                       OnClick="CreateRoomClicked"
+                       StartIcon="@Icons.Material.Filled.AddHome"
+                       Class="add-btn">
+                Create Room
+            </MudButton>
+        </MudStack>
+    </MudStack>
 
-        <MudTable ServerData="ServerReload" Hover="true" @ref="table">
+    <MudPaper Class="portal-card" Elevation="0">
+        <MudTable ServerData="ServerReload" Hover="true" @ref="table" Class="portal-table">
             <ToolBarContent>
-                <MudText Typo="Typo.h6">Browse Public Rooms</MudText>
+                <MudText Typo="Typo.h6" Class="toolbar-title">Browse Public Rooms</MudText>
                 <MudSpacer />
-                <MudTextField T="string" ValueChanged="@(s => OnSearch(s))" Placeholder="Search rooms"
+                <MudTextField @bind-Value="searchString"
+                              Placeholder="Search rooms..."
                               Adornment="Adornment.Start"
                               AdornmentIcon="@Icons.Material.Filled.Search"
-                              IconSize="Size.Medium" Class="mt-0 ml-3">
-                </MudTextField>
+                              IconSize="Size.Medium"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Class="search-field"
+                              Immediate="true"
+                              DebounceInterval="700"
+                              OnDebounceIntervalElapsed="OnSearch" />
             </ToolBarContent>
-
             <HeaderContent>
                 <MudTh><MudTableSortLabel SortLabel="name_field" T="RoomModel">Name</MudTableSortLabel></MudTh>
-                <MudTh>Public</MudTh>
-                <MudTh>Actions</MudTh>
+                <MudTh>Visibility</MudTh>
+                <MudTh Style="width: 100px;">Actions</MudTh>
             </HeaderContent>
-
             <RowTemplate>
-                <MudTd DataLabel="Name">@context?.Name</MudTd>
-                <MudTd DataLabel="Public">@context?.IsPublic</MudTd>
-                <MudTd>
-                    <MudButton Variant="Variant.Outlined" Color="Color.Primary" Size="Size.Small"
-                               OnClick="() => JoinSelectedRoom(context!)">
-                        Join
-                    </MudButton>
+                <MudTd DataLabel="Name">
+                    <MudText Typo="Typo.body2" Class="row-text">@context?.Name</MudText>
+                </MudTd>
+                <MudTd DataLabel="Visibility">
+                    <MudChip T="bool"
+                             Color="@(context!.IsPublic ? Color.Success : Color.Default)"
+                             Size="Size.Small"
+                             Variant="Variant.Filled"
+                             Icon="@(context!.IsPublic ? Icons.Material.Filled.Public : Icons.Material.Filled.Lock)"
+                             Class="status-chip">
+                        @(context!.IsPublic ? "Public" : "Private")
+                    </MudChip>
+                </MudTd>
+                <MudTd DataLabel="Actions">
+                    <MudTooltip Text="Join room">
+                        <MudIconButton Icon="@Icons.Material.Filled.Login"
+                                       Color="Color.Primary"
+                                       Variant="Variant.Text"
+                                       Size="Size.Small"
+                                       OnClick="() => JoinSelectedRoom(context!)" />
+                    </MudTooltip>
                 </MudTd>
             </RowTemplate>
-
             <NoRecordsContent>
-                <MudText>No public rooms found</MudText>
+                <div class="empty-state">
+                    <MudIcon Icon="@Icons.Material.Filled.MeetingRoom" Class="empty-icon" />
+                    <MudText Typo="Typo.body1" Class="empty-title">No public rooms found</MudText>
+                    <MudText Typo="Typo.body2" Class="empty-subtitle">Try adjusting your search or create a new room</MudText>
+                </div>
             </NoRecordsContent>
-
             <LoadingContent>
-                <MudText>Loading rooms...</MudText>
+                <div class="loading-state">
+                    <MudProgressCircular Indeterminate="true" Size="Size.Small" Color="Color.Primary" />
+                    <MudText Typo="Typo.body2" Class="ml-3">Loading rooms...</MudText>
+                </div>
             </LoadingContent>
-
             <PagerContent>
                 <MudTablePager />
             </PagerContent>

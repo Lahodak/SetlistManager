@@ -9,12 +9,13 @@ public partial class Home
 {
     [Inject]
     public required ISongService SongService { get; set; }
-    private StatsRange _selectedRange = StatsRange.Week;
+    
+    private StatsRange _selectedRange = StatsRange.Month;
     private List<string> _mostUsedLabels = [];
     private List<string> _mostAddedLabels = [];
     private List<ChartSeries> _mostUsedSeries = [];
     private List<ChartSeries> _mostAddedSeries = [];
-    private List<LatestSongStatModel>? _latestSongs;
+    private List<SongUsageStatModel>? _latestSongs;
 
     protected override async Task OnInitializedAsync()
     {
@@ -36,23 +37,23 @@ public partial class Home
 
     private async Task LoadMostUsedAsync()
     {
-        var response = await SongService.GetMostUsedSongsAsync(new StatsPagedRequest
+        var response = await SongService.GetStatisticsAsync(new StatsRequest
         {
+            Subject = StatsSubject.Song,
+            Metric = StatsMetric.MostUsed,
             Range = _selectedRange,
-            PageIndex = 0,
-            PageSize = 5
+            Limit = 10
         });
 
-        if (response?.Items is null || response.Items.Count == 0)
+        if (response is null || response.Count == 0)
         {
             _mostUsedLabels = [];
             _mostUsedSeries = [];
-
             StateHasChanged();
             return;
         }
 
-        _mostUsedLabels = response.Items
+        _mostUsedLabels = response
             .Select(x => x.Name)
             .ToList();
 
@@ -61,7 +62,7 @@ public partial class Home
             new ChartSeries
             {
                 Name = "Usage Count",
-                Data = response.Items
+                Data = response
                     .Select(x => (double)x.UsageCount)
                     .ToArray()
             }
@@ -71,22 +72,23 @@ public partial class Home
 
     private async Task LoadMostAddedAsync()
     {
-        var response = await SongService.GetMostAddedToLibraryAsync(new PagedRequest
+        var response = await SongService.GetStatisticsAsync(new StatsRequest
         {
-            PageIndex = 0,
-            PageSize = 5
+            Subject = StatsSubject.Song,
+            Metric = StatsMetric.MostAdded,
+            Range = StatsRange.Week,
+            Limit = 10
         });
 
-        if (response?.Items is null || response.Items.Count == 0)
+        if (response is null || response.Count == 0)
         {
             _mostAddedLabels = [];
             _mostAddedSeries = [];
-
             StateHasChanged();
             return;
         }
 
-        _mostAddedLabels = response.Items
+        _mostAddedLabels = response
             .Select(x => x.Name)
             .ToList();
 
@@ -95,22 +97,25 @@ public partial class Home
             new ChartSeries
             {
                 Name = "Added Count",
-                Data = response.Items
+                Data = response
                     .Select(x => (double)x.UsageCount)
                     .ToArray()
             }
         ];
         StateHasChanged();
     }
-
+        
     private async Task LoadLatestPublicAsync()
     {
-        var response = await SongService.GetLatestPublicSongsAsync(new PagedRequest
+        var response = await SongService.GetStatisticsAsync(new StatsRequest
         {
-            PageIndex = 0,
-            PageSize = 5
+            Subject = StatsSubject.Song,
+            Metric = StatsMetric.LatestPublic,
+            Range = StatsRange.Week,
+            Limit = 10
         });
-        _latestSongs = response?.Items;
+
+        _latestSongs = response;
         StateHasChanged();
     }
 }

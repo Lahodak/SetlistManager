@@ -1,39 +1,36 @@
 ﻿using Blazored.LocalStorage;
-using Newtonsoft.Json;
+using System.Net.Http.Json;
 
 namespace SetlistManager.App.Services.Implementations;
 
 public class ApiService : IApiService
 {
-    private const string _mediaType = "application/json";
-    private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILocalStorageService _localStorage;
-    private readonly ILogger<ApiService> _logger;
+    private readonly HttpClient _client;
+    private const string _authTokenKey = "authToken";
+    private const string _bearerHeaderKey = "Bearer";
 
-    public ApiService(IHttpClientFactory factory, ILocalStorageService localStorageService, ILogger<ApiService> logger)
+    public ApiService(HttpClient client, ILocalStorageService localStorageService)
     {
-        _httpClientFactory = factory;
-        _logger = logger;
+        _client = client;
         _localStorage = localStorageService;
     }
 
     private async Task ConfigureHttpClientAsync(HttpClient httpClient)
     {
-        var token = await _localStorage.GetItemAsync<string>("authToken");
+        var token = await _localStorage.GetItemAsync<string>(_authTokenKey);
         if (!string.IsNullOrWhiteSpace(token))
         {
             httpClient.DefaultRequestHeaders.Authorization =
-                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+                new System.Net.Http.Headers.AuthenticationHeaderValue(_bearerHeaderKey, token);
         }
     }
 
     public async Task<bool> TryDeleteAsync(string endpoint)
-    {
-        using var httpClient = _httpClientFactory.CreateClient();
+    {        
+        await ConfigureHttpClientAsync(_client);
         
-        await ConfigureHttpClientAsync(httpClient);
-        
-        var response = await httpClient.DeleteAsync(endpoint);
+        var response = await _client.DeleteAsync(endpoint);
         
         if(response.IsSuccessStatusCode)
             return true;
@@ -41,26 +38,11 @@ public class ApiService : IApiService
         return false;
     }
 
-    public async Task<bool> TryPutAsync<T>(string endpoint, T data)
+    public async Task<bool> TryPostAsync<T>(string endpoint, T data)
     {
-        using var httpClient = _httpClientFactory.CreateClient();
-        await ConfigureHttpClientAsync(httpClient);
+        await ConfigureHttpClientAsync(_client);    
         
-        string jsonData;
-        
-        try
-        {
-            jsonData = JsonConvert.SerializeObject(data);
-        }
-        catch (Exception ex)
-        {
-            _logger.Log(LogLevel.Error, ex, message: ex.Message);
-            return false;
-        }
-
-        var content = new StringContent(jsonData, System.Text.Encoding.UTF8, _mediaType);
-
-        var response = await httpClient.PutAsync(endpoint, content);
+        var response = await _client.PostAsJsonAsync(endpoint, data);
         
         if (response.IsSuccessStatusCode)
             return true;
@@ -68,150 +50,70 @@ public class ApiService : IApiService
         return false;
     }
 
-    public async Task<T?> GetAsync<T>(string endpoint)
+    public async Task<bool> TryPutAsync<T>(string endpoint, T data)
     {
-        using var httpClient = _httpClientFactory.CreateClient();
-        await ConfigureHttpClientAsync(httpClient);
+        await ConfigureHttpClientAsync(_client);        
 
-        var response = await httpClient.GetAsync(endpoint);
-        response.EnsureSuccessStatusCode();
-
-        var json = await response.Content.ReadAsStringAsync();
-
-        if(string.IsNullOrWhiteSpace(json))        
-            return default;
+        var response = await _client.PutAsJsonAsync(endpoint, data);
         
-        T? result;   
+        if (response.IsSuccessStatusCode)
+            return true;
         
-        try
-        {
-            result = JsonConvert.DeserializeObject<T?>(json);
-        }
-        catch(Exception ex)
-        {
-            _logger.Log(LogLevel.Error, ex, message: ex.Message);
-            return default;
-        }
+        return false;
+    }
 
-        return result;
+    public async Task<T> GetAsync<T>(string endpoint)
+    {
+        await ConfigureHttpClientAsync(_client);
+
+        return await _client.GetFromJsonAsync<T>(endpoint) ?? default!;
     }
 
     public async Task<T?> PostAsync<T>(string endpoint, T data)
     {
-        using var httpClient = _httpClientFactory.CreateClient();
-        await ConfigureHttpClientAsync(httpClient);
-        string jsonData;
+        await ConfigureHttpClientAsync(_client);
 
-        try
-        {
-            jsonData = JsonConvert.SerializeObject(data);
-        }
-        catch (Exception ex)
-        {
-            _logger.Log(LogLevel.Error, ex, message: ex.Message);
+        var response = await _client.PostAsJsonAsync(endpoint, data);
+
+        if(response.Content is null || !response.IsSuccessStatusCode)        
             return default;
-        }
+       
+        return await response.Content.ReadFromJsonAsync<T>();
+    }
 
-        var content = new StringContent(jsonData, System.Text.Encoding.UTF8, _mediaType);
-        var response = await httpClient.PostAsync(endpoint, content);
-        response.EnsureSuccessStatusCode();
-        var jsonResponse = await response.Content.ReadAsStringAsync();
+    public async Task<bool> PostAsync(string endpoint)
+    {
+        await ConfigureHttpClientAsync(_client);
         
-        if (string.IsNullOrWhiteSpace(jsonResponse))        
-            return default;        
+        var response = await _client.PostAsync(endpoint, null);
+        
+        if (response.IsSuccessStatusCode)
+            return true;
 
-        T? result;
-
-        try
-        {
-            result = JsonConvert.DeserializeObject<T>(jsonResponse);
-        }
-        catch (Exception ex)
-        {
-            _logger.Log(LogLevel.Error, ex, message: ex.Message);
-            return default;
-        }
-
-        return result;
+        return false;
     }
 
     public async Task<TResponse?> PostAsync<TRequest, TResponse>(string endpoint, TRequest data)
     {
-        using var httpClient = _httpClientFactory.CreateClient();
-        await ConfigureHttpClientAsync(httpClient);
-        string jsonData;
+        await ConfigureHttpClientAsync(_client);
 
-        try
-        {
-            jsonData = JsonConvert.SerializeObject(data);
-        }
-        catch (Exception ex)
-        {
-            _logger.Log(LogLevel.Error, ex, message: ex.Message);
-            return default;
-        }
+        var response = await _client.PostAsJsonAsync(endpoint, data);
 
-        var content = new StringContent(jsonData, System.Text.Encoding.UTF8, _mediaType);
-        var response = await httpClient.PostAsync(endpoint, content);
-        response.EnsureSuccessStatusCode();
-        var jsonResponse = await response.Content.ReadAsStringAsync();
-
-        if (string.IsNullOrWhiteSpace(jsonResponse))
+        if (response.Content is null || !response.IsSuccessStatusCode)
             return default;
 
-        TResponse? result;
-
-        try
-        {
-            result = JsonConvert.DeserializeObject<TResponse>(jsonResponse);
-        }
-        catch (Exception ex)
-        {
-            _logger.Log(LogLevel.Error, ex, message: ex.Message);
-            return default;
-        }
-
-        return result;
+        return await response.Content.ReadFromJsonAsync<TResponse>();
     }
 
     public async Task<T?> PutAsync<T>(string endpoint, T data)
     {
-        using var httpClient = _httpClientFactory.CreateClient();
-        await ConfigureHttpClientAsync(httpClient);
-        string jsonData;
+        await ConfigureHttpClientAsync(_client);
 
-        try
-        {
-            jsonData = JsonConvert.SerializeObject(data);
-        }
-        catch (Exception ex)
-        {
-            _logger.Log(LogLevel.Error, ex, message: ex.Message);
+        var response = await _client.PutAsJsonAsync(endpoint, data);
+
+        if (response.Content is null || !response.IsSuccessStatusCode)        
             return default;
-        }
 
-        var content = new StringContent(jsonData, System.Text.Encoding.UTF8, _mediaType);
-        var response = await httpClient.PutAsync(endpoint, content);
-
-        response.EnsureSuccessStatusCode();
-
-        var jsonResponse = await response.Content.ReadAsStringAsync();
-
-        if (string.IsNullOrWhiteSpace(jsonResponse))        
-            return default;        
-
-        T? result;
-        
-        try
-        {
-            result = JsonConvert.DeserializeObject<T>(jsonResponse);
-        }
-        catch (Exception ex)
-        {
-            _logger.Log(LogLevel.Error, ex, message: ex.Message);
-            return default;
-        }
-
-        return result;
+        return await response.Content.ReadFromJsonAsync<T>();
     }
 }

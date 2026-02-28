@@ -12,12 +12,13 @@ public static class UserMapper
         if (user.Tokens is not null)
             tokens = user.Tokens?.Select(t => new TokenModel
             {
+                Id = t.Id,
                 AccessToken = t.AccessToken,
                 RefreshToken = t.RefreshToken,
                 Provider = t.Provider.Name,
             }).ToList();
 
-        return new UserModel
+        return new()
         {
             Id = user.Id,
             Username = user.UserName!,
@@ -31,17 +32,6 @@ public static class UserMapper
         };
     }
 
-    public static User ToEntity(this UserModel model)
-    {
-        return new User
-        {
-            UserName = model.Username,
-            Email = model.Email,
-            IsActive = true,
-            InstrumentId = model.Instrument?.Id
-        };
-    }
-
     public static UserViewModel ToViewModel(this User user)
     {
         return new UserViewModel
@@ -49,6 +39,15 @@ public static class UserMapper
             Id = user.Id,
             UserName = user.UserName!,
             Email = user.Email!
+        };
+    }
+
+    public static UserPlayerModel ToPlayerModel(this User user)
+    {
+        return new UserPlayerModel
+        {
+            UserName = user.UserName!,
+            Instrument = user.Instrument?.Name ?? "No Instrument"
         };
     }
 }

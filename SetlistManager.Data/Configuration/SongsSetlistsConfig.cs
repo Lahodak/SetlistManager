@@ -8,8 +8,6 @@ public class SongsSetlistsConfig : IEntityTypeConfiguration<SongsSetlists>
 {
     public void Configure(EntityTypeBuilder<SongsSetlists> builder)
     {
-        builder.HasKey(x => x.Id);
-
         builder.Property(ss => ss.Order)
             .IsRequired();
 

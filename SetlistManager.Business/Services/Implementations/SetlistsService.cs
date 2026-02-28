@@ -1,77 +1,74 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SetlistManager.Business.Mappers;
 using SetlistManager.Common.Models;
+using SetlistManager.Common.Exceptions;
 using SetlistManager.Data;
 using SetlistManager.Data.Entities;
+using SetlistManager.Business.Extensions;
 
 namespace SetlistManager.Business.Services.Implementations;
 
 public class SetlistsService : ISetlistsService
 {
     private readonly AppDbContext _dbContext;
+    private readonly int _currentUserId;
 
-    public SetlistsService(AppDbContext dbContext)
+    public SetlistsService(AppDbContext dbContext, ICurrentUserContext currentUserContext)
     {
         _dbContext = dbContext;
+        _currentUserId = currentUserContext.UserId;
     }
 
-    public async Task<SetlistModel?> GetSetlistByIdAsync(int setlistId, int userId)
+    public async Task<SetlistModel> GetSetlistByIdAsync(int setlistId)
     {
         var setlist = await _dbContext.Setlists
             .Include(s => s.SongsSetlists)
                 .ThenInclude(s => s.Song)
                     .ThenInclude(s => s.Artist)
+            .Include(s => s.Owner)                    
             .Include(s => s.SongsSetlists)
                 .ThenInclude(s => s.Song)
                     .ThenInclude(s => s.Language)
-            .FirstOrDefaultAsync(x => x.Id == setlistId 
-                && (x.OwnerId == userId) || x.SetlistsUsers.Any(x => x.UserId == userId));   
+            .FirstOrDefaultAsync(x =>
+                x.Id == setlistId &&
+                (x.OwnerId == _currentUserId || x.SetlistsUsers.Any(x => x.UserId == _currentUserId)));
 
-        return setlist?.ToModel();
+        if (setlist is null)
+            throw new EntryNotFoundException("Setlist not found or access denied.");
+
+        return setlist.ToModel();
     }
 
-    public async Task<PagedResponse<SetlistModel>?> GetSetlistsAsync(int userId, PagedRequest request)
+    public async Task<PagedResponse<SetlistModel>> GetSetlistsAsync(PagedRequest request)
     {
         var query = _dbContext.Setlists
             .Where(s =>
-            (string.IsNullOrEmpty(request.Query) || s.Name.Contains(request.Query))
-            && (s.SetlistsUsers.Any(x => x.UserId == userId) || s.OwnerId == userId));
+                (string.IsNullOrEmpty(request.Query) || s.Name.Contains(request.Query)) &&
+                (s.SetlistsUsers.Any(x => x.UserId == _currentUserId) || s.OwnerId == _currentUserId));
 
-        var totalCount = await query.CountAsync();
-
-        var setlists = await _dbContext.Setlists
+        return await query
             .Include(s => s.SongsSetlists)
                 .ThenInclude(s => s.Song)
                     .ThenInclude(l => l.Language)
+            .Include(s => s.Owner)
             .Include(s => s.SongsSetlists)
                 .ThenInclude(s => s.Song)
                     .ThenInclude(s => s.Artist)
             .Include(x => x.Owner)
-            .Skip(request.PageIndex * request.PageSize)
-            .Take(request.PageSize)
-            .AsNoTracking()
-            .ToListAsync();
-
-        PagedResponse<SetlistModel> response = new()
-        {
-            TotalCount = totalCount,
-            Items = setlists
-                .Select(setlists => setlists
-                .ToModel())
-                .ToList()
-        };
-
-        return response;
+            .Select(s => s.ToModel())
+            .ToPaginatedResultAsync(request);
     }
 
-    public async Task<bool> TryGiveAccessToSetlistAsync(int setlistId, int targetId, int currentUserId)
+    public async Task GiveAccessToSetlistAsync(int setlistId, int targetId)
     {
         var setlist = await _dbContext.Setlists
             .Include(s => s.SetlistsUsers)
-            .FirstOrDefaultAsync(s => s.Id == setlistId && s.OwnerId == currentUserId);
+            .FirstOrDefaultAsync(s => s.Id == setlistId && s.OwnerId == _currentUserId);
 
-        if (setlist is null || setlist.SetlistsUsers.Count != 0 || (currentUserId != setlist.OwnerId && targetId != currentUserId))
-            return false;
+        if (setlist is null ||
+            setlist.SetlistsUsers.Count != 0 ||
+            (_currentUserId != setlist.OwnerId && targetId != _currentUserId))
+            throw new EntryNotFoundException("Setlist not found or access denied.");
 
         setlist.SetlistsUsers.Add(new()
         {
@@ -80,45 +77,43 @@ public class SetlistsService : ISetlistsService
         });
 
         await _dbContext.SaveChangesAsync();
-        return true;
     }
 
-    public async Task<bool> TryCreateSetlistAsync(SetlistModel setlistModel, int creatorId)
+    public async Task CreateSetlistAsync(SetlistCreateModel createModel)
     {
-        if(await _dbContext.Setlists
-            .AnyAsync(s => s.Name == setlistModel.Name 
-            && (s.OwnerId == creatorId || s.SetlistsUsers.Any(x => x.UserId == creatorId))))        
-            return false;
-        
+        if (await _dbContext.Setlists.AnyAsync(s =>
+            s.Name == createModel.Name &&
+            (s.OwnerId == _currentUserId || s.SetlistsUsers.Any(x => x.UserId == _currentUserId))))
+            throw new DuplicateEntryException();
+
         Setlist setlistToCreate = new()
         {
-            Name = setlistModel.Name,
+            Name = createModel.Name,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
-            OwnerId = setlistModel.OwnerId
+            OwnerId = _currentUserId
         };
 
-        _dbContext.Setlists.Add(setlistModel.MapSongModelToEntity(setlistToCreate));
+        _dbContext.Setlists.Add(createModel.MapCreateModelToEntity(setlistToCreate));
         await _dbContext.SaveChangesAsync();
-        return true;
     }
 
-    public async Task EditSetlistAsync(SetlistModel setlistModel, int currentUserId)
+    public async Task EditSetlistAsync(SetlistModel setlistModel)
     {
         var setlistToBeEdited = await _dbContext.Setlists
             .Include(x => x.SongsSetlists)
-            .ThenInclude(x => x.Song)
-                .ThenInclude(l => l.Language)
+                .ThenInclude(x => x.Song)
+                    .ThenInclude(l => l.Language)
             .Include(s => s.SongsSetlists)
                 .ThenInclude(s => s.Song)
                     .ThenInclude(s => s.Artist)
-            .FirstOrDefaultAsync(x => x.Id == setlistModel.Id && x.OwnerId == currentUserId);
+            .FirstOrDefaultAsync(x => x.Id == setlistModel.Id && x.OwnerId == _currentUserId);
 
         if (setlistToBeEdited is null)
-            return;
+            throw new EntryNotFoundException("Setlist not found or access denied.");
 
         setlistToBeEdited.Name = setlistModel.Name;
-        setlistToBeEdited.UpdatedAt = DateTime.Now;
+        setlistToBeEdited.UpdatedAt = DateTime.UtcNow;
 
         var existingSongIds = setlistToBeEdited.SongsSetlists
             .Select(s => s.SongId)
@@ -157,28 +152,27 @@ public class SetlistsService : ISetlistsService
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task<bool> TryDeleteSetlistAsync(int setlistId, int currentUserId)
+    public async Task DeleteSetlistAsync(int setlistId)
     {
         var setlistToBeDeleted = await _dbContext.Setlists
-            .FirstOrDefaultAsync(x => x.Id == setlistId && x.OwnerId == currentUserId);
+            .FirstOrDefaultAsync(x => x.Id == setlistId && x.OwnerId == _currentUserId);
 
         if (setlistToBeDeleted is null)
-            return false;
-        
+            throw new EntryNotFoundException("Entry not found or access denied.");
+
         _dbContext.Setlists.Remove(setlistToBeDeleted);
         await _dbContext.SaveChangesAsync();
-        
-        return true;
     }
 
-    public async Task RemoveAccessFromUserAsync(int setlistId, int userId, int currentUserId)
+    public async Task RemoveAccessFromUserAsync(int setlistId, int userId)
     {
         var setlistUser = await _dbContext.SetlistsUsers
             .Include(su => su.Setlist)
             .FirstOrDefaultAsync(su => su.SetlistId == setlistId && su.UserId == userId);
 
-        if (setlistUser is null || (setlistUser.Setlist.OwnerId != currentUserId && userId != currentUserId))
-            return;
+        if (setlistUser is null ||
+            (setlistUser.Setlist.OwnerId != _currentUserId && userId != _currentUserId))
+            throw new EntryNotFoundException("Entry not found or access denied.");
 
         _dbContext.SetlistsUsers.Remove(setlistUser);
         await _dbContext.SaveChangesAsync();

@@ -1,75 +1,105 @@
 ﻿<MudDialog>
     <DialogContent>
-        @if (Song is not null)
-        {
-            <MudPaper Class="pa-4 mt-3" Elevation="2">
-                <MudGrid Spacing="2">
-                    <MudItem xs="12" sm="6">
-                        <MudTextField @bind-Value="Song.Name"
-                                      Label="Song Name"
-                                      Required="true"
-                                      Variant="Variant.Outlined" />
-                    </MudItem>
-                    <MudItem xs="12" sm="6">
-                        <MudAutocomplete T="ArtistModel"
-                                         Label="Artist"
-                                         Variant="Variant.Outlined"
-                                         SearchFunc="SearchArtists"
-                                         ToStringFunc="@(a => a == null ? null : a.Nick)"
-                                         ValueChanged="OnArtistSelected"
-                                         Value="Song.Artist"
-                                         Clearable="true"
-                                         ResetValueOnEmptyText="true"
-                                         Required="true" />
-                    </MudItem>
-                    <MudItem xs="12" sm="6">
-                        <MudTextField @bind-Value="Song.TabsURL"
-                                      Label="Tabs URL"
-                                      Variant="Variant.Outlined" />
-                    </MudItem>
-                    <MudItem xs="12" sm="6">
-                        <MudTextField @bind-Value="Song.AudioURL"
-                                      Label="Audio URL"
-                                      Variant="Variant.Outlined" />
-                    </MudItem>
-                    <MudItem xs="12" sm="6">
-                        <MudTextField @bind-Value="Song.Tuning"
-                                      Label="Tuning"
-                                      Variant="Variant.Outlined" />
-                    </MudItem>
-                    <MudItem xs="12" sm="6">
-                        <MudTextField @bind-Value="Song.Key"
-                                      Label="Key"
-                                      Variant="Variant.Outlined" />
-                    </MudItem>
-                    <MudItem xs="12" sm="6">
-                        <MudNumericField @bind-Value="Song.BPM"
-                                         Label="BPM"
-                                         Min="40" Max="300"
-                                         Variant="Variant.Outlined" />
-                    </MudItem>
-                    <MudItem xs="12" sm="6">
-                        <MudAutocomplete T="LanguageModel"
-                                         Label="Language"
-                                         Variant="Variant.Outlined"
-                                         SearchFunc="SearchLanguages"
-                                         ToStringFunc="@(l => l == null ? null : l.Name)"
-                                         ValueChanged="OnLanguageSelected"
-                                         Value="Song.Language"
-                                         Clearable="true"
-                                         ResetValueOnEmptyText="true"
-                                         Required="true" />
-                    </MudItem>
-                </MudGrid>
-            </MudPaper>
-        }
-        else
-        {
-            <MudProgressCircular Indeterminate="true" />
-        }
+        <MudGrid Spacing="3" Class="mt-1">
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="_updateModel.Name"
+                              Label="Song Name"
+                              Required="true"
+                              Variant="Variant.Outlined" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudAutocomplete T="ArtistModel"
+                                 Label="Artist"
+                                 Variant="Variant.Outlined"
+                                 SearchFunc="SearchArtists"
+                                 ToStringFunc="@(a => a == null ? null : a.Nick)"
+                                 ValueChanged="OnArtistSelected"
+                                 Value="_selectedArtist"
+                                 Clearable="true"
+                                 ResetValueOnEmptyText="true"
+                                 Required="true"
+                                 DebounceInterval="700" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="_updateModel.TabsURL"
+                              Label="Tabs URL"
+                              Variant="Variant.Outlined"
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.Tab" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="_updateModel.AudioURL"
+                              Label="Audio URL"
+                              Variant="Variant.Outlined"
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.Audiotrack" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="_updateModel.Tuning"
+                              Label="Tuning"
+                              Variant="Variant.Outlined"
+                              Placeholder="e.g., E Standard, Drop D"
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.GraphicEq" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="_updateModel.Key"
+                              Label="Key"
+                              Variant="Variant.Outlined"
+                              Placeholder="e.g., C, Am, G"
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.MusicNote" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudNumericField @bind-Value="_updateModel.BPM"
+                                 Label="BPM"
+                                 Min="40"
+                                 Max="300"
+                                 Variant="Variant.Outlined"
+                                 Adornment="Adornment.Start"
+                                 AdornmentIcon="@Icons.Material.Filled.Speed" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudAutocomplete T="LanguageModel"
+                                 Label="Language"
+                                 Variant="Variant.Outlined"
+                                 SearchFunc="SearchLanguages"
+                                 ToStringFunc="@(l => l == null ? null : l.Name)"
+                                 ValueChanged="OnLanguageSelected"
+                                 Value="_selectedLanguage"
+                                 Clearable="true"
+                                 ResetValueOnEmptyText="true"
+                                 Required="true"
+                                 DebounceInterval="700" />
+            </MudItem>
+            <MudItem xs="12">
+                <MudPaper Class="dialog-public-toggle" Elevation="0">
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                        <div>
+                            <MudText Typo="Typo.body2" Class="dialog-toggle-title">Make song public</MudText>
+                            <MudText Typo="Typo.caption" Class="dialog-section-caption">This song will be visible and addable by other users</MudText>
+                        </div>
+                        <MudSwitch T="bool"
+                                   @bind-Value="_updateModel.IsPublic"
+                                   Color="Color.Primary" />
+                    </MudStack>
+                </MudPaper>
+            </MudItem>
+        </MudGrid>
     </DialogContent>
     <DialogActions>
-        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="SaveAsync" Disabled="Song is null"> Save </MudButton>
-        <MudButton Variant="Variant.Text" OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Error"
+                   Variant="Variant.Text"
+                   OnClick="Cancel"
+                   Class="dialog-cancel-btn">
+            Cancel
+        </MudButton>
+        <MudButton Color="Color.Primary"
+                   Variant="Variant.Filled"
+                   OnClick="SaveAsync"
+                   StartIcon="@Icons.Material.Filled.Save"
+                   Class="dialog-save-btn">
+            Save
+        </MudButton>
     </DialogActions>
 </MudDialog>

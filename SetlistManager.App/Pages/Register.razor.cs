@@ -15,20 +15,22 @@ public partial class Register
     public required ILocalStorageService LocalStorage { get; set; }
 
     private const string _emailKey = "registeredEmail";
+    private const string _verifyEmailUri = "/verify-email";
     private readonly RegisterRequestModel _registerRequestModel = new();
     private string confirmPassword = string.Empty;
+    private bool _showPassword = false;
 
     private async Task LoginUser()
     {
-        if (_registerRequestModel.Password == string.Empty
-            || _registerRequestModel.Email == string.Empty
-            || _registerRequestModel.UserName == string.Empty
+        if (string.IsNullOrEmpty(_registerRequestModel.Password)
+            || string.IsNullOrEmpty(_registerRequestModel.Email)
+            || string.IsNullOrEmpty(_registerRequestModel.UserName)
             || confirmPassword != _registerRequestModel.Password)
             return;
 
         await UserService.RegisterAsync(_registerRequestModel);
         await LocalStorage.SetItemAsStringAsync(_emailKey, _registerRequestModel.Email);
 
-        Navigation.NavigateTo("/verify-email");
+        Navigation.NavigateTo(_verifyEmailUri);
     }
 }

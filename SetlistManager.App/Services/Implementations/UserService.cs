@@ -1,88 +1,59 @@
 ﻿using Blazored.LocalStorage;
-using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Options;
+using Microsoft.JSInterop;
+using SetlistManager.App.Extensions;
+using SetlistManager.App.Models;
 using SetlistManager.App.Options;
 using SetlistManager.Common.Models;
-using System.IdentityModel.Tokens.Jwt;
-using System.Net.Http.Json;
-using System.Security.Claims;
 
 namespace SetlistManager.App.Services.Implementations;
+
 public class UserService : IUserService
 {
-    private const string _loginUserSuffix = "/login";
-    private const string _tokenKey = "authToken";
-    private const string _getUserSetlistsSuffix = "/setlists";
-    private const string _verifyEmailSuffix = "/verify";
-    private const string _resetPasswordSuffix = "/reset-password";
-    private const string _resetPasswordRequestSuffix = "/request-password-reset";
-    private const string _friendshipsSuffix = "/friendships";
-    private const string _tokensEndpointSuffix = "/tokens";
-
-    private readonly IHttpClientFactory _httpClientFactory; 
     private readonly ILocalStorageService _localStorage;
     private readonly IApiService _apiService;
-    private readonly IOptions<SetlistManagerApiOptions> _apiOptions;
+    private readonly string _apiUsersEndpointPath;
+    private readonly string _apiAuthEndpointPath;
 
-    public UserService(IHttpClientFactory httpClientFactory, ILocalStorageService localStorageService, IApiService apiService, 
-        IOptions<SetlistManagerApiOptions> apiOptions)
+    private const string _loginUserSuffix = "/login";
+    private const string _tokenKey = "authToken";
+    private const string _verifyEmailSuffix = "/verify-email";
+    private const string _resetPasswordSuffix = "/reset-password";
+    private const string _verifyTokenSuffix = "/verify-token";
+    private const string _resetPasswordRequestSuffix = "/request-password-reset";
+    private const string _friendshipsSuffix = "/friendships";
+    private const string _meSuffix = "/me";
+    private const string _darkModeSettingsKey = "ToggleDarkMode";
+    private const string _panelConfigStorageKey = "roomPanelConfig";
+
+    public UserService(ILocalStorageService localStorageService, IApiService apiService, IOptions<SetlistManagerApiOptions> apiOptions)
     {
-        _apiOptions = apiOptions;
-        _httpClientFactory = httpClientFactory;
         _localStorage = localStorageService;
         _apiService = apiService;
+        _apiUsersEndpointPath = apiOptions.Value.BaseUrl + apiOptions.Value.UsersEndpoint;
+        _apiAuthEndpointPath = apiOptions.Value.BaseUrl + apiOptions.Value.AuthEndpoint;
     }
 
-    public async Task AddNewProviderToken(TokenCreateModel tokenModel) 
-        => await _apiService.PutAsync(_apiOptions.Value.UsersEndpoint + _tokensEndpointSuffix, tokenModel);
+    public async Task<bool> GetUserDarkModeSettings()
+        => await _localStorage.GetItemAsync<bool>(_darkModeSettingsKey);
+
+    public async Task UpdateUserDarkModeSettingsAsync(bool newValue)
+        => await _localStorage.SetItemAsync(_darkModeSettingsKey, newValue);
 
     public async Task<UserModel?> GetUserAsync()
-    {
-        var userId = await GetCurrentUserIdAsync();
-        
-        if (userId is null)
-            return null;
+        => await _apiService.GetAsync<UserModel?>($"{_apiUsersEndpointPath}{_meSuffix}");
 
-        return await _apiService.GetAsync<UserModel?>($"{_apiOptions.Value.UsersEndpoint}/{userId}");
-    }
+    public async Task RegisterAsync(RegisterRequestModel model)
+        => await _apiService.TryPostAsync(_apiAuthEndpointPath, model);
 
-    public async Task<List<SetlistModel>?> GetAllUserSetlists()
-    {
-        UserModel? user = await GetUserAsync();
-        
-        if (user is null)
-            return null;
-
-        return await _apiService.GetAsync<List<SetlistModel>?>($"{_apiOptions.Value.UsersEndpoint}/{user.Id}{_getUserSetlistsSuffix}");
-    }
-
-    public async Task RegisterAsync(RegisterRequestModel model) 
-        => await _apiService.PostAsync(_apiOptions.Value.AuthEndpoint, model);
-
-    public async Task LogOutAsync() 
+    public async Task LogOutAsync()
         => await _localStorage.RemoveItemAsync(_tokenKey);
 
-    public async Task<string?> GetUserToken() 
+    public async Task<string?> GetUserTokenAsync()
         => await _localStorage.GetItemAsync<string>(_tokenKey);
 
-    public async Task<bool> IsUserLoggedInAsync()
-    {
-        var token = await _localStorage.GetItemAsync<string>(_tokenKey);
-        if (string.IsNullOrWhiteSpace(token))
-            return false;
-
-        var handler = new JwtSecurityTokenHandler();
-        if (!handler.CanReadToken(token))
-            return false;
-
-        var jwt = handler.ReadJwtToken(token);
-        var exp = jwt.ValidTo;
-
-        if (exp < DateTime.UtcNow)
-            return false;
-
-        return true;
-    }
+    public async Task<bool> VerifyStoredToken()
+        => await _apiService.PostAsync($"{_apiAuthEndpointPath}{_verifyTokenSuffix}");
 
     public async Task<bool> TryUpdateUser(UserModel user)
     {
@@ -90,26 +61,44 @@ public class UserService : IUserService
 
         if (userId is null)
             return false;
-
-        await _apiService.PutAsync($"{_apiOptions.Value.UsersEndpoint}/{userId}", user);
-        return true;
+        
+        return await _apiService.TryPutAsync($"{_apiUsersEndpointPath}/{userId}", user);
     }
 
-    public async Task LogInAsync(LoginRequestModel model)
-    {
-        var client = _httpClientFactory.CreateClient();
-
-        var message = await client.PostAsJsonAsync($"{_apiOptions.Value.AuthEndpoint}{_loginUserSuffix}", model);
-
-        if (!message.IsSuccessStatusCode)
-            return;
+    public async Task<List<PanelType>?> GetPanelConfigAsync()
+    {        
+        var savedConfig = await _localStorage.GetItemAsStringAsync(_panelConfigStorageKey);
         
-        var loginResult = await message.Content.ReadFromJsonAsync<LoginResultModel>();
+        if (string.IsNullOrEmpty(savedConfig)) 
+            return null;
 
-        if (loginResult?.Token is null)
-            return;     
+        List<PanelType>? panels = savedConfig.Split(',')
+                .Select(p => Enum.TryParse<PanelType>(p, out var panel) ? panel : (PanelType?)null)
+                .Where(p => p.HasValue)
+                .Select(p => p!.Value)
+                .ToList();
+        
+        return panels;
+    }
 
-        await _localStorage.SetItemAsync(_tokenKey, loginResult.Token);
+    public async Task SavePanelConfigAsync(List<PanelType> panels)
+    {
+        var configString = string.Join(",", panels);
+        await _localStorage.SetItemAsStringAsync(_panelConfigStorageKey, configString);
+    }
+
+    public async Task<bool> LogInAsync(LoginRequestModel model)
+    {
+        var result = await _apiService.PostAsync<LoginRequestModel, LoginResultModel>(
+            $"{_apiAuthEndpointPath}{_loginUserSuffix}",
+            model
+        );
+
+        if (result?.Token is null)
+            return false;
+
+        await _localStorage.SetItemAsync(_tokenKey, result.Token);
+        return true;
     }
 
     public async Task<bool> VerifyEmailAsync(string token, string email)
@@ -120,9 +109,7 @@ public class UserService : IUserService
             Token = token
         };
 
-        await _apiService.PostAsync($"{_apiOptions.Value.AuthEndpoint}{_verifyEmailSuffix}", verifyModel);
-        
-        return true;                
+        return await _apiService.TryPostAsync($"{_apiAuthEndpointPath}{_verifyEmailSuffix}", verifyModel);
     }
 
     public async Task<bool> RequestPasswordResetAsync(string email)
@@ -132,9 +119,7 @@ public class UserService : IUserService
             Email = email
         };
 
-        await _apiService.PostAsync($"{_apiOptions.Value.AuthEndpoint}{_resetPasswordRequestSuffix}", model);
-
-        return true;
+        return await _apiService.TryPostAsync($"{_apiAuthEndpointPath}{_resetPasswordRequestSuffix}", model);
     }
 
     public async Task<bool> ResetPasswordAsync(string email, string newPassword, string token)
@@ -146,8 +131,7 @@ public class UserService : IUserService
             Token = token
         };
 
-        await _apiService.PostAsync($"{_apiOptions.Value.AuthEndpoint}{_resetPasswordSuffix}", resetModel);
-        
+        await _apiService.PostAsync($"{_apiAuthEndpointPath}{_resetPasswordSuffix}", resetModel);
         return true;
     }
 
@@ -157,19 +141,8 @@ public class UserService : IUserService
         if (string.IsNullOrWhiteSpace(token))
             return null;
 
-        var handler = new JwtSecurityTokenHandler();
-        if (!handler.CanReadToken(token))
-            return null;
-
-        var jwt = handler.ReadJwtToken(token);
-
-        var userIdClaim = jwt.Claims
-            .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier
-                              || c.Type == "nameid");
-
-        return int.TryParse(userIdClaim?.Value, out var userId)
-            ? userId
-            : null;
+        var user = await GetUserAsync();
+        return user?.Id;
     }
 
     public async Task<PagedResponse<FriendModel>?> GetUserFriendshipsAsync(PagedRequest request)
@@ -179,17 +152,8 @@ public class UserService : IUserService
         if (userId is null)
             return null;
 
-        UriBuilder uri = new($"{_apiOptions.Value.UsersEndpoint}/{userId}{_friendshipsSuffix}")
-        {
-            Query = new QueryBuilder
-            {
-                { "PageSize", request.PageSize.ToString() },
-                { "PageIndex", request.PageIndex.ToString() },
-                { "Query", request.Query ?? string.Empty }
-            }.ToString()
-        };
-
-        return await _apiService.GetAsync<PagedResponse<FriendModel>>(uri.ToString());
+        var uri = request.ToPagedRequestUri($"{_apiUsersEndpointPath}/{userId}{_friendshipsSuffix}");
+        return await _apiService.GetAsync<PagedResponse<FriendModel>>(uri);
     }
 
     public async Task HandleFriendshipRequestAsync(FriendshipRequestModel friendshipRequest)
@@ -199,41 +163,42 @@ public class UserService : IUserService
         if (initiatorId is null)
             return;
 
-        await _apiService.PostAsync($"{_apiOptions.Value.UsersEndpoint}/{initiatorId}{_friendshipsSuffix}", friendshipRequest);
+        await _apiService.TryPostAsync($"{_apiUsersEndpointPath}/{initiatorId}{_friendshipsSuffix}", friendshipRequest);
     }
 
     public async Task<bool> TryRemoveFriendshipAsync(int friendshipId)
     {
         var initiatorId = await GetCurrentUserIdAsync();
-        
+
         if (initiatorId is null)
             return false;
-        
-        return await _apiService.TryDeleteAsync($"{_apiOptions.Value.UsersEndpoint}/{initiatorId}{_friendshipsSuffix}/{friendshipId}");
+
+        return await _apiService.TryDeleteAsync($"{_apiUsersEndpointPath}/{initiatorId}{_friendshipsSuffix}/{friendshipId}");
     }
 
     public async Task<bool> TryAcceptFriendshipAsync(int friendshipId)
     {
         var initiatorId = await GetCurrentUserIdAsync();
-        
+
         if (initiatorId is null)
             return false;
 
-        return await _apiService.TryPutAsync($"{_apiOptions.Value.UsersEndpoint}/{initiatorId}{_friendshipsSuffix}/{friendshipId}", "");
+        return await _apiService.TryPutAsync($"{_apiUsersEndpointPath}/{initiatorId}{_friendshipsSuffix}/{friendshipId}", "");
     }
 
     public async Task<PagedResponse<UserViewModel>?> GetPagedUsersAsync(PagedRequest request)
     {
-        UriBuilder uri = new($"{_apiOptions.Value.UsersEndpoint}")
-        {
-            Query = new QueryBuilder
-            {
-                { "PageSize", request.PageSize.ToString() },
-                { "PageIndex", request.PageIndex.ToString() },
-                { "Query", request.Query ?? string.Empty }
-            }.ToString()
-        };
+        var uri = request.ToPagedRequestUri(_apiUsersEndpointPath);
+        return await _apiService.GetAsync<PagedResponse<UserViewModel>>(uri);
+    }
+
+    public async Task<bool> TryRevokeTokenAsync(int tokenId)
+    {
+        var userId = await GetCurrentUserIdAsync();
+
+        if (userId is null)
+            return false;
         
-        return await _apiService.GetAsync<PagedResponse<UserViewModel>>(uri.ToString());
+        return await _apiService.TryDeleteAsync($"{_apiUsersEndpointPath}/{userId}/tokens/{tokenId}");
     }
 }

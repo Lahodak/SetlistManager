@@ -21,38 +21,46 @@ public partial class EditSongDialog
     public required ISnackbar Snackbar { get; set; }
 
     private List<LanguageModel>? _languages;
-    private List<ArtistModel>? _artists;
+    private SongUpdateModel _updateModel = new();
+
+    private ArtistModel? _selectedArtist;
+    private LanguageModel? _selectedLanguage;
 
     protected override async Task OnInitializedAsync()
     {
-        _languages = await LanguageService.GetAvailableLanguagesAsync();
-        _artists = (await ArtistService.GetAvailableArtistsAsync(new() { PageSize = int.MaxValue, ContentType = ContentType.Private }))?.Items;
-
-        if (_artists is null || _artists.Count == 0)
+        _updateModel = new SongUpdateModel
         {
-            Snackbar.Add("Add Artists First!", Severity.Warning);
-        }
+            Name = Song.Name,
+            ArtistId = Song.Artist?.Id,
+            LanguageId = Song.Language?.Id,
+            TabsURL = Song.TabsURL,
+            AudioURL = Song.AudioURL,
+            Tuning = Song.Tuning,
+            Key = Song.Key,
+            BPM = Song.BPM
+        };
+
+        _selectedArtist = Song.Artist;
+        _selectedLanguage = Song.Language;
+
+        _languages = await LanguageService.GetAvailableLanguagesAsync();
     }
 
-    private Task<IEnumerable<ArtistModel>> SearchArtists(string value, CancellationToken token)
+    private async Task<IEnumerable<ArtistModel>> SearchArtists(string value, CancellationToken token)
     {
-        if (_artists is null)
-            return Task.FromResult<IEnumerable<ArtistModel>>(new List<ArtistModel>());
-
-        if (string.IsNullOrWhiteSpace(value))
-            return Task.FromResult<IEnumerable<ArtistModel>>(_artists);
-
-        var searchResults = _artists
-            .Where(a => a.Nick.Contains(value, StringComparison.OrdinalIgnoreCase))
-            .ToList();
-
-        return Task.FromResult<IEnumerable<ArtistModel>>(searchResults);
+        var request = new ContentPagedRequest
+        {
+            PageSize = 10,
+            Query = value
+        };
+        var result = await ArtistService.GetArtistsAsync(request);
+        return result?.Items ?? [];
     }
 
     private Task<IEnumerable<LanguageModel>> SearchLanguages(string value, CancellationToken token)
     {
         if (_languages is null)
-            return Task.FromResult<IEnumerable<LanguageModel>>(new List<LanguageModel>());
+            return Task.FromResult<IEnumerable<LanguageModel>>([]);
 
         if (string.IsNullOrWhiteSpace(value))
             return Task.FromResult<IEnumerable<LanguageModel>>(_languages);
@@ -64,57 +72,54 @@ public partial class EditSongDialog
         return Task.FromResult<IEnumerable<LanguageModel>>(searchResults);
     }
 
-    private void OnArtistSelected(ArtistModel selectedArtist)
+    private void OnArtistSelected(ArtistModel? selectedArtist)
     {
-        Song.Artist = selectedArtist;
+        _selectedArtist = selectedArtist;
+        _updateModel.ArtistId = selectedArtist?.Id;
     }
 
-    private void OnLanguageSelected(LanguageModel selectedLanguage)
+    private void OnLanguageSelected(LanguageModel? selectedLanguage)
     {
-        Song.Language = selectedLanguage;
+        _selectedLanguage = selectedLanguage;
+        _updateModel.LanguageId = selectedLanguage?.Id;
     }
 
-    public async Task SaveAsync()
+    private async Task SaveAsync()
     {
-        if (string.IsNullOrWhiteSpace(Song.Name))
+        if (string.IsNullOrWhiteSpace(_updateModel.Name))
         {
-            Snackbar.Add("Please provide Song Name", Severity.Error);
+            Snackbar.Add("Please provide Song Name", Severity.Warning);
             return;
         }
 
-        if (Song.Artist is null)
+        if (_updateModel.Name.Length < 2)
         {
-            Snackbar.Add("Please select an Artist", Severity.Error);
+            Snackbar.Add("Song name must be at least 2 characters", Severity.Warning);
             return;
         }
 
-        if (Song.Language is null)
+        if (_updateModel.ArtistId is null)
         {
-            Snackbar.Add("Please select a Language", Severity.Error);
+            Snackbar.Add("Please select an Artist", Severity.Warning);
             return;
         }
 
-        SongUpdateModel updateModel = new()
+        if (_updateModel.LanguageId is null)
         {
-            Name = Song.Name,
-            ArtistId = Song.Artist.Id,
-            LanguageId = Song.Language.Id,
-            TabsURL = Song.TabsURL,
-            AudioURL = Song.AudioURL,
-            Tuning = Song.Tuning,
-            Key = Song.Key,
-            BPM = Song.BPM
-        };
+            Snackbar.Add("Please select a Language", Severity.Warning);
+            return;
+        }
 
-        if (await SongService.TryUpdateSongAsync(Song.Id, updateModel))
+        var result = await SongService.TryUpdateSongAsync(Song.Id, _updateModel);
+
+        if (!result)
         {
-            Snackbar.Add("Song updated successfully", Severity.Success);
-            MudDialog.Close(DialogResult.Ok(true));
+            Snackbar.Add("Failed to update song", Severity.Error);
+            return;
         }
-        else
-        {
-            Snackbar.Add("Failed to update Song", Severity.Error);
-        }
+
+        Snackbar.Add("Song updated successfully!", Severity.Success);
+        MudDialog.Close(DialogResult.Ok(true));
     }
 
     private void Cancel() => MudDialog.Cancel();

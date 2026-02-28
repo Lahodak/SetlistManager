@@ -1,36 +1,38 @@
 ﻿using Microsoft.AspNetCore.Http.Extensions;
 using SetlistManager.Common.Models;
-using Newtonsoft.Json;
 using SetlistManager.Common.Genius.Models.Search;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using SetlistManager.App.Options;
 using SetlistManager.App.Models;
+using SetlistManager.Common.Exceptions;
+using System.Net.Http.Json;
 
 namespace SetlistManager.App.Services.Implementations;
 
 public class GeniusService : IGeniusService
 {
     private const string _searchEndpointSuffix = "/search?";
-    
-    private readonly IHttpClientFactory _httpClientFactory;
+    private const string _geniusAccessTokenKey = "access_token";
+    private const string _geniusQueryKey = "q";
     private readonly IUserService _userService;
-    private readonly IOptions<GeniusOptions> _geniusOptions;
-    private readonly IOptions<SetlistManagerApiOptions> _apiOptions;
     private readonly IApiService _apiService;
+    private readonly GeniusOptions _geniusOptions;
+    private readonly SetlistManagerApiOptions _apiOptions;
+    private readonly HttpClient _client;
     
-    public GeniusService(IHttpClientFactory factory, IOptions<GeniusOptions> geniusOptions, IUserService userService, IApiService apiService, IOptions<SetlistManagerApiOptions> apiOptions)
+    public GeniusService(HttpClient client, IOptions<GeniusOptions> geniusOptions, IUserService userService, IApiService apiService, IOptions<SetlistManagerApiOptions> apiOptions)
     {
         _apiService = apiService;
-        _apiOptions = apiOptions;
-        _geniusOptions = geniusOptions;
-        _httpClientFactory = factory;
+        _apiOptions = apiOptions.Value;
+        _geniusOptions = geniusOptions.Value;
+        _client = client;
         _userService = userService;
     }
 
     public async Task<string> AuthorizeAsync()
     {
-        var response = await _apiService.GetAsync<UrlResponseModel>(_apiOptions.Value.TokensEndpoint);
+        var response = await _apiService.GetAsync<UrlResponseModel>(_apiOptions.BaseUrl + _apiOptions.TokensEndpoint);
 
         if (response is null)
             return "/error";
@@ -40,38 +42,26 @@ public class GeniusService : IGeniusService
 
     public async Task<GeniusEmbedModel?> FetchSongLyricsAsync(SongModel song)
     {
-        var client = _httpClientFactory.CreateClient();
         var token = (await _userService.GetUserAsync())?.Tokens?.FirstOrDefault(x => x.Provider == ProviderEnum.Genius.ToString());
 
         if (token is null)
             return null;
 
-        UriBuilder uri = new(_geniusOptions.Value.BaseApiUrl + _searchEndpointSuffix)
+        UriBuilder uri = new(_geniusOptions.BaseApiUrl + _searchEndpointSuffix)
         {
             Query = new QueryBuilder
             {
-                { "access_token", token.AccessToken },
-                { "q", song.Name }
+                { _geniusAccessTokenKey, token.AccessToken },
+                { _geniusQueryKey, song.Name }
             }.ToString()
         };
 
-        SearchResponseModel? responseModel;
-        var searchResponse = await client.GetAsync(uri.ToString());
-        string response = await searchResponse.Content.ReadAsStringAsync();
+        var searchResponse = await _client.GetFromJsonAsync<SearchResponseModel>(uri.ToString());
 
-        try
-        {
-            responseModel = JsonConvert.DeserializeObject<SearchResponseModel>(response);
-        }
-        catch (Exception)
-        {
-            return null;
-        }
+        if (searchResponse is null || searchResponse.Meta.Status != StatusCodes.Status200OK || searchResponse.Response.Hits.Count == 0)
+            throw new GeniusSongLyricsNotFoundException();   
 
-        if (responseModel is null || responseModel.Meta.Status != StatusCodes.Status200OK || responseModel.Response.Hits.Count == 0)
-            return null;
-
-        var result = responseModel.Response.Hits[0].Result;
+        var result = searchResponse.Response.Hits[0].Result;
 
         return new GeniusEmbedModel
         {

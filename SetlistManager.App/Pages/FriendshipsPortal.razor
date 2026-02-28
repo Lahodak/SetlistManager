@@ -1,62 +1,91 @@
 ﻿@page "/FriendshipsPortal"
 <PageTitle>Friendships Portal</PageTitle>
 
-<MudContainer Class="mt-5">
-    <MudPaper Class="pa-4 mt-3" Elevation="2">
-        <MudText Typo="Typo.h3" Class="ml-2">My Friendships</MudText>
-        <MudTable ServerData="ServerReload" Hover="true" @ref="_table">
+<MudContainer Class="mt-6 mb-8">
+
+    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-6">
+        <div>
+            <MudText Typo="Typo.h4" Class="page-title">My Friendships</MudText>
+            <MudText Typo="Typo.body2" Class="page-subtitle">Connect and share your library with friends</MudText>
+        </div>
+    </MudStack>
+
+    <MudPaper Class="portal-card" Elevation="0">
+        <MudTable ServerData="ServerReload" Hover="true" @ref="_table" Class="portal-table">
             <ToolBarContent>
-                <MudText Typo="Typo.h6">Friends List</MudText>
+                <MudText Typo="Typo.h6" Class="toolbar-title">Friends List</MudText>
                 <MudSpacer />
+                <MudTextField @bind-Value="searchString"
+                              Placeholder="Search friends..."
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.Search"
+                              IconSize="Size.Medium"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Class="search-field"
+                              Immediate="true"
+                              DebounceInterval="700"
+                              OnDebounceIntervalElapsed="OnSearch" />
                 <MudButton Variant="Variant.Filled"
                            Color="Color.Primary"
                            OnClick="OpenAddFriendDialog"
-                           StartIcon="@Icons.Material.Filled.PersonAdd">
+                           StartIcon="@Icons.Material.Filled.PersonAdd"
+                           Class="ml-3 add-btn">
                     Add Friend
                 </MudButton>
-                <MudTextField T="string" ValueChanged="@(s => OnSearch(s))" Placeholder="Search friends"
-                              Adornment="Adornment.Start"
-                              AdornmentIcon="@Icons.Material.Filled.Search"
-                              IconSize="Size.Medium" Class="mt-0 ml-4">
-                </MudTextField>
             </ToolBarContent>
             <HeaderContent>
                 <MudTh><MudTableSortLabel SortLabel="username_field" T="FriendModel">Username</MudTableSortLabel></MudTh>
                 <MudTh><MudTableSortLabel SortLabel="state_field" T="FriendModel">Status</MudTableSortLabel></MudTh>
-                <MudTh>Actions</MudTh>
+                <MudTh Style="width: 120px;">Actions</MudTh>
             </HeaderContent>
             <RowTemplate>
-                <MudTd DataLabel="Username">@context.Username</MudTd>
+                <MudTd DataLabel="Username">
+                    <MudText Typo="Typo.body2" Class="username-text">@context.Username</MudText>
+                </MudTd>
                 <MudTd DataLabel="Status">
-                    <MudChip T="FriendshipState" Color="@(context.State == FriendshipState.Accepted ? Color.Success : Color.Warning)" 
-                             Size="Size.Small">
+                    <MudChip T="FriendshipState"
+                             Color="@(context.State == FriendshipState.Accepted ? Color.Success : Color.Warning)"
+                             Size="Size.Small"
+                             Variant="Variant.Filled"
+                             Class="status-chip">
                         @context.State
                     </MudChip>
                 </MudTd>
-                <MudTd>
-                    @if (context.State == FriendshipState.Pending && context.InitiatedById != _currentUserId)
-                    {
-                        <MudIconButton OnClick="() => AcceptFriendshipAsync(context)" 
-                                       Icon="@Icons.Material.Filled.Check" 
-                                       Variant="Variant.Outlined" 
-                                       Size="Size.Small" 
-                                       Color="Color.Success"
-                                       title="Accept" />
-                    }
-                    <MudIconButton OnClick="() => RemoveFriendshipAsync(context)" 
-                                   Icon="@Icons.Material.Filled.PersonRemove" 
-                                   Variant="Variant.Outlined" 
-                                   Size="Size.Small" 
-                                   Color="Color.Error" 
-                                   Class="ml-2"
-                                   title="Remove" />
+                <MudTd DataLabel="Actions">
+                    <MudStack Row="true" Spacing="1" AlignItems="AlignItems.Center">
+                        @if (context.State == FriendshipState.Pending && context.InitiatedById != _currentUserId)
+                        {
+                            <MudTooltip Text="Accept request">
+                                <MudIconButton OnClick="() => AcceptFriendshipAsync(context)"
+                                               Icon="@Icons.Material.Filled.Check"
+                                               Variant="Variant.Text"
+                                               Size="Size.Small"
+                                               Color="Color.Success" />
+                            </MudTooltip>
+                        }
+                        <MudTooltip Text="Remove friend">
+                            <MudIconButton OnClick="() => RemoveFriendshipAsync(context)"
+                                           Icon="@Icons.Material.Filled.PersonRemove"
+                                           Variant="Variant.Text"
+                                           Size="Size.Small"
+                                           Color="Color.Error" />
+                        </MudTooltip>
+                    </MudStack>
                 </MudTd>
             </RowTemplate>
             <NoRecordsContent>
-                <MudText>No matching friends found</MudText>
+                <div class="empty-state">
+                    <MudIcon Icon="@Icons.Material.Filled.PeopleOutline" Class="empty-icon" />
+                    <MudText Typo="Typo.body1" Class="empty-title">No friends found</MudText>
+                    <MudText Typo="Typo.body2" Class="empty-subtitle">Search for friends to connect and share your library</MudText>
+                </div>
             </NoRecordsContent>
             <LoadingContent>
-                <MudText>Loading...</MudText>
+                <div class="loading-state">
+                    <MudProgressCircular Indeterminate="true" Size="Size.Small" Color="Color.Primary" />
+                    <MudText Typo="Typo.body2" Class="ml-3">Loading friends...</MudText>
+                </div>
             </LoadingContent>
             <PagerContent>
                 <MudTablePager />

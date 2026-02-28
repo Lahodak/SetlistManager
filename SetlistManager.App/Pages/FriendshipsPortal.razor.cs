@@ -16,7 +16,7 @@ public partial class FriendshipsPortal
     public required ISnackbar Snackbar { get; set; }
     
     private MudTable<FriendModel> _table = new();
-    private PagedRequest pageStatus = new();
+    private readonly PagedRequest pageStatus = new();
     private string? searchString;
     private int _currentUserId;
 
@@ -27,7 +27,6 @@ public partial class FriendshipsPortal
 
     private async Task<TableData<FriendModel>> ServerReload(TableState state, CancellationToken token)
     {
-        await Task.Delay(300, token);
         pageStatus.PageIndex = state.Page;
         pageStatus.PageSize = state.PageSize;
         pageStatus.Query = searchString;

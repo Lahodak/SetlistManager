@@ -1,6 +1,106 @@
 ﻿@layout EmptyLayout
 @page "/"
+<MudAppBar Elevation="0" Color="Color.Primary"/>
 
-<MudContainer Class="d-flex justify-center align-center" Style="height:100vh;">
-    <MudText Typo="Typo.h1">Setlist Manager</MudText>
-</MudContainer>
+<div class="landing-root">
+    <section class="hero-section">
+        <MudContainer MaxWidth="MaxWidth.Large">
+            <div class="hero-content">
+
+                <h1 class="hero-title">
+                    SetlistManager
+                </h1>
+
+                <h6 class="hero-subtitle">
+                    Smarter setlists for better live performances.
+                </h6>
+
+                <p class="hero-description">
+                    Keep your band in sync on stage. Manage songs, generate dynamic setlists,
+                    and access everything you need—right when you need it.
+                </p>
+
+                <div class="hero-actions">
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               Size="Size.Large"
+                               Autofocus="true"
+                               OnClick="NavigateToLogin">
+                        Login
+                    </MudButton>
+
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Primary"
+                               Size="Size.Large"
+                               OnClick="NavigateToRegister">
+                        Register
+                    </MudButton>
+                </div>
+
+            </div>
+        </MudContainer>
+    </section>
+
+    <section class="features-section">
+        <MudContainer MaxWidth="MaxWidth.Large">
+            <MudText Typo="Typo.h4" Align="Align.Center" Class="mb-8">
+                Built for Bands, Not Spreadsheets
+            </MudText>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <MudIcon Icon="@Icons.Material.Filled.Groups" Size="Size.Large" />
+                    <h5>Live Room Mode</h5>
+                    <p>
+                        See the current and next song in real time.
+                        Join instantly via QR code or room code.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <MudIcon Icon="@Icons.Material.Filled.LibraryMusic" Size="Size.Large" />
+                    <h5>Song Details</h5>
+                    <p>
+                        Key, tempo, tuning, and useful links available
+                        for every song.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <MudIcon Icon="@Icons.Material.Filled.AutoAwesome" Size="Size.Large" />
+                    <h5>Smart Setlists</h5>
+                    <p>
+                        Generate setlists from your library automatically
+                        and export or print them anytime.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <MudIcon Icon="@Icons.Material.Filled.Api" Size="Size.Large" />
+                    <h5>Genius API Integration</h5>
+                    <p>
+                        Fetch lyrics and song data automatically
+                        from external sources.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <MudIcon Icon="@Icons.Material.Filled.Person" Size="Size.Large" />
+                    <h5>Personal Profiles</h5>
+                    <p>
+                        Set your instrument and connect your Genius account
+                        for richer song insights.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <MudIcon Icon="@Icons.Material.Filled.Share" Size="Size.Large" />
+                    <h5>Community Sharing</h5>
+                    <p>
+                        Share songs, artists, and setlists with other musicians.
+                    </p>
+                </div>
+            </div>
+        </MudContainer>
+    </section>
+</div>

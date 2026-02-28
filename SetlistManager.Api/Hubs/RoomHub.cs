@@ -7,6 +7,7 @@ namespace SetlistManager.Api.Hubs;
 
 public class RoomHub : Hub
 {
+    private const string _clientUpdateDataMethod = "UpdateData";
     private readonly IRoomsService _roomsService;
     private readonly IUserService _userService;
 
@@ -56,19 +57,15 @@ public class RoomHub : Hub
             return null;
         }
 
-        var currentUser = await _userService.GetUserEntityByIdAsync(userId);
-
-        if (currentUser is null)
-            throw new HubException("Couldn't find user");
-
-        var roomModel = await _roomsService.JoinRoomAsync(joinRoomModel, currentUser);
-
-        if (roomModel is null)
-            throw new HubException($"Couldn't find Room {joinRoomModel.RoomCode}");
-
+        var currentUser = await _userService.GetUserEntityByIdAsync(userId)
+            ?? throw new HubException("Couldn't find user");
+        
+        var roomModel = await _roomsService.JoinRoomAsync(joinRoomModel, currentUser) 
+            ?? throw new HubException($"Couldn't find Room {joinRoomModel.RoomCode}");
+        
         await Groups.AddToGroupAsync(Context.ConnectionId, roomModel.Id.ToString());
 
-        await Clients.Group(roomModel.Id.ToString()).SendAsync("UpdateData", roomModel);
+        await Clients.Group(roomModel.Id.ToString()).SendAsync(_clientUpdateDataMethod, roomModel);
 
         return roomModel;
     }
@@ -76,13 +73,13 @@ public class RoomHub : Hub
     public async Task LeaveRoomAsync(string roomId) 
     {
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomId);
-        await Clients.Group(roomId).SendAsync("UpdateData", Context.ConnectionId);
+        await Clients.Group(roomId).SendAsync(_clientUpdateDataMethod, Context.ConnectionId);
     }
 
     public async Task ChangeCurrentSongAsync(ChangeCurrentSongModel changeCurrentSongModel)
     {
         await _roomsService.ChangeCurrentSongAsync(changeCurrentSongModel);
-        var roomModel = await _roomsService.GetRoomByIdAsync(changeCurrentSongModel.RoomId);
-        await Clients.Group(changeCurrentSongModel.RoomId.ToString()).SendAsync("UpdateData", roomModel);
+        var roomModel = await _roomsService.GetRoomByIdAsync(changeCurrentSongModel.RoomId!.Value);
+        await Clients.Group(changeCurrentSongModel.RoomId!.Value.ToString()).SendAsync(_clientUpdateDataMethod, roomModel);
     }
 }

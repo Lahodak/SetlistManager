@@ -1,0 +1,109 @@
+﻿/* =============================================
+   Portal Shared Styles
+   Used by: SongsPortal, SetlistsPortal, ArtistsPortal,
+            FriendshipsPortal, PublicSongs, PublicArtists
+   ============================================= */
+
+.page-title {
+    font-weight: 700 !important;
+    color: var(--mud-palette-text-primary) !important;
+    letter-spacing: -0.5px;
+}
+
+.page-subtitle {
+    color: var(--mud-palette-text-secondary) !important;
+    margin-top: 2px;
+}
+
+.public-btn,
+.back-btn {
+    border-radius: 10px !important;
+    text-transform: none !important;
+    font-weight: 500 !important;
+    white-space: nowrap;
+}
+
+.portal-card {
+    border-radius: 16px !important;
+    border: 1px solid var(--mud-palette-divider) !important;
+    background: var(--mud-palette-surface) !important;
+    overflow: hidden;
+}
+
+.portal-table .mud-table-toolbar {
+    padding: 1rem 1.25rem !important;
+    border-bottom: 1px solid var(--mud-palette-divider);
+}
+
+.toolbar-title {
+    font-weight: 600 !important;
+    color: var(--mud-palette-text-primary) !important;
+}
+
+.search-field {
+    max-width: 240px;
+}
+
+.add-btn {
+    border-radius: 10px !important;
+    text-transform: none !important;
+    font-weight: 600 !important;
+    white-space: nowrap;
+}
+
+.row-link {
+    color: var(--mud-palette-text-primary) !important;
+    text-decoration: none !important;
+    font-weight: 500;
+    transition: color 0.15s ease;
+}
+
+    .row-link:hover {
+        color: var(--mud-palette-primary) !important;
+    }
+
+.row-text {
+    font-weight: 500 !important;
+    color: var(--mud-palette-text-primary) !important;
+}
+
+.username-text {
+    font-weight: 500 !important;
+    color: var(--mud-palette-text-primary) !important;
+}
+
+.status-chip {
+    text-transform: none !important;
+    font-weight: 500 !important;
+    border-radius: 8px !important;
+}
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 3rem 1rem;
+    gap: 0.4rem;
+}
+
+.empty-icon {
+    color: var(--mud-palette-text-disabled) !important;
+    font-size: 2.5rem !important;
+    margin-bottom: 0.5rem;
+}
+
+.empty-title {
+    font-weight: 600 !important;
+    color: var(--mud-palette-text-primary) !important;
+}
+
+.empty-subtitle {
+    color: var(--mud-palette-text-secondary) !important;
+}
+
+.loading-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}

@@ -19,7 +19,7 @@ public partial class ArtistsPortal
     public required IUserService UserService { get; set; }
 
     private MudTable<ArtistModel> _table = new();
-    private PagedRequest pageStatus = new() { ContentType = ContentType.Private };
+    private readonly ContentPagedRequest pageStatus = new();
     private string? searchString;
     private int _userId;
 
@@ -30,12 +30,11 @@ public partial class ArtistsPortal
 
     private async Task<TableData<ArtistModel>> ServerReload(TableState state, CancellationToken token)
     {
-        await Task.Delay(300, token);
         pageStatus.PageIndex = state.Page;
         pageStatus.PageSize = state.PageSize;
         pageStatus.Query = searchString;
 
-        var result = await ArtistService.GetAvailableArtistsAsync(pageStatus);
+        var result = await ArtistService.GetArtistsAsync(pageStatus);
 
         if(result?.Items is null)
         {
@@ -103,7 +102,7 @@ public partial class ArtistsPortal
         if (result is not true)
             return;
 
-        await ArtistService.RemoveAccessFromUserAsync(artist.Id, _userId);
+        await ArtistService.TryRemoveAccessFromUserAsync(artist.Id, _userId);
         await _table.ReloadServerData();
     }
 

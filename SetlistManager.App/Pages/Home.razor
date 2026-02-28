@@ -1,22 +1,26 @@
-﻿@page "/Home"
-
+﻿@page "/home"
 <PageTitle>Home</PageTitle>
-<MudContainer MaxWidth="MaxWidth.Large" Class="mt-6">
-    <MudText Typo="Typo.h4" Class="mb-4">
-        Dashboard
-    </MudText>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-6 mb-8">
+
+    <MudText Typo="Typo.h4" Class="mb-1 dashboard-title">Dashboard</MudText>
+    <MudText Typo="Typo.body2" Class="mb-6 dashboard-subtitle">Here's what's happening in the public library</MudText>
+
     <MudGrid Spacing="3">
+
         <MudItem xs="12" md="6">
-            <MudPaper Class="pa-4">
-                <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-                    <MudText Typo="Typo.h6">Most used songs</MudText>
-                    <MudSelect T="StatsRange" Dense="true"
-                               Value="@_selectedRange"
-                               ValueChanged="OnRangeChanged">
-                        <MudSelectItem Value="StatsRange.Day">Day</MudSelectItem>
-                        <MudSelectItem Value="StatsRange.Week">Week</MudSelectItem>
-                        <MudSelectItem Value="StatsRange.Month">Month</MudSelectItem>
-                    </MudSelect>
+            <MudPaper Class="dashboard-card pa-5" Elevation="0">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-4">
+                    <div>
+                        <MudText Typo="Typo.h6" Class="card-title">Most Used Songs</MudText>
+                        <MudText Typo="Typo.caption" Class="card-subtitle">Top played tracks</MudText>
+                    </div>
+                    <MudToggleGroup T="StatsRange" Value="@_selectedRange" ValueChanged="OnRangeChanged"
+                                    Dense="true" Outlined="true" Size="Size.Small">
+                        <MudToggleItem Value="StatsRange.Day">Day</MudToggleItem>
+                        <MudToggleItem Value="StatsRange.Week">Week</MudToggleItem>
+                        <MudToggleItem Value="StatsRange.Month">Month</MudToggleItem>
+                    </MudToggleGroup>
                 </MudStack>
                 @if (_mostUsedLabels.Any())
                 {
@@ -24,53 +28,183 @@
                               ChartSeries="@_mostUsedSeries"
                               XAxisLabels="@_mostUsedLabels.ToArray()"
                               Width="100%"
-                              Height="250px"/>
+                              Height="250px" />
                 }
                 else
                 {
-                    <MudText Typo="Typo.body2" Class="mt-4">No data available</MudText>
+                    <div class="empty-state">
+                        <MudIcon Icon="@Icons.Material.Filled.BarChart" Class="empty-icon" />
+                        <MudText Typo="Typo.body2" Class="empty-text">No data available yet</MudText>
+                    </div>
                 }
             </MudPaper>
         </MudItem>
+
         <MudItem xs="12" md="6">
-            <MudPaper Class="pa-4">
-                <MudText Typo="Typo.h6">Most added to library</MudText>
+            <MudPaper Class="dashboard-card pa-5" Elevation="0">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-4">
+                    <div>
+                        <MudText Typo="Typo.h6" Class="card-title">Most Added to Library</MudText>
+                        <MudText Typo="Typo.caption" Class="card-subtitle">Songs saved by users</MudText>
+                    </div>
+                </MudStack>
                 @if (_mostAddedLabels.Any())
                 {
                     <MudChart ChartType="ChartType.Bar"
                               ChartSeries="@_mostAddedSeries"
                               XAxisLabels="@_mostAddedLabels.ToArray()"
                               Width="100%"
-                              Height="250px"/>
+                              Height="250px" />
                 }
                 else
                 {
-                    <MudText Typo="Typo.body2" Class="mt-4">No data available</MudText>
+                    <div class="empty-state">
+                        <MudIcon Icon="@Icons.Material.Filled.LibraryMusic" Class="empty-icon" />
+                        <MudText Typo="Typo.body2" Class="empty-text">No data available yet</MudText>
+                    </div>
                 }
             </MudPaper>
         </MudItem>
+
         <MudItem xs="12">
-            <MudPaper Class="pa-4">
-                <MudText Typo="Typo.h6" Class="mb-2">
-                    Latest public songs
-                </MudText>
-                <MudList Dense="true" T="LatestSongStatModel">
-                    @if (_latestSongs is not null)
-                    {
+            <MudPaper Class="dashboard-card pa-5" Elevation="0">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-3" Spacing="2">
+                    <div class="list-icon-wrap">
+                        <MudIcon Icon="@Icons.Material.Filled.QueueMusic" Class="list-icon" Size="Size.Small" />
+                    </div>
+                    <div>
+                        <MudText Typo="Typo.h6" Class="card-title">Latest Public Songs</MudText>
+                        <MudText Typo="Typo.caption" Class="card-subtitle">Recently added to the platform</MudText>
+                    </div>
+                </MudStack>
+                <MudDivider Class="mb-2" />
+                @if (_latestSongs is not null && _latestSongs.Any())
+                {
+                    <MudList Dense="true" T="LatestSongStatModel" DisablePadding="true">
                         @foreach (var song in _latestSongs)
                         {
-                            <MudListItem>
-                                <MudText>
-                                    <b>@song.Name</b> – @song.ArtistNick
-                                </MudText>
-                                <MudText Typo="Typo.caption">
-                                    @song.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy")
-                                </MudText>
+                            <MudListItem Class="song-list-item">
+                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                                    <div class="song-icon-wrap">
+                                        <MudIcon Icon="@Icons.Material.Filled.MusicNote" Size="Size.Small" Class="song-icon" />
+                                    </div>
+                                    <div>
+                                        <MudText Typo="Typo.body2" Class="song-name">@song.Name</MudText>
+                                        <MudText Typo="Typo.caption" Class="song-artist">@song.Artist</MudText>
+                                    </div>
+                                </MudStack>
                             </MudListItem>
                         }
-                    }
-                </MudList>
+                    </MudList>
+                }
+                else
+                {
+                    <div class="empty-state">
+                        <MudIcon Icon="@Icons.Material.Filled.MusicOff" Class="empty-icon" />
+                        <MudText Typo="Typo.body2" Class="empty-text">No songs available yet</MudText>
+                    </div>
+                }
             </MudPaper>
         </MudItem>
+
     </MudGrid>
 </MudContainer>
+
+<style>
+    .dashboard-title {
+        font-weight: 700 !important;
+        color: var(--mud-palette-text-primary) !important;
+        letter-spacing: -0.5px;
+    }
+
+    .dashboard-subtitle {
+        color: var(--mud-palette-text-secondary) !important;
+    }
+
+    .dashboard-card {
+        border-radius: 16px !important;
+        border: 1px solid var(--mud-palette-divider) !important;
+        background: var(--mud-palette-surface) !important;
+        transition: box-shadow 0.2s ease;
+    }
+
+        .dashboard-card:hover {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+        }
+
+    .card-title {
+        font-weight: 600 !important;
+        color: var(--mud-palette-text-primary) !important;
+    }
+
+    .card-subtitle {
+        color: var(--mud-palette-text-secondary) !important;
+    }
+
+    .list-icon-wrap {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        background: var(--mud-palette-primary-hover);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .list-icon {
+        color: var(--mud-palette-primary) !important;
+    }
+
+    .song-list-item {
+        border-radius: 10px !important;
+        margin-bottom: 4px;
+        transition: background 0.15s ease;
+    }
+
+        .song-list-item:hover {
+            background: var(--mud-palette-action-default-hover) !important;
+        }
+
+    .song-icon-wrap {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        background: var(--mud-palette-primary-hover);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .song-icon {
+        color: var(--mud-palette-primary) !important;
+    }
+
+    .song-name {
+        font-weight: 600 !important;
+        color: var(--mud-palette-text-primary) !important;
+    }
+
+    .song-artist {
+        color: var(--mud-palette-text-secondary) !important;
+    }
+
+    .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 2.5rem 1rem;
+        gap: 0.5rem;
+    }
+
+    .empty-icon {
+        color: var(--mud-palette-text-disabled) !important;
+        font-size: 2.5rem !important;
+    }
+
+    .empty-text {
+        color: var(--mud-palette-text-secondary) !important;
+    }
+</style>

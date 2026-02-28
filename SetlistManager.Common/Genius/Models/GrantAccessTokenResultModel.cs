@@ -1,10 +1,11 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
+
 namespace SetlistManager.Common.Genius.Models;
 
 public class GrantAccessTokenResultModel
 {
-    [JsonProperty("code")]
+    [JsonPropertyName("code")]
     public string Code { get; set; } = default!;
-    [JsonProperty("state")]
+    [JsonPropertyName("state")]
     public string State { get; set; } = default!;
 }

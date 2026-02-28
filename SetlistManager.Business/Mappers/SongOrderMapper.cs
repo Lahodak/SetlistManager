@@ -5,16 +5,15 @@ namespace SetlistManager.Business.Mappers;
 
 public static class SongOrderMapper
 {
-    public static Setlist MapSongModelToEntity(this SetlistModel setlistModel, Setlist setlist)
-    {   
-        foreach (var songModel in setlistModel.Songs)
-        {            
+    public static Setlist MapCreateModelToEntity(this SetlistCreateModel createModel, Setlist setlist)
+    {
+        foreach (var song in createModel.Songs)
+        {
             setlist.SongsSetlists.Add(new SongsSetlists
             {
-                SongId = songModel.Id,
-                SetlistId = setlist.Id,
-                Order = songModel.Order
-            });            
+                SongId = song.SongId,
+                Order = song.Order
+            });
         }
 
         return setlist;

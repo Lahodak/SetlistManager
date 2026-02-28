@@ -1,9 +1,9 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace SetlistManager.Common.Genius.Models.Songs;
 
 public class Meta
 {
-    [JsonProperty("status")]
+    [JsonPropertyName("status")]
     public int Status { get; set; }
 }

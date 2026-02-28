@@ -2,10 +2,12 @@
 
 public interface IApiService
 {
-    Task<T?> GetAsync<T>(string endpoint);
+    Task<T> GetAsync<T>(string endpoint);
     Task<T?> PostAsync<T>(string endpoint, T data);
+    Task<bool> PostAsync(string endpoint);
     Task<TResponse?> PostAsync<TRequest, TResponse>(string endpoint, TRequest data);
     Task<T?> PutAsync<T>(string endpoint, T data);
+    Task<bool> TryPostAsync<T>(string endpoint, T data);
     Task<bool> TryDeleteAsync(string endpoint);
     Task<bool> TryPutAsync<T>(string endpoint, T data);
 }

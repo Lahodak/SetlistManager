@@ -16,7 +16,7 @@
 
         @if (_userFriendships?.Items is not null && _userFriendships.Items.Any())
         {
-            <MudList T="FriendModel" Clickable="true">
+            <MudList T="FriendModel">
                 @foreach (var friend in _userFriendships.Items)
                 {
                     <MudListItem>

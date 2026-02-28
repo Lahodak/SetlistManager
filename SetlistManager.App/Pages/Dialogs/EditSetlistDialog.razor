@@ -1,22 +1,25 @@
 ﻿<MudDialog>
     <DialogContent>
-        <MudText Typo="Typo.h5">Edit Setlist</MudText>
+        <MudText Typo="Typo.h5" Class="dialog-heading">Edit Setlist</MudText>
 
-        <MudPaper Class="pa-4 mt-3" Elevation="2">
-            <MudText Typo="Typo.h6" Class="mb-2">Setlist Name</MudText>
+        <MudPaper Class="dialog-section mt-3" Elevation="0">
+            <MudText Typo="Typo.body2" Class="dialog-section-label">Setlist Name</MudText>
             <MudTextField @bind-Value="_setlist.Name"
                           Label="Enter setlist name"
                           Variant="Variant.Outlined"
+                          Class="mt-2"
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.QueueMusic"
                           FullWidth="true" />
         </MudPaper>
 
-        <MudPaper Class="pa-4 mt-3" Elevation="2">
-            <MudText Typo="Typo.h6">Add Song</MudText>
-            <MudText Typo="Typo.body2" Class="mb-3">Search and add songs to your setlist.</MudText>
-
+        <MudPaper Class="dialog-section mt-3" Elevation="0">
+            <MudText Typo="Typo.body2" Class="dialog-section-label">Add Song</MudText>
+            <MudText Typo="Typo.caption" Class="dialog-section-caption">Search and add songs to your setlist</MudText>
             <MudAutocomplete T="SongModel"
                              Label="Search and Add Song"
                              Variant="Variant.Outlined"
+                             Class="mt-2"
                              SearchFunc="Search"
                              ToStringFunc="@(s => s == null ? null : $"{s.Name} | {s.Artist.Nick}")"
                              ValueChanged="OnSongSelected"
@@ -27,56 +30,68 @@
 
         @if (_setlist.Songs.Count > 0)
         {
-            <MudPaper Class="pa-4 mt-4" Elevation="2">
-                <MudText Typo="Typo.h6" Class="mb-3">Setlist Songs (@_setlist.Songs.Count)</MudText>
-                <MudList T="SongModel">
+            <MudPaper Class="dialog-section mt-3" Elevation="0">
+                <MudText Typo="Typo.body2" Class="dialog-section-label">Setlist Songs (@_setlist.Songs.Count)</MudText>
+                <MudList T="SongModel" DisablePadding="true" Class="mt-2">
                     @for (int i = 0; i < _setlist.Songs.Count; i++)
                     {
                         var song = _setlist.Songs[i];
                         var index = i;
-                        <MudListItem Style="display: flex; align-items: center; gap: 10px;">
-                            <span style="color: #666; min-width: 30px;">@(index + 1).</span>
-
-                            <MudLink Href="@($"songdetail/{song.Id}")"
-                                     Style="color: black; text-decoration: none; font-size: medium; flex-grow: 1;">
-                                @song.Name | @song.Artist.Nick
-                            </MudLink>
-
-                            <div style="display: flex; gap: 5px;">
-                                <MudIconButton Icon="@Icons.Material.Filled.ArrowUpward"
-                                               Size="Size.Small"
-                                               Color="Color.Default"
-                                               OnClick="() => MoveSongUp(song)"
-                                               Disabled="@(index == 0)"
-                                               title="Move up" />
-
-                                <MudIconButton Icon="@Icons.Material.Filled.ArrowDownward"
-                                               Size="Size.Small"
-                                               Color="Color.Default"
-                                               OnClick="() => MoveSongDown(song)"
-                                               Disabled="@(index == _setlist.Songs.Count - 1)"
-                                               title="Move down" />
-
-                                <MudIconButton Icon="@Icons.Material.Filled.Close"
-                                               Size="Size.Small"
-                                               Color="Color.Error"
-                                               OnClick="() => RemoveSong(song)"
-                                               title="Remove song" />
-                            </div>
+                        <MudListItem Class="dialog-song-item">
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                                <MudText Typo="Typo.caption" Class="dialog-song-index">@(index + 1)</MudText>
+                                <MudLink Href="@($"songdetail/{song.Id}")" Class="dialog-song-link">
+                                    @song.Name
+                                    <MudText Typo="Typo.caption" Class="dialog-song-artist">@song.Artist.Nick</MudText>
+                                </MudLink>
+                                <MudSpacer />
+                                <MudStack Row="true" Spacing="0">
+                                    <MudTooltip Text="Move up">
+                                        <MudIconButton Icon="@Icons.Material.Filled.ArrowUpward"
+                                                       Size="Size.Small"
+                                                       Variant="Variant.Text"
+                                                       Color="Color.Default"
+                                                       OnClick="() => MoveSongUp(song)"
+                                                       Disabled="@(index == 0)" />
+                                    </MudTooltip>
+                                    <MudTooltip Text="Move down">
+                                        <MudIconButton Icon="@Icons.Material.Filled.ArrowDownward"
+                                                       Size="Size.Small"
+                                                       Variant="Variant.Text"
+                                                       Color="Color.Default"
+                                                       OnClick="() => MoveSongDown(song)"
+                                                       Disabled="@(index == _setlist.Songs.Count - 1)" />
+                                    </MudTooltip>
+                                    <MudTooltip Text="Remove song">
+                                        <MudIconButton Icon="@Icons.Material.Filled.Close"
+                                                       Size="Size.Small"
+                                                       Variant="Variant.Text"
+                                                       Color="Color.Error"
+                                                       OnClick="() => RemoveSong(song)" />
+                                    </MudTooltip>
+                                </MudStack>
+                            </MudStack>
                         </MudListItem>
                     }
                 </MudList>
             </MudPaper>
         }
+
     </DialogContent>
 
     <DialogActions>
+        <MudButton Color="Color.Error"
+                   Variant="Variant.Text"
+                   OnClick="Cancel"
+                   Class="dialog-cancel-btn">
+            Cancel
+        </MudButton>
         <MudButton Color="Color.Primary"
                    Variant="Variant.Filled"
-                   OnClick="Save">
+                   OnClick="Save"
+                   StartIcon="@Icons.Material.Filled.Save"
+                   Class="dialog-save-btn">
             Save Changes
         </MudButton>
-
-        <MudButton Variant="Variant.Text" OnClick="Cancel">Cancel</MudButton>
     </DialogActions>
 </MudDialog>

@@ -4,7 +4,6 @@ using SetlistManager.Common.Models;
 
 namespace SetlistManager.Api.Controllers;
 
-[Route("api/instruments")]
 public class InstrumentsController : BaseController
 {
     private readonly IInstrumentsService _instrumentsService;
