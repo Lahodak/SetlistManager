@@ -22,8 +22,8 @@ public class SetlistService : ISetlistService
         return await _apiService.GetAsync<PagedResponse<SetlistModel>>(uri);
     }
 
-    public async Task<bool> TryCreateSetlistAsync(SetlistModel setlistModel)
-        => await _apiService.TryPostAsync(_apiPath, setlistModel);
+    public async Task<bool> TryCreateSetlistAsync(SetlistCreateModel createModel)
+        => await _apiService.TryPostAsync(_apiPath, createModel);
 
     public async Task<SetlistModel?> GetSetlistById(int id)
         => await _apiService.GetAsync<SetlistModel>($"{_apiPath}/{id}");

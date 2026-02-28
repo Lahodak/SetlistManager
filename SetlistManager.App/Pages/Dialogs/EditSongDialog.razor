@@ -72,11 +72,24 @@
                                  Required="true"
                                  DebounceInterval="700" />
             </MudItem>
+            <MudItem xs="12">
+                <MudPaper Class="dialog-public-toggle" Elevation="0">
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                        <div>
+                            <MudText Typo="Typo.body2" Class="dialog-toggle-title">Make song public</MudText>
+                            <MudText Typo="Typo.caption" Class="dialog-section-caption">This song will be visible and addable by other users</MudText>
+                        </div>
+                        <MudSwitch T="bool"
+                                   @bind-Value="_updateModel.IsPublic"
+                                   Color="Color.Primary" />
+                    </MudStack>
+                </MudPaper>
+            </MudItem>
         </MudGrid>
     </DialogContent>
     <DialogActions>
         <MudButton Color="Color.Error"
-                   Variant="Variant.Outlined"
+                   Variant="Variant.Text"
                    OnClick="Cancel"
                    Class="dialog-cancel-btn">
             Cancel

@@ -79,22 +79,22 @@ public class SetlistsService : ISetlistsService
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task CreateSetlistAsync(SetlistModel setlistModel)
+    public async Task CreateSetlistAsync(SetlistCreateModel createModel)
     {
         if (await _dbContext.Setlists.AnyAsync(s =>
-            s.Name == setlistModel.Name &&
+            s.Name == createModel.Name &&
             (s.OwnerId == _currentUserId || s.SetlistsUsers.Any(x => x.UserId == _currentUserId))))
             throw new DuplicateEntryException();
 
         Setlist setlistToCreate = new()
         {
-            Name = setlistModel.Name,
+            Name = createModel.Name,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
             OwnerId = _currentUserId
         };
 
-        _dbContext.Setlists.Add(setlistModel.MapSongModelToEntity(setlistToCreate));
+        _dbContext.Setlists.Add(createModel.MapCreateModelToEntity(setlistToCreate));
         await _dbContext.SaveChangesAsync();
     }
 
@@ -113,7 +113,7 @@ public class SetlistsService : ISetlistsService
             throw new EntryNotFoundException("Setlist not found or access denied.");
 
         setlistToBeEdited.Name = setlistModel.Name;
-        setlistToBeEdited.UpdatedAt = DateTime.Now;
+        setlistToBeEdited.UpdatedAt = DateTime.UtcNow;
 
         var existingSongIds = setlistToBeEdited.SongsSetlists
             .Select(s => s.SongId)

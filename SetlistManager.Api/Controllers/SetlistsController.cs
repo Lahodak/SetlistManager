@@ -25,7 +25,7 @@ public class SetlistsController : BaseController
     }
 
     [HttpPost]
-    public async Task<ActionResult<SetlistModel>> CreateSetlist([FromBody] SetlistModel setlist)
+    public async Task<ActionResult> CreateSetlist([FromBody] SetlistCreateModel setlist)
     {
         await _setlistService.CreateSetlistAsync(setlist);
         

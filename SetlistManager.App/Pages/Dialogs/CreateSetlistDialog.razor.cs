@@ -36,9 +36,7 @@ public partial class CreateSetlistDialog
     private readonly List<SongModel> _manuallyAddedSongs = [];
     private bool _showSetlistContentUI;
     private bool _showSaveSetlistUI;
-    private SetlistModel _setlist = new();
     private string? _toBeSavedSetlistName;
-    private UserModel? _user = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -46,14 +44,6 @@ public partial class CreateSetlistDialog
         {
             PageSize = int.MaxValue
         }))?.Items;
-
-        _user = await UserService.GetUserAsync();
-
-        if (_user is null)
-        {
-            Snackbar.Add("Failed to verify user", Severity.Error);
-            return;
-        }
 
         if (_allSongs is null)
         {
@@ -153,7 +143,6 @@ public partial class CreateSetlistDialog
             _toBeSavedSetlistName = $"Manual {DateTime.Now:HH:mm:ss}";
         }
 
-        _setlist = CreateSetlistModel(_toBeSavedSetlistName, _shuffeledSongCollection);
         _showSaveSetlistUI = true;
     }
 
@@ -166,7 +155,6 @@ public partial class CreateSetlistDialog
 
         UpdateShuffledCollection(generatedSongs);
         SetDefaultNameIfEmpty();
-        UpdateSetlistModel();
         ShowUI();
         ShowWarningIfIncomplete(generatedSongs.Count);
 
@@ -236,11 +224,6 @@ public partial class CreateSetlistDialog
         }
     }
 
-    private void UpdateSetlistModel()
-    {
-        _setlist = CreateSetlistModel(_toBeSavedSetlistName!, _shuffeledSongCollection);
-    }
-
     private void ShowUI()
     {
         _showSetlistContentUI = true;
@@ -267,9 +250,6 @@ public partial class CreateSetlistDialog
             return;
         }
 
-        if (_user is null)
-            return;
-
         if (_toBeSavedSetlistName.Length < 4)
         {
             Snackbar.Add("Setlist name has to be 4 characters or longer", Severity.Warning);
@@ -278,13 +258,17 @@ public partial class CreateSetlistDialog
 
         ReorderSongs();
 
-        _setlist.Name = _toBeSavedSetlistName;
-        _setlist.Owner.Id = _user.Id;
-        _setlist.Songs = _shuffeledSongCollection;
+        var createModel = new SetlistCreateModel
+        {
+            Name = _toBeSavedSetlistName,
+            Songs = _shuffeledSongCollection
+                .Select(s => new SetlistSongOrderItem { SongId = s.Id, Order = s.Order })
+                .ToList()
+        };
 
-        var result = await SetlistService.TryCreateSetlistAsync(_setlist);
+        var result = await SetlistService.TryCreateSetlistAsync(createModel);
         
-        if(!result)
+        if (!result)
         {
             Snackbar.Add("Failed to save setlist", Severity.Error);
             return;
@@ -334,15 +318,6 @@ public partial class CreateSetlistDialog
         {
             _shuffeledSongCollection[i].Order = i + 1;
         }
-    }
-
-    private SetlistModel CreateSetlistModel(string name, List<SongModel> songs)
-    {
-        return new SetlistModel
-        {
-            Name = name,
-            Songs = songs
-        };
     }
 
     private List<SongModel> GetAvailableSongs()
