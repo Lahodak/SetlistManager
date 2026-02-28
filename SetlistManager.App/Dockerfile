@@ -2,6 +2,10 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
+# Copy solution-level props for TargetFramework and central package management
+COPY Directory.Build.props ./
+COPY Directory.Packages.props ./
+
 # Copy all project files for dependency resolution
 COPY SetlistManager.App/*.csproj ./SetlistManager.App/
 COPY SetlistManager.Common/*.csproj ./SetlistManager.Common/
