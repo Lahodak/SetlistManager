@@ -24,7 +24,7 @@ public class RoomCodeService : IRoomCodeService
             code.Clear();
             for (int i = 0; i < roomCodeLength; i++)
             {
-                int index = Random.Shared.Next(roomCodeAvailableCharacters.Length - 1);
+                int index = Random.Shared.Next(roomCodeAvailableCharacters.Length);
                 code.Append(roomCodeAvailableCharacters[index]);
             }
         }

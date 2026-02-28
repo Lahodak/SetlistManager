@@ -121,7 +121,7 @@ public class UserService : IUserService
         var result = await _geniusAuthService.ExchangeGeniusCode(grantResultModel.Code);
 
         if (result?.AccessToken is null)
-            throw new GeniusAccessTokenNotRecievedException();
+            throw new GeniusAccessTokenNotReceivedException();
 
         return result.AccessToken;
     }
@@ -145,8 +145,8 @@ public class UserService : IUserService
             throw new UnauthorizedAccessException();
 
         var friendship = await _dbContext.Friendships.FirstOrDefaultAsync(f =>
-            (f.InitiatorId == initiatorId && f.RecieverId == friendshipRequest.RecieverId) ||
-            (f.InitiatorId == friendshipRequest.RecieverId && f.RecieverId == initiatorId));
+            (f.InitiatorId == initiatorId && f.RecieverId == friendshipRequest.ReceiverId) ||
+            (f.InitiatorId == friendshipRequest.ReceiverId && f.RecieverId == initiatorId));
 
         if (friendship is not null)
         {

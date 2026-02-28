@@ -26,7 +26,7 @@ public static class FriendshipsMapper
         return new Friendship
         {
             InitiatorId = currentUserId,
-            RecieverId = model.RecieverId!.Value,
+            RecieverId = model.ReceiverId!.Value,
             State = FriendshipState.Pending
         };
     }

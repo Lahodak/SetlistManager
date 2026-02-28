@@ -69,7 +69,7 @@ public class AuthService : IAuthService
         else if (!result.Succeeded)        
             throw new UnauthorizedAccessException("Invalid login attempt.");
         
-        var token = await _jwtService.GenerateTokenAsync(user);
+        var token = _jwtService.GenerateToken(user);
         
         return new LoginResultModel
         {

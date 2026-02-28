@@ -16,7 +16,7 @@ public class GlobalExceptionHandlingMiddleware(
         {
             ApplicationException => StatusCodes.Status400BadRequest,
             EntryNotFoundException => StatusCodes.Status404NotFound,
-            GeniusAccessTokenNotRecievedException => StatusCodes.Status502BadGateway,
+            GeniusAccessTokenNotReceivedException => StatusCodes.Status502BadGateway,
             DuplicateEntryException => StatusCodes.Status409Conflict,
             InvalidOperationException => StatusCodes.Status400BadRequest,            
             _ => StatusCodes.Status500InternalServerError

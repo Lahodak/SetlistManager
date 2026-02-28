@@ -68,7 +68,7 @@ public partial class CreateFriendshipDialog
     {
         var friendshipRequest = new FriendshipRequestModel
         {
-            RecieverId = user.Id
+            ReceiverId = user.Id
         };
 
         await UserService.HandleFriendshipRequestAsync(friendshipRequest);

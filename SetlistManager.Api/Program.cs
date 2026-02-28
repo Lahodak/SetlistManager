@@ -27,19 +27,21 @@ builder.Services
     .AddAuthenticationConfiguration(builder.Configuration);
 
 var app = builder.Build();
-
-app.UseSwagger()
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger()
     .UseSwaggerUI();
+}
 
 app.UseCors("AllowAllPolicy")
     .UseHttpsRedirection()
     .UseAuthentication();
 
-//using (var scope = app.Services.CreateScope())
-//{
-//    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-//    await dbContext.Database.MigrateAsync();
-//}
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await dbContext.Database.MigrateAsync();
+}
 
 app.UseAuthorization();
 app.UseResponseCompression();
@@ -49,7 +51,5 @@ app.UseExceptionHandler();
 app.MapControllers();
 
 app.MapHub<RoomHub>("/hubs/room");
-
-await app.RunAsync();
 
 await app.RunAsync();

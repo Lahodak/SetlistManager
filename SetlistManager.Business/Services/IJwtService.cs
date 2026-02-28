@@ -4,5 +4,5 @@ namespace SetlistManager.Business.Services;
 
 public interface IJwtService
 {
-    Task<string> GenerateTokenAsync(User user);
+    string GenerateToken(User user);
 }
