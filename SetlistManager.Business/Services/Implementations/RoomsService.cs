@@ -25,6 +25,8 @@ public class RoomsService : IRoomsService
     {
         var room = await _dbContext.Rooms
             .Include(x => x.Setlist)
+                .ThenInclude(x => x!.Owner)
+            .Include(x => x.Setlist)
                 .ThenInclude(x => x!.SongsSetlists)
                 .ThenInclude(x => x.Song)
                 .ThenInclude(x => x.Language)
@@ -60,13 +62,15 @@ public class RoomsService : IRoomsService
             UpdatedBy = _currentUserId,
             CreatedAt = DateTime.UtcNow,
             IsActive = true,
-            Code = await _roomCodeService.GenerateUniqueRoomCodeAsync()
+            Code = await _roomCodeService.GenerateUniqueRoomCodeAsync()            
         };
 
         _dbContext.Rooms.Add(room);
         await _dbContext.SaveChangesAsync();
 
         var createdRoom = await _dbContext.Rooms
+            .Include(x => x.Setlist)
+                .ThenInclude(x => x!.Owner)
             .Include(x => x.Setlist)
                 .ThenInclude(x => x!.SongsSetlists)
                 .ThenInclude(x => x.Song)
@@ -99,6 +103,8 @@ public class RoomsService : IRoomsService
     {
         var room = await _dbContext.Rooms
             .Include(x => x.Setlist)
+                .ThenInclude(x => x!.Owner)
+            .Include(x => x.Setlist)
                 .ThenInclude(x => x!.SongsSetlists)
                 .ThenInclude(x => x.Song)
                 .ThenInclude(x => x.Language)
@@ -130,6 +136,8 @@ public class RoomsService : IRoomsService
     {
         var room = await _dbContext.Rooms
             .Include(x => x.Setlist)
+                .ThenInclude(x => x!.Owner)
+            .Include(x => x.Setlist)
                 .ThenInclude(x => x!.SongsSetlists)
                 .ThenInclude(x => x.Song)
                 .ThenInclude(x => x.Language)
@@ -157,6 +165,8 @@ public class RoomsService : IRoomsService
 
         return await query
             .Include(x => x.Setlist)
+                .ThenInclude(x => x!.Owner)
+            .Include(x => x.Setlist)
                 .ThenInclude(x => x!.SongsSetlists)
                 .ThenInclude(x => x.Song)
                 .ThenInclude(x => x.Language)
@@ -173,6 +183,8 @@ public class RoomsService : IRoomsService
     public async Task<RoomModel> GetRoomByCodeAsync(string roomCode)
     {
         var room = await _dbContext.Rooms
+            .Include(x => x.Setlist)
+                .ThenInclude(x => x!.Owner)
             .Include(x => x.Setlist)
                 .ThenInclude(x => x!.SongsSetlists)
                 .ThenInclude(x => x.Song)

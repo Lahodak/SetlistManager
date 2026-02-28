@@ -49,7 +49,7 @@ public class SetlistMapperTests
 
         Assert.Equal(setlist.Id, result.Id);
         Assert.Equal(setlist.Name, result.Name);
-        Assert.Equal(setlist.OwnerId, result.OwnerId);
+        Assert.Equal(setlist.OwnerId, result.Owner.Id);
     }
 
     [Fact]
