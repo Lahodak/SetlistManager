@@ -62,7 +62,7 @@ public class SetlistsService : ISetlistsService
     public async Task GiveAccessToSetlistAsync(int setlistId, int targetId)
     {
         var setlist = await _dbContext.Setlists
-            .Include(s => s.SetlistsUsers)
+            .Include(s => s.SetlistsUsers.Where(x => x.UserId == targetId))
             .FirstOrDefaultAsync(s => s.Id == setlistId && s.OwnerId == _currentUserId);
 
         if (setlist is null ||

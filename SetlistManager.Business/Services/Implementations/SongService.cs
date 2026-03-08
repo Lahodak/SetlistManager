@@ -40,7 +40,7 @@ public class SongService : ISongService
     public async Task GiveAccessToUserAsync(int songId, int targetId)
     {
         var song = await _dbContext.Songs
-            .Include(x => x.SongsUsers)
+            .Include(x => x.SongsUsers.Where(x => x.UserId == targetId))
             .Include(x => x.Artist)
                 .ThenInclude(x => x.ArtistsUsers.Where(x => x.UserId == targetId))
             .AsNoTracking()
