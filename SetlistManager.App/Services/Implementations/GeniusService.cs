@@ -13,6 +13,7 @@ namespace SetlistManager.App.Services.Implementations;
 public class GeniusService : IGeniusService
 {
     private const string _searchEndpointSuffix = "/search?";
+    private const string _connectGeniusEndpointSuffix = "/genius";
     private const string _geniusAccessTokenKey = "access_token";
     private const string _geniusQueryKey = "q";
     private readonly IUserService _userService;
@@ -32,7 +33,7 @@ public class GeniusService : IGeniusService
 
     public async Task<string> AuthorizeAsync()
     {
-        var response = await _apiService.GetAsync<UrlResponseModel>(_apiOptions.BaseUrl + _apiOptions.TokensEndpoint);
+        var response = await _apiService.GetAsync<UrlResponseModel>($"{_apiOptions.BaseUrl}{_apiOptions.TokensEndpoint}{_connectGeniusEndpointSuffix}");
 
         if (response is null)
             return "/error";

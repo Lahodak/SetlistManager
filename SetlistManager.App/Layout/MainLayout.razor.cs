@@ -14,7 +14,7 @@ namespace SetlistManager.App.Layout
 
         private const string _loginUri = "/login";
         private const string _homeUri = "/home";
-        private const string _userPortalUri = "/UserPortal";
+        private const string _userPortalUri = "/userportal";
         private bool _drawerOpen = true;
         private readonly MudTheme _theme = new();
         private bool _isDarkMode;

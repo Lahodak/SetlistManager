@@ -8,6 +8,9 @@ using SetlistManager.Common.Models;
 
 namespace SetlistManager.Api.Controllers;
 
+/// <summary>
+/// Handles Genius OAuth token authorization and callback processing.
+/// </summary>
 public class TokensController : BaseController
 {
     private readonly IGeniusAuthService _geniusAuthService;
@@ -21,12 +24,16 @@ public class TokensController : BaseController
         _appOptions = appOptions.Value;
     }
 
-    [HttpGet]
+    /// <summary>Initiates the Genius OAuth flow and returns the authorization URL.</summary>
+    /// <returns>A response containing the Genius authorization URL.</returns>
+    [HttpGet("genius")]
     public async Task<ActionResult<UrlResponseModel>> AuthorizeWithGenius()
     {
         return Ok(await _geniusAuthService.GetGrantAccessTokenRequestUri());
     }
 
+    /// <summary>Handles the Genius OAuth callback, stores the access token, and redirects to the user portal.</summary>
+    /// <param name="grantResultModel">The authorization code and state returned by Genius.</param>
     [AllowAnonymous]
     [HttpGet("genius/callback")]
     public async Task<ActionResult> AddGeniusTokenToUser([FromQuery] GrantAccessTokenResultModel grantResultModel)
