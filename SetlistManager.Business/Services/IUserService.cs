@@ -37,9 +37,9 @@ public interface IUserService
     /// <summary>
     /// Retrieves a user entity by a temporary OAuth authentication secret.
     /// </summary>
-    /// <param name="salt">The temporary secret used during the OAuth flow.</param>
-    /// <returns>The matching user entity, or <see langword="null"/> if not found.</returns>
-    Task<User?> GetUserByTempAuthSecret(string salt);
+    /// <param name="secret">The temporary secret used during the OAuth flow.</param>
+    /// <returns>The matching user entity</returns>
+    Task<User> GetUserByTempAuthSecret(string secret);
 
     /// <summary>
     /// Retrieves a user entity by its identifier.

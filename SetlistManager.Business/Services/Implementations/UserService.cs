@@ -96,8 +96,7 @@ public class UserService : IUserService
 
     public async Task AddGeniusTokenToUserAsync(GrantAccessTokenResultModel grantResultModel)
     {
-        var user = await GetUserByTempAuthSecret(grantResultModel.State)
-            ?? throw new EntryNotFoundException();
+        var user = await GetUserByTempAuthSecret(grantResultModel.State);
 
         var accessToken = await ExchangeCodeForGeniusAccessTokenAsync(grantResultModel);
 
@@ -126,17 +125,19 @@ public class UserService : IUserService
         return result.AccessToken;
     }
 
-    public async Task<User?> GetUserByTempAuthSecret(string salt)
+    public async Task<User> GetUserByTempAuthSecret(string secret)
     {
         var tempAuth = await _dbContext.TempAuthStorage
-            .FirstOrDefaultAsync(x => x.TempSecret == salt)
+            .Include(t => t.User)
+                .ThenInclude(x => x.Tokens)
+                    .ThenInclude(x => x.Provider)
+            .FirstOrDefaultAsync(t => t.TempSecret == secret)
             ?? throw new EntryNotFoundException();
 
-        return await _dbContext.Users
-            .Include(u => u.Instrument)
-            .Include(u => u.Tokens)!
-                .ThenInclude(t => t.Provider)
-            .FirstOrDefaultAsync(u => u.Id == tempAuth.UserId);
+        _dbContext.TempAuthStorage.Remove(tempAuth);
+        await _dbContext.SaveChangesAsync();
+
+        return tempAuth.User;
     }
 
     public async Task HandleFriendshipRequestAsync(int initiatorId, FriendshipRequestModel friendshipRequest)

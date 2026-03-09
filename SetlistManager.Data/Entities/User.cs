@@ -20,4 +20,5 @@ public class User : IdentityUser<int>
     public virtual List<ArtistsUsers> ArtistsUsers { get; set; } = [];
     public virtual List<Setlist> Setlists { get; set; } = [];
     public virtual List<SetlistsUsers> SetlistsUsers { get; set; } = [];
+    public virtual List<TempAuthStorage> TempAuthStorage { get; set; } = [];
 }

@@ -13,5 +13,10 @@ public class UserConfig : IEntityTypeConfiguration<User>
         
         builder.Property(x => x.CreatedAt)
             .IsRequired();
+    
+        builder.HasMany(x => x.TempAuthStorage)
+            .WithOne(x => x.User)
+            .HasForeignKey(x => x.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
