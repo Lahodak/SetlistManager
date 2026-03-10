@@ -4,9 +4,7 @@ using SetlistManager.Common.Exceptions;
 
 namespace SetlistManager.Api.Middleware;
 
-public class GlobalExceptionHandlingMiddleware(
-    IProblemDetailsService problemDetailsService,
-    ILogger<GlobalExceptionHandlingMiddleware> logger) : IExceptionHandler
+public class GlobalExceptionHandlingMiddleware(IProblemDetailsService problemDetailsService, ILogger<GlobalExceptionHandlingMiddleware> logger) : IExceptionHandler
 {
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
     {
@@ -23,7 +21,7 @@ public class GlobalExceptionHandlingMiddleware(
         };
 
         return await problemDetailsService.TryWriteAsync(new ProblemDetailsContext
-        {
+        {            
             HttpContext = httpContext,
             Exception = exception,
             ProblemDetails = new ProblemDetails

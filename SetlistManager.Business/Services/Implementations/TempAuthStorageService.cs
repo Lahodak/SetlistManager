@@ -1,4 +1,5 @@
-﻿using SetlistManager.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using SetlistManager.Data;
 using System.Security.Cryptography;
 namespace SetlistManager.Business.Services.Implementations;
 
@@ -14,8 +15,15 @@ public class TempAuthStorageService : ITempAuthStorageService
 
     public async Task<string> CreateNewTempAuthSecret(int userId)
     {
-        byte[] randomBytes = RandomNumberGenerator.GetBytes(_tempAuthSecretLength);
-        string secret = Convert.ToBase64String(randomBytes);
+        byte[] randomBytes;
+        string secret;
+        
+        do
+        {
+            randomBytes = RandomNumberGenerator.GetBytes(_tempAuthSecretLength);
+            secret = Convert.ToBase64String(randomBytes);
+        }
+        while (await _dbContext.TempAuthStorage.AnyAsync(x => x.TempSecret == secret));
 
         await _dbContext.TempAuthStorage.AddAsync(new(){
             UserId = userId,
