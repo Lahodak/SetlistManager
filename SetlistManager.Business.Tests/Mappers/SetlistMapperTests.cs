@@ -37,6 +37,7 @@ public class SetlistMapperTests
         Id = 1,
         Name = "Test Setlist",
         OwnerId = 42,
+        Owner = new User { Id = 42, UserName = "owner42", Email = "owner@test.com" },
         SongsSetlists = songsSetlists ?? []
     };
 
