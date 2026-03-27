@@ -1,0 +1,70 @@
+﻿@page "/artistdetail/{artistId:int}"
+<PageTitle>Artist Detail</PageTitle>
+
+<MudContainer Class="mt-6 mb-8">
+    @if (_artist is not null)
+    {
+        <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-6">
+            <div>
+                <MudText Typo="Typo.h4" Class="page-title">@_artist.Nick</MudText>
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1" Class="mt-1">
+                    <MudIcon Icon="@Icons.Material.Filled.MusicNote" Size="Size.Small" Style="color: var(--mud-palette-text-secondary);" />
+                    <MudText Typo="Typo.body2" Class="page-subtitle">@(_artist.Songs?.Count ?? 0) songs in library</MudText>
+                </MudStack>
+            </div>
+        </MudStack>
+
+        <MudPaper Class="portal-card" Elevation="0">
+            @if (_artist.Songs is not null && _artist.Songs.Count > 0)
+            {
+                <MudTable T="SongModel" Items="_artist.Songs" Hover="true" Class="portal-table">
+                    <ToolBarContent>
+                        <MudText Typo="Typo.h6" Class="toolbar-title">Songs by @_artist.Nick</MudText>
+                        <MudSpacer />
+                        <MudChip T="string" Color="Color.Primary" Variant="Variant.Filled" Size="Size.Small" Class="status-chip">
+                            @_artist.Songs.Count songs
+                        </MudChip>
+                    </ToolBarContent>
+                    <HeaderContent>
+                        <MudTh>Name</MudTh>
+                        <MudTh>Language</MudTh>
+                        <MudTh>BPM</MudTh>
+                        <MudTh>Key</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd DataLabel="Name">
+                            <MudLink Href="@($"/songdetail/{context.Id}")" Class="row-link">
+                                @context.Name
+                            </MudLink>
+                        </MudTd>
+                        <MudTd DataLabel="Language">
+                            <MudText Typo="Typo.body2" Class="row-text">@context.Language.Code</MudText>
+                        </MudTd>
+                        <MudTd DataLabel="BPM">
+                            <MudText Typo="Typo.body2" Class="row-text">@context.BPM</MudText>
+                        </MudTd>
+                        <MudTd DataLabel="Key">
+                            <MudText Typo="Typo.body2" Class="row-text">@context.Key</MudText>
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+            }
+            else
+            {
+                <div class="empty-state">
+                    <MudIcon Icon="@Icons.Material.Filled.MusicOff" Class="empty-icon" />
+                    <MudText Typo="Typo.body1" Class="empty-title">No songs yet</MudText>
+                    <MudText Typo="Typo.body2" Class="empty-subtitle">This artist doesn't have any songs in the library yet</MudText>
+                </div>
+            }
+        </MudPaper>
+    }
+    else
+    {
+        <div class="empty-state">
+            <MudIcon Icon="@Icons.Material.Filled.SearchOff" Class="empty-icon" />
+            <MudText Typo="Typo.body1" Class="empty-title">Artist not found</MudText>
+            <MudText Typo="Typo.body2" Class="empty-subtitle">This artist may have been removed or doesn't exist</MudText>
+        </div>
+    }
+</MudContainer>

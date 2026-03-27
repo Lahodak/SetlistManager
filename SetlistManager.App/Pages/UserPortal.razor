@@ -1,0 +1,255 @@
+﻿@page "/userportal"
+
+@if (_userModel is null)
+{
+    <div class="portal-loading">
+        <MudProgressCircular Color="Color.Primary" Size="Size.Large" />
+    </div>
+}
+else
+{
+    <div class="portal-wrapper">
+        <MudPaper Class="portal-card" Elevation="0">
+
+            <div class="portal-header">
+                <div class="portal-avatar">
+                    <MudIcon Icon="@Icons.Material.Filled.Person" Size="Size.Large" Class="avatar-icon" />
+                </div>
+                <MudText Typo="Typo.h5" Class="portal-title">Your Profile</MudText>
+                <MudText Typo="Typo.body2" Class="portal-subtitle">Manage your account settings</MudText>
+            </div>
+
+            <MudDivider Class="portal-divider" />
+
+            <div class="portal-fields">
+                <MudTextField @bind-Value="_userModel.Username"
+                              Label="Username"
+                              Variant="Variant.Outlined"
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.AlternateEmail"
+                              Class="portal-field" />
+
+                <MudTextField @bind-Value="_userModel.Email"
+                              Label="Email"
+                              Variant="Variant.Outlined"
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.Email"
+                              Class="portal-field" />
+
+                <MudSelect T="InstrumentModel"
+                           @bind-Value="_userModel.Instrument"
+                           Label="Instrument"
+                           Variant="Variant.Outlined"
+                           Adornment="Adornment.Start"
+                           AdornmentIcon="@Icons.Material.Filled.MusicNote"
+                           Class="portal-field">
+                    @if (_instruments is not null)
+                    {
+                        @foreach (var instrument in _instruments)
+                        {
+                            <MudSelectItem Value="@instrument">@instrument.Name</MudSelectItem>
+                        }
+                    }
+                </MudSelect>
+            </div>
+
+            <div class="genius-section">
+                @if (_userModel.Tokens!.Count == 0)
+                {
+                    <MudButton FullWidth="true"
+                               Variant="Variant.Outlined"
+                               Class="genius-connect-btn"
+                               OnClick="AuthorizeWithGenius"
+                               StartIcon="@Icons.Material.Filled.Link">
+                        Connect Genius Account
+                        <MudImage Src="GENIUS_Logo_Transparent.png" Width="18" Height="18" Class="ms-2" />
+                    </MudButton>
+                }
+                else
+                {
+                    <div class="genius-connected">
+                        <div class="genius-connected-info">
+                            <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Class="genius-check-icon" Size="Size.Small" />
+                            <MudText Typo="Typo.body2" Class="genius-connected-text">
+                                Connected to Genius
+                            </MudText>
+                            <MudImage Src="GENIUS_Logo_Transparent.png" Width="16" Height="16" Class="ms-1" />
+                        </div>
+                        <MudButton Variant="Variant.Text"
+                                   Color="Color.Error"
+                                   Size="Size.Small"
+                                   OnClick="RevokeGeniusTokenAsync"
+                                   StartIcon="@Icons.Material.Filled.LinkOff">
+                            Disconnect
+                        </MudButton>
+                    </div>
+                }
+            </div>
+
+            <MudDivider Class="portal-divider" />
+
+            <div class="portal-actions">
+                <MudButton OnClick="SaveAsync"
+                           Color="Color.Primary"
+                           Variant="Variant.Filled"
+                           Size="Size.Large"
+                           StartIcon="@Icons.Material.Filled.Save"
+                           Class="action-btn-save">
+                    Save Changes
+                </MudButton>
+                <MudButton OnClick="LogOutAsync"
+                           Color="Color.Error"
+                           Variant="Variant.Outlined"
+                           Size="Size.Large"
+                           StartIcon="@Icons.Material.Filled.Logout"
+                           Class="action-btn-logout">
+                    Log Out
+                </MudButton>
+            </div>
+
+        </MudPaper>
+    </div>
+}
+
+<style>
+    .portal-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 2.5rem 1rem;
+        min-height: 100vh;
+    }
+
+    .portal-loading {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 60vh;
+    }
+
+    .portal-card {
+        width: 100%;
+        max-width: 460px;
+        border-radius: 20px !important;
+        border: 1px solid var(--mud-palette-divider);
+        overflow: hidden;
+        background: var(--mud-palette-surface) !important;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.07), 0 1px 4px rgba(0, 0, 0, 0.04) !important;
+    }
+
+    .portal-header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 2rem 2rem 1.5rem;
+        text-align: center;
+    }
+
+    .portal-avatar {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: var(--mud-palette-primary-hover);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+    }
+
+    .avatar-icon {
+        color: var(--mud-palette-primary) !important;
+    }
+
+    .portal-title {
+        font-weight: 600 !important;
+        color: var(--mud-palette-text-primary) !important;
+        letter-spacing: -0.3px;
+    }
+
+    .portal-subtitle {
+        color: var(--mud-palette-text-secondary) !important;
+        margin-top: 2px;
+        font-size: 0.82rem !important;
+    }
+
+    .portal-divider {
+        margin: 0 !important;
+        opacity: 0.6;
+    }
+
+    .portal-fields {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        padding: 1.5rem 2rem;
+    }
+
+    .portal-field {
+        width: 100%;
+    }
+
+    .genius-section {
+        padding: 0 2rem 1.5rem;
+    }
+
+    .genius-connect-btn {
+        border-radius: 10px !important;
+        border-color: var(--mud-palette-divider) !important;
+        color: var(--mud-palette-text-primary) !important;
+        text-transform: none !important;
+        font-weight: 500 !important;
+        transition: background 0.2s, border-color 0.2s;
+    }
+
+        .genius-connect-btn:hover {
+            background: var(--mud-palette-action-default-hover) !important;
+            border-color: var(--mud-palette-text-secondary) !important;
+        }
+
+    .genius-connected {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: var(--mud-palette-success-hover);
+        border: 1px solid var(--mud-palette-success);
+        border-radius: 10px;
+        padding: 0.6rem 1rem;
+    }
+
+    .genius-connected-info {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .genius-check-icon {
+        color: var(--mud-palette-success) !important;
+    }
+
+    .genius-connected-text {
+        color: var(--mud-palette-success-darken) !important;
+        font-weight: 500 !important;
+    }
+
+    .portal-actions {
+        display: flex;
+        gap: 0.75rem;
+        padding: 1.25rem 2rem 1.75rem;
+    }
+
+    .action-btn-save {
+        flex: 1;
+        border-radius: 10px !important;
+        text-transform: none !important;
+        font-weight: 600 !important;
+        letter-spacing: 0 !important;
+    }
+
+    .action-btn-logout {
+        flex: 1;
+        border-radius: 10px !important;
+        text-transform: none !important;
+        font-weight: 500 !important;
+        letter-spacing: 0 !important;
+    }
+</style>

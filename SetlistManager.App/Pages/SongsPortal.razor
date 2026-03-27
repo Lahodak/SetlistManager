@@ -1,0 +1,126 @@
+﻿@page "/songsportal"
+@using SetlistManager.App.Pages.Dialogs;
+@using SetlistManager.App.Services.Implementations
+
+<PageTitle>Songs Portal</PageTitle>
+
+<MudContainer Class="mt-6 mb-8">
+
+    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-6">
+        <div>
+            <MudText Typo="Typo.h4" Class="page-title">Your Songs Library</MudText>
+            <MudText Typo="Typo.body2" Class="page-subtitle">Manage and organize your personal song collection</MudText>
+        </div>
+        <MudButton StartIcon="@Icons.Material.Filled.Public"
+                   Href="/publicsongs"
+                   Variant="Variant.Outlined"
+                   Color="Color.Primary"
+                   Class="public-btn">
+            Explore Public Songs
+        </MudButton>
+    </MudStack>
+
+    <MudPaper Class="portal-card" Elevation="0">
+        <MudTable ServerData="ServerReload" Hover="true" @ref="table" Class="portal-table">
+            <ToolBarContent>
+                <MudText Typo="Typo.h6" Class="toolbar-title">Song Library</MudText>
+                <MudSpacer />
+                <MudTextField @bind-Value="searchString"
+                              Placeholder="Search songs..."
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.Search"
+                              IconSize="Size.Medium"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Class="search-field"
+                              Immediate="true"
+                              DebounceInterval="700"
+                              OnDebounceIntervalElapsed="OnSearch" />
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           OnClick="OpenAddSongDialog"
+                           StartIcon="@Icons.Material.Filled.Add"
+                           Class="ml-3 add-btn">
+                    Add Song
+                </MudButton>
+            </ToolBarContent>
+            <HeaderContent>
+                <MudTh><MudTableSortLabel SortLabel="title_field" T="SongModel">Title</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortLabel="artist_field" T="SongModel">Artist</MudTableSortLabel></MudTh>
+                <MudTh Style="width: 160px;">Actions</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Title">
+                    <MudLink Href="@($"songdetail/{context.Id}")" Class="row-link">
+                        @context.Name
+                    </MudLink>
+                </MudTd>
+                <MudTd DataLabel="Artist">@context.Artist!.Nick</MudTd>
+                <MudTd DataLabel="Actions">
+                    <MudStack Row="true" Spacing="1" AlignItems="AlignItems.Center">
+                        @if (context.OwnerId == _userId)
+                        {
+                            <MudTooltip Text="Share song">
+                                <MudIconButton OnClick="@(() => AddAccessToUserAsync(context.Id))"
+                                               Icon="@Icons.Material.Filled.PersonAddAlt1"
+                                               Variant="Variant.Text"
+                                               Size="Size.Small"
+                                               Color="Color.Secondary" />
+                            </MudTooltip>
+                            @if (!context.IsPublic)
+                            {
+                                <MudTooltip Text="Make public">
+                                    <MudIconButton OnClick="() => MakeSongPublicAsync(context)"
+                                                   Icon="@Icons.Material.Filled.Public"
+                                                   Variant="Variant.Text"
+                                                   Size="Size.Small"
+                                                   Color="Color.Tertiary" />
+                                </MudTooltip>
+                                <MudTooltip Text="Edit song">
+                                    <MudIconButton OnClick="() => OpenEditSongDialog(context)"
+                                                   Icon="@Icons.Material.Filled.Edit"
+                                                   Variant="Variant.Text"
+                                                   Size="Size.Small"
+                                                   Color="Color.Primary" />
+                                </MudTooltip>
+                                <MudTooltip Text="Delete song">
+                                    <MudIconButton OnClick="() => DeleteSongAsync(context)"
+                                                   Icon="@Icons.Material.Filled.DeleteForever"
+                                                   Variant="Variant.Text"
+                                                   Size="Size.Small"
+                                                   Color="Color.Error" />
+                                </MudTooltip>
+                            }
+                        }
+                        else
+                        {
+                            <MudTooltip Text="Remove from library">
+                                <MudIconButton OnClick="() => RemoveSongFromUserLibraryAsync(context)"
+                                               Icon="@Icons.Material.Filled.PersonRemoveAlt1"
+                                               Variant="Variant.Text"
+                                               Size="Size.Small"
+                                               Color="Color.Error" />
+                            </MudTooltip>
+                        }
+                    </MudStack>
+                </MudTd>
+            </RowTemplate>
+            <NoRecordsContent>
+                <div class="empty-state">
+                    <MudIcon Icon="@Icons.Material.Filled.MusicOff" Class="empty-icon" />
+                    <MudText Typo="Typo.body1" Class="empty-title">No songs found</MudText>
+                    <MudText Typo="Typo.body2" Class="empty-subtitle">Try adjusting your search or add a new song</MudText>
+                </div>
+            </NoRecordsContent>
+            <LoadingContent>
+                <div class="loading-state">
+                    <MudProgressCircular Indeterminate="true" Size="Size.Small" Color="Color.Primary" />
+                    <MudText Typo="Typo.body2" Class="ml-3">Loading songs...</MudText>
+                </div>
+            </LoadingContent>
+            <PagerContent>
+                <MudTablePager />
+            </PagerContent>
+        </MudTable>
+    </MudPaper>
+</MudContainer>

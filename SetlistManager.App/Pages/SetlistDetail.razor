@@ -1,0 +1,129 @@
+﻿@page "/setlistdetail/{setlistId:int}"
+<PageTitle>Setlist Detail</PageTitle>
+
+<MudContainer Class="mt-6 mb-8">
+    @if (_setlist is not null)
+    {
+        <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-6">
+            <div>
+                <MudText Typo="Typo.h4" Class="page-title">@_setlist.Name</MudText>
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1" Class="mt-1">
+                    <MudIcon Icon="@Icons.Material.Filled.Person" Size="Size.Small" Style="color: var(--mud-palette-text-secondary);" />
+                    <MudText Typo="Typo.body2" Class="page-subtitle">@_setlist.Owner.UserName</MudText>
+                </MudStack>
+            </div>
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Primary"
+                       Href="@($"/setlists/{SetlistId}/print")"
+                       StartIcon="@Icons.Material.Filled.Print"
+                       Class="public-btn">
+                Print Setlist
+            </MudButton>
+        </MudStack>
+
+        <MudPaper Class="portal-card" Elevation="0">
+            @if (_setlist.Songs is not null && _setlist.Songs.Count > 0)
+            {
+                <MudTable T="SongModel" Items="_setlist.Songs" Hover="true" Class="portal-table">
+                    <ToolBarContent>
+                        <MudText Typo="Typo.h6" Class="toolbar-title">
+                            Songs
+                        </MudText>
+                        <MudSpacer />
+                        <MudChip T="string" Color="Color.Primary" Variant="Variant.Filled" Size="Size.Small" Class="status-chip">
+                            @_setlist.Songs.Count songs
+                        </MudChip>
+                    </ToolBarContent>
+                    <HeaderContent>
+                        <MudTh Style="width: 40px;">#</MudTh>
+                        <MudTh>Name</MudTh>
+                        <MudTh>Artist</MudTh>
+                        <MudTh>Language</MudTh>
+                        <MudTh>BPM</MudTh>
+                        <MudTh>Key</MudTh>
+                        <MudTh>Links</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>
+                            <MudText Typo="Typo.caption" Class="song-index">
+                                @(_setlist.Songs.IndexOf(context) + 1)
+                            </MudText>
+                        </MudTd>
+                        <MudTd DataLabel="Name">
+                            <MudLink Href="@($"/songdetail/{context.Id}")" Class="row-link">
+                                @context.Name
+                            </MudLink>
+                        </MudTd>
+                        <MudTd DataLabel="Artist">
+                            <MudText Typo="Typo.body2" Class="row-text">@context.Artist!.Nick</MudText>
+                        </MudTd>
+                        <MudTd DataLabel="Language">
+                            <MudText Typo="Typo.body2" Class="row-text">@context.Language.Code</MudText>
+                        </MudTd>
+                        <MudTd DataLabel="BPM">
+                            <MudText Typo="Typo.body2" Class="row-text">@context.BPM</MudText>
+                        </MudTd>
+                        <MudTd DataLabel="Key">
+                            <MudText Typo="Typo.body2" Class="row-text">@context.Key</MudText>
+                        </MudTd>
+                        <MudTd DataLabel="Links">
+                            <MudStack Row="true" Spacing="1">
+                                @if (!string.IsNullOrWhiteSpace(context.TabsURL))
+                                {
+                                    <MudButton Href="@context.TabsURL"
+                                               Target="_blank"
+                                               Variant="Variant.Text"
+                                               Size="Size.Small"
+                                               StartIcon="@Icons.Material.Filled.Tab"
+                                               Class="detail-link-btn">
+                                        Tabs
+                                    </MudButton>
+                                }
+                                @if (!string.IsNullOrWhiteSpace(context.AudioURL))
+                                {
+                                    <MudButton Href="@context.AudioURL"
+                                               Target="_blank"
+                                               Variant="Variant.Text"
+                                               Size="Size.Small"
+                                               StartIcon="@Icons.Material.Filled.Audiotrack"
+                                               Class="detail-link-btn">
+                                        Audio
+                                    </MudButton>
+                                }
+                            </MudStack>
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+            }
+            else
+            {
+                <div class="empty-state">
+                    <MudIcon Icon="@Icons.Material.Filled.QueueMusic" Class="empty-icon" />
+                    <MudText Typo="Typo.body1" Class="empty-title">No songs yet</MudText>
+                    <MudText Typo="Typo.body2" Class="empty-subtitle">This setlist doesn't have any songs added yet</MudText>
+                </div>
+            }
+        </MudPaper>
+    }
+    else
+    {
+        <div class="empty-state">
+            <MudIcon Icon="@Icons.Material.Filled.SearchOff" Class="empty-icon" />
+            <MudText Typo="Typo.body1" Class="empty-title">Setlist not found</MudText>
+            <MudText Typo="Typo.body2" Class="empty-subtitle">This setlist may have been removed or doesn't exist</MudText>
+        </div>
+    }
+</MudContainer>
+
+<style>
+    .song-index {
+        color: var(--mud-palette-text-secondary) !important;
+        font-weight: 600 !important;
+    }
+
+    .detail-link-btn {
+        text-transform: none !important;
+        font-weight: 500 !important;
+        border-radius: 8px !important;
+    }
+</style>

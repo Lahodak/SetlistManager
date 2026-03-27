@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<UserSecretsId>b24c1629-9ca2-4941-9ce0-f2f931a93492</UserSecretsId>
+		<Configurations>Debug;Release;Development</Configurations>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.Http.Extensions" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" />
+		<PackageReference Include="Microsoft.Extensions.Http" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\SetlistManager.Common\SetlistManager.Common.csproj" />
+		<ProjectReference Include="..\SetlistManager.Data\SetlistManager.Data.csproj" />
+		<ProjectReference Include="..\SetlistManager.Resources\SetlistManager.Resources.csproj" />
+	</ItemGroup>
+</Project>

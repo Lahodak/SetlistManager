@@ -1,0 +1,56 @@
+﻿@using SetlistManager.App.Models
+@using SetlistManager.Common.Models
+
+<MudDialog>
+    <DialogContent>
+        <MudText Typo="Typo.h6" Class="mb-4">Share "@_contentName" with Friends</MudText>
+        
+        <MudTextField @bind-Value="_searchQuery" 
+                      Label="Search friends" 
+                      Variant="Variant.Outlined"
+                      Adornment="Adornment.End"
+                      AdornmentIcon="@Icons.Material.Filled.Search"
+                      OnAdornmentClick="SearchFriends"
+                      OnKeyUp="OnSearchKeyUp"
+                      Class="mb-4" />
+
+        @if (_userFriendships?.Items is not null && _userFriendships.Items.Any())
+        {
+            <MudList T="FriendModel">
+                @foreach (var friend in _userFriendships.Items)
+                {
+                    <MudListItem>
+                        <div class="d-flex justify-space-between align-center">
+                            <div>
+                                <MudText Typo="Typo.body1">@friend.Username</MudText>
+                            </div>
+                            <MudButton Variant="Variant.Filled" 
+                                       Color="@(_sharedWith.Contains(friend.Id) ? Color.Success : Color.Primary)" 
+                                       Size="Size.Small"
+                                       OnClick="() => ShareWithFriend(friend)"
+                                       Disabled="_sharedWith.Contains(friend.Id) || _isSharing">
+                                @(_sharedWith.Contains(friend.Id) ? "Shared ✓" : "Share")
+                            </MudButton>
+                        </div>
+                    </MudListItem>
+                    <MudDivider />
+                }
+            </MudList>
+        }
+        else if (!string.IsNullOrWhiteSpace(_searchQuery))
+        {
+            <MudAlert Severity="Severity.Info">No friends found matching your search.</MudAlert>
+        }
+        else if (_userFriendships?.Items?.Count == 0)
+        {
+            <MudAlert Severity="Severity.Warning">You don't have any friends yet. Start by adding friends!</MudAlert>
+        }
+        else
+        {
+            <MudProgressLinear Indeterminate="true" Class="mb-2" />
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Close</MudButton>
+    </DialogActions>
+</MudDialog>

@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+	<PropertyGroup>
+		<UserSecretsId>892d756c-fa25-4fc7-9599-95a690ca9ae6</UserSecretsId>
+		<ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
+		<Configurations>Debug;Release;Development</Configurations>
+	</PropertyGroup>
+	<ItemGroup>
+		<None Include="..\.dockerignore" Link=".dockerignore">
+			<DependentUpon>$(DockerDefaultDockerfile)</DependentUpon>
+		</None>
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Blazored.LocalStorage" />
+		<PackageReference Include="CodeBeam.MudBlazor.Extensions" />
+		<PackageReference Include="HtmlAgilityPack" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" PrivateAssets="all" />
+		<PackageReference Include="Microsoft.AspNetCore.Http.Extensions" />
+		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" />
+		<PackageReference Include="Microsoft.AspNetCore.WebUtilities" />
+		<PackageReference Include="Microsoft.Extensions.Http" />
+		<PackageReference Include="MudBlazor" />
+		<PackageReference Include="QRCoder" />
+		<PackageReference Include="System.IdentityModel.Tokens.Jwt" />
+		<ServiceWorker Include="wwwroot\service-worker.js" PublishedContent="wwwroot\service-worker.published.js" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\SetlistManager.Common\SetlistManager.Common.csproj" />
+	</ItemGroup>
+</Project>

@@ -1,0 +1,108 @@
+﻿@using SetlistManager.Common.Models
+
+<MudDialog>
+    <DialogContent>
+        <MudText Typo="Typo.h5" Class="dialog-heading mb-4">Add a New Friend</MudText>
+
+        <MudTextField @bind-Value="_searchQuery"
+                      Label="Search users"
+                      Variant="Variant.Outlined"
+                      Adornment="Adornment.End"
+                      AdornmentIcon="@Icons.Material.Filled.Search"
+                      OnAdornmentClick="SearchUsers"
+                      OnKeyUp="OnSearchKeyUp"
+                      Placeholder="Search by username or email..."
+                      Class="mb-3" />
+
+        @if (_isSearching)
+        {
+            <MudProgressLinear Indeterminate="true" Color="Color.Primary" Rounded="true" Class="mb-3" />
+        }
+
+        @if (_searchResults is not null && _searchResults.Any())
+        {
+            <MudList T="UserViewModel" DisablePadding="true">
+                @foreach (var user in _searchResults)
+                {
+                    <MudListItem Class="dialog-song-item">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Spacing="2">
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                                <div class="friend-avatar">
+                                    <MudIcon Icon="@Icons.Material.Filled.Person" Size="Size.Small" Class="friend-avatar-icon" />
+                                </div>
+                                <div>
+                                    <MudText Typo="Typo.body2" Class="dialog-toggle-title">@user.UserName</MudText>
+                                    <MudText Typo="Typo.caption" Class="dialog-section-caption">@user.Email</MudText>
+                                </div>
+                            </MudStack>
+                            @if (_sentRequests.Contains(user.Id))
+                            {
+                                <MudChip T="string"
+                                         Color="Color.Success"
+                                         Variant="Variant.Filled"
+                                         Size="Size.Small"
+                                         Icon="@Icons.Material.Filled.Check"
+                                         Class="status-chip">
+                                    Request Sent
+                                </MudChip>
+                            }
+                            else
+                            {
+                                <MudButton Variant="Variant.Filled"
+                                           Color="Color.Primary"
+                                           Size="Size.Small"
+                                           OnClick="() => SendFriendRequest(user)"
+                                           StartIcon="@Icons.Material.Filled.PersonAdd"
+                                           Class="dialog-save-btn">
+                                    Add Friend
+                                </MudButton>
+                            }
+                        </MudStack>
+                    </MudListItem>
+                }
+            </MudList>
+        }
+        else if (!string.IsNullOrWhiteSpace(_searchQuery) && !_isSearching && _hasSearched)
+        {
+            <div class="empty-state">
+                <MudIcon Icon="@Icons.Material.Filled.PersonOff" Class="empty-icon" />
+                <MudText Typo="Typo.body1" Class="empty-title">No users found</MudText>
+                <MudText Typo="Typo.body2" Class="empty-subtitle">Try searching with a different username or email</MudText>
+            </div>
+        }
+        else if (!_hasSearched)
+        {
+            <div class="empty-state">
+                <MudIcon Icon="@Icons.Material.Filled.GroupAdd" Class="empty-icon" />
+                <MudText Typo="Typo.body1" Class="empty-title">Find your friends</MudText>
+                <MudText Typo="Typo.body2" Class="empty-subtitle">Search by username or email to send a friend request</MudText>
+            </div>
+        }
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Color="Color.Error"
+                   Variant="Variant.Text"
+                   OnClick="Cancel"
+                   Class="dialog-cancel-btn">
+            Close
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+<style>
+    .friend-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--mud-palette-primary-hover);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .friend-avatar-icon {
+        color: var(--mud-palette-primary) !important;
+    }
+</style>
