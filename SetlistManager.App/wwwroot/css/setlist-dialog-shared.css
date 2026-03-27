@@ -1,0 +1,79 @@
+﻿/* =============================================
+   Setlist Dialog Shared Styles
+   Used by: CreateSetlistDialog, EditSetlistDialog
+   ============================================= */
+
+.dialog-heading {
+    font-weight: 700 !important;
+    color: var(--mud-palette-text-primary) !important;
+    letter-spacing: -0.3px;
+}
+
+.dialog-section {
+    border: 1px solid var(--mud-palette-divider);
+    border-radius: 12px !important;
+    padding: 1rem 1.25rem;
+    background: var(--mud-palette-background-grey) !important;
+}
+
+.dialog-section-label {
+    font-weight: 600 !important;
+    color: var(--mud-palette-text-primary) !important;
+    margin-bottom: 4px;
+}
+
+.dialog-section-caption {
+    color: var(--mud-palette-text-secondary) !important;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.dialog-song-item {
+    border-radius: 8px !important;
+    margin-bottom: 4px;
+    transition: background 0.15s ease;
+}
+
+    .dialog-song-item:hover {
+        background: var(--mud-palette-action-default-hover) !important;
+    }
+
+.dialog-song-index {
+    color: var(--mud-palette-text-secondary) !important;
+    min-width: 24px;
+    text-align: right;
+    font-weight: 600 !important;
+}
+
+.dialog-song-link {
+    color: var(--mud-palette-text-primary) !important;
+    text-decoration: none !important;
+    font-weight: 500;
+    display: flex;
+    flex-direction: column;
+    transition: color 0.15s ease;
+}
+
+    .dialog-song-link:hover {
+        color: var(--mud-palette-primary) !important;
+    }
+
+.dialog-song-artist {
+    color: var(--mud-palette-text-secondary) !important;
+}
+
+.dialog-song-chip {
+    font-weight: 500 !important;
+}
+
+.dialog-save-btn {
+    border-radius: 10px !important;
+    text-transform: none !important;
+    font-weight: 600 !important;
+}
+
+.dialog-cancel-btn {
+    border-radius: 10px !important;
+    text-transform: none !important;
+    font-weight: 500 !important;
+}

@@ -1,0 +1,133 @@
+@page "/setlists/{setlistid:int}/print"
+@using SetlistManager.Common.Models
+@using SetlistManager.App.Services
+
+<PageTitle>Print Setlist</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="py-8 no-print">
+    @if (_setlist is not null)
+    {
+        <MudPaper Class="pa-6" Elevation="1">
+            <MudText Typo="Typo.h5" Class="mb-6">Print Settings for "@_setlist.Name"</MudText>
+
+            <MudPaper Class="pa-4 mb-6" Elevation="0" Style="background-color: var(--mud-palette-background-grey)">
+                <MudText Typo="Typo.subtitle2" Class="mb-4">Select fields to include in print layout:</MudText>
+                <MudGrid Spacing="2">
+                    <MudItem xs="12" sm="6">
+                        <MudCheckBox T="bool" @bind-Value="_includeSongOrder" Label="Song Order Number" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudCheckBox T="bool" @bind-Value="_includeSongName" Label="Song Name" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudCheckBox T="bool" @bind-Value="_includeArtist" Label="Artist" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudCheckBox T="bool" @bind-Value="_includeTuning" Label="Tuning" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudCheckBox T="bool" @bind-Value="_includeBPM" Label="BPM" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudCheckBox T="bool" @bind-Value="_includeKey" Label="Key" />
+                    </MudItem>
+                </MudGrid>
+            </MudPaper>
+
+            <MudText Typo="Typo.subtitle2" Class="mb-4">Preview:</MudText>
+            <MudPaper Class="pa-4 mb-6" Elevation="0" Style="background-color: #fafafa; border: 1px solid #e0e0e0; max-height: 400px; overflow-y: auto;">
+                @foreach (var song in _setlist.Songs)
+                {
+                    <MudText Typo="Typo.body2" Class="mb-2" Style="color: black">
+                        @GenerateSongLine(song)
+                    </MudText>
+                }
+            </MudPaper>
+
+            <MudStack Row="true" Spacing="2">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="HandlePrint">
+                    <MudIcon Icon="@Icons.Material.Filled.Print" Class="mr-2" />
+                    Print
+                </MudButton>
+                <MudButton Variant="Variant.Text" OnClick="GoBack">Cancel</MudButton>
+            </MudStack>
+        </MudPaper>
+    }
+    else
+    {
+        <MudProgressCircular Indeterminate="true" />
+    }
+</MudContainer>
+
+@if (_setlist is not null)
+{
+    <div class="print-only">
+        <div class="print-watermark">Created using SetlistManager</div>
+        <h1 class="print-title">@_setlist.Name</h1>
+        <div class="print-songs">
+            @foreach (var song in _setlist.Songs)
+            {
+                <div class="print-song-line">@GenerateSongLine(song)</div>
+            }
+        </div>
+    </div>
+}
+
+<style>
+    .print-only {
+        display: none;
+    }
+
+    .mud-appbar,
+    .mud-appbar-fixed {
+        display: none !important;
+    }
+
+    @@media print {
+        .no-print {
+            display: none !important;
+        }
+
+        .print-only {
+            display: block !important;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 1in;
+            background: white;
+            font-family: Calibri, 'Segoe UI', Arial, sans-serif;
+        }
+
+        .print-watermark {
+            position: absolute;
+            top: 0.5in;
+            right: 1in;
+            font-size: 11pt;
+            color: #999;
+            font-style: italic;
+        }
+
+        .print-title {
+            font-size: 28pt;
+            font-weight: bold;
+            margin: 0 0 30pt 0;
+            color: #000;
+        }
+
+        .print-songs {
+            margin: 0;
+        }
+
+        .print-song-line {
+            font-size: 18pt;
+            margin-bottom: 14pt;
+            color: #000;
+            line-height: 1.8;
+        }
+
+        @@page {
+            margin: 0;
+        }
+    }
+</style>

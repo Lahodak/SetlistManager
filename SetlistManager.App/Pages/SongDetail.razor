@@ -1,0 +1,277 @@
+﻿@page "/songdetail/{SongId:int}"
+@using Microsoft.JSInterop
+
+<PageTitle>Song Detail - @_song?.Name</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-6 mb-8">
+    @if (_song != null)
+    {
+        <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-6">
+            <div>
+                <MudText Typo="Typo.h4" Class="page-title">@_song.Name</MudText>
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1" Class="mt-1">
+                    <MudIcon Icon="@Icons.Material.Filled.Person" Size="Size.Small" Style="color: var(--mud-palette-text-secondary);" />
+                    <MudText Typo="Typo.body2" Class="page-subtitle">@_song.Artist?.Nick</MudText>
+                </MudStack>
+            </div>
+        </MudStack>
+
+        <MudGrid Spacing="3">
+
+            <MudItem xs="12" md="5">
+                <MudPaper Class="portal-card pa-5" Elevation="0" Style="height: fit-content;">
+
+                    <MudText Typo="Typo.body2" Class="toolbar-title mb-3">Song Info</MudText>
+
+                    <MudStack Spacing="3">
+                        <div class="detail-row">
+                            <MudIcon Icon="@Icons.Material.Filled.Person" Size="Size.Small" Class="detail-icon" />
+                            <div>
+                                <MudText Typo="Typo.caption" Class="detail-label">Artist</MudText>
+                                <MudText Typo="Typo.body2" Class="detail-value">@_song.Artist?.Nick</MudText>
+                            </div>
+                        </div>
+                        <div class="detail-row">
+                            <MudIcon Icon="@Icons.Material.Filled.Language" Size="Size.Small" Class="detail-icon" />
+                            <div>
+                                <MudText Typo="Typo.caption" Class="detail-label">Language</MudText>
+                                <MudText Typo="Typo.body2" Class="detail-value">@_song.Language?.Code (@_song.Language?.Name)</MudText>
+                            </div>
+                        </div>
+                        <div class="detail-row">
+                            <MudIcon Icon="@Icons.Material.Filled.Speed" Size="Size.Small" Class="detail-icon" />
+                            <div>
+                                <MudText Typo="Typo.caption" Class="detail-label">BPM</MudText>
+                                <MudText Typo="Typo.body2" Class="detail-value">@_song.BPM</MudText>
+                            </div>
+                        </div>
+                        <div class="detail-row">
+                            <MudIcon Icon="@Icons.Material.Filled.MusicNote" Size="Size.Small" Class="detail-icon" />
+                            <div>
+                                <MudText Typo="Typo.caption" Class="detail-label">Key</MudText>
+                                <MudText Typo="Typo.body2" Class="detail-value">@_song.Key</MudText>
+                            </div>
+                        </div>
+                        <div class="detail-row">
+                            <MudIcon Icon="@Icons.Material.Filled.Tune" Size="Size.Small" Class="detail-icon" />
+                            <div>
+                                <MudText Typo="Typo.caption" Class="detail-label">Tuning</MudText>
+                                <MudText Typo="Typo.body2" Class="detail-value">@_song.Tuning</MudText>
+                            </div>
+                        </div>
+                        <div class="detail-row">
+                            <MudIcon Icon="@Icons.Material.Filled.PersonPin" Size="Size.Small" Class="detail-icon" />
+                            <div>
+                                <MudText Typo="Typo.caption" Class="detail-label">Owner</MudText>
+                                <MudText Typo="Typo.body2" Class="detail-value">@_song.OwnerNick</MudText>
+                            </div>
+                        </div>
+                    </MudStack>
+
+                    @if (!string.IsNullOrWhiteSpace(_song.TabsURL) || !string.IsNullOrWhiteSpace(_song.AudioURL))
+                    {
+                        <MudDivider Class="my-4" />
+                        <MudText Typo="Typo.body2" Class="toolbar-title mb-2">Links</MudText>
+                        <MudStack Row="true" Spacing="2">
+                            @if (!string.IsNullOrWhiteSpace(_song.TabsURL))
+                            {
+                                <MudButton Href="@_song.TabsURL"
+                                           Target="_blank"
+                                           Variant="Variant.Outlined"
+                                           Color="Color.Primary"
+                                           Size="Size.Small"
+                                           StartIcon="@Icons.Material.Filled.Tab"
+                                           Class="detail-link-btn">
+                                    Tabs
+                                </MudButton>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(_song.AudioURL))
+                            {
+                                <MudButton Href="@_song.AudioURL"
+                                           Target="_blank"
+                                           Variant="Variant.Outlined"
+                                           Color="Color.Error"
+                                           Size="Size.Small"
+                                           StartIcon="@Icons.Custom.Brands.YouTube"
+                                           Class="detail-link-btn">
+                                    YouTube
+                                </MudButton>
+                            }
+                        </MudStack>
+                    }
+
+                    @if (_isGeniusAuthenticated)
+                    {
+                        <MudDivider Class="my-4" />
+                        <MudText Typo="Typo.body2" Class="toolbar-title mb-2">Autoscroll</MudText>
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                            @if (!_isScrolling)
+                            {
+                                <MudIconButton Icon="@Icons.Material.Filled.PlayArrow"
+                                               Color="Color.Success"
+                                               OnClick="@(() => ToggleScroll(true))"
+                                               Variant="Variant.Filled"
+                                               Size="Size.Small" />
+                            }
+                            else
+                            {
+                                <MudIconButton Icon="@Icons.Material.Filled.Stop"
+                                               Color="Color.Error"
+                                               OnClick="@(() => ToggleScroll(false))"
+                                               Variant="Variant.Filled"
+                                               Size="Size.Small" />
+                            }
+                            <MudIconButton Icon="@Icons.Material.Filled.ArrowUpward"
+                                           Color="Color.Default"
+                                           OnClick="ResetScroll"
+                                           Variant="Variant.Outlined"
+                                           Size="Size.Small" />
+                            <div style="flex-grow: 1;">
+                                <MudSlider T="int" Value="@_scrollSpeed" ValueChanged="OnSpeedChanged"
+                                           Min="1" Max="100" Step="1" Color="Color.Primary">
+                                    Speed: @_scrollSpeed
+                                </MudSlider>
+                            </div>
+                        </MudStack>
+                    }
+
+                </MudPaper>
+            </MudItem>
+
+            <MudItem xs="12" md="7">
+                <MudPaper Class="portal-card pa-5" Elevation="0">
+                    @if (_isLoading)
+                    {
+                        <MudProgressLinear Indeterminate="true" Color="Color.Primary" Class="mb-4" />
+                    }
+                    else if (!_isGeniusAuthenticated)
+                    {
+                        <div class="empty-state" style="min-height: 400px;">
+                            <MudIcon Icon="@Icons.Material.Filled.Lyrics" Class="empty-icon" Style="font-size: 3rem !important;" />
+                            <MudText Typo="Typo.body1" Class="empty-title">Lyrics unavailable</MudText>
+                            <MudText Typo="Typo.body2" Class="empty-subtitle">Connect your Genius account to view lyrics directly in the app</MudText>
+                            <MudButton Variant="Variant.Filled"
+                                       Color="Color.Warning"
+                                       StartIcon="@Icons.Material.Filled.Login"
+                                       OnClick="SignInWithGeniusAsync"
+                                       Size="Size.Medium"
+                                       Class="mt-3 public-btn">
+                                Sign in with Genius
+                            </MudButton>
+                        </div>
+                    }
+                    else
+                    {
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-4">
+                            <MudText Typo="Typo.body2" Class="toolbar-title">Lyrics</MudText>
+                            <MudToggleGroup T="double" Value="@_fontScale" ValueChanged="OnFontScaleChanged"
+                                            Outlined="true" Delimiters="true" CheckMark="false" FixedContent="true" Size="Size.Small">
+                                <MudToggleItem Value="1.0">Standard</MudToggleItem>
+                                <MudToggleItem Value="2.0">Large</MudToggleItem>
+                            </MudToggleGroup>
+                        </MudStack>
+                        @if (_lyricsData is not null)
+                        {
+                            <div id="genius-lyrics-container"
+                                 style="height: calc(100vh - 200px); overflow-y: auto; overflow-x: hidden; border-radius: 8px; --lyrics-zoom: @_fontScale;">
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="empty-state">
+                                <MudIcon Icon="@Icons.Material.Filled.Lyrics" Class="empty-icon" />
+                                <MudText Typo="Typo.body2" Class="empty-subtitle">Loading lyrics...</MudText>
+                            </div>
+                        }
+                    }
+                </MudPaper>
+            </MudItem>
+
+        </MudGrid>
+    }
+    else
+    {
+        <div class="empty-state">
+            <MudIcon Icon="@Icons.Material.Filled.SearchOff" Class="empty-icon" />
+            <MudText Typo="Typo.body1" Class="empty-title">Song not found</MudText>
+            <MudText Typo="Typo.body2" Class="empty-subtitle">This song may have been removed or doesn't exist</MudText>
+        </div>
+    }
+</MudContainer>
+
+<style>
+    .detail-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .detail-icon {
+        color: var(--mud-palette-primary) !important;
+        margin-top: 2px;
+        flex-shrink: 0;
+    }
+
+    .detail-label {
+        color: var(--mud-palette-text-secondary) !important;
+        line-height: 1.2;
+    }
+
+    .detail-value {
+        font-weight: 500 !important;
+        color: var(--mud-palette-text-primary) !important;
+    }
+
+    .detail-link-btn {
+        border-radius: 8px !important;
+        text-transform: none !important;
+        font-weight: 500 !important;
+    }
+
+    #genius-lyrics-container .rg_embed {
+        transform: scale(var(--lyrics-zoom, 1.0)) !important;
+        transform-origin: top center !important;
+        width: calc(100% / var(--lyrics-zoom, 1.0)) !important;
+        margin: 0 auto !important;
+        display: block !important;
+        background: transparent !important;
+    }
+
+    #genius-lyrics-container .rg_embed_body,
+    #genius-lyrics-container .rg_embed_body div,
+    #genius-lyrics-container .rg_embed_body p,
+    #genius-lyrics-container .lyrics,
+    #genius-lyrics-container .lyrics p {
+        color: var(--mud-palette-text-primary) !important;
+        background-color: transparent !important;
+    }
+
+        #genius-lyrics-container .rg_embed_body a {
+            color: var(--mud-palette-text-primary) !important;
+            text-decoration: none !important;
+        }
+
+    #genius-lyrics-container .rg_embed_header,
+    #genius-lyrics-container .rg_embed_footer {
+        background: transparent !important;
+        color: var(--mud-palette-text-secondary) !important;
+        border: none !important;
+    }
+
+    #genius-lyrics-container::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    #genius-lyrics-container::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    #genius-lyrics-container::-webkit-scrollbar-thumb {
+        background: var(--mud-palette-lines-inputs);
+        border-radius: 10px;
+    }
+
+        #genius-lyrics-container::-webkit-scrollbar-thumb:hover {
+            background: var(--mud-palette-text-secondary);
+        }
+</style>

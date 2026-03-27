@@ -1,0 +1,20 @@
+﻿<MudDialog>
+	    <DialogContent>
+			<MudPaper Class="pa-4 mt-3" Elevation="2">
+				<MudGrid>
+					<MudItem xs="12">
+						<MudTextField @bind-Value="_roomCode"
+									  Label="Room Code"
+									  Variant="Variant.Outlined" />
+					</MudItem>
+				</MudGrid>
+			</MudPaper>
+		</DialogContent>
+	<DialogActions>
+		<MudButton Class="pa-2 ml-2" Variant="Variant.Outlined" Color="Color.Primary" Style="height: 50px;"
+				   OnClick="() => JoinRoom()">
+			Join Room
+		</MudButton>
+		<MudButton Variant="Variant.Text" OnClick="Cancel">Cancel</MudButton>
+	</DialogActions>
+</MudDialog>

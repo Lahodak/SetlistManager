@@ -1,0 +1,37 @@
+﻿@inherits LayoutComponentBase
+
+<MudThemeProvider @bind-IsDarkMode="@_isDarkMode" Theme="_theme" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+    <MudAppBar>
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+        <MudSpacer />
+        <MudIconButton Icon="@Icons.Material.Filled.Home" Color="Color.Inherit" OnClick="NavigateHome" />
+        <MudIconButton Icon="@(_isDarkMode? Icons.Material.Filled.DarkMode : Icons.Material.Filled.WbSunny)"
+                       OnClick="ToggleTheme"
+                       Color="Color.Inherit"
+                       Class="ma-4" />
+        <MudStack AlignItems="AlignItems.Start" Spacing="0">
+            <MudText Typo="Typo.caption">Welcome</MudText>
+            <MudText Typo="Typo.subtitle2">@(userModel?.Username ?? "Loading...")</MudText>
+        </MudStack>
+
+        <MudIconButton Icon="@Icons.Material.Filled.ManageAccounts" Color="Color.Inherit" OnClick="OpenUserDetail"/>
+    </MudAppBar>
+
+    <MudDrawer @bind-Open="_drawerOpen" Elevation="2">
+        <MudDrawerHeader>
+            <MudText Typo="Typo.h6">SetlistManager</MudText>
+        </MudDrawerHeader>
+        <MudDrawerContainer>
+            <NavMenu />
+        </MudDrawerContainer>
+    </MudDrawer>
+
+    <MudMainContent>
+        @Body
+    </MudMainContent>
+</MudLayout>

@@ -1,0 +1,208 @@
+﻿@layout EmptyLayout
+@page "/"
+<MudAppBar Elevation="0" Color="Color.Primary"/>
+
+<div class="landing-root">
+    <section class="hero-section">
+        <MudContainer MaxWidth="MaxWidth.Large">
+            <div class="hero-content">
+
+                <h1 class="hero-title">
+                    SetlistManager
+                </h1>
+
+                <h6 class="hero-subtitle">
+                    Smarter setlists for better live performances.
+                </h6>
+
+                <p class="hero-description">
+                    Keep your band in sync on stage. Manage songs, generate setlists,
+                    and access everything you need—right when you need it.
+                </p>
+
+                <div class="hero-actions">
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               Size="Size.Large"
+                               Autofocus="true"
+                               OnClick="NavigateToLogin">
+                        Login
+                    </MudButton>
+
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Primary"
+                               Size="Size.Large"
+                               OnClick="NavigateToRegister">
+                        Register
+                    </MudButton>
+                </div>
+
+            </div>
+        </MudContainer>
+    </section>
+
+    <section class="features-section">
+        <MudContainer MaxWidth="MaxWidth.Large">
+            <MudText Typo="Typo.h4" Align="Align.Center" Class="mb-8">
+                Built for Bands, Not Spreadsheets
+            </MudText>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <MudIcon Icon="@Icons.Material.Filled.Groups" Size="Size.Large" />
+                    <h5>Live Room Mode</h5>
+                    <p>
+                        See the current and next song in real time.
+                        Join instantly via QR code or room code.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <MudIcon Icon="@Icons.Material.Filled.LibraryMusic" Size="Size.Large" />
+                    <h5>Song Details</h5>
+                    <p>
+                        Key, tempo, tuning, and useful links available
+                        for every song.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <MudIcon Icon="@Icons.Material.Filled.AutoAwesome" Size="Size.Large" />
+                    <h5>Smart Setlists</h5>
+                    <p>
+                        Generate setlists from your library automatically
+                        and export or print them anytime.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <img src="GENIUS_Logo_Transparent.png" alt="Genius" class="genius-logo-icon" />
+                    <h5>Genius API Integration</h5>
+                    <p>
+                        Fetch lyrics and song data automatically
+                        from external sources.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <MudIcon Icon="@Icons.Material.Filled.Person" Size="Size.Large" />
+                    <h5>Personal Profiles</h5>
+                    <p>
+                        Set your instrument and connect your Genius account
+                        for richer song insights.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <MudIcon Icon="@Icons.Material.Filled.Share" Size="Size.Large" />
+                    <h5>Community Sharing</h5>
+                    <p>
+                        Share songs, artists, and setlists with other musicians.
+                    </p>
+                </div>
+            </div>
+        </MudContainer>
+    </section>
+
+    <section class="how-it-works-section">
+        <MudContainer MaxWidth="MaxWidth.Large">
+            <MudText Typo="Typo.h4" Align="Align.Center" Class="mb-2">
+                How It Works
+            </MudText>
+            <p class="section-subtitle">From first rehearsal to shownight in four steps.</p>
+
+            <div class="steps-flow">
+                <div class="step-item">
+                    <div class="step-number">1</div>
+                    <h5>Build your library</h5>
+                    <p>Add songs with key, BPM, tuning, and links to tabs or audio. Connect Genius to enrich them with lyrics automatically.</p>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">2</div>
+                    <h5>Create a setlist</h5>
+                    <p>Curate your set by hand or let the smart generator pick songs from your library for you.</p>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">3</div>
+                    <h5>Open a Live Room</h5>
+                    <p>Start a session and share the room code or QR code with your bandmates.</p>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">4</div>
+                    <h5>Perform</h5>
+                    <p>Follow the setlist in real time. Song details and lyrics are always one glance away. Configure content shown on the screen according to your needs </p>
+                </div>
+            </div>
+        </MudContainer>
+    </section>
+
+    <section class="live-room-section">
+        <MudContainer MaxWidth="MaxWidth.Large">
+            <div class="live-room-inner">
+                <div class="live-room-visual">
+                    <MudIcon Icon="@Icons.Material.Filled.Sensors" Class="live-room-icon" />
+                    <span class="live-badge">LIVE</span>
+                    <p class="live-room-visual-label">Real-time for everyone on stage</p>
+                </div>
+
+                <div class="live-room-text">
+                    <h3 class="live-room-title">The Live Room</h3>
+                    <p class="live-room-lead">
+                        Designed for the stage — no distractions, just the info your band needs
+                        at the moment they need it.
+                    </p>
+                    <ul class="live-room-bullets">
+                        <li>
+                            <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Small" />
+                            <span>Always visible current time</span>
+                        </li>
+                        <li>
+                            <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Small" />
+                            <span>Lyrics panel powered by Genius</span>
+                        </li>
+                        <li>
+                            <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Small" />
+                            <span>Full setlist overview panel</span>
+                        </li>
+                        <li>
+                            <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Small" />
+                            <span>Rearrange panels to fit your workflow</span>
+                        </li>
+
+                        <li>
+                            <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Small" />
+                            <span>Join via QR code or room code</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </MudContainer>
+    </section>
+
+    <section class="cta-section">
+        <MudContainer MaxWidth="MaxWidth.Medium">
+            <div class="cta-inner">
+                <MudIcon Icon="@Icons.Material.Filled.MusicNote" Class="cta-icon" />
+                <h3 class="cta-title">Ready to take the stage?</h3>
+                <p class="cta-description">
+                    Whether you're rehearsing in the garage or playing a full show,
+                    SetlistManager keeps your whole band on the same page.
+                </p>
+                <div class="cta-actions">
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               Size="Size.Large"
+                               OnClick="NavigateToRegister">
+                        Get Started — It's Free
+                    </MudButton>
+                    <MudButton Variant="Variant.Text"
+                               Color="Color.Default"
+                               Size="Size.Large"
+                               OnClick="NavigateToLogin">
+                        Already have an account? Login
+                    </MudButton>
+                </div>
+            </div>
+        </MudContainer>
+    </section>
+</div>

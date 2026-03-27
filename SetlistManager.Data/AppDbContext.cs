@@ -1,0 +1,29 @@
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using SetlistManager.Data.Entities;
+
+namespace SetlistManager.Data;
+
+public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbContext<User, Role, int>(options)
+{
+    public DbSet<Instrument> Instruments { get; set; }
+    public DbSet<Language> Languages { get; set; }
+    public DbSet<Room> Rooms { get; set; }
+    public DbSet<Setlist> Setlists { get; set; }
+    public DbSet<SetlistsUsers> SetlistsUsers { get; set; }
+    public DbSet<Song> Songs { get; set; }
+    public DbSet<SongsSetlists> SongsSetlists { get; set; }
+    public DbSet<SongsUsers> SongsUsers { get; set; }
+    public DbSet<Artist> Artists { get; set; }
+    public DbSet<ArtistsUsers> ArtistsUsers { get; set; }
+    public DbSet<Provider> Providers { get; set; }
+    public DbSet<Token> Tokens { get; set; }
+    public DbSet<TempAuthStorage> TempAuthStorage { get; set; }
+    public DbSet<Friendship> Friendships { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+        base.OnModelCreating(builder);
+        builder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+    }
+}

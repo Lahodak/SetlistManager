@@ -1,0 +1,132 @@
+﻿/* =============================================
+   Auth Shared Styles
+   Used by: Login, Register, RequestPasswordReset,
+            ResetPassword, VerifyEmail
+   ============================================= */
+
+html, body, #app, .mud-layout {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.auth-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    background: var(--mud-palette-background);
+    padding: 1rem;
+    box-sizing: border-box;
+}
+
+.auth-back-btn {
+    border-radius: 50% !important;
+    border-color: var(--mud-palette-primary) !important;
+    flex-shrink: 0;
+    align-self: center;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 420px;
+    border-radius: 20px !important;
+    border: 1px solid var(--mud-palette-divider);
+    background: var(--mud-palette-surface) !important;
+    overflow: hidden;
+}
+
+.auth-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2.5rem 2rem 1.5rem;
+    text-align: center;
+}
+
+.auth-logo-wrap {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    background: var(--mud-palette-primary-hover);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.25rem;
+}
+
+.auth-logo-icon {
+    color: var(--mud-palette-primary) !important;
+    font-size: 2rem !important;
+}
+
+.auth-title {
+    font-weight: 700 !important;
+    color: var(--mud-palette-text-primary) !important;
+    letter-spacing: -0.3px;
+}
+
+.auth-subtitle {
+    color: var(--mud-palette-text-secondary) !important;
+    margin-top: 4px;
+}
+
+.auth-alert-wrap {
+    padding: 0 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.5rem 2rem 1.5rem;
+}
+
+.auth-field {
+    width: 100%;
+}
+
+.auth-btn {
+    border-radius: 10px !important;
+    text-transform: none !important;
+    font-weight: 600 !important;
+    letter-spacing: 0 !important;
+}
+
+.auth-divider {
+    margin: 0 !important;
+    opacity: 0.6;
+}
+
+.auth-footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1.25rem 2rem 2rem;
+    text-align: center;
+}
+
+.auth-footer-text {
+    color: var(--mud-palette-text-secondary) !important;
+}
+
+.auth-link {
+    color: var(--mud-palette-primary) !important;
+    font-weight: 500 !important;
+    text-decoration: none !important;
+}
+
+.auth-reset-link {
+    font-size: 0.82rem !important;
+    color: var(--mud-palette-text-secondary) !important;
+}
+
+    .auth-reset-link:hover {
+        color: var(--mud-palette-primary) !important;
+    }
+
+.auth-verify-body {
+    padding: 0.5rem 2rem 2rem;
+}

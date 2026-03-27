@@ -1,0 +1,43 @@
+﻿@using SetlistManager.App.Services;
+
+<MudDialog>
+    <DialogContent>
+        <MudPaper Class="pa-4 mt-3" Elevation="2">
+            @if (!string.IsNullOrEmpty(_qrCodeImageSrc))
+            {
+                <MudGrid Justify="Justify.Center">
+                    <MudItem xs="12" Class="d-flex flex-column align-center">
+                        <MudText Typo="Typo.h6" Class="mb-3">Room QR Code</MudText>
+                        <MudImage Src="@_qrCodeImageSrc"
+                                  Alt="Room QR Code"
+                                  Class="mb-3"
+                                  Style="max-width: 300px; width: 100%;" />
+                        <MudText Typo="Typo.body2" Class="mb-2">@RoomUrl</MudText>
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">
+                            Scan this code to join the room
+                        </MudText>
+                    </MudItem>
+                </MudGrid>
+            }
+            else
+            {
+                <MudGrid Justify="Justify.Center">
+                    <MudItem xs="12" Class="d-flex justify-center">
+                        <MudProgressCircular Indeterminate="true" />
+                    </MudItem>
+                </MudGrid>
+            }
+        </MudPaper>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Class="pa-2 ml-2"
+                   Variant="Variant.Outlined"
+                   Style="height: 50px;"
+                   Href="@_qrCodeImageSrc"                  
+                   Download="room-qrcode.png"
+                   Disabled="@string.IsNullOrEmpty(_qrCodeImageSrc)">
+            Download QR Code
+        </MudButton>
+        <MudButton Variant="Variant.Text" OnClick="Close">Close</MudButton>
+    </DialogActions>
+</MudDialog>
